@@ -49,7 +49,7 @@ export interface ScoreRecord {
     /** iidx-memo 等から同期された譜面オプション。読み取り専用。 */
     options?: string[];
     djName?: string;
-    /** スコア取得元。"arcade" / "infinitas"。表示の INF タグ判定に使う。 */
+    /** スコア取得元（常に "arcade"）。 */
     source?: string;
     /**
      * 「歴代ベストを反映」表示時、この行の EX スコアが過去作由来である場合にその作品番号が入る。

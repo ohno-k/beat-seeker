@@ -126,30 +126,6 @@
             </div>
           </div>
 
-          <!-- Source Filter（INFINITAS / アーケード）。INFINITAS スコアを取り込んでいる場合のみ表示。 -->
-          <div v-if="hasInfinitasScores" class="relative w-full md:w-36">
-            <button
-              @click.stop="toggleDropdown('source')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
-            >
-              <span class="truncate">{{ t('table.source') }}{{ filterSource.length > 0 ? ` (${filterSource.length})` : '' }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div v-if="openDropdown === 'source'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="src in ['infinitas', 'arcade']" :key="src" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(filterSource, src)"
-                  @change="toggleFilterValue(filterSource, src)"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
-                >
-                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ t(`table.source.${src}`) }}</span>
-              </label>
-            </div>
-          </div>
-
           <!-- 歴代ベスト作品フィルタ（歴代自己ベストスコアを出した作品で絞り込む）。過去作を取り込み済みの本人閲覧時のみ表示。 -->
           <div v-if="canFilterBestVersion" class="relative w-full md:w-44">
             <button
@@ -392,12 +368,6 @@
                 <div class="flex flex-col gap-0.5 sm:gap-1">
                   <span :class="['px-1 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] font-bold whitespace-nowrap inline-block w-fit', record.difficultyColor]">
                     {{ record.difficultyName.charAt(0) }}<span class="hidden sm:inline">{{ record.difficultyName.slice(1) }}</span> {{ record.difficultyLevel || '' }}
-                  </span>
-                  <!-- INF タグ: 表示中のスコアが INFINITAS 取得（アーケードより高い／アーケード未プレイ）の場合に付与。 -->
-                  <span v-if="record.source === 'infinitas'"
-                        class="px-1 sm:px-1.5 py-0 rounded text-[7px] sm:text-[9px] font-bold whitespace-nowrap inline-block w-fit text-sky-700 bg-sky-100 border border-sky-300 dark:text-sky-300 dark:bg-sky-900/40 dark:border-sky-700"
-                        title="INFINITAS で取り込んだスコア（アーケードとは別管理。両方ある場合は EX SCORE が高い方を表示）">
-                    INF
                   </span>
                 </div>
               </td>
@@ -1650,8 +1620,6 @@ const filterLevel = ref<string[]>([]);
 const filterDjLevel = ref<string[]>([]);
 /** クリアランプフィルタ（'FULLCOMBO CLEAR' など）。空配列は「全て」。 */
 const filterClearType = ref<string[]>([]);
-/** 取得元フィルタ（'infinitas' / 'arcade'）。空配列は「全て」。 */
-const filterSource = ref<string[]>([]);
 /**
  * 歴代ベスト作品フィルタ（'33' / '32' など作品番号の文字列）。空配列は「全て」。
  * 「歴代自己ベストスコアをどの作品で出したか」で絞り込む。判定は {@link allTimeBestVersionByKey}。
@@ -1732,13 +1700,6 @@ const appliedFilterChips = computed<Array<{ id: string; label: string; remove: (
       remove: () => { filterClearType.value = filterClearType.value.filter(x => x !== ct); },
     });
   });
-  filterSource.value.forEach((src) => {
-    chips.push({
-      id: `source:${src}`,
-      label: t(`table.source.${src}`),
-      remove: () => { filterSource.value = filterSource.value.filter(x => x !== src); },
-    });
-  });
   filterBestVersion.value.forEach((v) => {
     chips.push({
       id: `bestVersion:${v}`,
@@ -1763,7 +1724,6 @@ const clearAllFilters = () => {
   filterDifficulty.value = [];
   filterDjLevel.value = [];
   filterClearType.value = [];
-  filterSource.value = [];
   filterBestVersion.value = [];
   hideZeroScore.value = false;
 };
@@ -1941,9 +1901,6 @@ const allRecords = computed<ScoreRecord[]>(() => {
 
   return baseRecords;
 });
-
-/** INFINITAS 取得スコアが 1 件でも存在するか。取得元フィルタの表示要否に使う。 */
-const hasInfinitasScores = computed(() => allRecords.value.some(r => r.source === 'infinitas'));
 
 const emit = defineEmits<{
   (e: 'reset'): void;
@@ -3195,7 +3152,7 @@ watch(isLoggedIn, (val) => { if (val) fetchSongRanks(); });
 
 /** フィルタ/ソート/件数のどれかが変わったらページ番号を 1 に戻す（UX 改善）。 */
 watch(
-  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterSource, filterBestVersion, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
+  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterBestVersion, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
   () => {
     currentPage.value = 1;
   },
@@ -3251,7 +3208,7 @@ const toggleSort = (key: SortKey) => {
  *
  * 処理フロー:
  *  手順1: モード（通常 / rate）に応じたベースリストを複製。
- *  手順2: hideZeroScore / difficulty / level / djLevel / clearType / source / bestVersion のフィルタを順次適用。
+ *  手順2: hideZeroScore / difficulty / level / djLevel / clearType / bestVersion のフィルタを順次適用。
  *  手順3: 検索ワードで title / artist / genre / clearType の部分一致フィルタ。
  *  手順4: sortKey ごとに専用のソート比較関数を適用。
  *         - informalRank: 末尾の数値（例 "12.5"）を抽出して比較、次点で difficultyLevel → title。
@@ -3281,10 +3238,6 @@ const filteredScores = computed(() => {
 
   if (filterClearType.value.length > 0) {
     result = result.filter(r => filterClearType.value.includes(r.clearType));
-  }
-
-  if (filterSource.value.length > 0) {
-    result = result.filter(r => r.source != null && filterSource.value.includes(r.source));
   }
 
   // 歴代ベスト作品: 譜面キーで引く（歴代反映で score が置き換わった行でも判定が揺れないよう、行の score は見ない）

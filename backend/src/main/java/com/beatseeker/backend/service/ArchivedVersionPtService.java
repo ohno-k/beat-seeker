@@ -28,8 +28,8 @@ import java.util.Optional;
  *
  * 現実世界の概念: 新作稼働日の 07:00 に前作の最終 PT を焼き付けても、その後に「前作の最後のプレー分を
  * まだ取り込んでいなかった」利用者が前作の CSV を歴代スコアとして入れてくる。前作ランキングは
- * その人の本当の到達点を映すべきなので、past_scores から前作の 4 指標
- * （BEAT / RATE / KENBAN / SARA）を計算し直し、スナップショットの本人の行に反映する。
+ * その人の本当の到達点を映すべきなので、past_scores から前作の 2 指標
+ * （BEAT / RATE）を計算し直し、スナップショットの本人の行に反映する。
  *
  * 設計上の判断:
  *  - <b>難易度表は「切り替え時点で凍結した表」（revision {@code archive:<version>}）を使う。</b>
@@ -101,17 +101,15 @@ public class ArchivedVersionPtService {
      * @param difficultyRevision 実際に使った難易度表の revision（凍結表が無ければ "active"）
      * @param songMaxScores      title_difficultyCode → 理論値（notes×2）
      * @param informalRanks      title_diffName → 非公式ランク
-     * @param scratchMap         title_diffName → 皿率(%)
      */
     public record Context(int version,
                           String difficultyRevision,
                           Map<String, Integer> songMaxScores,
-                          Map<String, String> informalRanks,
-                          Map<String, Double> scratchMap) {
+                          Map<String, String> informalRanks) {
     }
 
     /**
-     * 1 ユーザーぶんの更新結果。{@code before} / {@code after} は [BEAT, RATE, KENBAN, SARA]。
+     * 1 ユーザーぶんの更新結果。{@code before} / {@code after} は [BEAT, RATE]。
      *
      * @param created スナップショット行を新規作成した
      * @param changed いずれかの指標を書き換えた（dry-run では「書き換える予定」）
@@ -128,10 +126,6 @@ public class ArchivedVersionPtService {
             m.put("afterBeatPt", after[0]);
             m.put("beforeRatePt", before[1]);
             m.put("afterRatePt", after[1]);
-            m.put("beforeKenbanPt", before[2]);
-            m.put("afterKenbanPt", after[2]);
-            m.put("beforeSaraPt", before[3]);
-            m.put("afterSaraPt", after[3]);
             return m;
         }
     }
@@ -149,8 +143,7 @@ public class ArchivedVersionPtService {
         }
         return new Context(version, revision,
                 recalcService.loadSongMaxScores(),
-                recalcService.loadInformalRanks(revision),
-                recalcService.loadScratchMap());
+                recalcService.loadInformalRanks(revision));
     }
 
     /**
@@ -186,7 +179,7 @@ public class ArchivedVersionPtService {
         Optional<VersionPtSnapshot> existing = snapshotRepository.findByVersionAndUserId(ctx.version(), user.getId());
 
         if (existing.isEmpty()) {
-            boolean allZero = computed[0] <= 0 && computed[1] <= 0 && computed[2] <= 0 && computed[3] <= 0;
+            boolean allZero = computed[0] <= 0 && computed[1] <= 0;
             if (allZero) return Optional.empty();
             if (!dryRun) {
                 VersionPtSnapshot s = new VersionPtSnapshot();
@@ -197,23 +190,21 @@ public class ArchivedVersionPtService {
                 s.setPrivacyLevel(user.getPrivacyLevel());
                 s.setTotalBeatPt(computed[0]);
                 s.setTotalRatePt(computed[1]);
-                s.setTotalKenbanPt(computed[2]);
-                s.setTotalSaraPt(computed[3]);
                 s.setLastUploadedAt(LocalDateTime.now());
                 s.setCapturedAt(LocalDateTime.now());
                 // 順位の振り直し（JDBC）が新しい値を見られるよう、ここで DB に流す。
                 snapshotRepository.saveAndFlush(s);
-                log.info("[前作PT] version={} user={} のスナップショットを新規作成: BEAT {} / RATE {} / KENBAN {} / SARA {}（難易度表 {}）",
-                        ctx.version(), user.getId(), computed[0], computed[1], computed[2], computed[3], ctx.difficultyRevision());
+                log.info("[前作PT] version={} user={} のスナップショットを新規作成: BEAT {} / RATE {}（難易度表 {}）",
+                        ctx.version(), user.getId(), computed[0], computed[1], ctx.difficultyRevision());
             }
-            return Optional.of(new RefreshResult(user.getId(), true, true, new double[4], computed));
+            return Optional.of(new RefreshResult(user.getId(), true, true, new double[2], computed));
         }
 
         VersionPtSnapshot s = existing.get();
-        double[] before = { nz(s.getTotalBeatPt()), nz(s.getTotalRatePt()), nz(s.getTotalKenbanPt()), nz(s.getTotalSaraPt()) };
-        double[] after = new double[4];
+        double[] before = { nz(s.getTotalBeatPt()), nz(s.getTotalRatePt()) };
+        double[] after = new double[2];
         boolean changed = false;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 2; i++) {
             // 指標ごとに「上回ったときだけ」置き換える（INFINITAS 込みで撮った値を下げない）。
             after[i] = Math.max(before[i], computed[i]);
             if (after[i] > before[i] + 1e-9) changed = true;
@@ -221,14 +212,12 @@ public class ArchivedVersionPtService {
         if (changed && !dryRun) {
             s.setTotalBeatPt(after[0]);
             s.setTotalRatePt(after[1]);
-            s.setTotalKenbanPt(after[2]);
-            s.setTotalSaraPt(after[3]);
             s.setLastUploadedAt(LocalDateTime.now());
             // JPA の保留 UPDATE は既定ではコミット時まで流れないため、続く順位の振り直し（JdbcTemplate）が
             // 古い値で順位を付けてしまう。ここで明示的に flush する。
             snapshotRepository.saveAndFlush(s);
-            log.info("[前作PT] version={} user={} を更新: BEAT {}→{} / RATE {}→{} / KENBAN {}→{} / SARA {}→{}（難易度表 {}）",
-                    ctx.version(), user.getId(), before[0], after[0], before[1], after[1], before[2], after[2], before[3], after[3],
+            log.info("[前作PT] version={} user={} を更新: BEAT {}→{} / RATE {}→{}（難易度表 {}）",
+                    ctx.version(), user.getId(), before[0], after[0], before[1], after[1],
                     ctx.difficultyRevision());
         }
         return Optional.of(new RefreshResult(user.getId(), false, changed, before, after));
@@ -328,11 +317,11 @@ public class ArchivedVersionPtService {
 
     // ── 内部ヘルパー ──────────────────────────────────────
 
-    /** past_scores の行から [BEAT, RATE, KENBAN, SARA] を計算する。 */
+    /** past_scores の行から [BEAT, RATE] を計算する。 */
     private double[] compute(Collection<PastScore> rows, Context ctx) {
         List<Score> scores = new ArrayList<>(rows.size());
         for (PastScore p : rows) scores.add(toScore(p));
-        return recalcService.calculatePtTotals(scores, ctx.songMaxScores(), ctx.informalRanks(), ctx.scratchMap());
+        return recalcService.calculatePtTotals(scores, ctx.songMaxScores(), ctx.informalRanks());
     }
 
     /**

@@ -127,7 +127,6 @@ const { t } = useI18n();
           <li><strong>{{ t('terms.privacyItem2') }}</strong></li>
           <li>{{ t('terms.privacyItemPublic') }}</li>
           <li>{{ t('terms.privacyItemShare') }}</li>
-          <li>{{ t('terms.privacyItemInfinitas') }}</li>
           <li>
             {{ t('terms.privacyItem3') }}
             <ul class="list-[circle] pl-6 mt-2 space-y-1">

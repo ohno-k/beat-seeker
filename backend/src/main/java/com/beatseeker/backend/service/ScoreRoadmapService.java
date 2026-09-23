@@ -52,6 +52,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *    達成状況と θ を計算し直す。バッチ後にアップロードされたスコアもすぐ反映される。1 人分なので数十 ms。
  *  - 他の人のスコア更新が d・到達率・θ 分布に効くのは次のバッチ（最大 3 時間後）から。
  *
+ * レベル表の固定（2026-09-23 ユーザー要望: 各レベルの課題曲が勝手に変わらないように）:
+ *  - 「目標（譜面 × ライン）→ レベル番号」の対応表を {@code score_roadmap_level_table} に版ごとに保存し、
+ *    判定とランキングは常にこの表で行う。バッチが d を推定し直しても、既存の割り当てと番号は変わらない。
+ *  - 表に入れるのはプレー人数 {@link #MIN_PLAYERS_FOR_LEVEL} 人以上の譜面だけ。後から 200 人に達した譜面は、
+ *    その時点の d に一番近い既存レベルへ追加する（レベルの数・番号は増やさない）。
+ *  - 表の作り直しは管理者の「レベル表を作り直す」（{@link #refreeze()}）だけ。版番号を 1 つ上げて新しい行を足す。
+ *
  * 生データ約 100 万行は List&lt;Map&gt; に展開せず、カーソルで受けて int 配列へ詰める。
  */
 @Service
@@ -89,6 +96,17 @@ public class ScoreRoadmapService {
         "  id INTEGER PRIMARY KEY," +
         "  computed_at VARCHAR(40) NOT NULL," +
         "  payload TEXT NOT NULL)";
+
+    /** 固定したレベル表の保存先（版ごとに 1 行。一番大きい revision が現行）。 */
+    private static final String CREATE_LEVEL_TABLE_SQL =
+        "CREATE TABLE IF NOT EXISTS score_roadmap_level_table (" +
+        "  revision INTEGER PRIMARY KEY," +
+        "  frozen_at VARCHAR(40) NOT NULL," +
+        "  updated_at VARCHAR(40) NOT NULL," +
+        "  payload TEXT NOT NULL)";
+
+    /** レベル表に入れる譜面の最低プレー人数（歴代ベストがある人数）。 */
+    private static final int MIN_PLAYERS_FOR_LEVEL = 200;
 
     private static final String CHARTS_SQL =
         "SELECT sd.id, sd.title, CASE WHEN sd.difficulty = '4' THEN 'ANOTHER' ELSE 'LEGGENDARIA' END AS difficulty_name, " +
@@ -138,8 +156,15 @@ public class ScoreRoadmapService {
     private volatile Base base = null;
     private volatile String lastError = null;
     private final AtomicBoolean refreshing = new AtomicBoolean(false);
+    /** 実行中のバッチが終わったら、もう 1 回作り直す（レベル表の作り直しを反映するため）。 */
+    private final AtomicBoolean rebuildAgain = new AtomicBoolean(false);
     /** DB からの復元を 1 回だけ試みたか。 */
     private final AtomicBoolean restoreTried = new AtomicBoolean(false);
+
+    /** 現行のレベル表（null = DB 未読込 or まだ無い）。読み書きは levelLock の中で行う。 */
+    private LevelTable levelTable = null;
+    private boolean levelTableLoaded = false;
+    private final Object levelLock = new Object();
 
     public ScoreRoadmapService(DataSource dataSource, JdbcTemplate jdbcTemplate,
             PlatformTransactionManager transactionManager) {
@@ -172,8 +197,18 @@ public class ScoreRoadmapService {
     private record Snapshot(String[] titles, String[] diffs, int[] levels, int[] notes, int[] playerCounts,
                             JointResult joint, long[] userIds, int[] userStart, int[] userChart, byte[] userBucket) {}
 
-    /** 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。v3 = ランキング追加。 */
-    private static final int PAYLOAD_VERSION = 3;
+    /**
+     * 固定したレベル表。
+     *
+     * @param slots   レベル番号 − 1 → そのレベルの 0.02 枠（枠番号 = floor(d / 0.02)）。昇順
+     * @param levelOf 譜面キー（曲名 + NUL + 難易度名）→ {AAA のレベル番号, MAX- のレベル番号}
+     * @param addedAt 譜面キー → 表に入った時刻（作り直し時の譜面は frozenAt と同じ）
+     */
+    private record LevelTable(int revision, String frozenAt, String updatedAt, int minPlayers, long[] slots,
+                              Map<String, int[]> levelOf, Map<String, String> addedAt) {}
+
+    /** 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。v3 = ランキング追加、v4 = レベル表の固定。 */
+    private static final int PAYLOAD_VERSION = 4;
 
     /** レベルの幅（難度の目盛りで 0.02）。フロント（ScoreRoadmapView.vue の LEVEL_W）と必ず揃える。 */
     private static final double LEVEL_W = 0.02;
@@ -303,6 +338,18 @@ public class ScoreRoadmapService {
         if (refreshing.compareAndSet(false, true)) CompletableFuture.runAsync(this::rebuild);
     }
 
+    /**
+     * 【メソッドの役割】 土台の作り直しを必ずもう 1 回走らせる（実行中なら、終わった後にもう 1 回）。
+     * レベル表を作り直したとき、実行中のバッチが古い表で土台を作っていても上書きされるようにする。
+     */
+    private void startRebuildAfterCurrent() {
+        rebuildAgain.set(true);
+        if (refreshing.compareAndSet(false, true)) {
+            rebuildAgain.set(false);
+            CompletableFuture.runAsync(this::rebuild);
+        }
+    }
+
     private void rebuild() {
         long start = System.currentTimeMillis();
         try {
@@ -317,7 +364,259 @@ public class ScoreRoadmapService {
             log.error("Failed to build score roadmap base after {} ms (keeping previous)", System.currentTimeMillis() - start, e);
         } finally {
             refreshing.set(false);
+            if (rebuildAgain.getAndSet(false)) startRebuild();
         }
+    }
+
+    // ===================================================================================
+    // レベル表（固定）
+    // ===================================================================================
+
+    /**
+     * 【メソッドの役割】 レベル表を作り直した場合の変化を返す（まだ保存しない）。管理画面の確認用。
+     *
+     * 作り直しは今の土台の d（最大 3 時間前の集計）で行う。{@link #refreeze()} も同じ土台を使うので、結果は一致する。
+     *
+     * @return {ready, basedOn, current{revision, frozenAt, levels, targets}, next{levels, targets},
+     *          moved, movedUp, movedDown, added, removed}（件数は目標 = 譜面 × ライン 単位）
+     */
+    public Map<String, Object> refreezePreview() {
+        if (base == null) restoreFromDbOnce();
+        Base b = base;
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ready", b != null);
+        if (b == null) return body;
+        synchronized (levelLock) {
+            LevelTable cur = loadLevelTableOnce();
+            LevelTable next = freezeLevels(b.charts(), cur == null ? 1 : cur.revision() + 1, Instant.now().toString());
+            int moved = 0, up = 0, down = 0, added = 0, removed = 0;
+            for (Map.Entry<String, int[]> e : next.levelOf().entrySet()) {
+                int[] old = cur == null ? null : cur.levelOf().get(e.getKey());
+                if (old == null) { added += 2; continue; }
+                for (int li = 0; li < 2; li++) {
+                    // 番号は作り直しで振り直されるので、レベルの 0.02 枠どうしで比べる
+                    long from = cur.slots()[old[li] - 1], to = next.slots()[e.getValue()[li] - 1];
+                    if (from != to) { moved++; if (to > from) up++; else down++; }
+                }
+            }
+            if (cur != null) {
+                for (String key : cur.levelOf().keySet()) if (!next.levelOf().containsKey(key)) removed += 2;
+            }
+            body.put("basedOn", b.computedAt());
+            if (cur != null) {
+                body.put("current", Map.of("revision", cur.revision(), "frozenAt", cur.frozenAt(),
+                        "levels", cur.slots().length, "targets", cur.levelOf().size() * 2));
+            }
+            body.put("next", Map.of("levels", next.slots().length, "targets", next.levelOf().size() * 2));
+            body.put("moved", moved);
+            body.put("movedUp", up);
+            body.put("movedDown", down);
+            body.put("added", added);
+            body.put("removed", removed);
+        }
+        return body;
+    }
+
+    /**
+     * 【メソッドの役割】 今の土台の d でレベル表を作り直し、新しい版として保存する。管理者の操作でだけ呼ぶ。
+     *
+     * 土台（各譜面のレベル番号・ランキング）への反映は続けて走らせるバッチで行う（1〜2 分）。
+     *
+     * @return {ready, revision, levels}
+     */
+    public Map<String, Object> refreeze() {
+        if (base == null) restoreFromDbOnce();
+        Base b = base;
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ready", b != null);
+        if (b == null) return body;
+        synchronized (levelLock) {
+            LevelTable cur = loadLevelTableOnce();
+            LevelTable next = freezeLevels(b.charts(), cur == null ? 1 : cur.revision() + 1, Instant.now().toString());
+            saveLevelTable(next);
+            levelTable = next;
+            body.put("revision", next.revision());
+            body.put("levels", next.slots().length);
+            log.info("Refroze score roadmap level table: revision {} ({} levels, {} charts)",
+                    next.revision(), next.slots().length, next.levelOf().size());
+        }
+        startRebuildAfterCurrent();
+        return body;
+    }
+
+    /**
+     * 【メソッドの役割】 バッチの結果に合わせてレベル表を用意する。無ければ作り（第 1 版）、あれば
+     * 200 人に達した譜面だけを一番近い既存レベルへ追加する。既存の割り当ては変えない。
+     */
+    private LevelTable syncLevelTable(List<Map<String, Object>> charts, String now) {
+        synchronized (levelLock) {
+            LevelTable cur = loadLevelTableOnce();
+            if (cur == null) {
+                LevelTable first = freezeLevels(charts, 1, now);
+                saveLevelTable(first);
+                levelTable = first;
+                log.info("Froze score roadmap level table: revision 1 ({} levels, {} charts)",
+                        first.slots().length, first.levelOf().size());
+                return first;
+            }
+            LevelTable grown = withNewCharts(cur, charts, now);
+            if (grown != null) {
+                saveLevelTable(grown);
+                levelTable = grown;
+                log.info("Added {} charts to score roadmap level table revision {}",
+                        grown.levelOf().size() - cur.levelOf().size(), grown.revision());
+                return grown;
+            }
+            return cur;
+        }
+    }
+
+    private static String chartKey(Map<String, Object> c) {
+        return c.get("title") + "\u0000" + c.get("difficultyName");
+    }
+
+    private static boolean eligible(Map<String, Object> c) {
+        return ((Number) c.get("playerCount")).intValue() >= MIN_PLAYERS_FOR_LEVEL;
+    }
+
+    /** 難度 → 0.02 枠。丸め後の d（応答と同じ小数 4 桁）で決める（境目でフロントとずれないように）。 */
+    @SuppressWarnings("unchecked")
+    private static long slotOf(Map<String, Object> c, String line) {
+        double d = ((Number) ((Map<String, Object>) c.get(line)).get("d")).doubleValue();
+        return (long) Math.floor(d / LEVEL_W + 1e-9);
+    }
+
+    private static final String[] LINE_KEYS = { "aaa", "maxMinus" };
+
+    /** 【メソッドの役割】 200 人以上の譜面の目標がある 0.02 枠を易しい順に Lv.1 から連番にした表を作る。 */
+    private static LevelTable freezeLevels(List<Map<String, Object>> charts, int revision, String now) {
+        java.util.TreeSet<Long> set = new java.util.TreeSet<>();
+        for (Map<String, Object> c : charts) {
+            if (!eligible(c)) continue;
+            for (String line : LINE_KEYS) set.add(slotOf(c, line));
+        }
+        long[] slots = set.stream().mapToLong(Long::longValue).toArray();
+        Map<String, int[]> levelOf = new HashMap<>();
+        Map<String, String> addedAt = new HashMap<>();
+        for (Map<String, Object> c : charts) {
+            if (!eligible(c)) continue;
+            int[] no = new int[2];
+            for (int li = 0; li < 2; li++) no[li] = Arrays.binarySearch(slots, slotOf(c, LINE_KEYS[li])) + 1;
+            levelOf.put(chartKey(c), no);
+            addedAt.put(chartKey(c), now);
+        }
+        return new LevelTable(revision, now, now, MIN_PLAYERS_FOR_LEVEL, slots, levelOf, addedAt);
+    }
+
+    /** 【メソッドの役割】 表に無い 200 人以上の譜面を、一番近い既存レベルへ足した表を返す（足すものが無ければ null）。 */
+    private static LevelTable withNewCharts(LevelTable t, List<Map<String, Object>> charts, String now) {
+        Map<String, int[]> levelOf = null;
+        Map<String, String> addedAt = null;
+        for (Map<String, Object> c : charts) {
+            String key = chartKey(c);
+            if (!eligible(c) || t.levelOf().containsKey(key)) continue;
+            if (levelOf == null) { levelOf = new HashMap<>(t.levelOf()); addedAt = new HashMap<>(t.addedAt()); }
+            int[] no = new int[2];
+            for (int li = 0; li < 2; li++) no[li] = nearestLevel(t.slots(), slotOf(c, LINE_KEYS[li]));
+            levelOf.put(key, no);
+            addedAt.put(key, now);
+        }
+        if (levelOf == null) return null;
+        return new LevelTable(t.revision(), t.frozenAt(), now, t.minPlayers(), t.slots(), levelOf, addedAt);
+    }
+
+    /** 枠 s に一番近いレベルの番号（同じ距離なら易しい方）。 */
+    private static int nearestLevel(long[] slots, long s) {
+        int i = Arrays.binarySearch(slots, s);
+        if (i >= 0) return i + 1;
+        int ins = -i - 1; // s より大きい最初の枠
+        if (ins == 0) return 1;
+        if (ins == slots.length) return slots.length;
+        return s - slots[ins - 1] <= slots[ins] - s ? ins : ins + 1;
+    }
+
+    /** 【メソッドの役割】 現行の版を DB から 1 回だけ読む（levelLock の中で呼ぶ）。読めない時は例外（勝手に作り直さない）。 */
+    private LevelTable loadLevelTableOnce() {
+        if (levelTableLoaded) return levelTable;
+        jdbcTemplate.execute(CREATE_LEVEL_TABLE_SQL);
+        List<String> rows = jdbcTemplate.query(
+                "SELECT payload FROM score_roadmap_level_table ORDER BY revision DESC LIMIT 1",
+                (rs, n) -> rs.getString(1));
+        if (!rows.isEmpty()) {
+            try {
+                JsonLevelTable j = objectMapper.readValue(rows.get(0), JsonLevelTable.class);
+                Map<String, int[]> levelOf = new HashMap<>();
+                Map<String, String> addedAt = new HashMap<>();
+                for (JsonLevelChart c : j.charts()) {
+                    String key = c.title() + "\u0000" + c.difficultyName();
+                    levelOf.put(key, new int[] { c.aaa(), c.maxMinus() });
+                    addedAt.put(key, c.addedAt());
+                }
+                levelTable = new LevelTable(j.revision(), j.frozenAt(), j.updatedAt(), j.minPlayers(), j.slots(), levelOf, addedAt);
+            } catch (Exception e) {
+                throw new IllegalStateException("score_roadmap_level_table を読めません: " + e.getMessage(), e);
+            }
+        }
+        levelTableLoaded = true;
+        return levelTable;
+    }
+
+    /** 保存形式（JSON）。 */
+    private record JsonLevelTable(int revision, String frozenAt, String updatedAt, int minPlayers, long[] slots,
+                                  List<JsonLevelChart> charts) {}
+    private record JsonLevelChart(String title, String difficultyName, int aaa, int maxMinus, String addedAt) {}
+
+    /** 【メソッドの役割】 レベル表をその版の行として保存する（同じ版は上書き）。 */
+    private void saveLevelTable(LevelTable t) {
+        List<JsonLevelChart> list = new ArrayList<>();
+        for (Map.Entry<String, int[]> e : t.levelOf().entrySet()) {
+            String[] k = e.getKey().split("\u0000", 2);
+            list.add(new JsonLevelChart(k[0], k[1], e.getValue()[0], e.getValue()[1], t.addedAt().get(e.getKey())));
+        }
+        list.sort((a, b) -> a.aaa() != b.aaa() ? Integer.compare(a.aaa(), b.aaa()) : a.title().compareTo(b.title()));
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(
+                    new JsonLevelTable(t.revision(), t.frozenAt(), t.updatedAt(), t.minPlayers(), t.slots(), list));
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        writeTx.executeWithoutResult(status -> {
+            jdbcTemplate.execute(CREATE_LEVEL_TABLE_SQL);
+            jdbcTemplate.update("DELETE FROM score_roadmap_level_table WHERE revision = ?", t.revision());
+            jdbcTemplate.update("INSERT INTO score_roadmap_level_table (revision, frozen_at, updated_at, payload) VALUES (?, ?, ?, ?)",
+                    t.revision(), t.frozenAt(), t.updatedAt(), json);
+        });
+    }
+
+    /** 【メソッドの役割】 応答用の譜面に、レベル表の番号 {aaa, maxMinus} を付ける（表に無い譜面は付けない）。 */
+    private static List<Map<String, Object>> withLevels(List<Map<String, Object>> charts, LevelTable t) {
+        List<Map<String, Object>> out = new ArrayList<>(charts.size());
+        for (Map<String, Object> c : charts) {
+            Map<String, Object> m = new LinkedHashMap<>(c);
+            int[] no = t.levelOf().get(chartKey(c));
+            if (no != null) {
+                Map<String, Object> lv = new LinkedHashMap<>();
+                lv.put("aaa", no[0]);
+                lv.put("maxMinus", no[1]);
+                m.put("levels", lv);
+            } else {
+                m.remove("levels");
+            }
+            out.add(m);
+        }
+        return out;
+    }
+
+    /** 応答の model に載せるレベル表の情報（フロントはこの slots でレベルの枠を表示する）。 */
+    private static Map<String, Object> levelTableInfo(LevelTable t) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("revision", t.revision());
+        m.put("frozenAt", t.frozenAt());
+        m.put("updatedAt", t.updatedAt());
+        m.put("minPlayers", t.minPlayers());
+        m.put("slots", t.slots());
+        return m;
     }
 
     /** 【メソッドの役割】 土台を JSON にして 1 行テーブルへ保存する（前の行は消す）。 */
@@ -367,8 +666,8 @@ public class ScoreRoadmapService {
         }
     }
 
-    /** 【メソッドの役割】 全体計算の結果を、応答用の形 + 差分計算用の配列に変換する。 */
-    private static Base toBase(Snapshot s, String computedAt) {
+    /** 【メソッドの役割】 全体計算の結果を、応答用の形 + 差分計算用の配列に変換する（レベル表の用意もここで行う）。 */
+    private Base toBase(Snapshot s, String computedAt) {
         JointResult jr = s.joint();
         double[] th = jr.thetaAll().clone();
         Arrays.sort(th);
@@ -393,9 +692,12 @@ public class ScoreRoadmapService {
             c.put("maxMinus", chartLine(jr.maxMinus(), j));
             charts.add(c);
         }
-        Ranking r = computeRanking(s, charts);
+        LevelTable t = syncLevelTable(charts, computedAt);
+        List<Map<String, Object>> leveled = withLevels(charts, t);
+        Ranking r = computeRanking(s, leveled, t.slots().length);
         model.put("maxLevel", r.maxLevel());
-        return baseFromResponse(computedAt, model, charts, r.entries());
+        model.put("levelTable", levelTableInfo(t));
+        return baseFromResponse(computedAt, model, leveled, r.entries());
     }
 
     private record Ranking(int maxLevel, List<Map<String, Object>> entries) {}
@@ -404,41 +706,30 @@ public class ScoreRoadmapService {
      * 【メソッドの役割】 全ユーザーのロードマップレベルを計算し、ランキングにする。
      *
      * 判定はフロント（ScoreRoadmapView.vue の levels / myLevel）と同じ規則:
-     *  - 目標 = 譜面 × ライン（AAA / MAX-）。難度は応答に載せる丸め後の値（小数 4 桁）を使う
-     *    （丸め前の値で枠を決めると、枠の境目でフロントと 1 レベルずれることがあるため）。
-     *  - 0.02 枠で目標のある枠を易しい順に Lv.1 から連番。
+     *  - 目標 = 譜面 × ライン（AAA / MAX-）。レベル番号は固定したレベル表（charts[].levels）のもの。
+     *    表に無い譜面（プレー人数 200 人未満）は判定に使わない。
      *  - 達成 = プレー済み目標 ≥ min(n, max(2, ⌈n/3⌉)) かつ 達成数 × 3 ≥ プレー済み × 2。完全制覇 = 全目標達成。
+     *    目標が 0 件のレベル（マスタから消えた譜面だけのレベル）は達成にしない。
      *  - その人のレベル = 達成レベルの最大番号。レベル 0（どのレベルも未達成）の人は載せない。
      * 並びはレベル降順 → 達成レベル数 → 完全制覇数。順位は同じレベルなら同順位（1, 1, 3…）。
      */
     @SuppressWarnings("unchecked")
-    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts) {
-        // 手順1: 譜面（元の添字 j）× ライン → レベル番号
+    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts, int maxLevel) {
+        // 手順1: 譜面（元の添字 j）× ライン → レベル番号（0 = 表に無い）
         int nc = s.titles().length;
-        double[][] d = new double[2][nc];
-        for (double[] row : d) Arrays.fill(row, Double.NaN);
         // 曲名・難易度 → 元の添字（重複マスタ行は応答に載らないので、載っている譜面は一意）
         Map<String, Integer> idxOf = new HashMap<>(nc * 2);
         for (int j = 0; j < nc; j++) {
             if (!Double.isNaN(s.joint().aaa().d()[j])) idxOf.put(s.titles()[j] + "\u0000" + s.diffs()[j], j);
         }
-        for (Map<String, Object> c : charts) {
-            int j = idxOf.get(c.get("title") + "\u0000" + c.get("difficultyName"));
-            d[0][j] = ((Number) ((Map<String, Object>) c.get("aaa")).get("d")).doubleValue();
-            d[1][j] = ((Number) ((Map<String, Object>) c.get("maxMinus")).get("d")).doubleValue();
-        }
-        java.util.TreeSet<Long> slots = new java.util.TreeSet<>();
-        for (double[] row : d) for (double v : row) if (!Double.isNaN(v)) slots.add((long) Math.floor(v / LEVEL_W + 1e-9));
-        Map<Long, Integer> noOfSlot = new HashMap<>();
-        int no = 0;
-        for (long slot : slots) noOfSlot.put(slot, ++no);
-        int maxLevel = no;
         int[][] levelOf = new int[2][nc];
         int[] targetsPerLevel = new int[maxLevel + 1];
-        for (int li = 0; li < 2; li++) {
-            for (int j = 0; j < nc; j++) {
-                if (Double.isNaN(d[li][j])) { levelOf[li][j] = 0; continue; }
-                levelOf[li][j] = noOfSlot.get((long) Math.floor(d[li][j] / LEVEL_W + 1e-9));
+        for (Map<String, Object> c : charts) {
+            Map<String, Object> lv = (Map<String, Object>) c.get("levels");
+            if (lv == null) continue;
+            int j = idxOf.get(chartKey(c));
+            for (int li = 0; li < 2; li++) {
+                levelOf[li][j] = ((Number) lv.get(LINE_KEYS[li])).intValue();
                 targetsPerLevel[levelOf[li][j]]++;
             }
         }
@@ -463,7 +754,7 @@ public class ScoreRoadmapService {
             for (int lv = 1; lv <= maxLevel; lv++) {
                 int n = targetsPerLevel[lv];
                 int minPlayed = Math.min(n, Math.max(2, (n + 2) / 3));
-                if (played[lv] >= minPlayed && done[lv] * 3 >= played[lv] * 2) { level = lv; cleared++; }
+                if (n > 0 && played[lv] >= minPlayed && done[lv] * 3 >= played[lv] * 2) { level = lv; cleared++; }
                 if (n > 0 && done[lv] == n) complete++;
             }
             if (level > 0) rows.add(new long[] { s.userIds()[u], level, cleared, complete });

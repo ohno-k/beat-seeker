@@ -99,13 +99,6 @@ function calculateScoreRateTierPoints(scoreRate) {
   return 0;
 }
 
-const SCRATCH_FULL_THRESHOLD_PCT = 30.0;
-const KENBAN_PT_MULTIPLIER = 1.125;
-const SARA_PT_MULTIPLIER = 1.5;
-const clamp01 = w => Math.max(0, Math.min(1, w));
-const kenbanWeight = p => (p == null ? 0 : clamp01(1 - p / SCRATCH_FULL_THRESHOLD_PCT));
-const saraWeight = p => (p == null ? 0 : clamp01(p / SCRATCH_FULL_THRESHOLD_PCT));
-
 const DIFF_CODE = { BEGINNER: '1', NORMAL: '2', HYPER: '3', ANOTHER: '4', LEGGENDARIA: '10' };
 const round1 = v => Math.round(v * 10) / 10;
 const sumTop = (arr, n) => arr.slice(0, n).reduce((a, b) => a + b, 0);
@@ -128,10 +121,10 @@ function djLevelFromRate(rate) {
  * 集計規則は保存経路ごとに異なるので、実際の save-history-log に合わせる:
  *  - totalScore / 各クリア種別・DJ ランクのカウント … scores 全行をそのまま数える
  *    （ScoreController.saveHistoryLog と同じ。重複排除も NO PLAY 除外もしない）
- *  - BEAT / RATE / KENBAN / SARA-PT … (曲,難易度) ごとに最高スコアの行だけ採用し上位 100
+ *  - BEAT / RATE-PT … (曲,難易度) ごとに最高スコアの行だけ採用し上位 100
  */
 function computeTotals(scores, masters) {
-  const { maxScores, informalRanks, scratchMap } = masters;
+  const { maxScores, informalRanks } = masters;
 
   let totalScore = 0;
   let fcCount = 0, exhCount = 0, hCount = 0, clearCount = 0, easyCount = 0;
@@ -148,7 +141,7 @@ function computeTotals(scores, masters) {
     if (s.djLevel === 'A') aCount++;
   }
 
-  // (曲, 難易度) ごとに最高スコアの 1 行へ寄せる（arcade / infinitas の二重計上防止）。
+  // (曲, 難易度) ごとに最高スコアの 1 行へ寄せる（同一譜面の重複行による二重計上防止）。
   const bestByChart = new Map();
   for (const s of scores) {
     const k = `${s.title} ${s.difficultyName}`;
@@ -156,7 +149,7 @@ function computeTotals(scores, masters) {
     if (!cur || (s.score || 0) > (cur.score || -1)) bestByChart.set(k, s);
   }
 
-  const beatPts = [], ratePts = [], kenContribs = [], sarContribs = [];
+  const beatPts = [], ratePts = [];
   let perfectRateCount = 0;
   const chartPt = new Map(); // key → { beatPt, ratePt, scoreRate, maxScore, informalRank }
 
@@ -183,22 +176,11 @@ function computeTotals(scores, masters) {
       if (ratePt > 0) ratePts.push(ratePt);
       if (scoreRate >= 100) perfectRateCount++;
     }
-    if (isRateEligible) {
-      // KENBAN/SARA は ANOTHER/LEGGENDARIA の BEAT-PT に皿率重みを掛けた寄与の上位 100。
-      const bp = calculatePoints(scoreRate, informalRank);
-      if (bp > 0) {
-        const scratchPct = scratchMap.has(`${s.title}_${diffName}`) ? scratchMap.get(`${s.title}_${diffName}`) : null;
-        const kc = bp * kenbanWeight(scratchPct);
-        const sc = bp * saraWeight(scratchPct);
-        if (kc > 0) kenContribs.push(kc);
-        if (sc > 0) sarContribs.push(sc);
-      }
-    }
     chartPt.set(`${s.title}_${diffName}`, { beatPt, ratePt, scoreRate, maxScore, informalRank });
   }
 
   const desc = (a, b) => b - a;
-  beatPts.sort(desc); ratePts.sort(desc); kenContribs.sort(desc); sarContribs.sort(desc);
+  beatPts.sort(desc); ratePts.sort(desc);
 
   let rateAcc = sumTop(ratePts, 100);
   if (perfectRateCount > 100) rateAcc += perfectRateCount - 100;
@@ -207,8 +189,6 @@ function computeTotals(scores, masters) {
     totalScore, fcCount, exhCount, hCount, clearCount, easyCount, aaaCount, aaCount, aCount,
     totalBeatPt: round1(sumTop(beatPts, 100)),
     totalRatePt: round1(rateAcc),
-    totalKenbanPt: round1(sumTop(kenContribs, 100) * KENBAN_PT_MULTIPLIER),
-    totalSaraPt: round1(sumTop(sarContribs, 100) * SARA_PT_MULTIPLIER),
     // 上位 100 判定用（diffJson の isInTop100 / isInRateTop100 に使う）
     beatTop100Threshold: beatPts.length >= 100 ? beatPts[99] : 0,
     rateTop100Threshold: ratePts.length >= 100 ? ratePts[99] : 0,
@@ -238,20 +218,13 @@ async function loadMasters() {
     else informalRanks.set(`${t}_ANOTHER`, r.rank_value);
   }
 
-  const scratchMap = new Map();
-  for (const r of (await client.query(
-    "select title, difficulty, scratch_pct from chart_tendency_profiles where difficulty in ('4','10') and scratch_pct is not null")).rows) {
-    const diffName = r.difficulty === '4' ? 'ANOTHER' : 'LEGGENDARIA';
-    scratchMap.set(`${r.title}_${diffName}`, Number(r.scratch_pct));
-  }
-
-  return { maxScores, informalRanks, scratchMap };
+  return { maxScores, informalRanks };
 }
 
 async function loadScores(userId) {
   const { rows } = await client.query(
     `select id, title, difficulty_name as "difficultyName", difficulty_level as "difficultyLevel",
-            score, clear_type as "clearType", dj_level as "djLevel", source, uploaded_at as "uploadedAt"
+            score, clear_type as "clearType", dj_level as "djLevel", uploaded_at as "uploadedAt"
        from scores where user_id = $1`, [userId]);
   return rows;
 }
@@ -351,7 +324,6 @@ function buildDiffJson(stateAfter, logs, cluster, totals, masters) {
       oldClearType: before.clearType,
       newClearType: s.clearType,
       clearTypeImproved: clearRank(s.clearType) > clearRank(before.clearType),
-      source: s.source || 'arcade',
       maxScore,
       scoreRate,
       informalRank: informalRank ?? undefined,
@@ -393,7 +365,7 @@ const fmt = d => new Date(d).toISOString().replace('T', ' ').slice(0, 19);
 async function main() {
   await client.connect();
   const masters = await loadMasters();
-  console.log(`masters: maxScores=${masters.maxScores.size} informalRanks=${masters.informalRanks.size} scratch=${masters.scratchMap.size}`);
+  console.log(`masters: maxScores=${masters.maxScores.size} informalRanks=${masters.informalRanks.size}`);
 
   // 欠落候補のユーザーを絞り込む（SINCE 以降にスコア更新があったユーザーのみ走査）
   const userRows = (await client.query(
@@ -472,7 +444,6 @@ async function main() {
     console.log(
       `user=${p.userId} ${p.name} @${fmt(p.cluster.start)} UTC  更新${p.rowsWritten}譜面  ` +
       `BEAT=${p.totals.totalBeatPt} RATE=${p.totals.totalRatePt} (直前ログ RATE=${prev}) ` +
-      `KENBAN=${p.totals.totalKenbanPt} SARA=${p.totals.totalSaraPt} ` +
       `diff=${p.diff.length}件 ${p.isLatest ? '[最新イベント=ランキングに影響]' : ''}`);
   }
 
@@ -493,21 +464,21 @@ async function main() {
       `insert into score_history_logs
          (user_id, uploaded_at, tag, version, total_score, fc_count, exh_count, h_count,
           clear_count, easy_count, aaa_count, aa_count, a_count, total_beat_pt, beat_pt_increase,
-          updated_count, total_precision_pt, total_rate_pt, total_kenban_pt, total_sara_pt, diff_json)
-       values ($1,$2,null,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,0,$16,$17,$18,$19)
+          updated_count, total_precision_pt, total_rate_pt, diff_json)
+       values ($1,$2,null,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,0,$16,$17)
        returning id`,
       [p.userId, fmt(p.cluster.start), p.version, t.totalScore, t.fcCount, t.exhCount, t.hCount,
        t.clearCount, t.easyCount, t.aaaCount, t.aaCount, t.aCount, t.totalBeatPt,
        round1(Math.max(0, t.totalBeatPt - base)), p.diff.length, t.totalRatePt,
-       t.totalKenbanPt, t.totalSaraPt, JSON.stringify(p.diff)]);
+       JSON.stringify(p.diff)]);
     console.log(`INSERT log id=${rows[0].id} user=${p.userId} @${fmt(p.cluster.start)}`);
 
     // 最新イベントだった場合は users 側のキャッシュも追従させる（ランキングの整合性）。
     if (p.isLatest) {
       await client.query(
-        'update users set total_beat_pt=$1, total_kenban_pt=$2, total_sara_pt=$3 where id=$4',
-        [t.totalBeatPt, t.totalKenbanPt, t.totalSaraPt, p.userId]);
-      console.log(`  users キャッシュ更新 user=${p.userId} beat=${t.totalBeatPt} kenban=${t.totalKenbanPt} sara=${t.totalSaraPt}`);
+        'update users set total_beat_pt=$1 where id=$2',
+        [t.totalBeatPt, p.userId]);
+      console.log(`  users キャッシュ更新 user=${p.userId} beat=${t.totalBeatPt}`);
     }
   }
 

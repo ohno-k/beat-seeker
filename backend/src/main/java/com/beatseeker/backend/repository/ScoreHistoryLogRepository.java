@@ -96,7 +96,7 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
      * ■ 「> 0」の条件は最新行を選んだ<b>後</b>に掛ける（2026-09-15 変更）
      * 世代切り替え（新作稼働）時に全ユーザーへ「0 pt の履歴行」を 1 本入れてランキングを初期化する。
      * 条件を DISTINCT ON の内側に置くと「最新の非ゼロ行」＝前作の最終値を拾ってしまい初期化にならない。
-     * 各ランキング（precision / rate / kenban / sara）も同じ理由で外側に置いている。
+     * 各ランキング（precision / rate）も同じ理由で外側に置いている。
      * 最新行が 0 pt のユーザー（＝新作でまだ 1 度もアップロードしていない）はランキングに出ない。
      *
      * @return ランキング配列（0 件でも空リスト）
@@ -128,7 +128,6 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "       cr.total_beat_pt AS \"totalBeatPt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
-            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -218,7 +217,6 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "       cr.total_rate_pt AS \"totalRatePt\", " +
             "       cr.uploaded_at AS \"lastUpdatedAt\", " +
             "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
-            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
             "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
             "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
             "FROM current_ranks cr " +
@@ -226,88 +224,6 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
             "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
             "ORDER BY cr.rank_pos", nativeQuery = true)
     List<Map<String, Object>> getRateTierRanking();
-
-    /**
-     * 【メソッドの役割】 KENBAN-PT のグローバルランキングを取得する。
-     *
-     * 構造は {@link #getRateTierRanking()} と同一で、対象カラムを {@code total_kenban_pt} に置き換えただけ。
-     * 返却キー: userId / displayName / iidxId / privacyLevel / totalKenbanPt / lastUpdatedAt / isSupporter / rankChange
-     */
-    @Query(value =
-            "WITH current_ranks AS ( " +
-            "    SELECT user_id, total_kenban_pt, uploaded_at, " +
-            "           RANK() OVER (ORDER BY total_kenban_pt DESC) AS rank_pos " +
-            "    FROM ( " +
-            "        SELECT DISTINCT ON (user_id) user_id, total_kenban_pt, uploaded_at " +
-            "        FROM score_history_logs " +
-            "        ORDER BY user_id, uploaded_at DESC " +
-            "    ) AS latest " +
-            "    WHERE total_kenban_pt > 0 " +
-            "), " +
-            "previous_ranks AS ( " +
-            "    SELECT user_id, " +
-            "           RANK() OVER (ORDER BY total_kenban_pt DESC) AS rank_pos " +
-            "    FROM ( " +
-            "        SELECT DISTINCT ON (user_id) user_id, total_kenban_pt, uploaded_at " +
-            "        FROM score_history_logs " +
-            "        WHERE uploaded_at < CURRENT_DATE " +
-            "        ORDER BY user_id, uploaded_at DESC " +
-            "    ) AS prev_latest " +
-            "    WHERE total_kenban_pt > 0 " +
-            ") " +
-            "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
-            "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
-            "       cr.total_kenban_pt AS \"totalKenbanPt\", " +
-            "       cr.uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
-            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
-            "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
-            "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
-            "FROM current_ranks cr " +
-            "JOIN users u ON cr.user_id = u.id " +
-            "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
-            "ORDER BY cr.rank_pos", nativeQuery = true)
-    List<Map<String, Object>> getKenbanTierRanking();
-
-    /**
-     * 【メソッドの役割】 SARA-PT のグローバルランキングを取得する。
-     * 構造は {@link #getKenbanTierRanking()} と同一で {@code total_sara_pt} に置き換えただけ。
-     */
-    @Query(value =
-            "WITH current_ranks AS ( " +
-            "    SELECT user_id, total_sara_pt, uploaded_at, " +
-            "           RANK() OVER (ORDER BY total_sara_pt DESC) AS rank_pos " +
-            "    FROM ( " +
-            "        SELECT DISTINCT ON (user_id) user_id, total_sara_pt, uploaded_at " +
-            "        FROM score_history_logs " +
-            "        ORDER BY user_id, uploaded_at DESC " +
-            "    ) AS latest " +
-            "    WHERE total_sara_pt > 0 " +
-            "), " +
-            "previous_ranks AS ( " +
-            "    SELECT user_id, " +
-            "           RANK() OVER (ORDER BY total_sara_pt DESC) AS rank_pos " +
-            "    FROM ( " +
-            "        SELECT DISTINCT ON (user_id) user_id, total_sara_pt, uploaded_at " +
-            "        FROM score_history_logs " +
-            "        WHERE uploaded_at < CURRENT_DATE " +
-            "        ORDER BY user_id, uploaded_at DESC " +
-            "    ) AS prev_latest " +
-            "    WHERE total_sara_pt > 0 " +
-            ") " +
-            "SELECT u.id AS \"userId\", u.display_name AS \"displayName\", u.iidx_id AS \"iidxId\", " +
-            "       COALESCE(u.privacy_level, 1) AS \"privacyLevel\", " +
-            "       cr.total_sara_pt AS \"totalSaraPt\", " +
-            "       cr.uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AS \"isSupporter\"," +
-            "       COALESCE(u.ranking_includes_infinitas, false) AS \"includesInfinitas\"," +
-            "       CASE WHEN pr.rank_pos IS NULL THEN NULL " +
-            "            ELSE (pr.rank_pos - cr.rank_pos)::integer END AS \"rankChange\" " +
-            "FROM current_ranks cr " +
-            "JOIN users u ON cr.user_id = u.id " +
-            "LEFT JOIN previous_ranks pr ON cr.user_id = pr.user_id " +
-            "ORDER BY cr.rank_pos", nativeQuery = true)
-    List<Map<String, Object>> getSaraTierRanking();
 
     /**
      * 【メソッドの役割】 ARENA ランク（SS／S+／S／A など）ごとの平均 beat_pt とユーザー数を集計する。
@@ -414,23 +330,6 @@ public interface ScoreHistoryLogRepository extends JpaRepository<ScoreHistoryLog
      */
     Optional<ScoreHistoryLog> findFirstByUserAndUploadedAtLessThanOrderByUploadedAtDesc(
             User user, LocalDateTime threshold);
-
-    /**
-     * 【メソッドの役割】 指定ユーザーの、特定タグ・指定期間 [startDate, endDate) 内の最新 1 件を返す。
-     *
-     * 派生クエリ: {@code WHERE user_id = ? AND tag = ? AND uploaded_at >= ? AND uploaded_at < ?
-     * ORDER BY uploaded_at DESC LIMIT 1}。
-     * INFINITAS 取り込みの「その日 1 レコード」集約で、当日分の既存ログを引き当てるのに使う
-     * （見つかれば upsert、無ければ新規作成）。endDate は含まない（[日初, 翌日初) の半開区間）。
-     *
-     * @param user      対象ユーザー
-     * @param tag       タグ（例 "INFINITAS"）
-     * @param startDate 期間開始（含む）
-     * @param endDate   期間終了（含まない）
-     * @return 当日分の既存ログ（無ければ空）
-     */
-    Optional<ScoreHistoryLog> findFirstByUserAndTagAndUploadedAtGreaterThanEqualAndUploadedAtLessThanOrderByUploadedAtDesc(
-            User user, String tag, LocalDateTime startDate, LocalDateTime endDate);
 
     /**
      * 【メソッドの役割】 指定ユーザー ID の履歴のうち {@code uploadedAt >= since} を昇順で返す。

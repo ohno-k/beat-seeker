@@ -48,8 +48,7 @@ import java.util.Set;
  *  - <b>クエリは 4 本のみ</b>: 譜面マスタ / ユーザースコア / 難易度表 / 最大スコア表。
  *    譜面数に比例したクエリは発行しない。
  *  - <b>アーケードの記録のみを返す</b>（{@code source = "arcade"}。source 未設定の
- *    レガシー行も arcade 扱い）。INFINITAS の記録は除外するため、その譜面のベストが
- *    INFINITAS 側にあるユーザーでは、アプリ内表示・総 BEAT-PT と値が食い違い得る。
+ *    レガシー行も arcade 扱い）。INFINITAS の記録は除外する。
  *  - BEAT-PT / RATE-PT は DB に持っていないため {@link BeatPtCalculator} でその場計算する
  *    （アップロード時の再集計と同じ計算式）。
  */

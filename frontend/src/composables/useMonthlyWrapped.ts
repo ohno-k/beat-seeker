@@ -58,7 +58,7 @@ export interface TopUpdatedSong {
 /**
  * 月末振り返りのレスポンス本体。
  *
- * 各 PT（BEAT/RATE/KENBAN/SARA）について start/end/increase の 3 値を持ち、
+ * 各 PT（BEAT/RATE）について start/end/increase の 3 値を持ち、
  * クリア種別・DJ レベルは月内増加分を Map で返す。
  * `newBeatPtBest` / `newRatePtBest` は月末値が全期間最高と一致した場合に true。
  */
@@ -73,19 +73,12 @@ export interface MonthlyWrapped {
   isSupporter: boolean;
   /** RATE-TIER をプロフィールに表示するかどうか。false なら振り返り上の RATE-PT 系も非表示にする。 */
   showRateTier: boolean;
-  showKenbanSaraTier: boolean;
   startBeatPt: number;
   endBeatPt: number;
   beatPtIncrease: number;
   startRatePt: number;
   endRatePt: number;
   ratePtIncrease: number;
-  startKenbanPt: number;
-  endKenbanPt: number;
-  kenbanPtIncrease: number;
-  startSaraPt: number;
-  endSaraPt: number;
-  saraPtIncrease: number;
   uploadCount: number;
   totalUpdatedCount: number;
   uniqueUpdatedSongCount: number;

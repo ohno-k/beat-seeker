@@ -113,8 +113,6 @@ public class SecurityConfig {
                                                                 "/api/scores/ranking/arena-top-rankers",
                                                                 "/api/scores/rate-ranking/arena-top-rankers",
                                                                 "/api/scores/arena-top-ranker-profile",
-                                                                "/api/scores/kenban-ranking",
-                                                                "/api/scores/sara-ranking",
                                                                 "/api/scores/average-ranking",
                                                                 "/api/scores/song-top-rankers",
                                                                 "/api/scores/top-ranker-profile",

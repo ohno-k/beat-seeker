@@ -1550,7 +1550,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
         try {
           // ブックマークレット由来ならページの作品番号（pageVersion）を添える。サーバーはこれと
           // 最終プレー日時から「前作のデータ」を判定し、該当すれば 400（rejected）で返す。
-          result = await upload(newData, 'arcade', pageVersion);
+          result = await upload(newData, pageVersion);
         } catch (uploadErr: any) {
           if (uploadErr?.rejected) {
             // サーバーが内容を理由に拒否（前作の CSV / 前作ページのブックマークレット）。
@@ -1608,18 +1608,6 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
           .sort((a, b) => b.pt - a.pt);
         const rateTop100Set = new Set(sortedByRatePtDesc.slice(0, 100).map(s => s.key));
         const accurateTotalRatePt = calcFlatRatePt(allFlatAfterUpload);
-
-        // ランキング行の INF バッジ用: 集計対象（BEAT/RATE の上位100曲）に INFINITAS 由来ベストが
-        // 含まれるか。flattenScores の record.source は arcade/infinitas のうち「採用された高い方」を指す。
-        const beatTop100HasInf = sortedByPtDesc.slice(0, 100).some(s => s.source === 'infinitas');
-        const rateTop100HasInf = allFlatAfterUpload
-          .filter(s => ['ANOTHER', 'LEGGENDARIA'].includes(s.difficultyName) && s.scoreRate > 0)
-          .map(s => ({ rec: s, pt: calculateScoreRateTierPoints(s.scoreRate) }))
-          .filter(x => x.pt > 0)
-          .sort((a, b) => b.pt - a.pt)
-          .slice(0, 100)
-          .some(x => x.rec.source === 'infinitas');
-        const includesInfinitas = beatTop100HasInf || rateTop100HasInf;
 
         // backendUpdates に scoreRate / maxScore / RATE-PT 関連フィールドを追加補完する。
         const enrichedUpdates = backendUpdates.map(s => {
@@ -1729,8 +1717,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
                     JSON.stringify(reportSongs),
                     newTierLabel,
                     oldTierLabel,
-                    accurateTotalRatePt,
-                    includesInfinitas
+                    accurateTotalRatePt
                 );
                 console.log("History log saved successfully.");
             } catch (err) {

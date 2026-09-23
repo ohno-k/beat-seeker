@@ -74,24 +74,6 @@ public class User {
     @ColumnDefault("true")
     private Boolean showRateTier = true;
 
-    /**
-     * アーケード（CSV/ブックマークレット）由来のスコアを UI 上に表示するかどうか。
-     * INFINITAS 取得スコアと並走させた場合に「アーケードのスコアだけ見たい / 逆」をユーザーが切り替えるためのフラグ。
-     */
-    @ColumnDefault("true")
-    private Boolean showArcadeScores = true;
-
-    /**
-     * INFINITAS 画面共有 OCR 由来のスコアを UI 上に表示するかどうか。
-     * INFINITAS モードを使うユーザーがアーケードのスコアと別フィルタで切り替えたい時に使う。
-     */
-    @ColumnDefault("true")
-    private Boolean showInfinitasScores = true;
-
-    /** KENBAN-TIER / SARA-TIER を UI に表示するかどうか。サポーター限定のオプトイン機能。 */
-    @ColumnDefault("false")
-    private Boolean showKenbanSaraTier = false;
-
     /** サポーター（課金支援者）かどうか。true の場合は特別 UI が有効になる。 */
     @ColumnDefault("false")
     private Boolean isSupporter = false;
@@ -110,22 +92,6 @@ public class User {
     /** 累計 Beat-Pt（レート値）。全スコアから算出されるユーザーの総合力指標。 */
     @ColumnDefault("0")
     private Double totalBeatPt = 0.0;
-
-    /** 累計 KENBAN-PT（鍵盤側ティア指標）。BEAT-PT 算出時に同じスコアから派生計算する。 */
-    @ColumnDefault("0")
-    private Double totalKenbanPt = 0.0;
-
-    /** 累計 SARA-PT（皿側ティア指標）。BEAT-PT 算出時に同じスコアから派生計算する。 */
-    @ColumnDefault("0")
-    private Double totalSaraPt = 0.0;
-
-    /**
-     * ランキング集計（上位100曲）に INFINITAS 取得のベストが 1 曲でも含まれるか。
-     * TIER 系ランキング（BEAT/RATE/KENBAN/SARA）の行に「INF」バッジを出すための表示フラグ。
-     * saveHistoryLog 時にフロントが算出した値を保存する（AVERAGE ランキングは対象外）。
-     */
-    @ColumnDefault("false")
-    private Boolean rankingIncludesInfinitas = false;
 
     /**
      * 公式難易度 Lv11/Lv12 ANOTHER/LEGGENDARIA 全曲における平均順位（AVERAGE ランキング用）。

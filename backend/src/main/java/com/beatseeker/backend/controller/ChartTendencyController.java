@@ -2,7 +2,6 @@ package com.beatseeker.backend.controller;
 
 import com.beatseeker.backend.entity.ChartTendencyProfile;
 import com.beatseeker.backend.entity.User;
-import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
@@ -65,12 +64,8 @@ public class ChartTendencyController {
     private final ScoreRepository scoreRepository;
     /** 譜面ペア回帰のキャッシュ（伸びしろ算出に使う）。 */
     private final PairRegressionService pairRegressionService;
-    /** 履歴ログリポジトリ（KENBAN/SARA ランキングを DB から直接引く用）。 */
-    private final ScoreHistoryLogRepository scoreHistoryLogRepository;
     /** コスパ埋めレコメンド（期待 BEAT-PT の算出）。 */
     private final FillRecommendationService fillRecommendationService;
-    /** 前作の最終 PT（ランキング行のティアアイコンの外枠用）。 */
-    private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
     /**
      * 【コンストラクタ】 Spring DI によりサービス・リポジトリを注入する。
@@ -81,17 +76,13 @@ public class ChartTendencyController {
                                    AdminAuthService adminAuthService,
                                    ScoreRepository scoreRepository,
                                    PairRegressionService pairRegressionService,
-                                   ScoreHistoryLogRepository scoreHistoryLogRepository,
-                                   FillRecommendationService fillRecommendationService,
-                                   com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
-        this.previousVersionPtService = previousVersionPtService;
+                                   FillRecommendationService fillRecommendationService) {
         this.service = service;
         this.skillTreeService = skillTreeService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
         this.scoreRepository = scoreRepository;
         this.pairRegressionService = pairRegressionService;
-        this.scoreHistoryLogRepository = scoreHistoryLogRepository;
         this.fillRecommendationService = fillRecommendationService;
     }
 
@@ -271,52 +262,6 @@ public class ChartTendencyController {
                 .map(this::profileToMap)
                 .toList();
         return ResponseEntity.ok(result);
-    }
-
-    /**
-     * 【メソッドの役割】 KENBAN-TIER / SARA-TIER 算出用の軽量サマリを返す。
-     *
-     * ANOTHER / LEGGENDARIA 全譜面について `(title, difficulty, scratchPct)` のみを返す。
-     * 重い JSON 列を含めず、ダッシュボード起動時に一括取得できるサイズに抑える。
-     *
-     * GET /api/analysis/tendency-scratch-summary
-     *
-     * @return 各譜面の `{title, difficulty, scratchPct}` を持つ Map のリスト
-     */
-    @GetMapping("/api/analysis/tendency-scratch-summary")
-    public ResponseEntity<List<Map<String, Object>>> getScratchSummary() {
-        return ResponseEntity.ok(service.getScratchSummaryForAnotherLegg());
-    }
-
-    /**
-     * 【メソッドの役割】 KENBAN-TIER ランキングを {@code score_history_logs.total_kenban_pt} から返す。
-     *
-     * BEAT-PT / RATE-PT と同じパターンで事前計算済みのスナップショットを利用する。
-     * 再計算は CSV アップロード時 ({@code save-history-log}) や管理者再計算 API で行われる。
-     *
-     * GET /api/scores/kenban-ranking
-     */
-    @GetMapping("/api/scores/kenban-ranking")
-    public ResponseEntity<List<Map<String, Object>>> getKenbanRanking(@RequestParam(required = false) Integer version) {
-        // 過去作を指定されたら世代切り替え時のスナップショットから終了時点のランキングを返す。
-        if (version != null && version != com.beatseeker.backend.service.IidxVersions.current()) {
-            return ResponseEntity.ok(previousVersionPtService.archivedRanking(version, "totalKenbanPt"));
-        }
-        return ResponseEntity.ok(previousVersionPtService.decorate(scoreHistoryLogRepository.getKenbanTierRanking(), "userId"));
-    }
-
-    /**
-     * 【メソッドの役割】 SARA-TIER ランキングを {@code score_history_logs.total_sara_pt} から返す。
-     * {@link #getKenbanRanking()} と対称な構造。
-     *
-     * GET /api/scores/sara-ranking
-     */
-    @GetMapping("/api/scores/sara-ranking")
-    public ResponseEntity<List<Map<String, Object>>> getSaraRanking(@RequestParam(required = false) Integer version) {
-        if (version != null && version != com.beatseeker.backend.service.IidxVersions.current()) {
-            return ResponseEntity.ok(previousVersionPtService.archivedRanking(version, "totalSaraPt"));
-        }
-        return ResponseEntity.ok(previousVersionPtService.decorate(scoreHistoryLogRepository.getSaraTierRanking(), "userId"));
     }
 
     /**

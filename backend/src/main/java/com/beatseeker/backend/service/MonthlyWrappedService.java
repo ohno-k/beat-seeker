@@ -107,7 +107,7 @@ public class MonthlyWrappedService {
      *
      * 集計手順:
      *  1. 月境界 [startDate, endDate) を作成し、月内ログ + 月初前ベース + 月末ログを揃える
-     *  2. PT 系（BEAT/RATE/KENBAN/SARA）の差分を計算
+     *  2. PT 系（BEAT/RATE）の差分を計算
      *  3. クリア種別・DJ レベル別カウントの差分を計算
      *  4. 月内アップロード回数・更新譜面数（延べ）を集計
      *  5. diffJson を全パースして同一譜面を集約（MergedSong リスト）
@@ -132,10 +132,6 @@ public class MonthlyWrappedService {
         double endBeatPt = nullToZero(effectiveEnd != null ? effectiveEnd.getTotalBeatPt() : null);
         double startRatePt = nullToZero(baseSnapshot != null ? baseSnapshot.getTotalRatePt() : null);
         double endRatePt = nullToZero(effectiveEnd != null ? effectiveEnd.getTotalRatePt() : null);
-        double startKenbanPt = nullToZero(baseSnapshot != null ? baseSnapshot.getTotalKenbanPt() : null);
-        double endKenbanPt = nullToZero(effectiveEnd != null ? effectiveEnd.getTotalKenbanPt() : null);
-        double startSaraPt = nullToZero(baseSnapshot != null ? baseSnapshot.getTotalSaraPt() : null);
-        double endSaraPt = nullToZero(effectiveEnd != null ? effectiveEnd.getTotalSaraPt() : null);
 
         Map<String, Integer> clearTypeIncrease = new LinkedHashMap<>();
         clearTypeIncrease.put("fullcombo", intDiff(effectiveEnd, baseSnapshot, ScoreHistoryLog::getFcCount));
@@ -212,11 +208,8 @@ public class MonthlyWrappedService {
                 user.getDisplayName() != null ? user.getDisplayName() : "",
                 Boolean.TRUE.equals(user.getIsSupporter()),
                 showRateTier,
-                Boolean.TRUE.equals(user.getShowKenbanSaraTier()),
                 startBeatPt, endBeatPt, endBeatPt - startBeatPt,
                 startRatePt, endRatePt, endRatePt - startRatePt,
-                startKenbanPt, endKenbanPt, endKenbanPt - startKenbanPt,
-                startSaraPt, endSaraPt, endSaraPt - startSaraPt,
                 uploadCount,
                 totalUpdatedCount,
                 merged.size(),
@@ -479,19 +472,12 @@ public class MonthlyWrappedService {
             String displayName,
             boolean isSupporter,
             boolean showRateTier,
-            boolean showKenbanSaraTier,
             double startBeatPt,
             double endBeatPt,
             double beatPtIncrease,
             double startRatePt,
             double endRatePt,
             double ratePtIncrease,
-            double startKenbanPt,
-            double endKenbanPt,
-            double kenbanPtIncrease,
-            double startSaraPt,
-            double endSaraPt,
-            double saraPtIncrease,
             int uploadCount,
             int totalUpdatedCount,
             int uniqueUpdatedSongCount,

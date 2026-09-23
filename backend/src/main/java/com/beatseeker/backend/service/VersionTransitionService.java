@@ -100,12 +100,11 @@ public class VersionTransitionService {
         int inserted = jdbcTemplate.update(
                 "INSERT INTO version_pt_snapshots " +
                 "  (version, user_id, iidx_id, display_name, total_beat_pt, total_rate_pt, " +
-                "   total_kenban_pt, total_sara_pt, privacy_level, last_uploaded_at, captured_at) " +
+                "   privacy_level, last_uploaded_at, captured_at) " +
                 "SELECT ?, l.user_id, u.iidx_id, u.display_name, l.total_beat_pt, l.total_rate_pt, " +
-                "       l.total_kenban_pt, l.total_sara_pt, u.privacy_level, l.uploaded_at, now() " +
+                "       u.privacy_level, l.uploaded_at, now() " +
                 "FROM ( " +
-                "  SELECT DISTINCT ON (user_id) user_id, total_beat_pt, total_rate_pt, " +
-                "         total_kenban_pt, total_sara_pt, uploaded_at " +
+                "  SELECT DISTINCT ON (user_id) user_id, total_beat_pt, total_rate_pt, uploaded_at " +
                 "  FROM score_history_logs " +
                 "  WHERE tag IS NULL OR tag <> '" + RESET_TAG + "' " +
                 "  ORDER BY user_id, uploaded_at DESC " +
@@ -262,7 +261,7 @@ public class VersionTransitionService {
      *  2. {@code scores} / {@code user_song_ranks} を全削除（TRUNCATE。どちらも FK 参照なし）
      *     → アップロードは「ベスト更新のみ書き換える」upsert なので、前作のスコアを残したまま
      *       新作の CSV を入れると低い記録が全部無視される。空にしておかないと新作の取り込みが成立しない。
-     *  3. {@code users} の PT キャッシュ（total_beat_pt / kenban / sara / average_rank）を 0 に戻す
+     *  3. {@code users} の PT キャッシュ（total_beat_pt / average_rank）を 0 に戻す
      *  4. 履歴を持つ全ユーザーに「0PT の履歴行」を 1 本入れる（version = 新作、tag = {@link #RESET_TAG}）
      *     → ランキングは履歴の最新行を見るため、この行が無いと前作の PT がランキングに残り続ける。
      *       各ランキング SQL は「最新行の値が 0 なら除外」なので、新作で 1 度もアップロードしていない
@@ -300,15 +299,15 @@ public class VersionTransitionService {
         jdbcTemplate.execute("TRUNCATE TABLE user_song_ranks");
 
         int usersReset = jdbcTemplate.update(
-                "UPDATE users SET total_beat_pt = 0, total_kenban_pt = 0, total_sara_pt = 0, " +
+                "UPDATE users SET total_beat_pt = 0, " +
                 "                 total_average_rank = NULL, total_average_rank_played = 0");
 
         int zeroRows = jdbcTemplate.update(
                 "INSERT INTO score_history_logs " +
                 "  (user_id, uploaded_at, version, tag, total_score, fc_count, exh_count, h_count, clear_count, " +
                 "   easy_count, aaa_count, aa_count, a_count, total_beat_pt, beat_pt_increase, updated_count, " +
-                "   total_precision_pt, total_rate_pt, total_kenban_pt, total_sara_pt, diff_json) " +
-                "SELECT DISTINCT h.user_id, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '[]' " +
+                "   total_precision_pt, total_rate_pt, diff_json) " +
+                "SELECT DISTINCT h.user_id, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '[]' " +
                 "FROM score_history_logs h " +
                 "WHERE NOT EXISTS (SELECT 1 FROM score_history_logs z " +
                 "                  WHERE z.user_id = h.user_id AND z.tag = ? AND z.version = ?)",

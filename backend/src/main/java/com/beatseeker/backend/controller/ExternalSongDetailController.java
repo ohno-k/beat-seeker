@@ -432,8 +432,6 @@ public class ExternalSongDetailController {
         m.put("danRank", u.getDanRank());
         m.put("arenaRank", u.getArenaRank());
         m.put("totalBeatPt", u.getTotalBeatPt());
-        m.put("totalKenbanPt", u.getTotalKenbanPt());
-        m.put("totalSaraPt", u.getTotalSaraPt());
 
         // RATE-PT / 精度 PT は User エンティティに直接持たず、ScoreHistoryLog の最新スナップショットから取る。
         // 履歴 0 件のユーザーは null（未集計）を返す。

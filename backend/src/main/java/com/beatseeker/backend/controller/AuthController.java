@@ -187,9 +187,6 @@ public class AuthController {
             responseBody.put("privacyLevel", user.getPrivacyLevel());
             responseBody.put("language", user.getLanguage() != null ? user.getLanguage() : "ja");
             responseBody.put("showRateTier", user.getShowRateTier() != null ? user.getShowRateTier() : true);
-            responseBody.put("showKenbanSaraTier", user.getShowKenbanSaraTier() != null ? user.getShowKenbanSaraTier() : false);
-            responseBody.put("showArcadeScores", user.getShowArcadeScores() != null ? user.getShowArcadeScores() : true);
-            responseBody.put("showInfinitasScores", user.getShowInfinitasScores() != null ? user.getShowInfinitasScores() : true);
             responseBody.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
             // 前作の最終 BEAT-PT / RATE-PT（ティアアイコンの外枠の色と光量に使う。前作の記録が無ければ null）
             previousVersionPtService.putPrevious(responseBody, user.getId());
@@ -265,17 +262,6 @@ public class AuthController {
             user.setLanguage(request.language());
         if (request.showRateTier() != null)
             user.setShowRateTier(request.showRateTier());
-        // KENBAN/SARA-TIER 表示はサポーター限定機能。非サポーターからの true 指定は無視する。
-        if (request.showKenbanSaraTier() != null) {
-            boolean isSupporter = Boolean.TRUE.equals(user.getIsSupporter());
-            user.setShowKenbanSaraTier(isSupporter && request.showKenbanSaraTier());
-        }
-        // アーケード／INFINITAS スコアの表示トグル。両方とも単純な PATCH 的更新。
-        // 「両方 false」のような極端な設定もユーザー責任で許容する（UI からはほぼ起きない）。
-        if (request.showArcadeScores() != null)
-            user.setShowArcadeScores(request.showArcadeScores());
-        if (request.showInfinitasScores() != null)
-            user.setShowInfinitasScores(request.showInfinitasScores());
         if (request.email() != null && !request.email().isBlank()) {
             // メールアドレスは小文字化して保存。他ユーザーと衝突しないかを確認してから更新する
             String newEmail = request.email().trim().toLowerCase();

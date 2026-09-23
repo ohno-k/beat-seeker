@@ -25,11 +25,10 @@ const UPLOAD_TIMEOUT_MS = 180000;
  *
  * 'NO PLAY' や '---' のような未プレイ譜面はサーバへ送らない（サーバ側負荷削減）。
  *
- * @param source スコア取得元（"arcade" / "infinitas"）。各レコードに付与してサーバへ送る。
  * @param sourceVersion ブックマークレットを実行したページの作品番号（例: 34）。CSV ファイル取り込みでは null。
  *                      前作のページで取った結果をサーバー（StaleUploadGuard）が弾くための材料。
  */
-function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinitas', sourceVersion: number | null) {
+function flattenToUploadRecords(scores: ScoreData[], sourceVersion: number | null) {
     const difficulties = ['beginner', 'normal', 'hyper', 'another', 'leggendaria'] as const;
     // UI 側のキー（小文字） → API 側のラベル（大文字）への変換表
     const difficultyLabels: Record<string, string> = {
@@ -63,10 +62,10 @@ function flattenToUploadRecords(scores: ScoreData[], source: 'arcade' | 'infinit
                 playCount: song.playCount,
                 // 公式 CSV の「最終プレー日時」（曲単位）。記録が伸びなくても進む唯一の値で、
                 // リーグモードの活動判定（課題曲をリーグ期間中に遊んだか）がこれを根拠にする。
-                // ブックマークレット CSV は空欄、INFINITAS は別書式のため、サーバー側で
+                // ブックマークレット CSV は空欄のため、サーバー側で
                 // 公式 CSV 書式（"YYYY-MM-DD HH:mm"）以外は無視される。
                 lastPlayTime: song.lastPlayTime,
-                source,
+                source: 'arcade',
                 ...(sourceVersion != null ? { sourceVersion } : {}),
             });
         });
@@ -103,16 +102,14 @@ export function useScoreUpload() {
      *    message に、`rejected = true` を付けて投げる。呼び出し側は「保存されていない」と確定して扱える。
      *
      * @param scores 曲単位のスコア配列
-     * @param source スコアの取得元。既定は "arcade"。INFINITAS 画面取得時は "infinitas" を渡す
      * @param sourceVersion ブックマークレットを実行したページの作品番号。CSV ファイル取り込みでは null
      * @returns 更新件数・更新譜面一覧・サーバメッセージ
      */
     const upload = async (
         scores: ScoreData[],
-        source: 'arcade' | 'infinitas' = 'arcade',
         sourceVersion: number | null = null,
-    ): Promise<{ updatedCount: number; updatedSongs: any[]; message: string; skippedInfinitasOnly?: number }> => {
-        const records = flattenToUploadRecords(scores, source, sourceVersion);
+    ): Promise<{ updatedCount: number; updatedSongs: any[]; message: string }> => {
+        const records = flattenToUploadRecords(scores, sourceVersion);
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), UPLOAD_TIMEOUT_MS);
         try {
@@ -162,11 +159,11 @@ export function useScoreUpload() {
      * BeatPt / RatePt の推移・Tier 変動をユーザー個別の履歴に残すため、
      * `upload()` 成功後に呼ぶ設計。
      */
-    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number, includesInfinitas?: boolean): Promise<void> => {
+    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number): Promise<void> => {
         const res = await fetch(`${API_BASE}/api/scores/save-history-log`, {
             method: 'POST',
             headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, totalRatePt: totalRatePt ?? 0, tierName, prevTierName, includesInfinitas: includesInfinitas ?? false }),
+            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, totalRatePt: totalRatePt ?? 0, tierName, prevTierName }),
         });
 
         if (!res.ok) {

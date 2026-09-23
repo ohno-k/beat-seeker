@@ -13,14 +13,11 @@
  * @emits close 処理完了時にモーダルを閉じる。
  * @emits score-file スコア CSV を File として親（メインインポート処理）に引き渡す。
  */
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
-import { useAuth } from '../composables/useAuth';
 import { useNativeBridge } from '../composables/useNativeBridge';
-import InfinitasMonitor from './InfinitasMonitor.vue';
 
 const { t } = useI18n();
-const { user } = useAuth();
 const { isNativeApp, message: nativeMessage, startNativeImport } = useNativeBridge();
 
 const props = defineProps<{ bookmarkletCode: string }>();
@@ -36,12 +33,6 @@ const emit = defineEmits<{
   (e: 'score-file', file: File, origin?: 'bookmarklet', pageVersion?: number | null): void;
 }>();
 
-/**
- * INFINITAS モードへのアクセス可否。ログイン済みユーザーへ一般開放。
- * （スコアをサーバーへ保存するためログインは必須。未ログイン＝ゲストは不可。）
- */
-const canUseInfinitas = computed(() => !!user.value);
-
 // ---- ブックマークレット使い方モーダル関連 ----
 /** ヘルプモーダル表示フラグ。 */
 const showHelpModal = ref(false);
@@ -51,8 +42,8 @@ const deviceTab = ref<'pc' | 'sp'>('sp');
 const codeCopied = ref(false);
 
 // ---- メインタブ ----
-/** インポート方式タブ（テキスト貼り付け / ファイルアップロード / INFINITAS 画面取込）。 */
-const importTab = ref<'text' | 'file' | 'infinitas'>('text');
+/** インポート方式タブ（テキスト貼り付け / ファイルアップロード）。 */
+const importTab = ref<'text' | 'file'>('text');
 
 // ---- ファイルアップロード状態 ----
 /** D&D 中のハイライト表示フラグ。 */
@@ -315,12 +306,6 @@ const copyBookmarkletCode = async () => {
         :class="importTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
         @click="importTab = 'file'"
       >{{ t('import.tabFile') }}</button>
-      <button
-        v-if="canUseInfinitas"
-        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="importTab === 'infinitas' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        @click="importTab = 'infinitas'"
-      >{{ t('import.tabInfinitas') }}</button>
     </div>
 
     <!-- Text paste tab -->
@@ -333,11 +318,6 @@ const copyBookmarkletCode = async () => {
         class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
         :placeholder="t('import.textareaPlaceholder')"
       ></textarea>
-    </div>
-
-    <!-- INFINITAS monitor tab (ログイン済みユーザーのみ) -->
-    <div v-else-if="importTab === 'infinitas' && canUseInfinitas">
-      <InfinitasMonitor />
     </div>
 
     <!-- File upload tab -->
@@ -374,9 +354,8 @@ const copyBookmarkletCode = async () => {
       <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.pastCsvHint') }}</p>
     </div>
 
-    <!-- Unified submit button（INFINITAS タブでは非表示。InfinitasMonitor が独自のコントロールを持つため） -->
+    <!-- Unified submit button -->
     <button
-      v-if="importTab !== 'infinitas'"
       @click="handleSubmit"
       :disabled="isImporting || (importTab === 'file' && !selectedFile)"
       class="w-full py-2.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"

@@ -105,10 +105,6 @@ public class DataInitializer implements ApplicationRunner {
                     .executeUpdate();
             entityManager.createQuery("UPDATE User u SET u.showRateTier = true WHERE u.showRateTier IS NULL")
                     .executeUpdate();
-            entityManager.createQuery("UPDATE User u SET u.showArcadeScores = true WHERE u.showArcadeScores IS NULL")
-                    .executeUpdate();
-            entityManager.createQuery("UPDATE User u SET u.showInfinitasScores = true WHERE u.showInfinitasScores IS NULL")
-                    .executeUpdate();
         });
 
         // 手順2: 既存スコアの source カラムが未設定ならアーケード扱いで埋める。

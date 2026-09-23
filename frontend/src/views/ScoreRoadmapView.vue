@@ -7,7 +7,10 @@
  * レベルに分ける。初めての AAA から全 MAX- までを 1 本の道のりとして見せる。
  *
  * レベルの番号と達成判定（2026-09-23 ユーザー指定・推奨案）:
- *  - 番号: 全目標のうち目標がある 0.02 枠を易しい順に Lv.1 から連番。表示フィルタ（☆・AAA/MAX-）では変わらない。
+ *  - 番号: サーバーが固定したレベル表（model.levelTable、charts[].levels）のもの。作った時点で目標がある 0.02 枠を
+ *    易しい順に Lv.1 から連番にしてあり、3 時間ごとの集計で難度が動いても変わらない（作り直しは管理者の操作だけ）。
+ *    プレー人数 200 人未満の譜面は表に入らず、ここにも出さない。200 人に達すると一番近い既存レベルへ追加される。
+ *    表示フィルタ（☆・AAA/MAX-）では変わらない。
  *  - 達成: そのレベルの全目標のうち「プレー済み（その譜面を遊んだことがある）」目標の 3 分の 2 以上を達成。
  *    ただしプレー済みが max(2, ⌈n/3⌉) 件（n = そのレベルの目標数、n 以下）に満たないレベルは判定しない
  *    （1 曲だけ遊んで高いレベルを取れないように）。判定は常に全目標で行い、表示フィルタの影響を受けない。
@@ -32,11 +35,16 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 type LineKey = 'aaa' | 'maxMinus';
 interface ChartLine { d: number; se: number; n: number; rate: number }
-interface Chart { i: number; title: string; difficultyName: string; level: number; playerCount: number; aaa: ChartLine; maxMinus: ChartLine }
-interface Model { kAaa: number; kMaxMinus: number; thetas: number[] }
+interface Chart {
+  i: number; title: string; difficultyName: string; level: number; playerCount: number; aaa: ChartLine; maxMinus: ChartLine;
+  /** 固定したレベル表での番号。表に無い譜面（プレー人数 200 人未満）は無し。 */
+  levels?: Record<LineKey, number>;
+}
+interface LevelTableInfo { revision: number; frozenAt: string; updatedAt: string; minPlayers: number; slots: number[] }
+interface Model { kAaa: number; kMaxMinus: number; thetas: number[]; levelTable?: LevelTableInfo }
 interface UserInfo { userId: number; label: string | null; found: boolean; theta?: number; plays?: [number, number][] }
-/** 目標 = 譜面 × ライン。 */
-interface Target { key: string; c: Chart; line: LineKey; d: number }
+/** 目標 = 譜面 × ライン。no = 固定したレベル表でのレベル番号。 */
+interface Target { key: string; c: Chart; line: LineKey; d: number; no: number }
 
 const LINES: LineKey[] = ['aaa', 'maxMinus'];
 const LINE_BUCKET: Record<LineKey, number> = { aaa: 160, maxMinus: 170 };
@@ -129,6 +137,35 @@ function chooseUser(h: UserHit) {
   suggestOpen.value = false;
   load();
 }
+// ===== レベル表の作り直し（管理者の操作だけでレベルの課題曲が変わる） =====
+const refreezing = ref(false);
+/** 【関数の役割】 作り直した場合の変化を見せて確認し、OK なら今の難度でレベル表を作り直す。 */
+async function refreezeLevels() {
+  refreezing.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/scores/score-roadmap/refreeze-preview`, { headers: authHeaders() });
+    if (!res.ok) { alert(`APIエラー: ${res.status}`); return; }
+    const p = await res.json();
+    if (!p.ready) { alert('集計がまだありません'); return; }
+    const cur = p.current ? `第${p.current.revision}版 ${p.current.levels} レベル・${p.current.targets} 目標` : 'なし';
+    const msg = [
+      `${formatJstDateTime(p.basedOn)} の集計の難度でレベル表を作り直します。`,
+      `現在: ${cur}`,
+      `作り直し後: ${p.next.levels} レベル・${p.next.targets} 目標`,
+      `別の枠へ移る目標: ${p.moved}（難しい側へ ${p.movedUp} / 易しい側へ ${p.movedDown}）`,
+      `新しく入る目標: ${p.added}　外れる目標: ${p.removed}`,
+      'レベル番号は振り直されます。よろしいですか？',
+    ].join('\n');
+    if (!confirm(msg)) return;
+    const r2 = await fetch(`${API_BASE}/api/scores/score-roadmap/refreeze`, { method: 'POST', headers: authHeaders() });
+    if (!r2.ok) { alert(`APIエラー: ${r2.status}`); return; }
+    // 反映はサーバーの集計し直し（1〜2 分）の後。ポーリングで待つ
+    await load();
+  } finally {
+    refreezing.value = false;
+  }
+}
+
 /** ランキングモーダルの表示フラグ。 */
 const showRanking = ref(false);
 /** 【関数の役割】 ランキングの行から選んだユーザーのロードマップを表示する。 */
@@ -155,10 +192,10 @@ const closeSuggestSoon = () => setTimeout(() => { suggestOpen.value = false; }, 
 // ===== 表示フィルタ（判定には影響しない） =====
 const TARGETS = [
   { key: '1-12', label: '☆1〜12', min: 1, max: 12 },
-  { key: '8-12', label: '☆8〜12', min: 8, max: 12 },
-  { key: '10-12', label: '☆10〜12', min: 10, max: 12 },
-  { key: '11-12', label: '☆11〜12', min: 11, max: 12 },
-  { key: '12', label: '☆12のみ', min: 12, max: 12 },
+  { key: '1-7', label: '☆1〜7', min: 1, max: 7 },
+  { key: '8-10', label: '☆8〜10', min: 8, max: 10 },
+  { key: '11', label: '☆11', min: 11, max: 11 },
+  { key: '12', label: '☆12', min: 12, max: 12 },
 ];
 const targetKey = ref('1-12');
 const range = computed(() => TARGETS.find((t) => t.key === targetKey.value) ?? TARGETS[0]);
@@ -178,8 +215,11 @@ const isShown = (t: Target) =>
 const userBucket = computed(() => new Map<number, number>(user.value?.plays ?? []));
 const played = (t: Target) => userBucket.value.has(t.c.i);
 const achieved = (t: Target) => (userBucket.value.get(t.c.i) ?? -1) >= LINE_BUCKET[t.line];
-const targets = computed<Target[]>(() => charts.value.flatMap((c) =>
-  LINES.map((line) => ({ key: `${c.i}:${line}`, c, line, d: c[line].d }))));
+/** レベル表に入っている譜面（プレー人数 200 人以上）。 */
+const levelCharts = computed(() => charts.value.filter((c) => c.levels));
+const targets = computed<Target[]>(() => levelCharts.value.flatMap((c) =>
+  LINES.map((line) => ({ key: `${c.i}:${line}`, c, line, d: c[line].d, no: c.levels![line] }))));
+const levelTable = computed(() => model.value?.levelTable ?? null);
 /** 曲名の表記: ANOTHER は表記なし、LEGGENDARIA は末尾に [L]（難易度表と同じ書き方）。 */
 const chartName = (c: Chart) => (c.difficultyName === 'LEGGENDARIA' ? `${c.title}[L]` : c.title);
 
@@ -203,29 +243,28 @@ interface Level {
   remaining: number; reachShare: number; group: number;
 }
 /**
- * 【computed の役割】 全目標を 0.02 枠に分け、目標のある枠を易しい順に Lv.1 から連番にする。
- * 番号と判定は常に全目標で決める（表示フィルタで変わらない）。
+ * 【computed の役割】 固定したレベル表の各レベル（slots[番号 − 1] = そのレベルの 0.02 枠）に目標を振り分ける。
+ * 番号と判定は常に表の全目標で決める（表示フィルタで変わらない）。
  */
 const levels = computed<Level[]>(() => {
-  const bySlot = new Map<number, Target[]>();
-  for (const t of targets.value) {
-    const s = Math.floor(t.d / LEVEL_W + 1e-9);
-    if (!bySlot.has(s)) bySlot.set(s, []);
-    bySlot.get(s)!.push(t);
-  }
-  return [...bySlot.entries()].sort((a, b) => a[0] - b[0]).map(([slot, items], idx) => {
+  const slots = levelTable.value?.slots ?? [];
+  const byNo = slots.map(() => [] as Target[]);
+  for (const t of targets.value) byNo[t.no - 1]?.push(t);
+  return slots.map((slot, idx) => {
+    const items = byNo[idx];
     items.sort((a, b) => a.d - b.d);
     const n = items.length;
     const p = items.filter(played).length;
     const x = items.filter(achieved).length;
     const minPlayed = minPlayedFor(n);
-    const cleared = p >= minPlayed && x * 3 >= p * 2;
+    // 目標が 0 件のレベル（マスタから消えた譜面だけ）は達成にしない
+    const cleared = n > 0 && p >= minPlayed && x * 3 >= p * 2;
     // あと何件達成すればよいか（未達成のプレー済み or 未プレーの目標を達成した場合）
     const need = Math.ceil((Math.max(p, minPlayed) * 2) / 3);
     const from = slot * LEVEL_W;
     return {
       no: idx + 1, from, to: from + LEVEL_W, items, played: p, done: x, minPlayed, cleared,
-      complete: x === n, remaining: Math.max(0, need - x), reachShare: shareAtLeast(from + LEVEL_W), group: Math.floor(from / GROUP_W + 1e-9),
+      complete: n > 0 && x === n, remaining: Math.max(0, need - x), reachShare: shareAtLeast(from + LEVEL_W), group: Math.floor(from / GROUP_W + 1e-9),
     };
   });
 });
@@ -240,7 +279,7 @@ const clearedCount = computed(() => levels.value.filter((l) => l.cleared).length
 const completeCount = computed(() => levels.value.filter((l) => l.complete).length);
 /** 表示フィルタの範囲（☆）に入る譜面での、ライン別の達成数。 */
 const doneCount = computed(() => {
-  const inRange = charts.value.filter((c) => c.level >= range.value.min && c.level <= range.value.max);
+  const inRange = levelCharts.value.filter((c) => c.level >= range.value.min && c.level <= range.value.max);
   const count = (line: LineKey) => inRange.filter((c) => (userBucket.value.get(c.i) ?? -1) >= LINE_BUCKET[line]).length;
   return { total: inRange.length, aaa: count('aaa'), maxMinus: count('maxMinus') };
 });
@@ -294,12 +333,17 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
           <span v-if="computedAt" title="全目標の難度と全プレイヤーの分布は 3 時間ごとに作り直します。表示中のユーザーの達成状況は最新のスコアです">難度の集計: {{ formatJstDateTime(computedAt) }}（3 時間ごと）</span>
           <span v-if="serverRefreshing" class="text-blue-600 dark:text-blue-400">集計し直し中…</span>
           <button class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50" :disabled="serverRefreshing" @click="load(true)">今すぐ集計し直す</button>
+          <button class="px-2 py-1 rounded border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 disabled:opacity-50" :disabled="serverRefreshing || refreezing" @click="refreezeLevels">レベル表を作り直す</button>
         </div>
       </div>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-5">
-        ANOTHER・LEGGENDARIA 全譜面の「AAA」と「MAX-」をそれぞれ 1 つの目標として、達成に必要な実力の順に並べ、難度 0.02 刻みのレベルに分けています（難度は難易度表と同じ目盛り。0.2 ごとに見出し）。
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
+        ANOTHER・LEGGENDARIA の譜面（プレー人数 {{ levelTable?.minPlayers ?? 200 }} 人以上）の「AAA」と「MAX-」をそれぞれ 1 つの目標として、達成に必要な実力の順に並べ、難度 0.02 刻みのレベルに分けています（難度は難易度表と同じ目盛り。0.2 ごとに見出し）。
         各レベルで、遊んだことのある譜面の目標の 3 分の 2 以上を達成するとそのレベルを達成（遊んだ目標がレベルの 3 分の 1 かつ 2 件以上必要）。達成したレベルのうち一番高いものがあなたのレベルです（自己歴代ベストで判定）。
         レベルの番号と判定は常に全譜面で決まり、下の絞り込みは表示だけを変えます。
+      </p>
+      <p v-if="levelTable" class="text-xs text-slate-500 dark:text-slate-400 mb-5">
+        レベル表は第{{ levelTable.revision }}版（{{ formatJstDateTime(levelTable.frozenAt) }} に固定）。各レベルの課題曲は自動では変わりません。
+        新しく {{ levelTable.minPlayers }} 人に達した譜面は、一番近いレベルに追加されます（最終追加 {{ formatJstDateTime(levelTable.updatedAt) }}）。譜面右の難度は最新の集計値です。
       </p>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">

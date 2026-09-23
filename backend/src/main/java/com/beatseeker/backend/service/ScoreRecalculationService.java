@@ -6,7 +6,6 @@ import com.beatseeker.backend.entity.Score;
 import com.beatseeker.backend.entity.ScoreHistoryLog;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.User;
-import com.beatseeker.backend.repository.ChartTendencyProfileRepository;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
@@ -63,21 +62,11 @@ public class ScoreRecalculationService {
     private final ObjectMapper objectMapper;
     /** BEAT-PT / RATE-PT 単曲計算の共通ユーティリティ */
     private final BeatPtCalculator beatPtCalculator;
-    /** 譜面傾向プロファイル（KENBAN/SARA-PT 算出に必要な皿率を取得） */
-    private final ChartTendencyProfileRepository chartTendencyProfileRepository;
-
-    // ── KENBAN/SARA-TIER 算出定数（フロントの beatTier.ts と同期） ──────────────
-    /** 皿率の按分しきい値 (%)。この値以上は完全に皿曲扱い。 */
-    private static final double SCRATCH_FULL_THRESHOLD_PCT = 30.0;
-    /** KENBAN-PT の BEAT 同等スケール補正倍率。 */
-    private static final double KENBAN_PT_MULTIPLIER = 1.125;
-    /** SARA-PT の BEAT 同等スケール補正倍率。 */
-    private static final double SARA_PT_MULTIPLIER = 1.5;
 
     /**
      * 【コンストラクタ】 Spring が Repository 群と {@link ObjectMapper} を注入する。
      */
-    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper, BeatPtCalculator beatPtCalculator, ChartTendencyProfileRepository chartTendencyProfileRepository) {
+    public ScoreRecalculationService(UserRepository userRepository, ScoreRepository scoreRepository, ScoreHistoryLogRepository scoreHistoryLogRepository, SongDefinitionRepository songDefinitionRepository, DifficultyRankRepository difficultyRankRepository, ObjectMapper objectMapper, BeatPtCalculator beatPtCalculator) {
         this.userRepository = userRepository;
         this.scoreRepository = scoreRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -85,7 +74,6 @@ public class ScoreRecalculationService {
         this.difficultyRankRepository = difficultyRankRepository;
         this.objectMapper = objectMapper;
         this.beatPtCalculator = beatPtCalculator;
-        this.chartTendencyProfileRepository = chartTendencyProfileRepository;
     }
 
     /**
@@ -152,97 +140,12 @@ public class ScoreRecalculationService {
     }
 
     /**
-     * 【メソッドの役割】 chart_tendency_profiles から `(title_diffName) → 皿率(%)` の Map を構築する。
-     *
-     * KENBAN/SARA-PT 算出に必要な皿率マスタを一括読み込みする。`difficulty='4'`→ANOTHER、`difficulty='10'`→LEGGENDARIA。
-     *
-     * @return 皿率 Map（`scratchPct IS NOT NULL` のレコードのみ含む）
-     */
-    public Map<String, Double> loadScratchMap() {
-        Map<String, Double> map = new HashMap<>();
-        for (Object[] row : chartTendencyProfileRepository.findScratchSummaryForAnotherLegg()) {
-            String title = (String) row[0];
-            String diff = (String) row[1];
-            String diffName = "4".equals(diff) ? "ANOTHER" : "10".equals(diff) ? "LEGGENDARIA" : null;
-            if (diffName == null) continue;
-            map.put(title + "_" + diffName, ((Number) row[2]).doubleValue());
-        }
-        return map;
-    }
-
-    /** KENBAN-TIER 側の重み: scratchPct が低いほど高い (0〜1)。null は 0。 */
-    private static double kenbanWeight(Double scratchPct) {
-        if (scratchPct == null) return 0.0;
-        double w = 1.0 - scratchPct / SCRATCH_FULL_THRESHOLD_PCT;
-        return Math.max(0.0, Math.min(1.0, w));
-    }
-
-    /** SARA-TIER 側の重み: scratchPct が高いほど高い (0〜1)。null は 0。 */
-    private static double saraWeight(Double scratchPct) {
-        if (scratchPct == null) return 0.0;
-        double w = scratchPct / SCRATCH_FULL_THRESHOLD_PCT;
-        return Math.max(0.0, Math.min(1.0, w));
-    }
-
-    /**
-     * 【メソッドの役割】 BEAT-PT 計算と同じスコア集合から KENBAN-PT / SARA-PT を一括算出する。
-     *
-     * 計算ロジック:
-     *  - 各 ANOTHER/LEGGENDARIA 譜面の BP に kenbanWeight / saraWeight を掛けた値を「貢献 pt」とする
-     *  - 各 side ごとに独立に降順ソート → 上位 100 譜面の合計
-     *  - 補正倍率 (KENBAN: ×1.125, SARA: ×1.5) を掛けて BEAT 同等スケールに揃え
-     *  - 0.1 桁で丸める
-     *
-     * @param scores         対象ユーザーの全スコア（事前ロード済み）
-     * @param songMaxScores  title_difficultyCode → maxScore(=notes*2)
-     * @param informalRanks  title_diffName → 非公式ランク文字列
-     * @param scratchMap     title_diffName → 皿率(%) （{@link #loadScratchMap()} の戻り値）
-     * @return `[KENBAN-PT, SARA-PT]` の 2 要素配列
-     */
-    public double[] calculateKenbanSaraPtFromActiveData(List<Score> scores, Map<String, Integer> songMaxScores,
-                                                       Map<String, String> informalRanks, Map<String, Double> scratchMap) {
-        List<Double> kenContribs = new ArrayList<>();
-        List<Double> sarContribs = new ArrayList<>();
-        for (Score score : scores) {
-            if ("---".equals(score.getClearType()) || "NO PLAY".equals(score.getClearType())) continue;
-            String diffName = normalizeDiffName(score.getDifficultyName());
-            // KENBAN/SARA は ANOTHER/LEGGENDARIA のみ対象
-            if (!"ANOTHER".equals(diffName) && !"LEGGENDARIA".equals(diffName)) continue;
-            String code = getDifficultyCode(diffName);
-            if (code == null) continue;
-            Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
-            if (maxScore == null || maxScore == 0) continue;
-            double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
-            String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
-            double bp = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
-            if (bp <= 0) continue;
-            Double scratchPct = scratchMap.get(score.getTitle() + "_" + diffName);
-            double kw = kenbanWeight(scratchPct);
-            double sw = saraWeight(scratchPct);
-            double kc = bp * kw;
-            double sc = bp * sw;
-            if (kc > 0) kenContribs.add(kc);
-            if (sc > 0) sarContribs.add(sc);
-        }
-        kenContribs.sort(Collections.reverseOrder());
-        sarContribs.sort(Collections.reverseOrder());
-        double kenSum = 0;
-        for (int i = 0; i < Math.min(100, kenContribs.size()); i++) kenSum += kenContribs.get(i);
-        double sarSum = 0;
-        for (int i = 0; i < Math.min(100, sarContribs.size()); i++) sarSum += sarContribs.get(i);
-        double kenbanPt = Math.round(kenSum * KENBAN_PT_MULTIPLIER * 10.0) / 10.0;
-        double saraPt   = Math.round(sarSum * SARA_PT_MULTIPLIER   * 10.0) / 10.0;
-        return new double[]{kenbanPt, saraPt};
-    }
-
-    /**
-     * 【メソッドの役割】 スコア集合から BEAT / RATE / KENBAN / SARA の 4 指標を一度に計算する（履歴には書かない）。
+     * 【メソッドの役割】 スコア集合から BEAT / RATE の 2 指標を一度に計算する（履歴には書かない）。
      *
      * 集計規則は {@link #processUserRecalculation} と同一:
-     *  - (曲, 難易度) ごとに EX SCORE が高い行だけを採用（arcade / infinitas の二重計上防止）
+     *  - (曲, 難易度) ごとに EX SCORE が高い行だけを採用（同一譜面の重複行による二重計上防止）
      *  - BEAT: HYPER レベル 11 以上は対象外。上位 100 譜面の合計
      *  - RATE: ANOTHER / LEGGENDARIA のみ。上位 100 譜面の合計 ＋ 100% 超過 100 件以降の +1pt
-     *  - KENBAN / SARA: {@link #calculateKenbanSaraPtFromActiveData}
      *  - いずれも 0.1 桁で丸める
      *
      * 過去作ランキングの再計算（{@link ArchivedVersionPtService}）が、凍結した難易度表を渡して呼ぶ。
@@ -250,11 +153,10 @@ public class ScoreRecalculationService {
      * @param scores        対象スコア（永続化されていない一時オブジェクトでもよい）
      * @param songMaxScores title_difficultyCode → 理論値（notes×2）
      * @param informalRanks title_diffName → 非公式ランク文字列
-     * @param scratchMap    title_diffName → 皿率(%)
-     * @return {@code [BEAT-PT, RATE-PT, KENBAN-PT, SARA-PT]}
+     * @return {@code [BEAT-PT, RATE-PT]}
      */
     public double[] calculatePtTotals(List<Score> scores, Map<String, Integer> songMaxScores,
-                                      Map<String, String> informalRanks, Map<String, Double> scratchMap) {
+                                      Map<String, String> informalRanks) {
         Map<String, Score> bestByChart = new LinkedHashMap<>();
         for (Score s : scores) {
             String key = s.getTitle() + " " + s.getDifficultyName();
@@ -298,12 +200,9 @@ public class ScoreRecalculationService {
         for (int i = 0; i < Math.min(100, ratePts.size()); i++) rateAcc += ratePts.get(i);
         if (perfectRateCount > 100) rateAcc += (perfectRateCount - 100);
 
-        double[] kenbanSara = calculateKenbanSaraPtFromActiveData(deduped, songMaxScores, informalRanks, scratchMap);
         return new double[] {
                 Math.round(beatAcc * 10.0) / 10.0,
-                Math.round(rateAcc * 10.0) / 10.0,
-                kenbanSara[0],
-                kenbanSara[1]
+                Math.round(rateAcc * 10.0) / 10.0
         };
     }
 
@@ -319,7 +218,7 @@ public class ScoreRecalculationService {
      *
      * 集計規則は {@code ScoreController.saveHistoryLog} と揃える:
      *  - totalScore / クリア種別・DJ ランクのカウント … scores 全行をそのまま数える
-     *  - BEAT / RATE / KENBAN / SARA-PT … {@link #calculatePtTotals}（譜面ごと最高スコアの上位 100）
+     *  - BEAT / RATE-PT … {@link #calculatePtTotals}（譜面ごと最高スコアの上位 100）
      *
      * @param user         対象ユーザー
      * @param updatedSongs 今回の upload で更新された譜面の差分（サーバー側で組み立てたもの）
@@ -350,7 +249,7 @@ public class ScoreRecalculationService {
             if ("A".equals(s.getDjLevel())) aCount++;
         }
 
-        double[] totals = calculatePtTotals(allScores, loadSongMaxScores(), loadInformalRanks(), loadScratchMap());
+        double[] totals = calculatePtTotals(allScores, loadSongMaxScores(), loadInformalRanks());
         double base = scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(user)
                 .map(l -> l.getTotalBeatPt() != null ? l.getTotalBeatPt() : 0.0).orElse(0.0);
 
@@ -371,8 +270,6 @@ public class ScoreRecalculationService {
         log.setTotalBeatPt(totals[0]);
         log.setBeatPtIncrease(Math.max(0.0, Math.round((totals[0] - base) * 10.0) / 10.0));
         log.setTotalRatePt(totals[1]);
-        log.setTotalKenbanPt(totals[2]);
-        log.setTotalSaraPt(totals[3]);
         log.setTotalPrecisionPt(0.0);
         log.setUpdatedCount(updatedSongs != null ? updatedSongs.size() : 0);
         try {
@@ -384,8 +281,6 @@ public class ScoreRecalculationService {
 
         // ランキング用キャッシュもここで更新しておく（フロントの save-history-log が来なくても正しい値になる）。
         user.setTotalBeatPt(totals[0]);
-        user.setTotalKenbanPt(totals[2]);
-        user.setTotalSaraPt(totals[3]);
         userRepository.save(user);
 
         return log;
@@ -544,14 +439,11 @@ public class ScoreRecalculationService {
             }
         }
 
-        // 手順3 (前段): 皿率マスタを 1 度だけロード（KENBAN/SARA-PT 算出用）
-        Map<String, Double> scratchMap = loadScratchMap();
-
         // 手順3: 全ユーザーを走査して、各々を独立トランザクションで再計算
         List<User> users = userRepository.findAll();
         for (User user : users) {
             try {
-                processUserRecalculation(user, songMaxScores, informalRanks, scratchMap);
+                processUserRecalculation(user, songMaxScores, informalRanks);
             } catch (Exception e) {
                 System.err.println("Failed to recalculate user " + user.getId() + ": " + e.getMessage());
             }
@@ -601,15 +493,12 @@ public class ScoreRecalculationService {
         // 手順3: スコア 0 件ならスキップ（履歴ログを作っても意味がない）。
         if (scoreRepository.findByUserOrderByUploadedAtAsc(user).isEmpty()) return false;
 
-        // 手順4: 皿率マスタもロードし、既存の per-user 再計算ロジックに委譲。これが新規 ScoreHistoryLog を 1 件追加する。
-        Map<String, Double> scratchMap = loadScratchMap();
-        processUserRecalculation(user, songMaxScores, informalRanks, scratchMap);
+        // 手順4: 既存の per-user 再計算ロジックに委譲。これが新規 ScoreHistoryLog を 1 件追加する。
+        processUserRecalculation(user, songMaxScores, informalRanks);
 
-        // 手順5: users.total_beat_pt / total_kenban_pt / total_sara_pt キャッシュを追従させる（ランキング集計の高速化用）。
+        // 手順5: users.total_beat_pt キャッシュを追従させる（ランキング集計の高速化用）。
         scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(user).ifPresent(log -> {
-            if (log.getTotalBeatPt()   != null) user.setTotalBeatPt(log.getTotalBeatPt());
-            if (log.getTotalKenbanPt() != null) user.setTotalKenbanPt(log.getTotalKenbanPt());
-            if (log.getTotalSaraPt()   != null) user.setTotalSaraPt(log.getTotalSaraPt());
+            if (log.getTotalBeatPt() != null) user.setTotalBeatPt(log.getTotalBeatPt());
             userRepository.save(user);
         });
         return true;
@@ -630,15 +519,14 @@ public class ScoreRecalculationService {
      * @param user          対象ユーザー
      * @param songMaxScores title_code → maxScore マップ
      * @param informalRanks title_diffName → rankValue マップ
-     * @param scratchMap    title_diffName → 皿率(%) （KENBAN/SARA-PT 算出用）
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void processUserRecalculation(User user, Map<String, Integer> songMaxScores, Map<String, String> informalRanks, Map<String, Double> scratchMap) {
+    public void processUserRecalculation(User user, Map<String, Integer> songMaxScores, Map<String, String> informalRanks) {
         List<Score> rawScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         if (rawScores.isEmpty()) return;
 
-        // arcade / infinitas が並走する場合は (曲, 難易度) ごとに EX SCORE が高い方だけを採用し、
-        // 二重計上を防ぐ（表示の「高い方を表示」ルールと集計を一致させる）。同点は先着(=arcade)を維持。
+        // 同一譜面の行が複数ある場合は (曲, 難易度) ごとに EX SCORE が高い方だけを採用し、
+        // 二重計上を防ぐ。同点は先着を維持。
         java.util.Map<String, Score> bestByChart = new java.util.LinkedHashMap<>();
         for (Score s : rawScores) {
             String key = s.getTitle() + " " + s.getDifficultyName();
@@ -649,9 +537,8 @@ public class ScoreRecalculationService {
         }
         List<Score> scores = new ArrayList<>(bestByChart.values());
 
-        // pt は [値, INFINITAS由来か(1/0)] の対で保持し、上位100曲に INF が含まれるか判定する。
-        List<double[]> beatPts = new ArrayList<>();
-        List<double[]> ratePts = new ArrayList<>();
+        List<Double> beatPts = new ArrayList<>();
+        List<Double> ratePts = new ArrayList<>();
         int perfectRateCount = 0;
 
         long totalScore = 0;
@@ -688,46 +575,36 @@ public class ScoreRecalculationService {
 
             String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
 
-            // この譜面ベストが INFINITAS 取得か（null/未設定は arcade 扱い）。
-            boolean isInf = "infinitas".equals(score.getSource());
-
             // BEAT-PT
             boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
             if (!isHyperNonTarget) {
                 double pt = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
-                if (pt > 0) beatPts.add(new double[]{pt, isInf ? 1 : 0});
+                if (pt > 0) beatPts.add(pt);
             }
 
             // RATE-PT
             boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
             if (isRateEligible && scoreRate > 0) {
                 double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
-                if (rPt > 0) ratePts.add(new double[]{rPt, isInf ? 1 : 0});
+                if (rPt > 0) ratePts.add(rPt);
                 if (scoreRate >= 100.0) perfectRateCount++;
             }
         }
 
-        beatPts.sort((a, b) -> Double.compare(b[0], a[0]));
+        beatPts.sort(Collections.reverseOrder());
         double totalBeatPtAcc = 0;
-        boolean beatHasInf = false;
         for (int i = 0; i < Math.min(100, beatPts.size()); i++) {
-            totalBeatPtAcc += beatPts.get(i)[0];
-            if (beatPts.get(i)[1] > 0) beatHasInf = true;
+            totalBeatPtAcc += beatPts.get(i);
         }
         double finalBeatPt = Math.round(totalBeatPtAcc * 10.0) / 10.0;
 
-        ratePts.sort((a, b) -> Double.compare(b[0], a[0]));
+        ratePts.sort(Collections.reverseOrder());
         double totalRatePtAcc = 0;
-        boolean rateHasInf = false;
         for (int i = 0; i < Math.min(100, ratePts.size()); i++) {
-            totalRatePtAcc += ratePts.get(i)[0];
-            if (ratePts.get(i)[1] > 0) rateHasInf = true;
+            totalRatePtAcc += ratePts.get(i);
         }
         if (perfectRateCount > 100) totalRatePtAcc += (perfectRateCount - 100);
         double finalRatePt = Math.round(totalRatePtAcc * 10.0) / 10.0;
-
-        // 上位100曲(BEAT/RATE)に INFINITAS 由来ベストが含まれるか → ランキング行の INF バッジ用。
-        boolean includesInfinitas = beatHasInf || rateHasInf;
 
         List<ScoreHistoryLog> logs = scoreHistoryLogRepository.findByUserOrderByUploadedAtAsc(user);
         double oldBeatPt = logs.isEmpty() ? 0 : (logs.get(logs.size() - 1).getTotalBeatPt() != null ? logs.get(logs.size() - 1).getTotalBeatPt() : 0);
@@ -752,211 +629,7 @@ public class ScoreRecalculationService {
         newLog.setTotalPrecisionPt(0.0);
         newLog.setTotalRatePt(finalRatePt);
 
-        // KENBAN-PT / SARA-PT を派生計算（同じスコア集合から皿率重み付きで集計）
-        double[] kenbanSara = calculateKenbanSaraPtFromActiveData(scores, songMaxScores, informalRanks, scratchMap);
-        newLog.setTotalKenbanPt(kenbanSara[0]);
-        newLog.setTotalSaraPt(kenbanSara[1]);
-
         scoreHistoryLogRepository.save(newLog);
-
-        // users テーブルのキャッシュも同期更新（ランキング クエリの高速化用）
-        user.setTotalKenbanPt(kenbanSara[0]);
-        user.setTotalSaraPt(kenbanSara[1]);
-        user.setRankingIncludesInfinitas(includesInfinitas);
-        userRepository.save(user);
-    }
-
-    /**
-     * 【メソッドの役割】 INFINITAS 画面取り込みの結果を「その日 1 レコード」の履歴ログ（tag="INFINITAS"）に
-     * 集約して upsert する。同日の既存 INF ログがあれば更新し、無ければ新規作成する。
-     *
-     * 集計式は {@link #processUserRecalculation} と同一（(曲,難易度)ごとに EX SCORE が高い方を採用 →
-     * 上位100曲で BEAT/RATE-PT、KENBAN/SARA-PT、クリア種別・DJ ランクのカウント）。違いは次の3点:
-     *  - その日の INF ログへ upsert（量産せず 1 日 1 レコードに集約）
-     *  - tag="INFINITAS" を付与（成長記録ページの「INF」バッジ表示用）
-     *  - diffJson に当日の更新曲を蓄積（title+difficulty で重複排除、後勝ち）
-     *
-     * BEAT-PT 増分(beatPtIncrease)は『当日ログ作成前の基準値』からの差分で表す:
-     *  - 既存ログあり: base = log.totalBeatPt - log.beatPtIncrease（作成時の基準を復元）
-     *  - 新規作成:     base = 直前の最新ログの totalBeatPt（履歴が無ければ 0）
-     *
-     * @param user            対象ユーザー
-     * @param updatedInfSongs 今回 upload で更新された INFINITAS 由来の曲 diff（title/difficulty/old/new 等）
-     */
-    // 注意: REQUIRES_NEW にしない。upload と同一トランザクションに参加させることで、直前に保存した
-    // （まだコミット前の）INFINITAS スコアも含めて Beat-PT 等を再計算できる。別トランザクションだと
-    // 未コミットのスコアが見えず、今読み込んだ曲が当日記録に反映されない。
-    @Transactional
-    public void upsertDailyInfinitasLog(User user, List<Map<String, Object>> updatedInfSongs) {
-        if (updatedInfSongs == null || updatedInfSongs.isEmpty()) return;
-
-        List<Score> rawScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
-        if (rawScores.isEmpty()) return;
-
-        Map<String, Integer> songMaxScores = loadSongMaxScores();
-        Map<String, String> informalRanks = loadInformalRanks();
-        Map<String, Double> scratchMap = loadScratchMap();
-
-        // ── processUserRecalculation と同一の集計（(曲,難易度)ごと高い方を採用 → 上位100曲合計）──
-        java.util.Map<String, Score> bestByChart = new java.util.LinkedHashMap<>();
-        for (Score s : rawScores) {
-            String k = s.getTitle() + " " + s.getDifficultyName();
-            Score cur = bestByChart.get(k);
-            int sv = s.getScore() != null ? s.getScore() : 0;
-            int cv = (cur != null && cur.getScore() != null) ? cur.getScore() : -1;
-            if (cur == null || sv > cv) bestByChart.put(k, s);
-        }
-        List<Score> scores = new ArrayList<>(bestByChart.values());
-
-        List<double[]> beatPts = new ArrayList<>();
-        List<double[]> ratePts = new ArrayList<>();
-        int perfectRateCount = 0;
-        long totalScore = 0;
-        int fcCount = 0, exhCount = 0, hCount = 0, clearCount = 0, easyCount = 0;
-        int aaaCount = 0, aaCount = 0, aCount = 0;
-
-        for (Score score : scores) {
-            if ("---".equals(score.getClearType()) || "NO PLAY".equals(score.getClearType())) continue;
-            if (score.getScore() != null) totalScore += score.getScore();
-            if ("FULLCOMBO CLEAR".equals(score.getClearType())) fcCount++;
-            if ("EX HARD CLEAR".equals(score.getClearType())) exhCount++;
-            if ("HARD CLEAR".equals(score.getClearType())) hCount++;
-            if ("CLEAR".equals(score.getClearType())) clearCount++;
-            if ("EASY CLEAR".equals(score.getClearType())) easyCount++;
-            if ("AAA".equals(score.getDjLevel())) aaaCount++;
-            if ("AA".equals(score.getDjLevel())) aaCount++;
-            if ("A".equals(score.getDjLevel())) aCount++;
-
-            String diffName = normalizeDiffName(score.getDifficultyName());
-            String code = getDifficultyCode(diffName);
-            if (code == null) continue;
-            Integer maxScore = songMaxScores.get(score.getTitle() + "_" + code);
-            if (maxScore == null || maxScore == 0) continue;
-            double scoreRate = (score.getScore() != null ? score.getScore() : 0) * 100.0 / maxScore;
-            String informalRankString = informalRanks.get(score.getTitle() + "_" + diffName);
-            boolean isInf = "infinitas".equals(score.getSource());
-
-            boolean isHyperNonTarget = "HYPER".equals(diffName) && score.getDifficultyLevel() != null && score.getDifficultyLevel() >= 11;
-            if (!isHyperNonTarget) {
-                double pt = beatPtCalculator.calculatePoints(scoreRate, informalRankString);
-                if (pt > 0) beatPts.add(new double[]{pt, isInf ? 1 : 0});
-            }
-            boolean isRateEligible = "ANOTHER".equals(diffName) || "LEGGENDARIA".equals(diffName);
-            if (isRateEligible && scoreRate > 0) {
-                double rPt = beatPtCalculator.calculateScoreRateTierPoints(scoreRate);
-                if (rPt > 0) ratePts.add(new double[]{rPt, isInf ? 1 : 0});
-                if (scoreRate >= 100.0) perfectRateCount++;
-            }
-        }
-
-        beatPts.sort((a, b) -> Double.compare(b[0], a[0]));
-        double totalBeatPtAcc = 0; boolean beatHasInf = false;
-        for (int i = 0; i < Math.min(100, beatPts.size()); i++) {
-            totalBeatPtAcc += beatPts.get(i)[0];
-            if (beatPts.get(i)[1] > 0) beatHasInf = true;
-        }
-        double finalBeatPt = Math.round(totalBeatPtAcc * 10.0) / 10.0;
-
-        ratePts.sort((a, b) -> Double.compare(b[0], a[0]));
-        double totalRatePtAcc = 0; boolean rateHasInf = false;
-        for (int i = 0; i < Math.min(100, ratePts.size()); i++) {
-            totalRatePtAcc += ratePts.get(i)[0];
-            if (ratePts.get(i)[1] > 0) rateHasInf = true;
-        }
-        if (perfectRateCount > 100) totalRatePtAcc += (perfectRateCount - 100);
-        double finalRatePt = Math.round(totalRatePtAcc * 10.0) / 10.0;
-        boolean includesInfinitas = beatHasInf || rateHasInf;
-
-        double[] kenbanSara = calculateKenbanSaraPtFromActiveData(scores, songMaxScores, informalRanks, scratchMap);
-
-        // ── 当日の INF ログを引き当て（無ければ新規作成）──
-        LocalDateTime now = LocalDateTime.now();
-        java.time.LocalDate today = now.toLocalDate();
-        LocalDateTime dayStart = today.atStartOfDay();
-        LocalDateTime dayEnd = today.plusDays(1).atStartOfDay();
-        Optional<ScoreHistoryLog> existingOpt = scoreHistoryLogRepository
-                .findFirstByUserAndTagAndUploadedAtGreaterThanEqualAndUploadedAtLessThanOrderByUploadedAtDesc(
-                        user, "INFINITAS", dayStart, dayEnd);
-
-        ScoreHistoryLog log;
-        double base;
-        List<Map<String, Object>> mergedSongs;
-        if (existingOpt.isPresent()) {
-            log = existingOpt.get();
-            double prevTotal = log.getTotalBeatPt() != null ? log.getTotalBeatPt() : 0.0;
-            double prevInc = log.getBeatPtIncrease() != null ? log.getBeatPtIncrease() : 0.0;
-            base = prevTotal - prevInc; // 当日ログ作成時の基準を復元
-            mergedSongs = mergeDiffSongs(log.getDiffJson(), updatedInfSongs);
-        } else {
-            log = new ScoreHistoryLog();
-            log.setUser(user);
-            log.setTag("INFINITAS");
-            base = scoreHistoryLogRepository.findFirstByUserOrderByUploadedAtDesc(user)
-                    .map(l -> l.getTotalBeatPt() != null ? l.getTotalBeatPt() : 0.0).orElse(0.0);
-            mergedSongs = mergeDiffSongs(null, updatedInfSongs);
-        }
-
-        log.setUploadedAt(now); // 当日内の最終更新時刻に更新
-        log.setTotalScore(totalScore);
-        log.setFcCount(fcCount);
-        log.setExhCount(exhCount);
-        log.setHCount(hCount);
-        log.setClearCount(clearCount);
-        log.setEasyCount(easyCount);
-        log.setAaaCount(aaaCount);
-        log.setAaCount(aaCount);
-        log.setACount(aCount);
-        log.setTotalBeatPt(finalBeatPt);
-        log.setBeatPtIncrease(Math.max(0.0, finalBeatPt - base));
-        log.setTotalRatePt(finalRatePt);
-        log.setTotalKenbanPt(kenbanSara[0]);
-        log.setTotalSaraPt(kenbanSara[1]);
-        log.setTotalPrecisionPt(0.0);
-
-        String diffJsonStr;
-        try {
-            diffJsonStr = objectMapper.writeValueAsString(mergedSongs);
-        } catch (Exception e) {
-            diffJsonStr = "[]";
-        }
-        log.setDiffJson(diffJsonStr);
-        log.setUpdatedCount(mergedSongs.size());
-
-        scoreHistoryLogRepository.save(log);
-
-        // users キャッシュ更新（processUserRecalculation と同様。BEAT-PT キャッシュは元実装に倣い触らない）
-        user.setTotalKenbanPt(kenbanSara[0]);
-        user.setTotalSaraPt(kenbanSara[1]);
-        user.setRankingIncludesInfinitas(includesInfinitas);
-        userRepository.save(user);
-    }
-
-    /**
-     * 【メソッドの役割】 既存 diffJson と今回の更新曲をマージする。title+difficulty をキーに重複排除し、
-     * 後から来た（= より新しい）スコアで上書きする。当日内で同一曲を複数回更新しても 1 件に集約される。
-     *
-     * @param existingJson 既存ログの diffJson（null / "[]" / 空文字は空とみなす）
-     * @param newSongs     今回の更新曲リスト
-     * @return マージ後の更新曲リスト
-     */
-    private List<Map<String, Object>> mergeDiffSongs(String existingJson, List<Map<String, Object>> newSongs) {
-        java.util.LinkedHashMap<String, Map<String, Object>> map = new java.util.LinkedHashMap<>();
-        if (existingJson != null && !existingJson.isBlank() && !"[]".equals(existingJson)) {
-            try {
-                List<Map<String, Object>> existing = objectMapper.readValue(
-                        existingJson, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
-                for (Map<String, Object> s : existing) map.put(diffSongKey(s), s);
-            } catch (Exception ignored) { /* 壊れた JSON は無視して今回分のみ採用 */ }
-        }
-        for (Map<String, Object> s : newSongs) map.put(diffSongKey(s), s);
-        return new ArrayList<>(map.values());
-    }
-
-    /** diff 1 曲分のマージキー（title_difficulty）。 */
-    private String diffSongKey(Map<String, Object> s) {
-        Object t = s.get("title");
-        Object d = s.get("difficulty");
-        return (t == null ? "" : t.toString()) + "_" + (d == null ? "" : d.toString());
     }
 
     /**

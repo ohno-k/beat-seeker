@@ -33,8 +33,8 @@ public interface VersionPtSnapshotRepository extends JpaRepository<VersionPtSnap
      * 表示名・IIDX ID・プライバシー・サポーターは現在の users を優先する（表示名変更や公開設定の
      * 変更が過去作の順位表にも反映されるのが利用者の期待に沿う）。退会済みでスナップショットだけ
      * 残っている場合は撮影時の値にフォールバックする。
-     * 返却キー: userId / displayName / iidxId / privacyLevel / totalBeatPt / totalRatePt / totalKenbanPt /
-     *           totalSaraPt / beatRank / rateRank / lastUpdatedAt / isSupporter / includesInfinitas
+     * 返却キー: userId / displayName / iidxId / privacyLevel / totalBeatPt / totalRatePt /
+     *           beatRank / rateRank / lastUpdatedAt / isSupporter
      */
     @Query(value =
             "SELECT s.user_id AS \"userId\", " +
@@ -43,13 +43,10 @@ public interface VersionPtSnapshotRepository extends JpaRepository<VersionPtSnap
             "       COALESCE(u.privacy_level, s.privacy_level, 1) AS \"privacyLevel\", " +
             "       s.total_beat_pt AS \"totalBeatPt\", " +
             "       s.total_rate_pt AS \"totalRatePt\", " +
-            "       s.total_kenban_pt AS \"totalKenbanPt\", " +
-            "       s.total_sara_pt AS \"totalSaraPt\", " +
             "       s.beat_rank AS \"beatRank\", " +
             "       s.rate_rank AS \"rateRank\", " +
             "       s.last_uploaded_at AS \"lastUpdatedAt\", " +
-            "       COALESCE(u.is_supporter, false) AS \"isSupporter\", " +
-            "       false AS \"includesInfinitas\" " +
+            "       COALESCE(u.is_supporter, false) AS \"isSupporter\" " +
             "FROM version_pt_snapshots s " +
             "LEFT JOIN users u ON u.id = s.user_id " +
             "WHERE s.version = :version " +

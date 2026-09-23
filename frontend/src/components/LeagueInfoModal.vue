@@ -426,10 +426,6 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
                 <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                 {{ t('league.infoModal.line3') }}
               </li>
-              <li :class="[noteClass, 'pl-4 relative']">
-                <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
-                {{ t('league.infoModal.line4') }}
-              </li>
             </ul>
           </section>
 

@@ -25,7 +25,6 @@ import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { useFriends } from '../composables/useFriends';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
-import { useKenbanSaraTierVisibility } from '../composables/useKenbanSaraTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { diffTable as diffTableRanks } from '../composables/useGameData';
 
@@ -38,8 +37,6 @@ interface BeatRankingEntry {
   totalBeatPt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
-  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
-  includesInfinitas?: boolean;
   isSupporter?: boolean;
   /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
   previousBeatPt?: number | null;
@@ -75,8 +72,6 @@ interface RateRankingEntry {
   totalRatePt: number;
   rankChange: number | null;
   lastUpdatedAt: string | null;
-  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
-  includesInfinitas?: boolean;
   isSupporter?: boolean;
   /** 前作の最終 RATE-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
   previousRatePt?: number | null;
@@ -104,30 +99,6 @@ type MergedRateRow =
   | { kind: 'topRanker'; totalRatePt: number; versionNum: number; versionName: string; prefectureFileNum: number; prefectureName: string }
   | { kind: 'arenaTopRanker'; totalRatePt: number; iidxId: string; djName: string; arenaClass: string; rankPos: number };
 
-/** KENBAN-TIER ランキング API のエントリ（暫定: rankChange / lastUpdatedAt なし）。 */
-interface KenbanRankingEntry {
-  userId: number | null;
-  privacyLevel: number | null;
-  displayName: string;
-  iidxId: string;
-  totalKenbanPt: number;
-  isSupporter: boolean;
-  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
-  includesInfinitas?: boolean;
-}
-
-/** SARA-TIER ランキング API のエントリ。 */
-interface SaraRankingEntry {
-  userId: number | null;
-  privacyLevel: number | null;
-  displayName: string;
-  iidxId: string;
-  totalSaraPt: number;
-  isSupporter: boolean;
-  /** 集計(上位100曲)に INFINITAS 由来ベストが含まれるか（INF バッジ用）。 */
-  includesInfinitas?: boolean;
-}
-
 /** AVERAGE ランキング API のエントリ（Lv11/Lv12 ANOTHER/LEGGENDARIA の平均順位）。 */
 interface AverageRankingEntry {
   userId: number | null;
@@ -138,8 +109,6 @@ interface AverageRankingEntry {
   playedCount: number;
   totalSongs: number;
   isSupporter: boolean;
-  /** 型整合用。AVERAGE ランキングは対象外のため API では返さず常に undefined（バッジ非表示）。 */
-  includesInfinitas?: boolean;
 }
 
 interface SimulationEntry {
@@ -273,20 +242,13 @@ function handleArenaTopRankerRowClick(row: { iidxId: string; djName: string; are
 const { user, authHeaders } = useAuth();
 const { friends, fetchFriends } = useFriends();
 const { showRateTier } = useRateTierVisibility();
-const { showKenbanSaraTier } = useKenbanSaraTierVisibility();
-// KENBAN/SARA トグルが OFF に切り替わったら、その viewMode から beat へ強制退避する。
-watch(showKenbanSaraTier, (val) => {
-    if (!val && (viewMode.value === 'kenban' || viewMode.value === 'sara')) {
-        viewMode.value = 'beat';
-    }
-});
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 /** 【computed の役割】 管理者判定。simulation モード表示制御に使用。判定ロジックは useAdmin に集約。 */
 const { isAdmin } = useAdmin();
 
-/** 現在のビューモード（beat / rate / kenban / sara / average / simulation）。 */
-const viewMode = ref<'beat' | 'rate' | 'kenban' | 'sara' | 'average' | 'simulation'>('beat');
+/** 現在のビューモード（beat / rate / average / simulation）。 */
+const viewMode = ref<'beat' | 'rate' | 'average' | 'simulation'>('beat');
 // Rate-Tier 表示設定がオフに切り替わったら、rate モードから beat へ強制退避する。
 watch(showRateTier, (val) => {
     if (!val && viewMode.value === 'rate') viewMode.value = 'beat';
@@ -295,10 +257,6 @@ watch(showRateTier, (val) => {
 const beatRanking = ref<BeatRankingEntry[]>([]);
 /** Rate-PT ランキング本体。 */
 const rateRanking = ref<RateRankingEntry[]>([]);
-/** KENBAN-PT ランキング本体（暫定オンザフライ計算結果）。 */
-const kenbanRanking = ref<KenbanRankingEntry[]>([]);
-/** SARA-PT ランキング本体（暫定オンザフライ計算結果）。 */
-const saraRanking = ref<SaraRankingEntry[]>([]);
 /** AVERAGE ランキング本体（Lv11/Lv12 ANOTHER/LEGGENDARIA の平均順位）。 */
 const averageRanking = ref<AverageRankingEntry[]>([]);
 /** Beat-PT 都道府県 TOP ランカー一覧。 */
@@ -320,7 +278,7 @@ const showTopRankers = ref(false);
  * 表示する作品バージョン。初期表示は現行作（切替後は ZINRAI）。
  * 前作（Sparkle Shower）を選ぶと、世代切り替え時のスナップショット＝終了時点のランキングを表示する。
  * 前作の表示中は都道府県 TOP ランカー／アリーナ仮想プレイヤーの行は混ぜない（アーカイブに含まれないため）。
- * 対象は BEAT / RATE / KENBAN / SARA。AVERAGE とシミュレーションはアーカイブが無いので現行作のまま。
+ * 対象は BEAT / RATE。AVERAGE とシミュレーションはアーカイブが無いので現行作のまま。
  */
 const selectedVersion = ref<number>(CURRENT_VERSION);
 /** セレクトに出す作品（新しい順）。1 作品しか無ければセレクト自体を出さない。 */
@@ -339,8 +297,6 @@ const PAGE_SIZE = 50;
 const SCATTER_TOP_RANKER_LIMIT = 50;
 const beatPage = ref(1);
 const ratePage = ref(1);
-const kenbanPage = ref(1);
-const saraPage = ref(1);
 const averagePage = ref(1);
 
 /**
@@ -505,18 +461,6 @@ const paginatedRateRanking = computed(() => {
     return mergedRateRanking.value.slice(start, start + PAGE_SIZE);
 });
 
-const kenbanTotalPages = computed(() => Math.max(1, Math.ceil(kenbanRanking.value.length / PAGE_SIZE)));
-const saraTotalPages   = computed(() => Math.max(1, Math.ceil(saraRanking.value.length   / PAGE_SIZE)));
-
-const paginatedKenbanRanking = computed(() => {
-    const start = (kenbanPage.value - 1) * PAGE_SIZE;
-    return kenbanRanking.value.slice(start, start + PAGE_SIZE).map((entry, i) => ({ rank: start + i + 1, entry }));
-});
-const paginatedSaraRanking = computed(() => {
-    const start = (saraPage.value - 1) * PAGE_SIZE;
-    return saraRanking.value.slice(start, start + PAGE_SIZE).map((entry, i) => ({ rank: start + i + 1, entry }));
-});
-
 const averageTotalPages = computed(() => Math.max(1, Math.ceil(averageRanking.value.length / PAGE_SIZE)));
 const paginatedAverageRanking = computed(() => {
     const start = (averagePage.value - 1) * PAGE_SIZE;
@@ -554,8 +498,6 @@ function goToMyRank() {
 watch(viewMode, () => {
     beatPage.value = 1;
     ratePage.value = 1;
-    kenbanPage.value = 1;
-    saraPage.value = 1;
     averagePage.value = 1;
 });
 
@@ -627,20 +569,6 @@ async function fetchBeatRanking() {
     } else if (past) {
         arenaTopRankers.value = [];
     }
-}
-
-/** 【関数の役割】 KENBAN-TIER ランキングを取得する（暫定オンザフライ API）。 */
-async function fetchKenbanRanking() {
-    const res = await fetch(`${API_BASE}/api/scores/kenban-ranking${versionQuery.value}`);
-    if (!res.ok) throw new Error('kenban');
-    kenbanRanking.value = await res.json();
-}
-
-/** 【関数の役割】 SARA-TIER ランキングを取得する（暫定オンザフライ API）。 */
-async function fetchSaraRanking() {
-    const res = await fetch(`${API_BASE}/api/scores/sara-ranking${versionQuery.value}`);
-    if (!res.ok) throw new Error('sara');
-    saraRanking.value = await res.json();
 }
 
 /** 【関数の役割】 AVERAGE ランキング（Lv11/Lv12 ANOTHER/LEGGENDARIA 全曲の平均順位）を取得する。 */
@@ -783,20 +711,6 @@ watch(viewMode, async (mode) => {
     if (mode === 'simulation' && simulationData.value.length === 0) {
         fetchSimulationData();
     }
-    if (mode === 'kenban' && kenbanRanking.value.length === 0) {
-        isLoading.value = true;
-        error.value = '';
-        try { await fetchKenbanRanking(); }
-        catch (e) { console.error(e); error.value = t('ranking.error'); }
-        finally { isLoading.value = false; }
-    }
-    if (mode === 'sara' && saraRanking.value.length === 0) {
-        isLoading.value = true;
-        error.value = '';
-        try { await fetchSaraRanking(); }
-        catch (e) { console.error(e); error.value = t('ranking.error'); }
-        finally { isLoading.value = false; }
-    }
     if (mode === 'average' && averageRanking.value.length === 0) {
         isLoading.value = true;
         error.value = '';
@@ -806,28 +720,22 @@ watch(viewMode, async (mode) => {
     }
 });
 
-// 作品を切り替えたら BEAT/RATE/KENBAN/SARA のキャッシュを捨てて取り直す。
+// 作品を切り替えたら BEAT/RATE のキャッシュを捨てて取り直す。
 // BEAT は常に（散布図と初期表示のため）、他は表示中のモードだけ取り直し、残りは次に開いたとき lazy に取る。
 watch(selectedVersion, async () => {
     beatRanking.value = [];
     rateRanking.value = [];
-    kenbanRanking.value = [];
-    saraRanking.value = [];
     topRankers.value = [];
     arenaTopRankers.value = [];
     rateTopRankers.value = [];
     arenaRateTopRankers.value = [];
     beatPage.value = 1;
     ratePage.value = 1;
-    kenbanPage.value = 1;
-    saraPage.value = 1;
     isLoading.value = true;
     error.value = '';
     try {
         const tasks: Promise<unknown>[] = [fetchBeatRanking()];
         if (showRateTier.value || viewMode.value === 'rate') tasks.push(fetchRateRanking());
-        if (viewMode.value === 'kenban') tasks.push(fetchKenbanRanking());
-        if (viewMode.value === 'sara') tasks.push(fetchSaraRanking());
         await Promise.all(tasks);
     } catch (e) {
         console.error(e);
@@ -920,22 +828,6 @@ watch(selectedVersion, async () => {
               ? 'bg-white dark:bg-slate-600 text-emerald-600 dark:text-emerald-400'
               : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
           >Rate-Tier</button>
-          <button
-            v-if="showKenbanSaraTier"
-            @click="viewMode = 'kenban'"
-            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
-            :class="viewMode === 'kenban'
-              ? 'bg-white dark:bg-slate-600 text-cyan-600 dark:text-cyan-400'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-          >Kenban-Tier</button>
-          <button
-            v-if="showKenbanSaraTier"
-            @click="viewMode = 'sara'"
-            class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
-            :class="viewMode === 'sara'
-              ? 'bg-white dark:bg-slate-600 text-orange-600 dark:text-orange-400'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-          >Sara-Tier</button>
           <button
             @click="viewMode = 'average'"
             class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all"
@@ -1049,7 +941,6 @@ watch(selectedVersion, async () => {
                     </td>
                     <td class="py-3 text-right">
                       <div class="flex items-baseline justify-end gap-1">
-                        <span v-if="row.entry.includesInfinitas" class="self-center text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                         <span class="text-xl font-bold tabular-nums"
                           :class="user && row.entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
                           {{ row.entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
@@ -1217,7 +1108,6 @@ watch(selectedVersion, async () => {
                     </td>
                     <td class="py-3 text-right">
                       <div class="flex items-baseline justify-end gap-1">
-                        <span v-if="row.entry.includesInfinitas" class="self-center text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                         <span class="text-xl font-bold tabular-nums"
                           :class="user && row.entry.iidxId === user.iidxId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-800 dark:text-slate-100'">
                           {{ row.entry.totalRatePt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
@@ -1318,158 +1208,6 @@ watch(selectedVersion, async () => {
             </div>
           </div>
         </div>
-        <!-- KENBAN-Tier ranking (暫定: rankChange / 更新日時 / TOP ランカー無し) -->
-        <div v-else-if="viewMode === 'kenban'">
-          <div v-if="kenbanRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
-            <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
-          </div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-20">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center">{{ t('ranking.colTier') }}</th>
-                  <th class="pb-4 pr-4 text-xs font-bold text-cyan-500 text-right">{{ t('ranking.colPoints', { type: 'KENBAN' }) }}</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="row in paginatedKenbanRanking" :key="`k-${row.entry.iidxId}`"
-                  class="group transition-colors"
-                  :class="[
-                    user && row.entry.iidxId === user.iidxId
-                      ? 'bg-cyan-50 dark:bg-cyan-900/20 border-l-4 border-l-cyan-500'
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
-                    row.entry.userId != null ? 'cursor-pointer' : ''
-                  ]"
-                  @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
-                  <td class="py-3 pl-4">
-                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
-                      :class="[
-                        row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                        row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                        row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                        user && row.entry.iidxId === user.iidxId ? 'bg-cyan-500 text-white' :
-                        'text-slate-400 border border-slate-100 dark:border-slate-700'
-                      ]">{{ row.rank }}</div>
-                  </td>
-                  <td class="py-3">
-                    <div class="flex items-center gap-2">
-                      <span class="font-bold text-base transition-colors"
-                        :class="user && row.entry.iidxId === user.iidxId
-                          ? 'text-cyan-700 dark:text-cyan-300'
-                          : 'text-slate-800 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400'">
-                        {{ row.entry.displayName || 'Unnamed Player' }}
-                      </span>
-                      <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
-                      <span v-if="user && row.entry.iidxId === user.iidxId"
-                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500 text-white">{{ t('ranking.you') }}</span>
-                    </div>
-                  </td>
-                  <td class="py-3 px-2 text-center">
-                    <div class="flex justify-center">
-                      <RankIcon :rank-name="getRankInfo(row.entry.totalKenbanPt).name" :tier="getRankInfo(row.entry.totalKenbanPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
-                    </div>
-                  </td>
-                  <td class="py-3 pr-4 text-right">
-                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                    <span class="font-bold text-base text-cyan-600 dark:text-cyan-400 tabular-nums">{{ row.entry.totalKenbanPt.toFixed(1) }}</span>
-                    <span class="text-xs text-slate-400 ml-0.5">pt</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <!-- KENBAN Pagination -->
-            <div class="flex items-center justify-end gap-1 mt-4 pr-4">
-              <button @click="kenbanPage = 1" :disabled="kenbanPage === 1"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&laquo;</button>
-              <button @click="kenbanPage--" :disabled="kenbanPage === 1"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&lsaquo;</button>
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">{{ kenbanPage }} / {{ kenbanTotalPages }}</span>
-              <button @click="kenbanPage++" :disabled="kenbanPage === kenbanTotalPages"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&rsaquo;</button>
-              <button @click="kenbanPage = kenbanTotalPages" :disabled="kenbanPage === kenbanTotalPages"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&raquo;</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- SARA-Tier ranking -->
-        <div v-else-if="viewMode === 'sara'">
-          <div v-if="saraRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
-            <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
-          </div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-                  <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-20">{{ t('ranking.colRank') }}</th>
-                  <th class="pb-4 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
-                  <th class="pb-4 text-xs font-bold text-slate-400 w-20 text-center">{{ t('ranking.colTier') }}</th>
-                  <th class="pb-4 pr-4 text-xs font-bold text-orange-500 text-right">{{ t('ranking.colPoints', { type: 'SARA' }) }}</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
-                <tr v-for="row in paginatedSaraRanking" :key="`s-${row.entry.iidxId}`"
-                  class="group transition-colors"
-                  :class="[
-                    user && row.entry.iidxId === user.iidxId
-                      ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-l-orange-500'
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
-                    row.entry.userId != null ? 'cursor-pointer' : ''
-                  ]"
-                  @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
-                  <td class="py-3 pl-4">
-                    <div class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
-                      :class="[
-                        row.rank === 1 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500 dark:text-white' :
-                        row.rank === 2 ? 'bg-slate-200 text-slate-700 dark:bg-slate-400 dark:text-white' :
-                        row.rank === 3 ? 'bg-orange-100 text-orange-700 dark:bg-orange-400 dark:text-white' :
-                        user && row.entry.iidxId === user.iidxId ? 'bg-orange-500 text-white' :
-                        'text-slate-400 border border-slate-100 dark:border-slate-700'
-                      ]">{{ row.rank }}</div>
-                  </td>
-                  <td class="py-3">
-                    <div class="flex items-center gap-2">
-                      <span class="font-bold text-base transition-colors"
-                        :class="user && row.entry.iidxId === user.iidxId
-                          ? 'text-orange-700 dark:text-orange-300'
-                          : 'text-slate-800 dark:text-slate-100 group-hover:text-orange-600 dark:group-hover:text-orange-400'">
-                        {{ row.entry.displayName || 'Unnamed Player' }}
-                      </span>
-                      <span v-if="(row.entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(row.entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
-                      <span v-if="user && row.entry.iidxId === user.iidxId"
-                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500 text-white">{{ t('ranking.you') }}</span>
-                    </div>
-                  </td>
-                  <td class="py-3 px-2 text-center">
-                    <div class="flex justify-center">
-                      <RankIcon :rank-name="getRankInfo(row.entry.totalSaraPt).name" :tier="getRankInfo(row.entry.totalSaraPt).tier" size="md" disable-party :is-supporter="row.entry.isSupporter" />
-                    </div>
-                  </td>
-                  <td class="py-3 pr-4 text-right">
-                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
-                    <span class="font-bold text-base text-orange-600 dark:text-orange-400 tabular-nums">{{ row.entry.totalSaraPt.toFixed(1) }}</span>
-                    <span class="text-xs text-slate-400 ml-0.5">pt</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <!-- SARA Pagination -->
-            <div class="flex items-center justify-end gap-1 mt-4 pr-4">
-              <button @click="saraPage = 1" :disabled="saraPage === 1"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&laquo;</button>
-              <button @click="saraPage--" :disabled="saraPage === 1"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&lsaquo;</button>
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">{{ saraPage }} / {{ saraTotalPages }}</span>
-              <button @click="saraPage++" :disabled="saraPage === saraTotalPages"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&rsaquo;</button>
-              <button @click="saraPage = saraTotalPages" :disabled="saraPage === saraTotalPages"
-                class="px-2 py-1 rounded-lg text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">&raquo;</button>
-            </div>
-          </div>
-        </div>
-
         <!-- AVERAGE ranking (Lv11/Lv12 ANOTHER/LEGGENDARIA) -->
         <div v-else-if="viewMode === 'average'">
           <div v-if="averageRanking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md">
@@ -1528,7 +1266,6 @@ watch(selectedVersion, async () => {
                     </span>
                   </td>
                   <td class="py-3 pr-4 text-right">
-                    <span v-if="row.entry.includesInfinitas" class="align-middle mr-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-300 dark:bg-sky-900/40 dark:text-sky-300 dark:border-sky-700" title="このユーザーの集計(上位100曲)にINFINITAS取得のベストが含まれています">INF</span>
                     <span class="font-bold text-base text-purple-600 dark:text-purple-400 tabular-nums">
                       {{ row.entry.averageRank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                     </span>

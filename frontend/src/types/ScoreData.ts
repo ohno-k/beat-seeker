@@ -11,8 +11,7 @@ export interface DifficultyStats {
     options?: string[];
     djName?: string;
     /**
-     * このスコアの取得元。"arcade"（CSV）/ "infinitas"（画面取得）。
-     * arcade と infinitas の両方がある場合、表示では EX SCORE が高い方の source が入る。
+     * このスコアの取得元。常に "arcade"（CSV / ブックマークレット）。
      * undefined は emptyDiff（未プレイプレースホルダ）の目印も兼ねる。
      */
     source?: string;

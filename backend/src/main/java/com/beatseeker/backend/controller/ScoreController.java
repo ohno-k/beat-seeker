@@ -13,12 +13,10 @@ import com.beatseeker.backend.repository.AppNotificationRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
-import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.beatseeker.backend.repository.TimelineEventRepository;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.repository.UserSongRankRepository;
 import com.beatseeker.backend.repository.VirtualRivalRepository;
-import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.service.EmailService;
 import com.beatseeker.backend.service.IidxVersions;
 import com.beatseeker.backend.service.PushNotificationService;
@@ -67,7 +65,6 @@ import java.util.Map;
  *  - {@link UserSongRankRepository} / {@link SongRankBatchService}: 曲別ランクの事前計算キャッシュ
  *  - {@link ScoreRecalculationService}: 再計算系
  *  - {@link EmailService}: 管理者向けメール通知
- *  - {@link SongDefinitionRepository}: 曲の正規データ（notes など）
  *  - {@link TopRankersBeatPtService}: トップランカー／エリアプロファイル
  *
  * 主なエンドポイント:
@@ -103,8 +100,6 @@ public class ScoreController {
     private final ScoreRecalculationService scoreRecalculationService;
     /** 管理者向けメール送信サービス。 */
     private final EmailService emailService;
-    /** 曲の正規定義（title, difficulty, level, notes 等）リポジトリ。 */
-    private final SongDefinitionRepository songDefinitionRepository;
 
     /**
      * 前作データ判定（{@link StaleUploadGuard}）で「前作のデータ」と断定するのに必要な、
@@ -155,6 +150,9 @@ public class ScoreController {
      */
     private static final int CLIENT_CONFIRM_WINDOW_MINUTES = 10;
 
+    /** upload で保存するスコアの取得元（{@code scores.source}）。ユニーク制約の 5 列目に揃える。 */
+    private static final String ARCADE_SOURCE = "arcade";
+
     /**
      * 【コンストラクタ】 Spring DI で全依存を受け取る。
      */
@@ -168,7 +166,6 @@ public class ScoreController {
             SongRankBatchService songRankBatchService,
             ScoreRecalculationService scoreRecalculationService,
             EmailService emailService,
-            SongDefinitionRepository songDefinitionRepository,
             TopRankersBeatPtService topRankersBeatPtService,
             VirtualArenaRankerService virtualArenaRankerService,
             SongArenaAveragesCacheService songArenaAveragesCacheService,
@@ -197,7 +194,6 @@ public class ScoreController {
         this.songRankBatchService = songRankBatchService;
         this.scoreRecalculationService = scoreRecalculationService;
         this.emailService = emailService;
-        this.songDefinitionRepository = songDefinitionRepository;
         this.topRankersBeatPtService = topRankersBeatPtService;
         this.virtualArenaRankerService = virtualArenaRankerService;
         this.songArenaAveragesCacheService = songArenaAveragesCacheService;
@@ -264,6 +260,14 @@ public class ScoreController {
 
         User user = getUser(auth);
 
+        // 手順000: INFINITAS からの取り込みは終了した。1 件でも含まれていたらアーケードとして
+        //   保存せず、リクエスト全体を 400 で返す（別物の記録がアーケードのベストに混ざるのを防ぐ）。
+        if (requests.stream().anyMatch(r -> "infinitas".equals(r.effectiveSource()))) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", "INFINITAS からの取り込みは終了しました",
+                    "code", "INFINITAS_DISCONTINUED"));
+        }
+
         // 手順00: 前作のデータを現行作として取り込むのを止める（詳細は StaleUploadGuard）。
         //   前作のページで実行したブックマークレット、切替前にダウンロードした CSV のどちらも 400 で返す。
         //   upsert は「ベスト更新のみ」なので、一度通すと新作の低い記録が全部無視されてしまう。
@@ -280,44 +284,25 @@ public class ScoreController {
             return ResponseEntity.badRequest().body(body);
         }
 
-        // 手順0: INFINITAS のみ収録された曲は arcade マスタに存在しない。受け入れ可否を判定するため、
-        // active リビジョンの SongDefinition を (title|difficultyName) でセット化しておく。
-        // arcade ソースのスコアは従来通り無条件で受け入れる（マスタ未登録曲は新リリース時にあり得る）。
-        java.util.Set<String> arcadeChartKeys = new java.util.HashSet<>();
-        for (SongDefinition sd : songDefinitionRepository.findByRevision("active")) {
-            String diffName = mapDifficultyCodeToName(sd.getDifficulty());
-            if (diffName == null) continue;
-            arcadeChartKeys.add(sd.getTitle() + "||" + diffName);
-        }
-
         // 手順1: 既存スコアを 1 クエリで読み込み、キー文字列で O(1) lookup 可能にする。
-        // 取得元（source）が異なれば別レコードとして並走するので、キーに source も含める。
+        // キーはユニーク制約（user, title, difficultyName, difficultyLevel, source）に揃えて source まで含める。
+        // 保存するのは arcade だけなので、それ以外の source の行はアップロードの突き合わせ対象にしない。
         List<Score> existingScores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         Map<String, Score> scoreMap = new HashMap<>();
         for (Score s : existingScores) {
-            String sourceKey = s.getSource() != null ? s.getSource() : "arcade";
+            String sourceKey = s.getSource() != null ? s.getSource() : ARCADE_SOURCE;
             String key = s.getTitle() + "_" + s.getDifficultyName() + "_" + s.getDifficultyLevel() + "_" + sourceKey;
             scoreMap.put(key, s);
         }
 
         List<Map<String, Object>> updatedSongs = new java.util.ArrayList<>();
-        int skippedInfinitasOnly = 0;
 
         for (ScoreUploadRequest rawReq : requests) {
             // 作品によって表記が変わった曲名（31 EPOLIS の "VØID" と現行の "VOID" など）は
             // 曲マスタの表記に寄せてから突き合わせ・保存する（SongTitleAliases）。
             ScoreUploadRequest req = rawReq.withTitle(SongTitleAliases.canonical(rawReq.title()));
-            String source = req.effectiveSource();
 
-            // INFINITAS 由来のレコードについては、arcade マスタに存在しない曲を保存対象から除外する。
-            // OCR フェーズで似た arcade 曲に誤マッチした場合、ここで安全側に倒す保険でもある。
-            if ("infinitas".equals(source)
-                    && !arcadeChartKeys.contains(req.title() + "||" + req.difficultyName())) {
-                skippedInfinitasOnly++;
-                continue;
-            }
-
-            String key = req.title() + "_" + req.difficultyName() + "_" + req.difficultyLevel() + "_" + source;
+            String key = req.title() + "_" + req.difficultyName() + "_" + req.difficultyLevel() + "_" + ARCADE_SOURCE;
             Score existing = scoreMap.get(key);
 
             boolean isImproved = false;
@@ -329,7 +314,7 @@ public class ScoreController {
                 isImproved = true;
                 Score newScore = new Score();
                 newScore.setUser(user);
-                newScore.setSource(source);
+                newScore.setSource(ARCADE_SOURCE);
                 updateScoreFields(newScore, req);
                 scoreRepository.save(newScore);
                 // 同一ペイロード内に同じ譜面が複数回含まれた場合、2 件目以降を新規 INSERT して
@@ -354,9 +339,7 @@ public class ScoreController {
 
                 // プレー回数は「記録更新なしのプレー」でも進むため、改善判定とは独立に保持する。
                 // リーグモードの「週内プレー必須」判定がこの値の増加を根拠にする。
-                //  - arcade: CSV が歴代プレー回数を持つので、増えていればその値を採用（再アップロードは冪等）
-                //  - infinitas: リクエストの playCount は常に 1 のため、1 アップロード = 1 プレーとして加算する
-                //    （OCR の二重認識で二重加算され得るが、playCount は有効判定にしか使わないため許容）
+                // CSV が歴代プレー回数を持つので、増えていればその値を採用する（再アップロードは冪等）。
                 int oldPlayCount = existing.getPlayCount() != null ? existing.getPlayCount() : 0;
 
                 // 最終プレー日時（CSV 由来）は「記録が伸びなかったプレー」でも進むため、改善判定とは
@@ -375,12 +358,6 @@ public class ScoreController {
                 if (scoreBetter || rankBetter || missBetter) {
                     isImproved = true;
                     updateScoreFields(existing, req);
-                    if ("infinitas".equals(source)) {
-                        existing.setPlayCount(oldPlayCount + 1);
-                    }
-                    scoreRepository.save(existing);
-                } else if ("infinitas".equals(source)) {
-                    existing.setPlayCount(oldPlayCount + 1);
                     scoreRepository.save(existing);
                 } else if ((req.playCount() != null && req.playCount() > oldPlayCount) || lastPlayedAdvanced) {
                     // 記録は据え置きのままプレー回数・最終プレー日時だけ更新する
@@ -404,8 +381,6 @@ public class ScoreController {
                 diff.put("oldClearType", oldClearType);
                 diff.put("newClearType", req.clearType());
                 diff.put("clearTypeImproved", getClearTypeRank(req.clearType()) > getClearTypeRank(oldClearType));
-                // 取得元（arcade/infinitas）を残す。INFINITAS 由来の更新だけを日次 INF 履歴へ集約する判定に使う。
-                diff.put("source", source);
                 updatedSongs.add(diff);
             }
         }
@@ -437,21 +412,7 @@ public class ScoreController {
             // 同グループへの「課題曲が更新された / 順位が下がった」通知。
             notifyLeagueGroupAfterCommit(user.getId(), updatedSongs);
 
-            // INFINITAS 由来の更新があれば、その日 1 レコードの成長記録（tag=INFINITAS）へ集約する。
-            // 画面取り込みは 1 曲ずつ届くため、同日内は既存ログに曲を追記・各 PT を再計算する upsert。
-            List<Map<String, Object>> infUpdated = updatedSongs.stream()
-                    .filter(d -> "infinitas".equals(d.get("source")))
-                    .collect(java.util.stream.Collectors.toList());
-            if (!infUpdated.isEmpty()) {
-                try {
-                    scoreRecalculationService.upsertDailyInfinitasLog(user, infUpdated);
-                } catch (Exception e) {
-                    // 履歴集約の失敗はスコア保存自体を巻き戻さない（成長記録は事後再計算で救済可能）。
-                    System.err.println("Failed to upsert daily INFINITAS history log: " + e.getMessage());
-                }
-            }
-
-            // CSV / ブックマークレット由来の更新があれば、この upload 自身で成長記録を作っておく。
+            // 更新があれば、この upload 自身で成長記録を作っておく。
             // 以前は成長記録がフロントの /save-history-log だけで作られていたため、upload の
             // レスポンスがブラウザに届かないと（60 秒タイムアウト・通信断・途中リロード）
             // 「スコアは保存されたのに成長記録が無い」状態になり、最新ログを読む RATE-Tier
@@ -459,16 +420,15 @@ public class ScoreController {
             // /save-history-log はこの行を仕上げる（clientConfirmed = true）役に変えている。
             // 対象はフロントがレポートに出すのと同じ条件（スコアかランプが伸びた譜面）に揃える。
             // BP だけ縮んだ更新まで拾うと、これまで成長記録が作られなかったケースで行が増えてしまう。
-            List<Map<String, Object>> arcadeUpdated = updatedSongs.stream()
-                    .filter(d -> !"infinitas".equals(d.get("source")))
+            List<Map<String, Object>> logSongs = updatedSongs.stream()
                     .filter(d -> ((Number) d.getOrDefault("scoreIncrease", 0)).intValue() > 0
                             || Boolean.TRUE.equals(d.get("clearTypeImproved")))
                     .collect(java.util.stream.Collectors.toList());
-            if (!arcadeUpdated.isEmpty()) {
+            if (!logSongs.isEmpty()) {
                 try {
                     // scoreMap には既存行と今回の新規行が全て入っている（= 更新後の全スコア）。
                     scoreRecalculationService.upsertUploadLog(
-                            user, arcadeUpdated, new java.util.ArrayList<>(scoreMap.values()));
+                            user, logSongs, new java.util.ArrayList<>(scoreMap.values()));
                 } catch (Exception e) {
                     // 成長記録の作成失敗でスコア保存を巻き戻さない（フロント側の保存で救済される）。
                     System.err.println("Failed to create upload history log: " + e.getMessage());
@@ -479,28 +439,8 @@ public class ScoreController {
         Map<String, Object> response = new HashMap<>();
         response.put("updatedCount", updatedSongs.size());
         response.put("updatedSongs", updatedSongs);
-        response.put("skippedInfinitasOnly", skippedInfinitasOnly);
         response.put("message", "スコアを更新しました");
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * 【メソッドの役割】 SongDefinition の難易度コード（文字列）を、Score/CSV 側の難易度名に変換する。
-     *
-     * 既知のコード:
-     *  - "1" → BEGINNER, "2" → NORMAL, "3" → HYPER, "4" → ANOTHER, "10" → LEGGENDARIA
-     * 未知のコードは null を返す（呼び出し側はマスタから除外する判断材料に使う）。
-     */
-    private String mapDifficultyCodeToName(String code) {
-        if (code == null) return null;
-        return switch (code) {
-            case "1" -> "BEGINNER";
-            case "2" -> "NORMAL";
-            case "3" -> "HYPER";
-            case "4" -> "ANOTHER";
-            case "10" -> "LEGGENDARIA";
-            default -> null;
-        };
     }
 
     /**
@@ -572,28 +512,6 @@ public class ScoreController {
         }
         log.setTotalRatePt(totalRatePt);
 
-        // KENBAN-PT / SARA-PT はフロントが送ってこないのでバックエンドで算出する。
-        // claimed の場合は upload 時に同じ式で計算済みなので、重い再計算を省いてそのまま使う。
-        if (claimed) {
-            if (log.getTotalKenbanPt() != null) user.setTotalKenbanPt(log.getTotalKenbanPt());
-            if (log.getTotalSaraPt() != null) user.setTotalSaraPt(log.getTotalSaraPt());
-        } else {
-            try {
-                var songMaxScores = scoreRecalculationService.loadSongMaxScores();
-                var informalRanks = scoreRecalculationService.loadInformalRanks();
-                var scratchMap    = scoreRecalculationService.loadScratchMap();
-                double[] kenbanSara = scoreRecalculationService.calculateKenbanSaraPtFromActiveData(
-                    allScores, songMaxScores, informalRanks, scratchMap);
-                log.setTotalKenbanPt(kenbanSara[0]);
-                log.setTotalSaraPt(kenbanSara[1]);
-                user.setTotalKenbanPt(kenbanSara[0]);
-                user.setTotalSaraPt(kenbanSara[1]);
-            } catch (Exception e) {
-                // 失敗してもメイン保存処理は続行（KENBAN/SARA は事後再計算で救済可能）。
-                System.err.println("Failed to compute KENBAN/SARA-PT in saveHistoryLog: " + e.getMessage());
-            }
-        }
-
         // 手順3: スコア全件を 1 周して totalScore と各クリア種別・DJ ランクのカウントを集計する。
         long totalScore = 0;
         int fcCount = 0;
@@ -651,8 +569,6 @@ public class ScoreController {
         // 手順4a: ユーザーの totalBeatPt を users テーブルにキャッシュ（ティア別平均クエリを高速化するため）。
         if (req.totalBeatPt() != null) {
             user.setTotalBeatPt(req.totalBeatPt());
-            // ランキング行の INF バッジ用フラグ。フロントが top-100(BEAT/RATE) から算出して送る。
-            if (req.includesInfinitas() != null) user.setRankingIncludesInfinitas(req.includesInfinitas());
             userRepository.save(user);
         }
 
@@ -722,7 +638,7 @@ public class ScoreController {
         score.setPlayCount(req.playCount());
         score.setUploadedAt(java.time.LocalDateTime.now());
         // 最終プレー日時は「不明（null）や古い値で上書きしない」単調増加。列を持たない取り込み経路
-        // （ブックマークレット CSV・INFINITAS）のアップロードで、公式 CSV 由来の値を消さないため。
+        // （ブックマークレット CSV）のアップロードで、公式 CSV 由来の値を消さないため。
         LocalDateTime lastPlayed = req.parsedLastPlayTime();
         if (lastPlayed != null && (score.getLastPlayedAt() == null || lastPlayed.isAfter(score.getLastPlayedAt()))) {
             score.setLastPlayedAt(lastPlayed);
@@ -767,20 +683,10 @@ public class ScoreController {
 
         User user = getUser(auth);
 
-        // 取得元（arcade / infinitas）の表示トグルに応じてフィルタする。
-        // 未設定は true 扱い（既存ユーザーが取りこぼされないようにする）。
-        boolean showArcade = user.getShowArcadeScores() == null || user.getShowArcadeScores();
-        boolean showInfinitas = user.getShowInfinitasScores() == null || user.getShowInfinitasScores();
-
         List<Score> scores = scoreRepository.findByUserOrderByUploadedAtAsc(user);
         Map<String, List<String>> optionsMap = loadOptionsMap(user);
 
         List<Map<String, Object>> result = scores.stream()
-            .filter(s -> {
-                String src = s.getSource() != null ? s.getSource() : "arcade";
-                if ("infinitas".equals(src)) return showInfinitas;
-                return showArcade; // arcade（既定）として扱う
-            })
             .map(s -> {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", s.getId());
@@ -793,7 +699,7 @@ public class ScoreController {
                 map.put("pgreat", s.getPgreat() != null ? s.getPgreat() : 0);
                 map.put("great", s.getGreat() != null ? s.getGreat() : 0);
                 map.put("missCount", s.getMissCount());
-                map.put("source", s.getSource() != null ? s.getSource() : "arcade");
+                map.put("source", s.getSource() != null ? s.getSource() : ARCADE_SOURCE);
                 map.put("options", optionsMap.getOrDefault(optionsKey(s.getTitle(), s.getDifficultyName()), List.of()));
                 return map;
             }).toList();
@@ -845,7 +751,7 @@ public class ScoreController {
             snapshotData.put("updatedCount", log.getUpdatedCount());
             snapshotData.put("diffJson", log.getDiffJson());
             snapshotData.put("totalRatePt", log.getTotalRatePt());
-            // 記録の種別タグ（"INFINITAS" など）。成長記録ページの「INF」バッジ表示に使う。null は無印。
+            // 記録の種別タグ。null は無印（通常のアップロード）。
             snapshotData.put("tag", log.getTag());
 
             history.add(snapshotData);
@@ -1180,6 +1086,36 @@ public class ScoreController {
         }
         body.put("entries", enriched);
         return ResponseEntity.ok(body);
+    }
+
+    /**
+     * 【メソッドの役割】 スコアロードマップのレベル表を作り直した場合の変化（保存しない）。管理者専用。
+     *
+     * @return {ready, basedOn, current, next, moved, movedUp, movedDown, added, removed}。管理者以外は 403
+     */
+    @GetMapping("/score-roadmap/refreeze-preview")
+    public ResponseEntity<Map<String, Object>> previewScoreRoadmapRefreeze(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(scoreRoadmapService.refreezePreview());
+    }
+
+    /**
+     * 【メソッドの役割】 スコアロードマップのレベル表を今の難度で作り直す（新しい版として保存）。管理者専用。
+     *
+     * レベル表はこの操作でしか変わらない（バッチは 200 人に達した譜面の追加だけ）。
+     *
+     * @return {ready, revision, levels}。管理者以外は 403
+     */
+    @PostMapping("/score-roadmap/refreeze")
+    public ResponseEntity<Map<String, Object>> refreezeScoreRoadmap(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(scoreRoadmapService.refreeze());
     }
 
     /**
@@ -1800,7 +1736,8 @@ public class ScoreController {
              */
             String lastPlayTime,
             /**
-             * スコア取得元。{@code "arcade"}（既定）または {@code "infinitas"}。
+             * スコア取得元。保存されるのは {@code "arcade"} のみ。
+             * {@code "infinitas"} を含むリクエストは取り込み終了のため upload 全体を 400 で拒否する。
              * 旧クライアントは送ってこないので null フォールバックを {@link #effectiveSource()} で吸収する。
              */
             String source,
@@ -1813,10 +1750,10 @@ public class ScoreController {
         /**
          * null/空白を "arcade" にフォールバックして返す。旧フロントとの互換維持と、
          * 不正値（任意の文字列）が来た場合の安全策を兼ねる。
+         * {@code "infinitas"} だけはそのまま返し、upload 側で拒否の判定に使う。
          */
         public String effectiveSource() {
             if (source == null || source.isBlank()) return "arcade";
-            // 既知ソース以外は "arcade" に正規化する（将来の追加時はここに足す）。
             String s = source.toLowerCase();
             if ("infinitas".equals(s) || "arcade".equals(s)) return s;
             return "arcade";
@@ -1837,8 +1774,8 @@ public class ScoreController {
          *
          * <p>受け付けるのは公式 CSV の書式（{@code "yyyy-MM-dd HH:mm"} / 秒あり）だけに限定する。
          * この値は JST の壁時計時刻としてそのまま保存し、リーグの週（同じく JST 壁時計の
-         * startsAt/endsAt）と直接比較するため、絶対時刻表現（INFINITAS 経路が送る
-         * ISO-8601 の UTC 文字列など）を混ぜると 9 時間ズレた判定になる。
+         * startsAt/endsAt）と直接比較するため、絶対時刻表現
+         * （ISO-8601 の UTC 文字列など）を混ぜると 9 時間ズレた判定になる。
          * 判定を誤るくらいなら「不明（null）」に倒す。
          *
          * @return パースできた日時。空欄・別書式・不正値は null

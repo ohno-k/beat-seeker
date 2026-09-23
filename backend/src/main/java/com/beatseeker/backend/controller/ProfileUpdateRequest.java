@@ -31,11 +31,5 @@ public record ProfileUpdateRequest(
                 /** UI 表示言語コード（例: "ja", "en"）。 */
                 String language,
                 /** レートティアをプロフィール上で表示するか。 */
-                Boolean showRateTier,
-                /** KENBAN-TIER / SARA-TIER を表示するか（サポーター限定オプトイン）。 */
-                Boolean showKenbanSaraTier,
-                /** アーケード（CSV）由来のスコアを UI 上に表示するか。 */
-                Boolean showArcadeScores,
-                /** INFINITAS 画面取得由来のスコアを UI 上に表示するか。 */
-                Boolean showInfinitasScores) {
+                Boolean showRateTier) {
 }

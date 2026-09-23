@@ -39,8 +39,7 @@ public class ScoreHistoryLog {
 
     /**
      * 記録の種別タグ。通常の一括アップロードは null（無印）。
-     * INFINITAS 画面取り込みによる自動記録は "INFINITAS"。成長記録ページの「INF」バッジ表示と、
-     * 同日 1 レコードに集約する upsert のマッチングキーに使う。
+     * 世代切替時に入れる 0PT の履歴行は {@link com.beatseeker.backend.service.VersionTransitionService#RESET_TAG}。
      */
     @Column(length = 20)
     private String tag;
@@ -84,11 +83,6 @@ public class ScoreHistoryLog {
     private Double totalPrecisionPt = 0.0;
     /** 累計レートポイント。 */
     private Double totalRatePt = 0.0;
-
-    /** 累計 KENBAN-PT（鍵盤側ティア指標）。 */
-    private Double totalKenbanPt = 0.0;
-    /** 累計 SARA-PT（皿側ティア指標）。 */
-    private Double totalSaraPt = 0.0;
 
     /** 更新された個別譜面の詳細 JSON（差分表示用）。 */
     @Column(columnDefinition = "TEXT")

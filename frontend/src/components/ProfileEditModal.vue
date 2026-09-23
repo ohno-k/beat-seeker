@@ -58,9 +58,6 @@ const email = ref('');
 const currentPassword = ref('');
 const newPassword = ref('');
 const newPasswordConfirm = ref('');
-// INFINITAS の取り込みスコアを UI に表示するか。アーケード（CSV）スコアは常に表示する仕様で、
-// トグルは廃止済み（DB スキーマは互換のため残す）。
-const showInfinitasScores = ref(true);
 
 /** 段位プルダウン選択肢（constants から共通定義を参照、i18n ラベル付き）。 */
 const danRankOptions = DAN_RANK_OPTIONS;
@@ -78,7 +75,6 @@ watch(() => props.isOpen, (newVal) => {
     playSide.value = user.value.playSide;
     privacyLevel.value = user.value.privacyLevel ?? 0;
     email.value = user.value.email ?? '';
-    showInfinitasScores.value = user.value.showInfinitasScores ?? true;
 
     currentPassword.value = '';
     newPassword.value = '';
@@ -126,8 +122,7 @@ const handleUpdate = async () => {
       arenaRank: arenaRank.value,
       playSide: playSide.value,
       privacyLevel: privacyLevel.value,
-      email: email.value.trim() || undefined,
-      showInfinitasScores: showInfinitasScores.value
+      email: email.value.trim() || undefined
     };
 
     if (newPassword.value) {
@@ -289,17 +284,6 @@ const handleUpdate = async () => {
               <div class="relative inline-flex items-center ml-4 shrink-0">
                 <input type="checkbox" :checked="showRateTier" @change="setRateTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-              </div>
-            </label>
-            <!-- INFINITAS スコア表示トグル -->
-            <label class="flex items-center justify-between cursor-pointer group">
-              <div>
-                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('profile.showInfinitasScores') }}</p>
-                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ t('profile.showInfinitasScoresHint') }}</p>
-              </div>
-              <div class="relative inline-flex items-center ml-4 shrink-0">
-                <input type="checkbox" v-model="showInfinitasScores" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
               </div>
             </label>
           </div>

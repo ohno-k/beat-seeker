@@ -6,13 +6,13 @@ import { useAuth } from './useAuth';
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 /**
- * 【内部ヘルパー】 同一(曲,難易度)に複数 source（arcade / infinitas）の行が来たとき、
+ * 【内部ヘルパー】 同一(曲,難易度)に複数の行が来たとき、
  * 表示用に 1 つの DifficultyStats へ集約する。
  *
  * ルール:
  *  - スロットがまだ emptyDiff プレースホルダ（`source` 未設定）なら無条件で採用する
  *  - 既に実レコードが入っている場合は **EX SCORE が高い方を残す**（同点は先着＝先に
- *    アップロードされた方を維持。CSV→画面取得の順で取り込むため通常 arcade が残る）
+ *    アップロードされた方を維持）
  *
  * stat には呼び出し側で `source` を必ず付与しておくこと（API が source を返さない場合は
  * 'arcade' 既定にする）。これにより「source 未設定＝プレースホルダ」が安定して判定できる。

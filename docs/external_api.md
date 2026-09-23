@@ -146,8 +146,6 @@ curl -s -X POST "https://beat-seeker.com/api/external/v1/sync-options" \
     "danRank": "皆伝",
     "arenaRank": "A1",
     "totalBeatPt": 16234.5,
-    "totalKenbanPt": 8120.3,
-    "totalSaraPt": 8014.2,
     "totalRatePt": 9532.1,
     "totalPrecisionPt": 6217.8
   },
@@ -345,17 +343,8 @@ curl -s "https://beat-seeker.com/api/external/v1/song-detail?title=灼熱Beach%2
 
 #### アーケードの記録のみを返す
 
-beat-seeker は同一譜面にアーケード記録（e-amusement CSV / ブックマークレット）と
-INFINITAS 記録（画面共有 OCR）を別レコードとして並存させますが、本 API は
-**アーケードの記録だけ**を返します。レスポンス直下の `source` が `"arcade"` 固定なのはこのためで、
-全行共通の値なので行ごとには持たせていません。
-
-注意点:
-
-- **INFINITAS でしかプレーしていない譜面は「未プレイ」として返ります**（スコア項目すべて `null`）。
-- 同一譜面で INFINITAS 側の EX スコアの方が高い場合でも、返るのはアーケードの値です。
-  beat-seeker アプリ内の表示・総 BEAT-PT は「両ソースのうち高い方」を採用しているため、
-  そのようなユーザーでは当方の画面と値が食い違います。
+本 API は **アーケードの記録**（e-amusement CSV / ブックマークレット）を返します。
+レスポンス直下の `source` は `"arcade"` 固定で、全行共通の値なので行ごとには持たせていません。
 
 #### PT の算出条件
 

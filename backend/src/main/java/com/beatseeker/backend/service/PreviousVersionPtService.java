@@ -82,7 +82,7 @@ public class PreviousVersionPtService {
      * 【メソッドの役割】 過去作の最終ランキングを、現行ランキング API と同じ行の形で返す。
      *
      * ランキングページの作品セレクトで「Sparkle Shower（終了時点）」を選んだときに使う。
-     * 指定した指標（totalBeatPt / totalRatePt / totalKenbanPt / totalSaraPt）が 0 の人は除外し、
+     * 指定した指標（totalBeatPt / totalRatePt）が 0 の人は除外し、
      * 指標の降順に並べる。前日比（rankChange）はアーカイブには無いので 0（＝変動なし表示）。
      * 前作 PT（外枠用）も現行と同じ規則で添える。
      *

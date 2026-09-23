@@ -70,12 +70,6 @@ public class VersionPtSnapshot {
     /** 撮影時点の合計 RATE-PT。 */
     private Double totalRatePt;
 
-    /** 撮影時点の合計 鍵盤 PT。 */
-    private Double totalKenbanPt;
-
-    /** 撮影時点の合計 皿 PT。 */
-    private Double totalSaraPt;
-
     /** 撮影時点の BEAT-PT 順位（同値は同順位）。 */
     private Integer beatRank;
 

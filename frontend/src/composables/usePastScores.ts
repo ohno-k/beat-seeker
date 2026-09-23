@@ -90,10 +90,6 @@ export interface PastImportArchivedPt {
     afterBeatPt: number;
     beforeRatePt: number;
     afterRatePt: number;
-    beforeKenbanPt: number;
-    afterKenbanPt: number;
-    beforeSaraPt: number;
-    afterSaraPt: number;
 }
 
 /** 過去作取り込み API の応答。 */

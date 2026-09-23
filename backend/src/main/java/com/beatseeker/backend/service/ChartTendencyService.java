@@ -462,26 +462,6 @@ public class ChartTendencyService {
         return profileRepo.findByTextageBase(textageBase);
     }
 
-    /**
-     * 【メソッドの役割】 ANOTHER / LEGGENDARIA 全譜面の `(title, difficulty, scratchPct)` を
-     * 軽量に取得し、フロント向けの Map リストに整形する。
-     *
-     * KENBAN-TIER / SARA-TIER のように、皿率を重みとして大量の譜面に適用する集計用途で使う。
-     *
-     * @return 各要素が `{title, difficulty, scratchPct}` のキーを持つ Map のリスト
-     */
-    public List<Map<String, Object>> getScratchSummaryForAnotherLegg() {
-        return profileRepo.findScratchSummaryForAnotherLegg().stream()
-                .map(row -> {
-                    Map<String, Object> m = new HashMap<>(3);
-                    m.put("title",      row[0]);
-                    m.put("difficulty", row[1]);
-                    m.put("scratchPct", row[2]);
-                    return m;
-                })
-                .toList();
-    }
-
     // ── スコア予測 ───────────────────────────────────────────────
 
     /**
