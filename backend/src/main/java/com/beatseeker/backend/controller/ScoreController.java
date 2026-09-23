@@ -125,6 +125,8 @@ public class ScoreController {
     private final SongAvgScoreRatesCacheService songAvgScoreRatesCacheService;
     /** スコア分布ページ（song-score-spectrum、管理者専用）の集計結果キャッシュ。 */
     private final com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService;
+    /** AAA ロードマップ（score-roadmap、管理者専用）の推定結果キャッシュ。 */
+    private final com.beatseeker.backend.service.ScoreRoadmapService scoreRoadmapService;
     /** 連携アプリ（iidx-memo 等）から同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
     private final com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository;
     /** タイムライン用イベント（スコア更新／フレンド・仮想ライバル抜き）を保存するリポジトリ。 */
@@ -179,9 +181,11 @@ public class ScoreController {
             com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService,
             com.beatseeker.backend.service.LeagueNotificationService leagueNotificationService,
             com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService,
-            com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService) {
+            com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService,
+            com.beatseeker.backend.service.ScoreRoadmapService scoreRoadmapService) {
         this.previousVersionPtService = previousVersionPtService;
         this.songScoreSpectrumCacheService = songScoreSpectrumCacheService;
+        this.scoreRoadmapService = scoreRoadmapService;
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -1113,6 +1117,32 @@ public class ScoreController {
             return ResponseEntity.status(403).build();
         }
         return ResponseEntity.ok(songScoreSpectrumCacheService.requestSnapshot(refresh));
+    }
+
+    /**
+     * 【メソッドの役割】 AAA ロードマップ（全 A/L 譜面の AAA・MAX- 到達難度と、指定ユーザーの現在地）を返す。管理者専用。
+     *
+     * 推定は {@link com.beatseeker.backend.service.ScoreRoadmapService} がバックグラウンドで行い、
+     * 未計算・計算中は {@code ready=false} を返す（フロントがポーリング）。
+     *
+     * @param refresh true ならキャッシュの鮮度に関係なく再計算を起動する
+     * @param userId  現在地を表示するユーザー ID（省略時はログイン中の管理者本人）
+     * @return 推定結果。管理者以外は 403
+     */
+    @GetMapping("/score-roadmap")
+    public ResponseEntity<Map<String, Object>> getScoreRoadmap(
+            Authentication auth,
+            @RequestParam(defaultValue = "false") boolean refresh,
+            @RequestParam(required = false) Long userId) {
+        if (auth == null || !auth.isAuthenticated()
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        User target = userId == null ? getUser(auth) : userRepository.findById(userId).orElse(null);
+        return ResponseEntity.ok(scoreRoadmapService.requestSnapshot(
+                refresh,
+                target == null ? userId : target.getId(),
+                target == null ? null : target.getDisplayName()));
     }
 
     /**

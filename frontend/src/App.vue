@@ -76,6 +76,7 @@ const PastVersionScoresView = defineAsyncComponent(() => import('./views/PastVer
 const LeagueView = defineAsyncComponent(() => import('./views/LeagueView.vue'));
 const RankComparisonView = defineAsyncComponent(() => import('./views/RankComparisonView.vue'));
 const ScoreSpectrumView = defineAsyncComponent(() => import('./views/ScoreSpectrumView.vue'));
+const ScoreRoadmapView = defineAsyncComponent(() => import('./views/ScoreRoadmapView.vue'));
 const ShareView = defineAsyncComponent(() => import('./views/ShareView.vue'));
 // ストラテジーカード: 大会主催者 + 当該管理者のみ到達可能な隠し機能 (Sidebar.vue 側で出し分け)。
 const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCardView.vue'));
@@ -375,7 +376,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-spectrum' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-spectrum' | 'score-roadmap' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores'>('dashboard')
 
 // 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
 // （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
@@ -432,6 +433,7 @@ const activeTabLabel = computed<string>(() => {
     'diff-table': t('nav.diffTable'),
     'rank-comparison': t('nav.rankComparison'),
     'score-spectrum': t('nav.scoreSpectrum'),
+    'score-roadmap': t('nav.scoreRoadmap'),
     'score-prediction': t('nav.scorePrediction'),
     'score-scatter': t('nav.scoreScatter'),
     'popular-songs': t('nav.popularSongs'),
@@ -2444,6 +2446,11 @@ const handleUnifiedClose = async () => {
         <!-- スコア分布（管理者 ID18 のみ） -->
         <template v-else-if="activeTab === 'score-spectrum' && user?.id === 18">
           <ScoreSpectrumView class="w-full max-w-7xl mx-auto animate-fade-in" />
+        </template>
+
+        <!-- AAA ロードマップ（管理者 ID18 のみ） -->
+        <template v-else-if="activeTab === 'score-roadmap' && user?.id === 18">
+          <ScoreRoadmapView class="w-full max-w-6xl mx-auto animate-fade-in" />
         </template>
 
         <!-- 譜面分析（スコア予測）: サポーター限定。非サポーターには課金誘導カードを表示。
