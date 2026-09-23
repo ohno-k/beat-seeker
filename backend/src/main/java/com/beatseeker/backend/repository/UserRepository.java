@@ -84,6 +84,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @org.springframework.data.repository.query.Param("variant") String variant);
 
     /**
+     * 【メソッドの役割】 管理者向けのユーザー名サジェスト（表示名・IIDX ID の部分一致、大文字小文字無視）。
+     *
+     * {@link #searchUsers} は完全一致なので、入力途中で候補を出す用途に使えない。
+     * AAA ロードマップの「ユーザー名で表示」で使う。
+     *
+     * @param q 入力途中の文字列（LIKE の特殊文字はエスケープ済みで渡す）
+     * @return 表示名順に最大 10 件
+     */
+    @Query("SELECT u FROM User u WHERE LOWER(u.displayName) LIKE LOWER(CONCAT('%', :q, '%')) ESCAPE '\\' " +
+           "OR u.iidxId LIKE CONCAT('%', :q, '%') ESCAPE '\\' ORDER BY u.displayName")
+    List<User> suggestByNameOrIidxId(@org.springframework.data.repository.query.Param("q") String q,
+            org.springframework.data.domain.Pageable pageable);
+
+    /**
      * 【メソッドの役割】 全ユーザーの Push Subscription を NULL でクリアする。
      *
      * VAPID キー再生成時など、登録済み Subscription がすべて無効化されたタイミングで呼ぶ。

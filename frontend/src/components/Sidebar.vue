@@ -177,6 +177,8 @@ const handleAction = (event: 'login' | 'logout' | 'editProfile' | 'openAdmin') =
  */
 const primaryItems = computed(() => [
   { id: 'dashboard', label: t('nav.dashboard'), icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+  // AAA ロードマップ: 検証中のため管理者のみ。位置はダッシュボードとスコア一覧の間（ユーザー指定）。
+  { id: 'score-roadmap', label: t('nav.scoreRoadmap'), icon: 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z', allowedUserIds: [18] },
   { id: 'table', label: t('nav.scoreList'), icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
   // タイムラインはユーザ要望によりスコア一覧の直後に置く。
   { id: 'timeline', label: t('nav.timeline'), icon: 'M13 10V3L4 14h7v7l9-11h-7z', requiresAuth: true, hideOnViewing: true },
@@ -201,9 +203,7 @@ const extraItems = computed(() => [
   { id: 'song-avg', label: t('nav.songAvg'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
   { id: 'diff-table', label: t('nav.diffTable'), icon: 'M4 6h16M4 10h16M4 14h16M4 18h16' },
   { id: 'rank-comparison', label: t('nav.rankComparison'), icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3', allowedUserIds: [18, 23, 24] },
-  { id: 'score-spectrum', label: t('nav.scoreSpectrum'), icon: 'M3 3v18h18M7 16c2-6 4-9 6-9s3 5 7 5', allowedUserIds: [18] },
-  { id: 'score-roadmap', label: t('nav.scoreRoadmap'), icon: 'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2z', allowedUserIds: [18] },
-  // 譜面分析（スコア予測）: サポーター限定。非サポーターにも項目自体は見せ、
+  { id: 'score-spectrum', label: t('nav.scoreSpectrum'), icon: 'M3 3v18h18M7 16c2-6 4-9 6-9s3 5 7 5', allowedUserIds: [18] },  // 譜面分析（スコア予測）: サポーター限定。非サポーターにも項目自体は見せ、
   // 開くと SupporterLock（Ko-fi 導線）を表示する。
   { id: 'score-prediction', label: t('nav.scorePrediction'), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', requiresAuth: true, hideOnViewing: true, supporterOnly: true },
   // スコアペア散布図: サポーター限定（最下部）

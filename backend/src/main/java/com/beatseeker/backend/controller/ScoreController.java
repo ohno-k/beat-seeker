@@ -1146,6 +1146,35 @@ public class ScoreController {
     }
 
     /**
+     * 【メソッドの役割】 AAA ロードマップで他ユーザーを表示するための、ユーザー名サジェスト。管理者専用。
+     *
+     * 表示名・IIDX ID の部分一致で最大 10 件（{@code /api/friends/search} は完全一致なので使えない）。
+     *
+     * @param q 入力途中の文字列
+     * @return {@code [{id, displayName, iidxId}]}。管理者以外は 403
+     */
+    @GetMapping("/score-roadmap/user-suggest")
+    public ResponseEntity<List<Map<String, Object>>> suggestRoadmapUsers(Authentication auth, @RequestParam String q) {
+        if (auth == null || !auth.isAuthenticated()
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        String trimmed = q.trim();
+        if (trimmed.isEmpty()) return ResponseEntity.ok(List.of());
+        // LIKE の特殊文字（\ % _）はそのまま文字として探す
+        String escaped = trimmed.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (User u : userRepository.suggestByNameOrIidxId(escaped, org.springframework.data.domain.PageRequest.of(0, 10))) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", u.getId());
+            m.put("displayName", u.getDisplayName());
+            m.put("iidxId", u.getIidxId());
+            result.add(m);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * 【メソッドの役割】 指定譜面の「大台」達成集計用に、全ユーザーのベストスコア一覧（匿名）を返す。
      *
      * 処理の流れ:
