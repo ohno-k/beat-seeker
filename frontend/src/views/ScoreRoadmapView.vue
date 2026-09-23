@@ -327,7 +327,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
 
 <template>
   <div class="space-y-6">
-    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
+    <div class="rm-card bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
       <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
         <div class="flex items-center gap-3">
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコアロードマップ（AAA・MAX-）</h2>
@@ -474,51 +474,59 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
               </span>
             </div>
             <div
-              class="border-b border-slate-100 dark:border-slate-700/60"
+              class="rm-level border-b border-slate-100 dark:border-slate-700/60"
               :class="l.no === myLevel ? 'bg-blue-50/70 dark:bg-blue-900/20' : l.complete ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''"
             >
-              <button class="w-full text-left px-3 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-700/30" @click="toggleLevel(l.no)">
+              <!-- レベルの見出し行: 広い画面は 1 行、スマホは 3 行（番号・状態 / 目標数など / プレー済み・達成）。scoped CSS の rm-head -->
+              <button class="rm-head w-full text-left px-3 py-1.5 text-xs hover:bg-slate-50 dark:hover:bg-slate-700/30" @click="toggleLevel(l.no)">
                 <!-- 状態: 完全制覇 = 金の星 / 達成 = 塗りの丸 / 未達成 = 白抜きの丸 -->
-                <svg v-if="l.complete" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 shrink-0 text-amber-500 dark:text-amber-400" aria-label="完全制覇"><path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.52 4.67a1 1 0 00.95.69h4.91c.97 0 1.37 1.24.59 1.81l-3.98 2.89a1 1 0 00-.36 1.12l1.52 4.67c.3.92-.76 1.69-1.54 1.12l-3.97-2.89a1 1 0 00-1.18 0l-3.97 2.89c-.78.57-1.84-.2-1.54-1.12l1.52-4.67a1 1 0 00-.36-1.12L1.08 10.1c-.78-.57-.38-1.81.59-1.81h4.91a1 1 0 00.95-.69l1.52-4.67z" /></svg>
-                <span
-                  v-else
-                  class="inline-block w-2.5 h-2.5 mx-0.5 rounded-full border-2 shrink-0"
-                  :class="l.cleared ? 'bg-blue-600 border-blue-600 dark:bg-blue-400 dark:border-blue-400' : 'border-slate-300 dark:border-slate-600'"
-                  :aria-label="l.cleared ? 'レベル達成' : '未達成'"
-                ></span>
-                <span class="font-bold font-mono text-slate-900 dark:text-white w-14">Lv.{{ l.no }}</span>
-                <span class="font-mono text-slate-500 w-24">{{ l.from.toFixed(2) }}〜{{ l.to.toFixed(2) }}</span>
-                <span v-if="l.no === 1" class="font-bold text-blue-700 dark:text-blue-300">スタート</span>
-                <span v-if="l.no === maxLevelNo" class="font-bold text-blue-700 dark:text-blue-300">最終レベル</span>
-                <span v-if="l.no === myLevel" class="font-bold text-blue-700 dark:text-blue-300">あなたのレベル</span>
-                <span class="text-slate-500">{{ l.items.length }}目標</span>
-                <span class="text-slate-500" :title="`推定実力 ${l.to.toFixed(2)} 以上の人の割合`">到達者 {{ l.reachShare.toFixed(0) }}%</span>
-                <span class="ml-auto flex items-center gap-3">
+                <span class="rm-status inline-flex">
+                  <svg v-if="l.complete" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" aria-label="完全制覇"><path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.52 4.67a1 1 0 00.95.69h4.91c.97 0 1.37 1.24.59 1.81l-3.98 2.89a1 1 0 00-.36 1.12l1.52 4.67c.3.92-.76 1.69-1.54 1.12l-3.97-2.89a1 1 0 00-1.18 0l-3.97 2.89c-.78.57-1.84-.2-1.54-1.12l1.52-4.67a1 1 0 00-.36-1.12L1.08 10.1c-.78-.57-.38-1.81.59-1.81h4.91a1 1 0 00.95-.69l1.52-4.67z" /></svg>
+                  <span
+                    v-else
+                    class="inline-block w-2.5 h-2.5 mx-0.5 rounded-full border-2"
+                    :class="l.cleared ? 'bg-blue-600 border-blue-600 dark:bg-blue-400 dark:border-blue-400' : 'border-slate-300 dark:border-slate-600'"
+                    :aria-label="l.cleared ? 'レベル達成' : '未達成'"
+                  ></span>
+                </span>
+                <span class="rm-no font-bold font-mono text-slate-900 dark:text-white">Lv.{{ l.no }}</span>
+                <span class="rm-range font-mono text-slate-500">{{ l.from.toFixed(2) }}〜{{ l.to.toFixed(2) }}</span>
+                <span class="rm-meta1 inline-flex flex-wrap items-center gap-x-3">
+                  <span v-if="l.no === 1" class="font-bold text-blue-700 dark:text-blue-300">スタート</span>
+                  <span v-if="l.no === maxLevelNo" class="font-bold text-blue-700 dark:text-blue-300">最終レベル</span>
+                  <span v-if="l.no === myLevel" class="font-bold text-blue-700 dark:text-blue-300">あなたのレベル</span>
+                  <span class="text-slate-500">{{ l.items.length }}目標</span>
+                  <span class="text-slate-500" :title="`推定実力 ${l.to.toFixed(2)} 以上の人の割合`">到達者 {{ l.reachShare.toFixed(0) }}%</span>
+                </span>
+                <span class="rm-meta2 inline-flex items-center gap-x-3 whitespace-nowrap">
                   <span class="text-slate-500" title="遊んだことのある譜面の目標数 / レベルの目標数">プレー済み {{ l.played }}/{{ l.items.length }}</span>
                   <span class="font-mono text-slate-700 dark:text-slate-300" title="達成した目標数 / プレー済みの目標数">達成 {{ l.done }}/{{ l.played }}</span>
-                  <span v-if="l.complete" class="font-bold text-amber-600 dark:text-amber-400 w-20 text-right">完全制覇</span>
-                  <span v-else-if="l.cleared" class="font-bold text-blue-700 dark:text-blue-300 w-20 text-right">レベル達成</span>
-                  <span v-else class="text-slate-500 w-20 text-right">あと {{ l.remaining }} 件</span>
-                  <span class="text-slate-400 w-3">{{ expanded.has(l.no) ? '▾' : '▸' }}</span>
                 </span>
+                <span v-if="l.complete" class="rm-state font-bold text-amber-600 dark:text-amber-400">完全制覇</span>
+                <span v-else-if="l.cleared" class="rm-state font-bold text-blue-700 dark:text-blue-300">レベル達成</span>
+                <span v-else class="rm-state text-slate-500">あと {{ l.remaining }} 件</span>
+                <span class="rm-arrow text-slate-400">{{ expanded.has(l.no) ? '▾' : '▸' }}</span>
               </button>
-              <div v-if="expanded.has(l.no)" class="px-3 pb-2 pl-8">
+              <div v-if="expanded.has(l.no)" class="rm-targets">
                 <div v-if="l.played < l.minPlayed" class="text-xs text-slate-500 py-1">このレベルは、目標を {{ l.minPlayed }} 件以上プレーすると判定されます（現在 {{ l.played }} 件）。</div>
-                <div class="grid gap-x-6" style="grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr))">
-                  <div v-for="t in shown" :key="t.key" class="flex items-center gap-2 text-sm py-1 border-b border-slate-100 dark:border-slate-700/50">
-                    <span class="w-4 text-center shrink-0" :title="achieved(t) ? '達成済み' : played(t) ? '未達成' : '未プレー'">
-                      <svg v-if="achieved(t)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-blue-600 dark:text-blue-400"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clip-rule="evenodd" /></svg>
-                      <span v-else-if="played(t)" class="inline-block w-2 h-2 rounded-full border border-slate-400"></span>
-                      <span v-else class="inline-block w-2 h-0.5 bg-slate-300 dark:bg-slate-600 align-middle"></span>
-                    </span>
-                    <span
-                      class="text-[10px] font-bold font-mono px-1.5 rounded shrink-0 w-11 text-center"
-                      :class="t.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'"
-                    >{{ LINE_LABEL[t.line] }}</span>
-                    <span class="font-mono text-xs text-slate-400 w-8 shrink-0">☆{{ t.c.level }}</span>
-                    <span class="truncate" :class="achieved(t) ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'">{{ chartName(t.c) }}</span>
-                    <span class="ml-auto font-mono text-xs text-slate-500 shrink-0" :title="`${LINE_LABEL[t.line]} 率（${t.c.playerCount}人中）`">{{ t.c[t.line].rate.toFixed(0) }}%</span>
-                    <span class="font-mono text-xs text-slate-700 dark:text-slate-300 w-10 text-right shrink-0" title="推定難度">{{ t.d.toFixed(2) }}</span>
+                <div class="grid gap-x-6" style="grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr))">
+                  <!-- 目標の行: 幅 400px 以上は 1 行、それ未満（スマホ）は曲名を 1 行目に全幅で出し、ラベル類を 2 行目へ。scoped CSS の rm-target -->
+                  <div v-for="t in shown" :key="t.key" class="rm-row border-b border-slate-100 dark:border-slate-700/50">
+                    <div class="rm-target text-sm py-1">
+                      <span class="rm-icon text-center" :title="achieved(t) ? '達成済み' : played(t) ? '未達成' : '未プレー'">
+                        <svg v-if="achieved(t)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-blue-600 dark:text-blue-400"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 111.4-1.4L8 12.6l7.3-7.3a1 1 0 011.4 0z" clip-rule="evenodd" /></svg>
+                        <span v-else-if="played(t)" class="inline-block w-2 h-2 rounded-full border border-slate-400"></span>
+                        <span v-else class="inline-block w-2 h-0.5 bg-slate-300 dark:bg-slate-600 align-middle"></span>
+                      </span>
+                      <span
+                        class="rm-tag text-[10px] font-bold font-mono px-1.5 rounded text-center"
+                        :class="t.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'"
+                      >{{ LINE_LABEL[t.line] }}</span>
+                      <span class="rm-star font-mono text-xs text-slate-400">☆{{ t.c.level }}</span>
+                      <span class="rm-title" :class="achieved(t) ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'">{{ chartName(t.c) }}</span>
+                      <span class="rm-rate font-mono text-xs text-slate-500 text-right" :title="`${LINE_LABEL[t.line]} 率（${t.c.playerCount}人中）`">{{ t.c[t.line].rate.toFixed(0) }}%</span>
+                      <span class="rm-d font-mono text-xs text-slate-700 dark:text-slate-300 text-right" title="推定難度">{{ t.d.toFixed(2) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -543,3 +551,72 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
     />
   </div>
 </template>
+
+<style scoped>
+/*
+ * スマホ対応（2026-09-23）。Tailwind の sm: は古い src/output.css に負けることがあるので、
+ * 幅による切り替えはここ（scoped CSS + コンテナクエリ）に書く。
+ * スマホでは曲名を優先し、達成率・推定難度・レベルの難度範囲は出さない（ユーザー指定: 無理に出さなくてよい）。
+ */
+@media (max-width: 480px) {
+  .rm-card { padding: 0.75rem; }
+}
+
+/* ===== レベルの見出し行 ===== */
+.rm-level { container: rm-level / inline-size; }
+.rm-head {
+  display: grid;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.125rem;
+  grid-template-columns: auto 3.5rem 6rem auto 1fr auto 5rem 0.75rem;
+  grid-template-areas: "status no range meta1 . meta2 state arrow";
+}
+.rm-status { grid-area: status; }
+.rm-no { grid-area: no; }
+.rm-range { grid-area: range; }
+.rm-meta1 { grid-area: meta1; }
+.rm-meta2 { grid-area: meta2; }
+.rm-state { grid-area: state; text-align: right; white-space: nowrap; }
+.rm-arrow { grid-area: arrow; }
+.rm-targets { padding: 0 0.75rem 0.5rem 2rem; }
+
+@container rm-level (max-width: 639px) {
+  .rm-head {
+    column-gap: 0.5rem;
+    grid-template-columns: auto 1fr auto 0.75rem;
+    grid-template-areas:
+      "status no state arrow"
+      ". meta1 meta1 meta1"
+      ". meta2 meta2 meta2";
+  }
+  .rm-range { display: none; }
+  .rm-targets { padding: 0 0.5rem 0.5rem 1.25rem; }
+}
+
+/* ===== 目標（譜面 × ライン）の行 ===== */
+.rm-row { container: rm-row / inline-size; }
+.rm-target {
+  display: grid;
+  align-items: center;
+  column-gap: 0.5rem;
+  grid-template-columns: 1rem 2.75rem 2rem minmax(0, 1fr) auto 2.5rem;
+  grid-template-areas: "icon tag star title rate d";
+}
+.rm-icon { grid-area: icon; }
+.rm-tag { grid-area: tag; }
+.rm-star { grid-area: star; }
+.rm-title { grid-area: title; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rm-rate { grid-area: rate; }
+.rm-d { grid-area: d; }
+
+@container rm-row (max-width: 399px) {
+  .rm-target {
+    grid-template-columns: 1rem 2.75rem 2rem minmax(0, 1fr);
+    grid-template-areas: "icon tag star title";
+  }
+  /* 曲名は省略せず折り返す */
+  .rm-title { white-space: normal; overflow-wrap: anywhere; line-height: 1.3; }
+  .rm-rate, .rm-d { display: none; }
+}
+</style>
