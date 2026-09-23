@@ -1,9 +1,12 @@
 package com.beatseeker.backend.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -21,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 【Service の役割】 AAA ロードマップページ（{@code /api/scores/score-roadmap}、管理者専用）の
- * 推定結果を計算・キャッシュするサービス。
+ * 推定結果を作り、表示するサービス。
  *
  * 目的:
  *  - ANOTHER / LEGGENDARIA 全譜面（☆1〜12）について「AAA（または MAX-）を取る難しさ」を
@@ -30,17 +33,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *    並びが崩れる。そこで実力アンカー付きのラッシュモデルで推定する。
  *
  * モデル（ラインごとに独立に推定。ライン = AAA は桶 160、MAX- は桶 170。桶は理論値の 1/180 単位）:
- *  - P(プレイヤー p が譜面 j でライン到達) = σ(k・(θ_p − d_j))
- *  - ☆11/12 のうち active 難易度表に載っている譜面は d_j を表の値に固定（アンカー）。
- *    これで θ と d がどちらも難易度表と同じ目盛り（11.0〜13.1）になる。
- *  - 手順: (1) アンカーを 30 譜面以上遊んだ人の θ と共通の傾き k を交互に推定
- *          (2) θ を固定して全譜面の d を推定（弱い事前分布: 公式レベルからの目安、σ=1）
- *          (3) d を固定して全ユーザーの θ を全譜面から推定し直す（☆11/12 を遊ばない人にも θ を出す）
+ * （2026-09-23 に AAA / MAX- を 1 本のロードマップへ統合。目標 = 譜面 × ライン、1 人 1 つの θ）
+ *  - P(プレイヤー p が目標 (譜面 j, ライン L) を達成) = σ(k_L・(θ_p − d_{j,L}))
+ *  - ☆11/12 のうち active 難易度表に載っている譜面の MAX- 目標は d を表の値に固定（アンカー）。
+ *    これで θ と全目標の d が難易度表と同じ目盛り（11.0〜13.1）に載り、AAA 目標と MAX- 目標を直接比べられる。
+ *  - 手順: (1) アンカーを 30 譜面以上遊んだ人の θ と傾き k を交互に推定
+ *          (2) θ を固定して、ラインごとに全目標の d と k_L を交互に推定（弱い事前分布: 公式レベルからの目安、σ=1）
+ *          (3) d・k を固定して全ユーザーの θ を両ラインの全目標から推定し直す（☆11/12 を遊ばない人にも θ を出す）
  *  - Newton 法の 1 歩は ±0.3 に制限する（初期値が遠いとヘッセ行列がほぼ 0 で発散するため）。
  *  - 2026-09-23 に Node で同じ手順を本番データに当てた検算: 表 11.0〜11.4 を隠して予測した平均誤差 0.10。
  *
- * 動作は {@link SongScoreSpectrumCacheService} と同じオンデマンド非同期方式
- * （空または 1 時間超で再計算を起動し、計算中はフロントがポーリング）。
+ * 「土台 + 差分」の二層構成（2026-09-23 ユーザー要望: 読み込みを速く）:
+ *  - 土台（バッチ）: 全譜面の d・到達率、全プレイヤーの θ 分布。約 100 万行を読む重い計算（本番 60 秒前後）なので
+ *    {@link #tick()} が 10 分おきに鮮度を見て、無い or {@link #BASE_STALE_AFTER_MS}（3 時間）超なら作り直す。
+ *    作った土台は {@code score_roadmap_snapshot} テーブルに JSON で保存し、再起動後はそこから即座に復元する
+ *    （起動直後に 1 分待たされない）。
+ *  - 差分（表示のたび）: 表示するユーザー 1 人分の歴代ベストだけをその場で読み、土台の d を固定したまま
+ *    達成状況と θ を計算し直す。バッチ後にアップロードされたスコアもすぐ反映される。1 人分なので数十 ms。
+ *  - 他の人のスコア更新が d・到達率・θ 分布に効くのは次のバッチ（最大 3 時間後）から。
+ *
  * 生データ約 100 万行は List&lt;Map&gt; に展開せず、カーソルで受けて int 配列へ詰める。
  */
 @Service
@@ -48,7 +59,13 @@ public class ScoreRoadmapService {
 
     private static final Logger log = LoggerFactory.getLogger(ScoreRoadmapService.class);
 
-    private static final long STALE_AFTER_MS = 60L * 60L * 1000L;
+    /** 土台を作り直す間隔。3 時間。 */
+    private static final long BASE_STALE_AFTER_MS = 3L * 60L * 60L * 1000L;
+    /** 鮮度チェックの間隔。10 分。 */
+    private static final long TICK_INTERVAL_MS = 10L * 60L * 1000L;
+    /** 起動直後の DataInitializer とロック競合しないよう初回チェックを遅らせる。 */
+    private static final long TICK_INITIAL_DELAY_MS = 90L * 1000L;
+
     private static final int STREAM_FETCH_SIZE = 5000;
     private static final String BUILD_STATEMENT_TIMEOUT = "300s";
 
@@ -60,11 +77,18 @@ public class ScoreRoadmapService {
     private static final int MIN_ANCHOR_PLAYS = 30;
     /** θ の事前分布（アンカー推定時）。 */
     private static final double THETA_PRIOR_MU = 11.8, THETA_PRIOR_VAR = 1.0;
-    /** θ の事前分布（全譜面での再推定時。初心者も含むので弱く）。 */
+    /** θ の事前分布（全譜面での推定時。初心者も含むので弱く）。差分計算でも同じ値を使う。 */
     private static final double THETA_ALL_PRIOR_MU = 11.0, THETA_ALL_PRIOR_VAR = 4.0;
     /** d の事前分布の分散。 */
     private static final double D_PRIOR_VAR = 1.0;
     private static final double MAX_STEP = 0.3;
+
+    /** 土台の保存先（1 行だけ持つ）。ddl-auto=none の prod-db プロファイルでも動くよう自前で作る。 */
+    private static final String CREATE_TABLE_SQL =
+        "CREATE TABLE IF NOT EXISTS score_roadmap_snapshot (" +
+        "  id INTEGER PRIMARY KEY," +
+        "  computed_at VARCHAR(40) NOT NULL," +
+        "  payload TEXT NOT NULL)";
 
     private static final String CHARTS_SQL =
         "SELECT sd.id, sd.title, CASE WHEN sd.difficulty = '4' THEN 'ANOTHER' ELSE 'LEGGENDARIA' END AS difficulty_name, " +
@@ -94,107 +118,279 @@ public class ScoreRoadmapService {
         "SELECT b.user_id, b.chart_id, LEAST(b.score * 90 / c.notes, 180) AS bucket " +
         "FROM lifetime_best b JOIN charts c ON c.chart_id = b.chart_id";
 
-    private final DataSource dataSource;
-    private final TransactionTemplate txTemplate;
+    /** 差分: 1 人分の歴代ベスト（曲名・難易度ごとの MAX）。 */
+    private static final String USER_BEST_SQL =
+        "SELECT title, difficulty_name, MAX(score) FROM ( " +
+        "  SELECT title, difficulty_name, score FROM scores " +
+        "   WHERE user_id = ? AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "  UNION ALL " +
+        "  SELECT title, difficulty_name, score FROM past_scores " +
+        "   WHERE user_id = ? AND difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        ") x GROUP BY title, difficulty_name";
 
-    private volatile Snapshot snapshot = null;
-    private volatile Instant computedAt = null;
+    private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+    private final TransactionTemplate readTx;
+    private final TransactionTemplate writeTx;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /** 現在の土台。null は未作成（DB にも無い）。 */
+    private volatile Base base = null;
     private volatile String lastError = null;
     private final AtomicBoolean refreshing = new AtomicBoolean(false);
+    /** DB からの復元を 1 回だけ試みたか。 */
+    private final AtomicBoolean restoreTried = new AtomicBoolean(false);
 
-    public ScoreRoadmapService(DataSource dataSource, PlatformTransactionManager transactionManager) {
+    public ScoreRoadmapService(DataSource dataSource, JdbcTemplate jdbcTemplate,
+            PlatformTransactionManager transactionManager) {
         this.dataSource = dataSource;
-        this.txTemplate = new TransactionTemplate(transactionManager);
-        this.txTemplate.setReadOnly(true);
+        this.jdbcTemplate = jdbcTemplate;
+        this.readTx = new TransactionTemplate(transactionManager);
+        this.readTx.setReadOnly(true);
+        this.writeTx = new TransactionTemplate(transactionManager);
     }
 
-    /** 1 ライン分の推定結果。 */
-    private record LineResult(double k, double[] d, double[] se, int[] nFit, double[] rate, double[] thetaAll) {}
+    /**
+     * 土台（応答にそのまま載せる部分 + 差分計算に使う配列）。不変として扱う。
+     *
+     * @param computedAt 土台を作った時刻（ISO-8601 UTC）
+     * @param model      {kAaa, kMaxMinus, thetas}（応答用。thetas は全プレイヤーの θ 昇順）
+     * @param charts     譜面ごとの {i, title, difficultyName, level, notes, playerCount, aaa{...}, maxMinus{...}}（応答用）
+     */
+    private record Base(String computedAt, Map<String, Object> model, List<Map<String, Object>> charts,
+                        Map<String, Integer> keyToIdx, int[] notes, double[] dAaa, double[] dMaxMinus,
+                        double kAaa, double kMaxMinus) {}
 
-    /** 不変の計算結果一式。 */
-    private record Snapshot(
-            String[] titles, String[] diffs, int[] levels, int[] playerCounts,
-            long[] userIds, Map<Long, Integer> userIdx,
-            int[] userStart, int[] userChart, byte[] userBucket,
-            LineResult aaa, LineResult maxMinus) {}
+    /** 1 ライン分の目標（譜面 × ライン）の推定結果。 */
+    private record LineResult(double k, double[] d, double[] se, int[] nFit, double[] rate) {}
+
+    /** 統合モデルの推定結果（1 人 1 つの θ）。 */
+    private record JointResult(LineResult aaa, LineResult maxMinus, double[] thetaAll) {}
+
+    /** 全体計算の結果一式（土台に変換して捨てる）。 */
+    private record Snapshot(String[] titles, String[] diffs, int[] levels, int[] notes, int[] playerCounts,
+                            JointResult joint) {}
+
+    /** 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。 */
+    private static final int PAYLOAD_VERSION = 2;
+
+    // ===================================================================================
+    // 公開 API
+    // ===================================================================================
 
     /**
-     * 【メソッドの役割】 キャッシュ状態を返し、必要なら再計算を起動する。
+     * 【メソッドの役割】 土台 + 指定ユーザーの差分を返す。
      *
-     * @param force   true なら鮮度に関係なく再計算
-     * @param userId  現在地を表示するユーザー（null なら user は返さない）
+     * 土台がメモリに無ければ DB から復元し、それでも無ければ作成を起動して {@code ready=false} を返す。
+     *
+     * @param force     true なら土台の作り直しを起動する（管理画面の「再計算」）
+     * @param userId    現在地を表示するユーザー（null なら user は返さない）
      * @param userLabel 表示名（そのまま返す）
      */
     public Map<String, Object> requestSnapshot(boolean force, Long userId, String userLabel) {
-        Instant at = computedAt;
-        boolean stale = at == null || System.currentTimeMillis() - at.toEpochMilli() > STALE_AFTER_MS;
-        if ((force || stale) && refreshing.compareAndSet(false, true)) {
-            CompletableFuture.runAsync(this::refresh);
-        }
-        Snapshot s = snapshot;
+        if (base == null) restoreFromDbOnce();
+        if (force || base == null) startRebuild();
+
+        Base b = base;
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("ready", s != null);
+        body.put("ready", b != null);
         body.put("refreshing", refreshing.get());
-        body.put("computedAt", at == null ? null : at.toString());
+        body.put("computedAt", b == null ? null : b.computedAt());
         body.put("error", lastError);
-        if (s == null) return body;
+        if (b == null) return body;
 
-        body.put("lines", Map.of(
-                "aaa", lineMeta(s.aaa()),
-                "maxMinus", lineMeta(s.maxMinus())));
-
-        List<Map<String, Object>> charts = new ArrayList<>(s.titles().length);
-        for (int j = 0; j < s.titles().length; j++) {
-            if (Double.isNaN(s.aaa().d()[j])) continue; // 重複マスタ行
-            Map<String, Object> c = new LinkedHashMap<>();
-            c.put("i", j);
-            c.put("title", s.titles()[j]);
-            c.put("difficultyName", s.diffs()[j]);
-            c.put("level", s.levels()[j]);
-            c.put("playerCount", s.playerCounts()[j]);
-            c.put("aaa", chartLine(s.aaa(), j));
-            c.put("maxMinus", chartLine(s.maxMinus(), j));
-            charts.add(c);
-        }
-        body.put("charts", charts);
-
-        if (userId != null) {
-            Map<String, Object> u = new LinkedHashMap<>();
-            u.put("userId", userId);
-            u.put("label", userLabel);
-            Integer ui = s.userIdx().get(userId);
-            if (ui == null) {
-                u.put("found", false);
-            } else {
-                u.put("found", true);
-                u.put("thetaAaa", round2(s.aaa().thetaAll()[ui]));
-                u.put("thetaMaxMinus", round2(s.maxMinus().thetaAll()[ui]));
-                // [譜面 i, 桶] の組。桶 ≥ 160 が AAA、≥ 170 が MAX-。
-                List<int[]> plays = new ArrayList<>();
-                for (int p = s.userStart()[ui]; p < s.userStart()[ui + 1]; p++) {
-                    plays.add(new int[] { s.userChart()[p], s.userBucket()[p] & 0xFF });
-                }
-                u.put("plays", plays);
-            }
-            body.put("user", u);
-        }
+        body.put("model", b.model());
+        body.put("charts", b.charts());
+        if (userId != null) body.put("user", userDelta(b, userId, userLabel));
         return body;
     }
 
-    private static Map<String, Object> lineMeta(LineResult r) {
-        double[] th = r.thetaAll().clone();
+    /**
+     * 【メソッドの役割】 土台の鮮度チェック（10 分おき）。無い or 3 時間超なら作り直す。
+     *
+     * 起動直後は DB から復元できれば作り直さない（直前のバッチから 3 時間以内なら、そのまま使う）。
+     */
+    @Scheduled(fixedDelay = TICK_INTERVAL_MS, initialDelay = TICK_INITIAL_DELAY_MS)
+    public void tick() {
+        if (base == null) restoreFromDbOnce();
+        Base b = base;
+        boolean stale = b == null
+                || System.currentTimeMillis() - Instant.parse(b.computedAt()).toEpochMilli() > BASE_STALE_AFTER_MS;
+        if (stale) startRebuild();
+    }
+
+    // ===================================================================================
+    // 差分（1 ユーザー分）
+    // ===================================================================================
+
+    /**
+     * 【メソッドの役割】 1 人分の歴代ベストをその場で読み、土台の d 固定で達成状況と θ を出す。
+     *
+     * @return {userId, label, found, theta, plays:[[譜面 i, 桶]...]}
+     */
+    private Map<String, Object> userDelta(Base b, long userId, String label) {
+        List<int[]> plays = new ArrayList<>();
+        jdbcTemplate.query(USER_BEST_SQL, rs -> {
+            Integer i = b.keyToIdx().get(rs.getString(1) + "\u0000" + rs.getString(2));
+            if (i == null) return;
+            int bucket = (int) Math.min(180L, (long) rs.getInt(3) * 90L / b.notes()[i]);
+            plays.add(new int[] { i, bucket });
+        }, userId, userId);
+
+        Map<String, Object> u = new LinkedHashMap<>();
+        u.put("userId", userId);
+        u.put("label", label);
+        u.put("found", !plays.isEmpty());
+        if (!plays.isEmpty()) {
+            u.put("theta", round2(thetaFor(plays, b)));
+            u.put("plays", plays);
+        }
+        return u;
+    }
+
+    /** 【メソッドの役割】 d・k 固定での θ（バッチの手順 (3) と同じ Newton・事前分布。AAA と MAX- の両目標を使う）。 */
+    private static double thetaFor(List<int[]> plays, Base b) {
+        double th = THETA_ALL_PRIOR_MU;
+        for (int it = 0; it < 50; it++) {
+            double g = -(th - THETA_ALL_PRIOR_MU) / THETA_ALL_PRIOR_VAR, h = -1.0 / THETA_ALL_PRIOR_VAR;
+            for (int[] p : plays) {
+                for (int line : new int[] { LINE_AAA, LINE_MAX_MINUS }) {
+                    double k = line == LINE_AAA ? b.kAaa() : b.kMaxMinus();
+                    double dj = line == LINE_AAA ? b.dAaa()[p[0]] : b.dMaxMinus()[p[0]];
+                    double pr = sig(k * (th - dj));
+                    int y = p[1] >= line ? 1 : 0;
+                    g += k * (y - pr);
+                    h -= k * k * pr * (1 - pr);
+                }
+            }
+            double step = clip(g / h);
+            th -= step;
+            if (Math.abs(step) < 1e-5) break;
+        }
+        return th;
+    }
+
+    // ===================================================================================
+    // 土台の作成・保存・復元
+    // ===================================================================================
+
+    /** 【メソッドの役割】 土台の作り直しを非同期で起動する（多重起動しない）。 */
+    private void startRebuild() {
+        if (refreshing.compareAndSet(false, true)) CompletableFuture.runAsync(this::rebuild);
+    }
+
+    private void rebuild() {
+        long start = System.currentTimeMillis();
+        try {
+            Snapshot s = build();
+            Base next = toBase(s, Instant.now().toString());
+            persist(next);
+            this.base = next;
+            this.lastError = null;
+            log.info("Built score roadmap base: {} charts in {} ms", next.charts().size(), System.currentTimeMillis() - start);
+        } catch (Exception e) {
+            this.lastError = e.getClass().getSimpleName() + ": " + e.getMessage();
+            log.error("Failed to build score roadmap base after {} ms (keeping previous)", System.currentTimeMillis() - start, e);
+        } finally {
+            refreshing.set(false);
+        }
+    }
+
+    /** 【メソッドの役割】 土台を JSON にして 1 行テーブルへ保存する（前の行は消す）。 */
+    private void persist(Base b) throws Exception {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("v", PAYLOAD_VERSION);
+        payload.put("model", b.model());
+        payload.put("charts", b.charts());
+        String json = objectMapper.writeValueAsString(payload);
+        writeTx.executeWithoutResult(status -> {
+            jdbcTemplate.execute(CREATE_TABLE_SQL);
+            jdbcTemplate.update("DELETE FROM score_roadmap_snapshot");
+            jdbcTemplate.update("INSERT INTO score_roadmap_snapshot (id, computed_at, payload) VALUES (1, ?, ?)",
+                    b.computedAt(), json);
+        });
+    }
+
+    /** 【メソッドの役割】 DB に保存済みの土台をメモリへ戻す（起動後に 1 回だけ試す）。 */
+    private void restoreFromDbOnce() {
+        if (!restoreTried.compareAndSet(false, true)) return;
+        try {
+            jdbcTemplate.execute(CREATE_TABLE_SQL);
+            // getString で読む（H2 では TEXT が CLOB になり、getObject だと String にならない）
+            List<String[]> rows = jdbcTemplate.query(
+                    "SELECT computed_at, payload FROM score_roadmap_snapshot WHERE id = 1",
+                    (rs, n) -> new String[] { rs.getString(1), rs.getString(2) });
+            if (rows.isEmpty()) return;
+            String computedAt = rows.get(0)[0];
+            Map<String, Object> payload = objectMapper.readValue(rows.get(0)[1],
+                    new TypeReference<Map<String, Object>>() {});
+            Object v = payload.get("v");
+            if (!(v instanceof Number n) || n.intValue() != PAYLOAD_VERSION) {
+                log.info("Stored score roadmap base has old format (v={}), rebuilding", v);
+                return;
+            }
+            @SuppressWarnings("unchecked")
+            Map<String, Object> model = (Map<String, Object>) payload.get("model");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> charts = (List<Map<String, Object>>) payload.get("charts");
+            this.base = baseFromResponse(computedAt, model, charts);
+            log.info("Restored score roadmap base computed at {} ({} charts)", computedAt, charts.size());
+        } catch (Exception e) {
+            log.warn("Could not restore score roadmap base from DB: {}", e.getMessage());
+        }
+    }
+
+    /** 【メソッドの役割】 全体計算の結果を、応答用の形 + 差分計算用の配列に変換する。 */
+    private static Base toBase(Snapshot s, String computedAt) {
+        JointResult jr = s.joint();
+        double[] th = jr.thetaAll().clone();
         Arrays.sort(th);
         double[] rounded = new double[th.length];
         for (int i = 0; i < th.length; i++) rounded[i] = round2(th[i]);
-        Map<String, Object> m = new LinkedHashMap<>();
-        m.put("k", round2(r.k()));
-        m.put("thetas", rounded); // 全ユーザーの θ（昇順）。「この段階に達している人の割合」に使う
-        return m;
+        Map<String, Object> model = new LinkedHashMap<>();
+        // k は差分の θ 計算に使うので丸めすぎない
+        model.put("kAaa", Math.round(jr.aaa().k() * 10000.0) / 10000.0);
+        model.put("kMaxMinus", Math.round(jr.maxMinus().k() * 10000.0) / 10000.0);
+        model.put("thetas", rounded); // 全ユーザーの θ（昇順）。「そのレベルに届いている人の割合」に使う
+        List<Map<String, Object>> charts = new ArrayList<>();
+        for (int j = 0; j < s.titles().length; j++) {
+            if (Double.isNaN(jr.aaa().d()[j])) continue; // 重複マスタ行
+            Map<String, Object> c = new LinkedHashMap<>();
+            c.put("i", charts.size()); // 応答内の位置（plays の譜面番号と共通）
+            c.put("title", s.titles()[j]);
+            c.put("difficultyName", s.diffs()[j]);
+            c.put("level", s.levels()[j]);
+            c.put("notes", s.notes()[j]);
+            c.put("playerCount", s.playerCounts()[j]);
+            c.put("aaa", chartLine(jr.aaa(), j));
+            c.put("maxMinus", chartLine(jr.maxMinus(), j));
+            charts.add(c);
+        }
+        return baseFromResponse(computedAt, model, charts);
+    }
+
+    /** 【メソッドの役割】 応答用の形（DB 保存形式と同じ）から差分計算用の配列を組み立てる。 */
+    @SuppressWarnings("unchecked")
+    private static Base baseFromResponse(String computedAt, Map<String, Object> model, List<Map<String, Object>> charts) {
+        int n = charts.size();
+        Map<String, Integer> keyToIdx = new HashMap<>(n * 2);
+        int[] notes = new int[n];
+        double[] dAaa = new double[n], dMm = new double[n];
+        for (int i = 0; i < n; i++) {
+            Map<String, Object> c = charts.get(i);
+            keyToIdx.put(c.get("title") + "\u0000" + c.get("difficultyName"), i);
+            notes[i] = ((Number) c.get("notes")).intValue();
+            dAaa[i] = ((Number) ((Map<String, Object>) c.get("aaa")).get("d")).doubleValue();
+            dMm[i] = ((Number) ((Map<String, Object>) c.get("maxMinus")).get("d")).doubleValue();
+        }
+        double kAaa = ((Number) model.get("kAaa")).doubleValue();
+        double kMm = ((Number) model.get("kMaxMinus")).doubleValue();
+        return new Base(computedAt, model, charts, keyToIdx, notes, dAaa, dMm, kAaa, kMm);
     }
 
     private static Map<String, Object> chartLine(LineResult r, int j) {
         Map<String, Object> m = new LinkedHashMap<>();
-        m.put("d", round2(r.d()[j]));
+        m.put("d", Math.round(r.d()[j] * 10000.0) / 10000.0);
         m.put("se", round2(r.se()[j]));
         m.put("n", r.nFit()[j]);
         m.put("rate", Math.round(r.rate()[j] * 1000.0) / 10.0);
@@ -205,34 +401,22 @@ public class ScoreRoadmapService {
         return Math.round(v * 100.0) / 100.0;
     }
 
-    /** 【メソッドの役割】 再計算本体。呼び出し側で refreshing を true にしてから呼ぶ。 */
-    private void refresh() {
-        long start = System.currentTimeMillis();
-        try {
-            this.snapshot = build();
-            this.computedAt = Instant.now();
-            this.lastError = null;
-            log.info("Built score roadmap: {} charts, {} users in {} ms",
-                    snapshot.titles().length, snapshot.userIds().length, System.currentTimeMillis() - start);
-        } catch (Exception e) {
-            this.lastError = e.getClass().getSimpleName() + ": " + e.getMessage();
-            log.error("Failed to build score roadmap after {} ms", System.currentTimeMillis() - start, e);
-        } finally {
-            refreshing.set(false);
-        }
-    }
+    private static double sig(double x) { return 1.0 / (1.0 + Math.exp(-x)); }
+    private static double clip(double v) { return Math.max(-MAX_STEP, Math.min(MAX_STEP, v)); }
+
+    // ===================================================================================
+    // 全体計算（土台の中身）
+    // ===================================================================================
 
     private Snapshot build() {
-        // 手順1: 譜面マスタと難易度表（アンカー）
+        // 手順1: 譜面マスタと難易度表（アンカー）、生データ（user_id, 譜面 idx, 桶）を int 配列に詰める
         List<Object[]> chartRows = new ArrayList<>();
         Map<String, Double> rankOf = new HashMap<>();
-        // 生データは int 配列に詰める（user_id, 譜面 idx, 桶）
         IntList rowUser = new IntList(), rowChart = new IntList(), rowBucket = new IntList();
         Map<Long, Integer> userIdx = new HashMap<>();
-        List<Long> userIdList = new ArrayList<>();
         Map<Long, Integer> chartIdxById = new HashMap<>();
 
-        txTemplate.execute(status -> {
+        readTx.execute(status -> {
             JdbcTemplate jdbc = new JdbcTemplate(dataSource);
             jdbc.setFetchSize(STREAM_FETCH_SIZE);
             String product = jdbc.execute((ConnectionCallback<String>) c -> c.getMetaData().getDatabaseProductName());
@@ -241,7 +425,7 @@ public class ScoreRoadmapService {
             }
             jdbc.query(CHARTS_SQL, rs -> {
                 chartIdxById.put(rs.getLong(1), chartRows.size());
-                chartRows.add(new Object[] { rs.getString(2), rs.getString(3), rs.getInt(4) });
+                chartRows.add(new Object[] { rs.getString(2), rs.getString(3), rs.getInt(4), rs.getInt(5) });
             });
             jdbc.query(RANKS_SQL, rs -> {
                 try {
@@ -256,9 +440,8 @@ public class ScoreRoadmapService {
                 long uid = rs.getLong(1);
                 Integer ui = userIdx.get(uid);
                 if (ui == null) {
-                    ui = userIdList.size();
+                    ui = userIdx.size();
                     userIdx.put(uid, ui);
-                    userIdList.add(uid);
                 }
                 rowUser.add(ui);
                 rowChart.add(ci);
@@ -267,9 +450,9 @@ public class ScoreRoadmapService {
             return null;
         });
 
-        int nc = chartRows.size(), nu = userIdList.size(), nr = rowUser.size;
+        int nc = chartRows.size(), nu = userIdx.size(), nr = rowUser.size;
         String[] titles = new String[nc], diffs = new String[nc];
-        int[] levels = new int[nc];
+        int[] levels = new int[nc], notes = new int[nc];
         double[] table = new double[nc], prior = new double[nc];
         boolean[] dup = new boolean[nc];
         Map<String, Integer> keyCount = new HashMap<>();
@@ -278,6 +461,7 @@ public class ScoreRoadmapService {
             titles[j] = (String) r[0];
             diffs[j] = (String) r[1];
             levels[j] = (Integer) r[2];
+            notes[j] = (Integer) r[3];
             keyCount.merge(titles[j] + "\u0000" + diffs[j], 1, Integer::sum);
         }
         for (int j = 0; j < nc; j++) {
@@ -310,13 +494,7 @@ public class ScoreRoadmapService {
         for (int j = 0; j < nc; j++) playerCounts[j] = chartStart[j + 1] - chartStart[j];
 
         Model m = new Model(nc, nu, table, prior, dup, userStart, userChart, userBucket, chartStart, chartUser, chartBucket);
-        LineResult aaa = m.fit(LINE_AAA);
-        LineResult mm = m.fit(LINE_MAX_MINUS);
-
-        long[] userIds = new long[nu];
-        for (int i = 0; i < nu; i++) userIds[i] = userIdList.get(i);
-        return new Snapshot(titles, diffs, levels, playerCounts, userIds, userIdx,
-                userStart, userChart, userBucket, aaa, mm);
+        return new Snapshot(titles, diffs, levels, notes, playerCounts, m.fitJoint());
     }
 
     /** 推定計算（純粋計算。DB に触らない）。 */
@@ -324,11 +502,20 @@ public class ScoreRoadmapService {
                          int[] userStart, int[] userChart, byte[] userBucket,
                          int[] chartStart, int[] chartUser, byte[] chartBucket) {
 
-        private static double sig(double x) { return 1.0 / (1.0 + Math.exp(-x)); }
-        private static double clip(double v) { return Math.max(-MAX_STEP, Math.min(MAX_STEP, v)); }
+        /** AAA 目標の d の事前分布は、同じ譜面の MAX- の目安よりこれだけ易しい所に置く（試算の中央値差 0.76）。 */
+        private static final double AAA_PRIOR_SHIFT = 0.7;
+        /** (2) の d と k の交互推定の回数。 */
+        private static final int JOINT_ROUNDS = 8;
 
-        LineResult fit(int line) {
-            // (1) アンカーを十分遊んだユーザーの θ と k
+        /**
+         * 統合モデル: 1 人 1 つの θ、目標 = 譜面 × ライン（AAA / MAX-）、ラインごとの傾き k。
+         *  (1) 難易度表にある譜面の MAX- 目標をアンカー（d = 表の値）にして θ と k を推定
+         *  (2) θ 固定で、ラインごとに全目標の d と k を交互に推定（AAA 目標も同じ目盛りに載る）
+         *  (3) d・k 固定で全ユーザーの θ を AAA・MAX- 両方の目標から推定し直す
+         * 2026-09-23 の Node 試作（本番データ）: k は AAA 6.72 / MAX- 6.73、全譜面で MAX- 目標 > AAA 目標（差の中央値 0.76）。
+         */
+        JointResult fitJoint() {
+            // (1) アンカー（MAX- 目標）を十分遊んだユーザーの θ と k
             int[] anchorCount = new int[nu];
             for (int u = 0; u < nu; u++) {
                 for (int p = userStart[u]; p < userStart[u + 1]; p++) if (!Double.isNaN(table[userChart[p]])) anchorCount[u]++;
@@ -336,10 +523,10 @@ public class ScoreRoadmapService {
             boolean[] fitUser = new boolean[nu];
             double[] theta = new double[nu];
             for (int u = 0; u < nu; u++) { fitUser[u] = anchorCount[u] >= MIN_ANCHOR_PLAYS; theta[u] = THETA_PRIOR_MU; }
-            double k = 3.0;
+            double kAnchor = 3.0;
             for (int outer = 0; outer < 15; outer++) {
                 for (int u = 0; u < nu; u++) {
-                    if (fitUser[u]) theta[u] = estTheta(u, k, theta[u], table, line, THETA_PRIOR_MU, THETA_PRIOR_VAR);
+                    if (fitUser[u]) theta[u] = estThetaOneLine(u, kAnchor, theta[u], table, LINE_MAX_MINUS);
                 }
                 double g = 0, h = 0;
                 for (int u = 0; u < nu; u++) {
@@ -347,63 +534,108 @@ public class ScoreRoadmapService {
                     for (int p = userStart[u]; p < userStart[u + 1]; p++) {
                         double d = table[userChart[p]];
                         if (Double.isNaN(d)) continue;
-                        double x = theta[u] - d, pr = sig(k * x);
-                        int y = (userBucket[p] & 0xFF) >= line ? 1 : 0;
+                        double x = theta[u] - d, pr = sig(kAnchor * x);
+                        int y = (userBucket[p] & 0xFF) >= LINE_MAX_MINUS ? 1 : 0;
+                        g += x * (y - pr);
+                        h -= x * x * pr * (1 - pr);
+                    }
+                }
+                if (h < 0) kAnchor -= g / h;
+            }
+
+            // (2) θ 固定で、ラインごとに d と k を交互推定
+            LineResult aaa = fitLine(LINE_AAA, kAnchor, fitUser, theta);
+            LineResult mm = fitLine(LINE_MAX_MINUS, kAnchor, fitUser, theta);
+
+            // (3) d・k 固定で全ユーザーの θ を両ラインの目標から
+            double[] thetaAll = new double[nu];
+            for (int u = 0; u < nu; u++) {
+                double th = fitUser[u] ? theta[u] : THETA_ALL_PRIOR_MU;
+                for (int it = 0; it < 50; it++) {
+                    double g = -(th - THETA_ALL_PRIOR_MU) / THETA_ALL_PRIOR_VAR, h = -1.0 / THETA_ALL_PRIOR_VAR;
+                    for (int p = userStart[u]; p < userStart[u + 1]; p++) {
+                        int c = userChart[p], b = userBucket[p] & 0xFF;
+                        for (LineResult lr : new LineResult[] { aaa, mm }) {
+                            double dj = lr.d()[c];
+                            if (Double.isNaN(dj)) continue;
+                            int line = lr == aaa ? LINE_AAA : LINE_MAX_MINUS;
+                            double pr = sig(lr.k() * (th - dj));
+                            g += lr.k() * ((b >= line ? 1 : 0) - pr);
+                            h -= lr.k() * lr.k() * pr * (1 - pr);
+                        }
+                    }
+                    double step = clip(g / h);
+                    th -= step;
+                    if (Math.abs(step) < 1e-5) break;
+                }
+                thetaAll[u] = th;
+            }
+            return new JointResult(aaa, mm, thetaAll);
+        }
+
+        /** (2) の 1 ライン分: θ 固定で全譜面の d（弱い事前分布）と、そのラインの k を交互に推定する。 */
+        private LineResult fitLine(int line, double k0, boolean[] fitUser, double[] theta) {
+            double[] d = new double[nc], se = new double[nc], rate = new double[nc];
+            int[] nFit = new int[nc];
+            double shift = line == LINE_AAA ? AAA_PRIOR_SHIFT : 0.0;
+            for (int j = 0; j < nc; j++) {
+                int hit = 0;
+                for (int p = chartStart[j]; p < chartStart[j + 1]; p++) if ((chartBucket[p] & 0xFF) >= line) hit++;
+                int all = chartStart[j + 1] - chartStart[j];
+                rate[j] = all == 0 ? 0 : (double) hit / all;
+                d[j] = dup[j] ? Double.NaN : prior[j] - shift;
+            }
+            double k = k0;
+            for (int round = 0; round < JOINT_ROUNDS; round++) {
+                for (int j = 0; j < nc; j++) {
+                    if (dup[j]) { se[j] = Double.NaN; continue; }
+                    double mu = prior[j] - shift, dj = d[j], info = 1.0 / D_PRIOR_VAR;
+                    int n = 0;
+                    for (int it = 0; it < 200; it++) {
+                        double g = -(dj - mu) / D_PRIOR_VAR, h = -1.0 / D_PRIOR_VAR;
+                        info = 1.0 / D_PRIOR_VAR;
+                        n = 0;
+                        for (int p = chartStart[j]; p < chartStart[j + 1]; p++) {
+                            int u = chartUser[p];
+                            if (!fitUser[u]) continue;
+                            n++;
+                            double pr = sig(k * (theta[u] - dj));
+                            int y = (chartBucket[p] & 0xFF) >= line ? 1 : 0;
+                            g -= k * (y - pr);
+                            double w = k * k * pr * (1 - pr);
+                            h -= w;
+                            info += w;
+                        }
+                        double step = clip(g / h);
+                        dj -= step;
+                        if (Math.abs(step) < 1e-6) break;
+                    }
+                    d[j] = dj;
+                    se[j] = 1.0 / Math.sqrt(info);
+                    nFit[j] = n;
+                }
+                // k のニュートン 1 歩（θ, d 固定）
+                double g = 0, h = 0;
+                for (int j = 0; j < nc; j++) {
+                    if (dup[j]) continue;
+                    for (int p = chartStart[j]; p < chartStart[j + 1]; p++) {
+                        int u = chartUser[p];
+                        if (!fitUser[u]) continue;
+                        double x = theta[u] - d[j], pr = sig(k * x);
+                        int y = (chartBucket[p] & 0xFF) >= line ? 1 : 0;
                         g += x * (y - pr);
                         h -= x * x * pr * (1 - pr);
                     }
                 }
                 if (h < 0) k -= g / h;
             }
-
-            // (2) θ 固定で全譜面の d
-            double[] d = new double[nc], se = new double[nc], rate = new double[nc];
-            int[] nFit = new int[nc];
-            for (int j = 0; j < nc; j++) {
-                int hit = 0;
-                for (int p = chartStart[j]; p < chartStart[j + 1]; p++) if ((chartBucket[p] & 0xFF) >= line) hit++;
-                int all = chartStart[j + 1] - chartStart[j];
-                rate[j] = all == 0 ? 0 : (double) hit / all;
-                if (dup[j]) { d[j] = Double.NaN; se[j] = Double.NaN; continue; }
-                double dj = prior[j], info = 1.0 / D_PRIOR_VAR;
-                int n = 0;
-                for (int it = 0; it < 200; it++) {
-                    double g = -(dj - prior[j]) / D_PRIOR_VAR, h = -1.0 / D_PRIOR_VAR;
-                    info = 1.0 / D_PRIOR_VAR;
-                    n = 0;
-                    for (int p = chartStart[j]; p < chartStart[j + 1]; p++) {
-                        int u = chartUser[p];
-                        if (!fitUser[u]) continue;
-                        n++;
-                        double pr = sig(k * (theta[u] - dj));
-                        int y = (chartBucket[p] & 0xFF) >= line ? 1 : 0;
-                        g -= k * (y - pr);
-                        double w = k * k * pr * (1 - pr);
-                        h -= w;
-                        info += w;
-                    }
-                    double step = clip(g / h);
-                    dj -= step;
-                    if (Math.abs(step) < 1e-6) break;
-                }
-                d[j] = dj;
-                se[j] = 1.0 / Math.sqrt(info);
-                nFit[j] = n;
-            }
-
-            // (3) d 固定で全ユーザーの θ を全譜面から
-            double[] thetaAll = new double[nu];
-            for (int u = 0; u < nu; u++) {
-                thetaAll[u] = estTheta(u, k, fitUser[u] ? theta[u] : THETA_ALL_PRIOR_MU, d, line,
-                        THETA_ALL_PRIOR_MU, THETA_ALL_PRIOR_VAR);
-            }
-            return new LineResult(k, d, se, nFit, rate, thetaAll);
+            return new LineResult(k, d, se, nFit, rate);
         }
 
-        /** ユーザー u の θ を、難易度 dOf（NaN の譜面は無視）固定で Newton 推定する。 */
-        private double estTheta(int u, double k, double th, double[] dOf, int line, double mu, double var) {
+        /** (1) 用: ユーザー u の θ を、1 ラインの難易度 dOf（NaN の譜面は無視）固定で Newton 推定する（事前分布はアンカー用）。 */
+        private double estThetaOneLine(int u, double k, double th, double[] dOf, int line) {
             for (int it = 0; it < 50; it++) {
-                double g = -(th - mu) / var, h = -1.0 / var;
+                double g = -(th - THETA_PRIOR_MU) / THETA_PRIOR_VAR, h = -1.0 / THETA_PRIOR_VAR;
                 for (int p = userStart[u]; p < userStart[u + 1]; p++) {
                     double d = dOf[userChart[p]];
                     if (Double.isNaN(d)) continue;

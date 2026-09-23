@@ -45,7 +45,7 @@ export const ja = {
   'nav.skillTree': 'スキルツリー',
   'nav.rankComparison': '曲別平均スコアレート',
   'nav.scoreSpectrum': 'スコア分布',
-  'nav.scoreRoadmap': 'AAAロードマップ',
+  'nav.scoreRoadmap': 'スコアロードマップ',
   'nav.scoreScatter': 'スコアペア散布図',
   // ── 伸びしろランキング（選曲アシスト）/ スコアペア散布図 共通 ──
   'arcade.potentialBtn': '伸びしろランキング',

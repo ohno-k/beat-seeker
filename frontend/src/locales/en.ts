@@ -43,7 +43,7 @@ export const en = {
   'nav.skillTree': 'Skill Tree',
   'nav.rankComparison': 'Avg Score Rate',
   'nav.scoreSpectrum': 'Score Spectrum',
-  'nav.scoreRoadmap': 'AAA Roadmap',
+  'nav.scoreRoadmap': 'Score Roadmap',
   'nav.scoreScatter': 'Score Pair Scatter',
   // ── Growth Potential (arcade) / Score Pair Scatter ──
   'arcade.potentialBtn': 'Growth Potential',
