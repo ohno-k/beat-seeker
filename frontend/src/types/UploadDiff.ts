@@ -1,4 +1,5 @@
 import type { RankInfo } from '../utils/beatTier';
+import type { LeagueReportSnapshot } from '../utils/leagueReport';
 
 export interface FolderAnnouncement {
     folder: string; // e.g. "12.0"
@@ -70,4 +71,9 @@ export interface UploadDiffResult {
     oldRateTier: RankInfo | null;
     newRateTier: RankInfo | null;
     folderAnnouncements?: FolderAnnouncement[];
+    /**
+     * アップロード時点のリーグモードの進捗（2026-09-23〜）。今回の更新に課題曲が含まれたときだけ入る。
+     * 成長記録の league_json から復元するので、過去のレポートでもその週のリーグが表示される。
+     */
+    league?: LeagueReportSnapshot | null;
 }

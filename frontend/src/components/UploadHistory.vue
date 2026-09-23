@@ -25,6 +25,7 @@ const { t, currentLang } = useI18n();
 import UploadResultModal from './UploadResultModal.vue';
 import RankIcon from './RankIcon.vue';
 import type { UploadDiffResult } from '../types/UploadDiff';
+import { parseLeagueSnapshot } from '../utils/leagueReport';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const { user, isLoggedIn, authHeaders } = useAuth();
@@ -111,6 +112,8 @@ const groupedList = computed(() => {
 
     return {
       ...latest,
+      // リーグ進捗はその日のうち最後に保存されたもの（課題曲を更新したアップロードの最新）を見せる
+      leagueJson: items.find((i: any) => i.leagueJson)?.leagueJson ?? null,
       _isGrouped: true,
       _dateKey: dateKey,
       _itemCount: items.length,
@@ -191,7 +194,9 @@ const openDiffModal = (item: any) => {
       oldTotalRatePt: Math.max(0, item.totalRatePt - item.ratePtIncrease),
       newTotalRatePt: item.totalRatePt,
       oldRateTier: getRateTierRankInfo(Math.max(0, item.totalRatePt - item.ratePtIncrease)),
-      newRateTier: getRateTierRankInfo(item.totalRatePt)
+      newRateTier: getRateTierRankInfo(item.totalRatePt),
+      // アップロード時点のリーグ進捗（2026-09-23 以降、課題曲を更新したときだけ保存されている）
+      league: parseLeagueSnapshot(item.leagueJson),
     };
     selectedDate.value = item.date ?? null;
     isModalOpen.value = true;

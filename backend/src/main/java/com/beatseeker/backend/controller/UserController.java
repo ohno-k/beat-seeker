@@ -214,6 +214,7 @@ public class UserController {
             m.put("beatPtIncrease", log.getBeatPtIncrease());
             m.put("updatedCount", log.getUpdatedCount());
             m.put("diffJson", log.getDiffJson());
+            m.put("leagueJson", log.getLeagueJson());
             m.put("totalRatePt", log.getTotalRatePt());
             return m;
         }).toList();

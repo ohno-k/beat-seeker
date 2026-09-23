@@ -118,6 +118,9 @@ import ImportVersionConfirmModal from './components/ImportVersionConfirmModal.vu
 import type { ScoreData } from './types/ScoreData';
 import { flattenScores, getSongMaxScore } from './utils/scoreData';
 import type { UploadDiffResult, UpdatedSong, FolderAnnouncement } from './types/UploadDiff';
+import { buildLeagueSnapshot } from './utils/leagueReport';
+import type { LeagueReportSnapshot } from './utils/leagueReport';
+import type { LeagueCurrent } from './composables/useLeague';
 import { getRankInfo, getRateTierRankInfo, calculateTotalPoints, calculatePoints, calculateScoreRateTierPoints, getFolderRankInfoByRate } from './utils/beatTier';
 import { diffTable as diffTableRanksRef } from './composables/useGameData';
 import { useAuth } from './composables/useAuth';
@@ -495,6 +498,29 @@ const isSidebarOpen = ref(false);
 
 const { user, isLoggedIn, logout, isLoading: authLoading, authHeaders } = useAuth();
 const { upload, saveHistoryLog } = useScoreUpload();
+
+/**
+ * 【関数の役割】 アップロード直後のリーグ進捗をレポート用に取る（2026-09-23〜）。
+ *
+ * 今回の更新に開催中リーグの課題曲が含まれるときだけスナップショットを返す（それ以外・未参加・取得失敗は null）。
+ * 成長記録に一緒に保存し、過去のレポートでもその週のリーグが固定で表示されるようにする。
+ * 10 秒で打ち切ってレポート表示を長く止めない。
+ */
+const buildLeagueForReport = async (songs: UpdatedSong[]): Promise<LeagueReportSnapshot | null> => {
+  const uid = user.value?.id;
+  if (!uid || songs.length === 0) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch(`${API_BASE}/api/league/current?ladder=score`, { headers: authHeaders(), signal: controller.signal });
+    if (!res.ok) return null;
+    return buildLeagueSnapshot((await res.json()) as LeagueCurrent, uid, songs);
+  } catch {
+    return null; // 握り潰し: リーグ欄はレポートの付加情報なので、取れなければ出さないだけ
+  } finally {
+    clearTimeout(timer);
+  }
+};
 
 const { fetchMyScores, fetchUserScores, fetchTopRankerProfile, fetchArenaTopRankerProfile, isFetching } = useScores();
 const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -1687,6 +1713,9 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
           })
           .sort((a, b) => b.beatPtIncrease - a.beatPtIncrease || b.scoreIncrease - a.scoreIncrease);
 
+        // 今回の更新に課題曲が含まれるときだけ、アップロード時点のリーグ進捗を残す（成長記録にも保存）。
+        const leagueSnapshot = await buildLeagueForReport(reportSongs);
+
         diffResult.value = {
             oldTotalBeatPt,
             newTotalBeatPt: accurateTotalBeatPt,
@@ -1699,6 +1728,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
             oldRateTier: getRateTierRankInfo(oldTotalRatePt),
             newRateTier: getRateTierRankInfo(accurateTotalRatePt),
             folderAnnouncements: computeFolderAnnouncements(oldFlat, allFlatAfterUpload),
+            league: leagueSnapshot,
         };
 
         // 実際にスコアが上がった譜面がある、または初回アップロード（旧データ空 → 新データあり）なら
@@ -1717,7 +1747,8 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
                     JSON.stringify(reportSongs),
                     newTierLabel,
                     oldTierLabel,
-                    accurateTotalRatePt
+                    accurateTotalRatePt,
+                    leagueSnapshot ? JSON.stringify(leagueSnapshot) : undefined
                 );
                 console.log("History log saved successfully.");
             } catch (err) {
@@ -1781,6 +1812,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
             await loadSavedScores();
             errorMsg.value = t('app.error.uploadFailed');
             const guestNewTotalRatePt = calcFlatRatePt(newFlat);
+            const leagueSnapshot = await buildLeagueForReport(updatedSongs);
             diffResult.value = {
                 oldTotalBeatPt,
                 newTotalBeatPt,
@@ -1793,6 +1825,7 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
                 oldRateTier: getRateTierRankInfo(oldTotalRatePt),
                 newRateTier: getRateTierRankInfo(guestNewTotalRatePt),
                 folderAnnouncements: computeFolderAnnouncements(oldFlat, newFlat),
+                league: leagueSnapshot,
             };
             isDiffModalOpen.value = true;
             try {
@@ -1805,7 +1838,8 @@ const handleFileDropped = async (file: File, origin?: 'bookmarklet', pageVersion
                     JSON.stringify(updatedSongs),
                     newTierLabel,
                     oldTierLabel,
-                    guestNewTotalRatePt
+                    guestNewTotalRatePt,
+                    leagueSnapshot ? JSON.stringify(leagueSnapshot) : undefined
                 );
                 console.log("History log saved (fallback).");
             } catch (histErr) {

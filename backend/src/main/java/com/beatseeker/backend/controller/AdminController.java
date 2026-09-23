@@ -337,6 +337,7 @@ public class AdminController {
             snapshotData.put("beatPtIncrease", log.getBeatPtIncrease());
             snapshotData.put("updatedCount", log.getUpdatedCount());
             snapshotData.put("diffJson", log.getDiffJson());
+            snapshotData.put("leagueJson", log.getLeagueJson());
             snapshotData.put("totalRatePt", log.getTotalRatePt());
 
             history.add(snapshotData);

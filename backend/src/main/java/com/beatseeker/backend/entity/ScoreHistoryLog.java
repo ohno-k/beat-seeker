@@ -89,6 +89,16 @@ public class ScoreHistoryLog {
     private String diffJson;
 
     /**
+     * アップロード時点のリーグモードの進捗（プレイ成果レポートのリーグ欄）の JSON。2026-09-23 追加。
+     *
+     * 今回の更新に開催中リーグの課題曲が含まれたときだけ、フロントの {@code /save-history-log} が入れる
+     * （形はフロントの utils/leagueReport.ts の LeagueReportSnapshot）。成長記録から開いた過去のレポートで
+     * 「その週のリーグ」を固定で見せるために使う。null = 課題曲の更新なし or 導入前の行。
+     */
+    @Column(columnDefinition = "TEXT")
+    private String leagueJson;
+
+    /**
      * フロントの {@code /save-history-log} がこの行を上書き済みかどうか。
      *
      * この行はまず {@code /api/scores/upload} がサーバー側で作る（false）。続けてフロントが

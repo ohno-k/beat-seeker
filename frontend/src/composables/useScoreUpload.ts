@@ -158,12 +158,15 @@ export function useScoreUpload() {
      *
      * BeatPt / RatePt の推移・Tier 変動をユーザー個別の履歴に残すため、
      * `upload()` 成功後に呼ぶ設計。
+     *
+     * @param leagueJson アップロード時点のリーグ進捗（utils/leagueReport.ts のスナップショット）。
+     *                   今回の更新に課題曲が無ければ undefined。成長記録から開いたレポートで使う。
      */
-    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number): Promise<void> => {
+    const saveHistoryLog = async (totalBeatPt: number, beatPtIncrease: number, updatedCount: number, diffJson: string, tierName?: string, prevTierName?: string, totalRatePt?: number, leagueJson?: string): Promise<void> => {
         const res = await fetch(`${API_BASE}/api/scores/save-history-log`, {
             method: 'POST',
             headers: authHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, totalRatePt: totalRatePt ?? 0, tierName, prevTierName }),
+            body: JSON.stringify({ totalBeatPt, beatPtIncrease, updatedCount, diffJson, totalRatePt: totalRatePt ?? 0, tierName, prevTierName, leagueJson }),
         });
 
         if (!res.ok) {

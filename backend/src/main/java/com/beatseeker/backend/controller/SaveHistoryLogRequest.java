@@ -23,5 +23,7 @@ public record SaveHistoryLogRequest(
         /** 今回到達したティア名（RATE）。 */
         String tierName,
         /** 直前のティア名。ティア昇降格判定に使う。 */
-        String prevTierName) {
+        String prevTierName,
+        /** アップロード時点のリーグ進捗 JSON（課題曲を更新したときだけ。無ければ null）。 */
+        String leagueJson) {
 }

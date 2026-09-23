@@ -102,12 +102,13 @@
               </div>
             </div>
 
-            <!-- リーグモードの進捗（開催中の週に参加していれば表示。今回反映後の順位・有効曲・見込みPT） -->
+            <!-- リーグモードの進捗（今回の更新に課題曲が含まれたときだけ。アップロード時点の順位・有効曲・見込みPT を保存したもの） -->
             <div v-if="leagueProgress" class="card p-3">
               <div class="flex items-center gap-2 flex-wrap">
                 <DivisionIcon :tier="leagueProgress.tier" :size="24" class="shrink-0" />
                 <p class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ t('report.league.title') }}</p>
                 <span class="badge">{{ divisionName(leagueProgress.tier) }} / {{ t('league.groupN', { n: leagueProgress.groupIndex + 1 }) }}</span>
+                <span v-if="leagueWeekLabel" class="ml-auto text-[11px] font-bold text-slate-400 tabular-nums">{{ leagueWeekLabel }}</span>
               </div>
               <div class="mt-2 grid grid-cols-4 gap-2">
                 <div class="rounded-md bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/60 px-2 py-1.5 text-center">
@@ -762,7 +763,6 @@ import RankIcon from './RankIcon.vue';
 import DivisionIcon from './DivisionIcon.vue';
 import UploadReportShareImage from './UploadReportShareImage.vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
-import { useLeague } from '../composables/useLeague';
 import { usePastScores, chartKey as pastChartKey } from '../composables/usePastScores';
 import {
   ROADMAP_LINES, ROADMAP_LINE_BUCKET, ROADMAP_LINE_LABEL, remainingToClear, scoreToBucket, summarizeRoadmap,
@@ -788,48 +788,26 @@ const props = defineProps<{
 
 const { authHeaders, user } = useAuth();
 const { showRateTier } = useRateTierVisibility();
-const league = useLeague();
 /** 過去作ベスト（App がアップロード時に取得済み。ロードマップの「更新前」を作るのに使う）。 */
 const { pastBestByChart } = usePastScores();
 
-/** リーグ課題曲 1 曲分の内訳（自己ベストとラインの比較・今回の更新有無）。 */
-interface LeagueSongProgress {
-  slot: number;
-  title: string;
-  difficultyName: string;
-  level: number | null;
-  /** リザルトが有効か（週内プレー + ライン超え）。 */
-  valid: boolean;
-  /** 現在の自己ベスト EX とそのスコアレート(%)。未プレーは null。 */
-  bestEx: number | null;
-  rate: number | null;
-  /** グループ共通のライン（週開始時点の最高 EX）とそのレート(%)。誰も未プレーなら null。 */
-  lineEx: number | null;
-  lineRate: number | null;
-  /** 今回のアップロードでこの譜面が更新されたか。 */
-  updated: boolean;
-  /** 今回の EX 増加量（updated のときのみ 1 以上）。 */
-  scoreIncrease: number;
-  /** 今回のアップロードでラインを超えて有効化されたか。 */
-  justActivated: boolean;
-  /** ライン超えに必要な残り EX。達成済み・ライン未設定なら null。 */
-  toLine: number | null;
-}
-
-/** リーグモードの進捗（開催中の週に参加していれば、今回反映後の順位を保持。無ければ null）。 */
-const leagueProgress = ref<null | {
-  tier: number;
-  groupIndex: number;
-  rank: number;
-  groupSize: number;
-  validSongs: number;
-  /** 集計対象の課題曲数（管理者が無効化した曲を除いた数。通常は 3）。 */
-  songCount: number;
-  resultValue: number | null;
-  projectedPoints: number;
-  zone: 'promote' | 'stay' | 'relegate';
-  songs: LeagueSongProgress[];
-}>(null);
+/**
+ * リーグモードの進捗。アップロード時点のスナップショット（utils/leagueReport.ts）をそのまま表示する。
+ * 今回の更新に課題曲が含まれないレポート・2026-09-23 より前の成長記録では null（欄を出さない）。
+ */
+const leagueProgress = computed(() => props.diffData?.league ?? null);
+/** 「#6 9/21〜9/27」のような開催回の表記（番号も期間も無ければ空）。 */
+const leagueWeekLabel = computed(() => {
+  const lp = leagueProgress.value;
+  if (!lp) return '';
+  const md = (iso: string | null) => {
+    if (!iso) return '';
+    const p = jstParts(iso);
+    return p ? `${p.month}/${p.day}` : '';
+  };
+  const range = lp.startsAt && lp.endsAt ? `${md(lp.startsAt)}〜${md(lp.endsAt)}` : '';
+  return [lp.weekNo != null ? `#${lp.weekNo}` : '', range].filter(Boolean).join(' ');
+});
 
 /** 今回のアップロードで新たに達成したロードマップの目標（譜面 × AAA / MAX-）。 */
 interface RoadmapNewTarget { key: string; title: string; difficultyName: string; level: number; line: RoadmapLine; no: number }
@@ -933,72 +911,6 @@ const roadmapChartName = (title: string, difficultyName: string) =>
 
 /** DIVISION 表示名（0=LEGEND）。 */
 const divisionName = (tier: number) => (tier === 0 ? 'DIVISION LEGEND' : `DIVISION ${tier}`);
-
-/**
- * 【関数の役割】 開催中のリーグ週に自分が参加していれば、今回のアップロード反映後の
- * 自分の順位・有効曲・見込み PT を取り込む。未参加・未開催・取得失敗時は何も表示しない。
- */
-const loadLeagueProgress = async () => {
-  leagueProgress.value = null;
-  const uid = user.value?.id;
-  if (!uid) return;
-  try {
-    const cur = await league.fetchCurrent('score');
-    // 開催中(active)の週に「メンバーとして」参加していることが条件（途中参加者は翌週から）。
-    if (!cur.member || cur.week?.status !== 'active' || !cur.standings) return;
-    const myRow = cur.standings.find((r) => r.userId === uid);
-    if (!myRow) return;
-    // 今回のアップロードで更新された譜面を (曲名|難易度) で引けるようにする。
-    const updatedByChart = new Map<string, UpdatedSong>();
-    for (const u of props.diffData?.updatedSongs ?? []) {
-      updatedByChart.set(`${u.title}|${u.difficulty}`, u);
-    }
-
-    // 管理者が無効化した課題曲（解禁不可能な選曲など）は集計対象外なので、この報告からも外す。
-    const allSongs = cur.songs || [];
-    const scoredSongs = allSongs.filter((s) => !s.disabled);
-
-    leagueProgress.value = {
-      tier: cur.member.tier,
-      groupIndex: cur.member.groupIndex,
-      rank: myRow.rank,
-      groupSize: cur.standings.length,
-      validSongs: myRow.validSongs,
-      songCount: allSongs.length ? scoredSongs.length : 3,
-      resultValue: myRow.resultValue,
-      projectedPoints: myRow.projectedPoints ?? 0,
-      zone: myRow.zone,
-      songs: scoredSongs.map((s) => {
-        const ps = myRow.perSong?.find((p) => p.slot === s.slot);
-        const up = updatedByChart.get(`${s.title}|${s.difficultyName}`);
-        const valid = !!ps?.valid;
-        const bestEx = ps?.bestEx ?? null;
-        const lineEx = ps?.lineEx ?? s.lineEx ?? null;
-        // レートはノーツ数（MAX = notes * 2）から出す。自己ベスト側はサーバ計算値をそのまま使う。
-        const lineRate = lineEx != null && s.notes > 0 ? (lineEx / (s.notes * 2)) * 100 : null;
-        return {
-          slot: s.slot,
-          title: s.title,
-          difficultyName: s.difficultyName,
-          level: s.level ?? null,
-          valid,
-          bestEx,
-          rate: ps?.rate ?? null,
-          lineEx,
-          lineRate,
-          updated: !!up,
-          scoreIncrease: up?.scoreIncrease ?? 0,
-          // 今回の更新で初めてラインを超えた曲（＝このアップロードで有効化された曲）。
-          justActivated: !!up && valid && (lineEx == null || up.oldScore <= lineEx),
-          // ライン超えに必要な残り EX（ラインちょうどでは無効なので +1 必要）。
-          toLine: !valid && lineEx != null ? lineEx - (bestEx ?? 0) + 1 : null,
-        };
-      }),
-    };
-  } catch {
-    /* 未参加・未開催・取得失敗時は表示しない */
-  }
-};
 
 // ─── ティアカード / 集計タイル ───────────────────────────────────
 
@@ -1614,7 +1526,8 @@ const confirmShare = async () => {
   }
 };
 
-// モーダルが開いた（＝アップロード完了）タイミングでリーグ状況を取り込み、一覧の状態を初期化する。
+// モーダルが開いた（＝アップロード完了）タイミングでロードマップの進捗を取り込み、一覧の状態を初期化する。
+// （リーグの進捗は diffData.league のスナップショットを表示するだけなので、ここでは取りに行かない）
 // immediate で setup 中に走るので、ここで触る ref がすべて宣言済みになる位置（末尾側）に置くこと。
 watch(() => props.isOpen, (open) => {
   if (!open || !props.diffData) return;
@@ -1631,7 +1544,6 @@ watch(() => props.isOpen, (open) => {
   pickQuery.value = '';
   pickSort.value = 'beat';
   discardShareImage();
-  loadLeagueProgress();
   loadRoadmapProgress();
 }, { immediate: true });
 

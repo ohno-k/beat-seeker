@@ -502,6 +502,7 @@ public class ScoreController {
         log.setBeatPtIncrease(req.beatPtIncrease());
         log.setUpdatedCount(req.updatedCount());
         log.setDiffJson(req.diffJson());
+        log.setLeagueJson(req.leagueJson());
         log.setTotalPrecisionPt(req.totalPrecisionPt() != null ? req.totalPrecisionPt() : 0.0);
         double totalRatePt = req.totalRatePt() != null ? req.totalRatePt() : 0.0;
         // フロント未計算・未送信（0 以下）の場合は upload が算出済みの値を使い、それも無ければ再計算。
@@ -750,6 +751,7 @@ public class ScoreController {
             snapshotData.put("beatPtIncrease", log.getBeatPtIncrease());
             snapshotData.put("updatedCount", log.getUpdatedCount());
             snapshotData.put("diffJson", log.getDiffJson());
+            snapshotData.put("leagueJson", log.getLeagueJson());
             snapshotData.put("totalRatePt", log.getTotalRatePt());
             // 記録の種別タグ。null は無印（通常のアップロード）。
             snapshotData.put("tag", log.getTag());
