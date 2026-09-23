@@ -951,6 +951,33 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findLifetimeSongAvgStats();
 
     /**
+     * 【メソッドの役割】 <b>歴代スコア基準</b>で、☆11/☆12 の ANOTHER/LEGGENDARIA について
+     * 譜面ごとのスコアレート分布（ヒストグラム）を集計する。スコア分布ページ（管理者専用）用。
+     *
+     * 桶は「理論値の 1/180」刻み（{@code bucket = floor(score * 90 / notes)}、0〜180）。
+     * DJ LEVEL の境界はすべて理論値の k/18 なので、桶の境目と完全に一致する:
+     *  - MAX- = bucket ≥ 170（{@code score * 9 >= notes * 17} と同値）
+     *  - AAA  = bucket ≥ 160、AA = ≥ 140、A = ≥ 120
+     * よって {@link #findLifetimeSongAvgStats()} の MAX- / AAA 人数をヒストグラムから厳密に再現できる。
+     * 平均スコアを厳密に出せるよう桶ごとの SUM(score) も返す。
+     *
+     * 返却キー: title / difficultyName / level / notes / bucket / cnt / scoreSum
+     *
+     * @return 集計リスト（曲名・難易度・bucket 順）
+     */
+    @Query(value =
+        "WITH " + LIFETIME_BEST_CTES + " " +
+        "SELECT c.title AS \"title\", c.difficulty_name AS \"difficultyName\", " +
+        "  MAX(c.level) AS \"level\", MAX(c.notes) AS \"notes\", " +
+        "  LEAST(b.score * 90 / c.notes, 180) AS \"bucket\", " +
+        "  COUNT(*) AS \"cnt\", SUM(b.score) AS \"scoreSum\" " +
+        "FROM lifetime_best b " +
+        "JOIN charts c ON c.chart_id = b.chart_id " +
+        "GROUP BY c.chart_id, c.title, c.difficulty_name, LEAST(b.score * 90 / c.notes, 180) " +
+        "ORDER BY c.title, c.difficulty_name, 5", nativeQuery = true)
+    List<Map<String, Object>> findLifetimeSongScoreHistogram();
+
+    /**
      * 【メソッドの役割】 非公式難易度表（active）に基づく曲×譜面ごとの beat_pt 集計。
      *
      * ネイティブ SQL。CTE 概要:

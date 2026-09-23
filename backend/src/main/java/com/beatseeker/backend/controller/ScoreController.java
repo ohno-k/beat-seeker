@@ -123,6 +123,8 @@ public class ScoreController {
     private final SongRankingAggregateCacheService songRankingAggregateCacheService;
     /** 曲別平均スコアレート（song-avg-score-rates）の集計結果キャッシュ。 */
     private final SongAvgScoreRatesCacheService songAvgScoreRatesCacheService;
+    /** スコア分布ページ（song-score-spectrum、管理者専用）の集計結果キャッシュ。 */
+    private final com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService;
     /** 連携アプリ（iidx-memo 等）から同期された譜面オプション。スコア応答に options を埋めるのに使う。 */
     private final com.beatseeker.backend.repository.UserSongOptionRepository userSongOptionRepository;
     /** タイムライン用イベント（スコア更新／フレンド・仮想ライバル抜き）を保存するリポジトリ。 */
@@ -176,8 +178,10 @@ public class ScoreController {
             com.beatseeker.backend.service.AdminAuthService adminAuthService,
             com.beatseeker.backend.service.LeagueUpdateNotificationService leagueUpdateNotificationService,
             com.beatseeker.backend.service.LeagueNotificationService leagueNotificationService,
-            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
+            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService,
+            com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService) {
         this.previousVersionPtService = previousVersionPtService;
+        this.songScoreSpectrumCacheService = songScoreSpectrumCacheService;
         this.scoreRepository = scoreRepository;
         this.userRepository = userRepository;
         this.scoreHistoryLogRepository = scoreHistoryLogRepository;
@@ -1089,6 +1093,26 @@ public class ScoreController {
     @GetMapping("/song-avg-score-rates")
     public ResponseEntity<List<Map<String, Object>>> getSongAvgScoreRates() {
         return ResponseEntity.ok(songAvgScoreRatesCacheService.get());
+    }
+
+    /**
+     * 【メソッドの役割】 譜面別のスコアレート分布（ヒストグラム）を返す。管理者専用。
+     *
+     * 集計は {@link com.beatseeker.backend.service.SongScoreSpectrumCacheService} が
+     * バックグラウンドで行い、未計算・計算中は {@code ready=false} を返す（フロントがポーリング）。
+     *
+     * @param refresh true ならキャッシュの鮮度に関係なく再計算を起動する
+     * @return {@code {ready, refreshing, computedAt, error, charts:[...]}}。管理者以外は 403
+     */
+    @GetMapping("/song-score-spectrum")
+    public ResponseEntity<Map<String, Object>> getSongScoreSpectrum(
+            Authentication auth,
+            @RequestParam(defaultValue = "false") boolean refresh) {
+        if (auth == null || !auth.isAuthenticated()
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(songScoreSpectrumCacheService.requestSnapshot(refresh));
     }
 
     /**

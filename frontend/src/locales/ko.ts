@@ -42,6 +42,7 @@ export const ko = {
   'nav.scorePrediction': '스코어 예측',
   'nav.skillTree': '스킬 트리',
   'nav.rankComparison': '곡별 평균 스코어 레이트',
+  'nav.scoreSpectrum': '스코어 분포',
   'nav.scoreScatter': '스코어 페어 산포도',
   // ── 성장 여지 (선곡 어시스트) / 스코어 페어 산포도 ──
   'arcade.potentialBtn': '성장 여지 랭킹',

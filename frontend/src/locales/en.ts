@@ -42,6 +42,7 @@ export const en = {
   'nav.scorePrediction': 'Score Prediction',
   'nav.skillTree': 'Skill Tree',
   'nav.rankComparison': 'Avg Score Rate',
+  'nav.scoreSpectrum': 'Score Spectrum',
   'nav.scoreScatter': 'Score Pair Scatter',
   // ── Growth Potential (arcade) / Score Pair Scatter ──
   'arcade.potentialBtn': 'Growth Potential',
