@@ -30,6 +30,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { formatJstDateTime } from '../utils/jstTime';
+import { minPlayedFor, isLevelCleared, remainingToClear } from '../utils/roadmapLevels';
 import ScoreRoadmapRankingModal from '../components/ScoreRoadmapRankingModal.vue';
 import ScoreRoadmapRulesModal from '../components/ScoreRoadmapRulesModal.vue';
 
@@ -239,8 +240,6 @@ function shareAtLeast(x: number): number {
   return ((th.length - lo) * 100) / th.length;
 }
 
-/** 判定に必要な最低プレー数。 */
-const minPlayedFor = (n: number) => Math.min(n, Math.max(2, Math.ceil(n / 3)));
 
 interface Level {
   no: number; from: number; to: number; items: Target[];
@@ -264,14 +263,12 @@ const levels = computed<Level[]>(() => {
     const p = items.filter(played).length;
     const x = items.filter(achieved).length;
     const minPlayed = minPlayedFor(n);
-    // 目標が 0 件のレベル（マスタから消えた譜面だけ）は達成にしない
-    const cleared = n > 0 && p >= minPlayed && x * 3 >= p * 2;
-    // あと何件達成すればよいか（未達成のプレー済み or 未プレーの目標を達成した場合）
-    const need = Math.ceil((Math.max(p, minPlayed) * 2) / 3);
+    // 判定規則は utils/roadmapLevels.ts（プレイ成果レポートと共用）。目標 0 件のレベルは達成にしない
+    const cleared = isLevelCleared(n, p, x);
     const from = slot * LEVEL_W;
     return {
       no: idx + 1, from, to: from + LEVEL_W, items, played: p, done: x, minPlayed, cleared,
-      complete: n > 0 && x === n, remaining: Math.max(0, need - x), reachShare: shareAtLeast(from + LEVEL_W), group: Math.floor(from / GROUP_W + 1e-9),
+      complete: n > 0 && x === n, remaining: remainingToClear(n, p, x), reachShare: shareAtLeast(from + LEVEL_W), group: Math.floor(from / GROUP_W + 1e-9),
     };
   });
 });

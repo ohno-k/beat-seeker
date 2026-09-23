@@ -594,6 +594,12 @@ export const en = {
   'report.league.activated': 'Now counts!',
   'report.league.invalid': 'Below line',
   'report.league.toLine': '{n} to go',
+  'report.roadmap.title': 'Score Roadmap',
+  'report.roadmap.open': 'Open roadmap',
+  'report.roadmap.newLevels': '{n} levels cleared',
+  'report.roadmap.newComplete': '{n} levels completed',
+  'report.roadmap.next': '{n} more to Lv.{lv}',
+  'report.roadmap.newTargets': 'Newly achieved targets ({n})',
 
   // Common
   'common.loading': 'Loading...',

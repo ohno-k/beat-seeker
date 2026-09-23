@@ -3,7 +3,7 @@
  * 【コンポーネントの役割】 スコアロードマップのルール説明（図解）モーダル。
  *
  * ページ上部の長い説明文をここへ移した（2026-09-23 ユーザー要望）。判定の数字は
- * ScoreRoadmapView.vue の levels（minPlayedFor・3 分の 2）と必ず揃える。
+ * utils/roadmapLevels.ts（minPlayedFor・3 分の 2）と必ず揃える。
  */
 import { formatJstDateTime } from '../utils/jstTime';
 

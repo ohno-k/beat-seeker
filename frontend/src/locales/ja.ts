@@ -599,6 +599,12 @@ export const ja = {
   'report.league.activated': '今回有効化！',
   'report.league.invalid': 'ライン未達',
   'report.league.toLine': 'あと {n}',
+  'report.roadmap.title': 'スコアロードマップ',
+  'report.roadmap.open': 'ロードマップを見る',
+  'report.roadmap.newLevels': '{n} レベル達成',
+  'report.roadmap.newComplete': '{n} レベル完全制覇',
+  'report.roadmap.next': '次の Lv.{lv} まで あと {n} 件',
+  'report.roadmap.newTargets': '新たに達成した目標（{n}）',
 
   // Common
   'common.loading': '読み込み中...',

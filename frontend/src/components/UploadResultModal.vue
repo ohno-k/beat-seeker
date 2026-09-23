@@ -401,6 +401,63 @@
                 >{{ t('report.showMore', { n: filteredSongs.length - visibleSongs.length }) }}</button>
               </template>
             </div>
+
+            <!-- スコアロードマップの進捗（今回のアップロードで新しく達成した目標・レベルがあるときだけ。最下部） -->
+            <div v-if="roadmapProgress" class="card p-3">
+              <div class="flex items-center gap-2">
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ t('report.roadmap.title') }}</p>
+                <button
+                  class="ml-auto text-[11px] font-bold text-blue-700 dark:text-blue-300 hover:underline shrink-0"
+                  @click="$emit('navigate', 'score-roadmap')"
+                >{{ t('report.roadmap.open') }} →</button>
+              </div>
+
+              <!-- レベルの変化 -->
+              <div class="mt-2 flex items-baseline gap-2 flex-wrap tabular-nums">
+                <template v-if="roadmapProgress.newLevel !== roadmapProgress.oldLevel">
+                  <span class="text-sm font-bold font-mono text-slate-400">Lv.{{ roadmapProgress.oldLevel }}</span>
+                  <span class="text-slate-400">→</span>
+                  <span class="text-2xl font-bold font-mono text-blue-700 dark:text-blue-300">Lv.{{ roadmapProgress.newLevel }}</span>
+                  <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-blue-700 text-white">
+                    {{ roadmapProgress.newLevel > roadmapProgress.oldLevel ? '+' : '' }}{{ roadmapProgress.newLevel - roadmapProgress.oldLevel }}
+                  </span>
+                </template>
+                <span v-else class="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">Lv.{{ roadmapProgress.newLevel }}</span>
+                <span class="text-xs text-slate-400">/ {{ roadmapProgress.maxLevel }}</span>
+              </div>
+              <div class="mt-1 flex flex-wrap gap-1.5 text-[11px] font-bold">
+                <span v-if="roadmapProgress.newlyCleared > 0" class="px-2 py-0.5 rounded border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-300">
+                  {{ t('report.roadmap.newLevels', { n: roadmapProgress.newlyCleared }) }}
+                </span>
+                <span v-if="roadmapProgress.newlyComplete > 0" class="px-2 py-0.5 rounded border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300">
+                  ★ {{ t('report.roadmap.newComplete', { n: roadmapProgress.newlyComplete }) }}
+                </span>
+                <span v-if="roadmapProgress.next" class="px-2 py-0.5 rounded border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                  {{ t('report.roadmap.next', { lv: roadmapProgress.next.no, n: roadmapProgress.next.remaining }) }}
+                </span>
+              </div>
+
+              <!-- 新たに達成した目標（難しいレベル順） -->
+              <div v-if="roadmapProgress.targets.length" class="mt-2">
+                <p class="section-label mb-1">{{ t('report.roadmap.newTargets', { n: roadmapProgress.targets.length }) }}</p>
+                <ul class="rounded-md border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+                  <li v-for="tg in roadmapTargetsShown" :key="tg.key" class="px-2.5 py-1.5 flex items-center gap-2 text-xs">
+                    <span
+                      class="text-[10px] font-bold font-mono px-1.5 rounded w-11 text-center shrink-0"
+                      :class="tg.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'"
+                    >{{ ROADMAP_LINE_LABEL[tg.line] }}</span>
+                    <span class="font-mono text-slate-400 shrink-0">☆{{ tg.level }}</span>
+                    <span class="min-w-0 font-bold text-slate-800 dark:text-slate-100 break-words">{{ roadmapChartName(tg.title, tg.difficultyName) }}</span>
+                    <span class="ml-auto font-mono text-slate-500 shrink-0">Lv.{{ tg.no }}</span>
+                  </li>
+                </ul>
+                <button
+                  v-if="!showAllRoadmapTargets && roadmapProgress.targets.length > ROADMAP_TARGETS_SHOWN"
+                  class="btn-secondary w-full mt-2"
+                  @click="showAllRoadmapTargets = true"
+                >{{ t('report.showMore', { n: roadmapProgress.targets.length - ROADMAP_TARGETS_SHOWN }) }}</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -706,6 +763,11 @@ import DivisionIcon from './DivisionIcon.vue';
 import UploadReportShareImage from './UploadReportShareImage.vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useLeague } from '../composables/useLeague';
+import { usePastScores, chartKey as pastChartKey } from '../composables/usePastScores';
+import {
+  ROADMAP_LINES, ROADMAP_LINE_BUCKET, ROADMAP_LINE_LABEL, remainingToClear, scoreToBucket, summarizeRoadmap,
+} from '../utils/roadmapLevels';
+import type { RoadmapChartLike, RoadmapLine } from '../utils/roadmapLevels';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
@@ -727,6 +789,8 @@ const props = defineProps<{
 const { authHeaders, user } = useAuth();
 const { showRateTier } = useRateTierVisibility();
 const league = useLeague();
+/** 過去作ベスト（App がアップロード時に取得済み。ロードマップの「更新前」を作るのに使う）。 */
+const { pastBestByChart } = usePastScores();
 
 /** リーグ課題曲 1 曲分の内訳（自己ベストとラインの比較・今回の更新有無）。 */
 interface LeagueSongProgress {
@@ -766,6 +830,106 @@ const leagueProgress = ref<null | {
   zone: 'promote' | 'stay' | 'relegate';
   songs: LeagueSongProgress[];
 }>(null);
+
+/** 今回のアップロードで新たに達成したロードマップの目標（譜面 × AAA / MAX-）。 */
+interface RoadmapNewTarget { key: string; title: string; difficultyName: string; level: number; line: RoadmapLine; no: number }
+
+/**
+ * スコアロードマップの進捗（今回のアップロードで変化があったときだけ。無ければ null）。
+ * next = 今のレベルより上で最初の未達成レベルと、その達成までの残り件数。
+ */
+const roadmapProgress = ref<null | {
+  oldLevel: number;
+  newLevel: number;
+  maxLevel: number;
+  newlyCleared: number;
+  newlyComplete: number;
+  targets: RoadmapNewTarget[];
+  next: { no: number; remaining: number } | null;
+}>(null);
+/** 新たに達成した目標のうち、最初に見せる件数。 */
+const ROADMAP_TARGETS_SHOWN = 8;
+const showAllRoadmapTargets = ref(false);
+
+/**
+ * 【関数の役割】 アップロード直後のロードマップの変化を計算する（2026-09-23 追加）。
+ *
+ * 更新後の歴代ベストは API（サーバーが scores ∪ past_scores を読む）から取る。更新前は、今回更新された譜面だけ
+ * 「旧スコアと過去作ベストの大きい方」に差し戻して作る（それ以外の譜面は今回変わっていない）。
+ * 判定は utils/roadmapLevels.ts（ロードマップ画面と同じ規則）。取得できない・変化が無いときは何も出さない。
+ * 成長記録から開いた過去のレポート（reportDate あり）では、今の状態と比べても意味が無いので出さない。
+ */
+const loadRoadmapProgress = async () => {
+  roadmapProgress.value = null;
+  showAllRoadmapTargets.value = false;
+  const updates = props.diffData?.updatedSongs ?? [];
+  if (!user.value || props.reportDate || updates.length === 0) return;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    let data: any;
+    try {
+      const res = await fetch(`${API_BASE}/api/scores/score-roadmap`, { headers: authHeaders(), signal: controller.signal });
+      if (!res.ok) return;
+      data = await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+    const slots: number[] | undefined = data?.model?.levelTable?.slots;
+    if (!data?.ready || !slots?.length || !data.user?.found) return;
+    const charts: RoadmapChartLike[] = data.charts;
+    const newBuckets = new Map<number, number>(data.user.plays ?? []);
+
+    // 更新前: 今回更新された譜面だけ「旧スコアと過去作ベストの大きい方」に戻す
+    const pastBest = pastBestByChart();
+    const chartByKey = new Map(charts.map((c) => [`${c.title}\u0000${c.difficultyName}`, c]));
+    const oldBuckets = new Map(newBuckets);
+    for (const u of updates) {
+      const c = chartByKey.get(`${u.title}\u0000${u.difficulty}`);
+      if (!c) continue;
+      const before = Math.max(u.oldScore, pastBest.get(pastChartKey(u.title, u.difficulty))?.score ?? 0);
+      if (before > 0) oldBuckets.set(c.i, scoreToBucket(before, c.notes));
+      else oldBuckets.delete(c.i);
+    }
+
+    const before = summarizeRoadmap(charts, slots.length, oldBuckets);
+    const after = summarizeRoadmap(charts, slots.length, newBuckets);
+    const targets: RoadmapNewTarget[] = [];
+    for (const c of charts) {
+      if (!c.levels) continue;
+      for (const line of ROADMAP_LINES) {
+        const line0 = ROADMAP_LINE_BUCKET[line];
+        if ((newBuckets.get(c.i) ?? -1) >= line0 && (oldBuckets.get(c.i) ?? -1) < line0) {
+          targets.push({ key: `${c.i}:${line}`, title: c.title, difficultyName: c.difficultyName, level: c.level, line, no: c.levels[line] });
+        }
+      }
+    }
+    const newlyCleared = after.levels.filter((l, k) => l.cleared && !before.levels[k].cleared).length;
+    const newlyComplete = after.levels.filter((l, k) => l.complete && !before.levels[k].complete).length;
+    if (targets.length === 0 && newlyCleared === 0 && after.myLevel === before.myLevel) return;
+
+    targets.sort((a, b) => b.no - a.no || (a.line === b.line ? 0 : a.line === 'maxMinus' ? -1 : 1));
+    const nextLv = after.levels.find((l) => l.no > after.myLevel && !l.cleared);
+    roadmapProgress.value = {
+      oldLevel: before.myLevel,
+      newLevel: after.myLevel,
+      maxLevel: slots.length,
+      newlyCleared,
+      newlyComplete,
+      targets,
+      next: nextLv ? { no: nextLv.no, remaining: remainingToClear(nextLv.n, nextLv.played, nextLv.done) } : null,
+    };
+  } catch {
+    // 握り潰し: ロードマップはレポートの付加情報なので、取れなければ出さないだけ
+  }
+};
+const roadmapTargetsShown = computed(() => {
+  const all = roadmapProgress.value?.targets ?? [];
+  return showAllRoadmapTargets.value ? all : all.slice(0, ROADMAP_TARGETS_SHOWN);
+});
+/** 曲名の表記（ロードマップ画面と同じ: ANOTHER は表記なし、LEGGENDARIA は末尾に [L]）。 */
+const roadmapChartName = (title: string, difficultyName: string) =>
+  (difficultyName === 'LEGGENDARIA' ? `${title}[L]` : title);
 
 /** DIVISION 表示名（0=LEGEND）。 */
 const divisionName = (tier: number) => (tier === 0 ? 'DIVISION LEGEND' : `DIVISION ${tier}`);
@@ -1468,6 +1632,7 @@ watch(() => props.isOpen, (open) => {
   pickSort.value = 'beat';
   discardShareImage();
   loadLeagueProgress();
+  loadRoadmapProgress();
 }, { immediate: true });
 
 /** 難易度名 → 行の左端に置く縦バーの色（BEG/NOR/HYP/ANO/LEG の IIDX 慣用色）。 */

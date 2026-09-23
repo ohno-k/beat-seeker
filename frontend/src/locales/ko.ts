@@ -593,6 +593,12 @@ export const ko = {
   'report.league.activated': '이번에 유효화!',
   'report.league.invalid': '라인 미달',
   'report.league.toLine': '{n} 남음',
+  'report.roadmap.title': '스코어 로드맵',
+  'report.roadmap.open': '로드맵 보기',
+  'report.roadmap.newLevels': '{n} 레벨 달성',
+  'report.roadmap.newComplete': '{n} 레벨 완전 제패',
+  'report.roadmap.next': '다음 Lv.{lv}까지 {n}개 남음',
+  'report.roadmap.newTargets': '새로 달성한 목표 ({n})',
 
   // Common
   'common.loading': '불러오는 중...',
