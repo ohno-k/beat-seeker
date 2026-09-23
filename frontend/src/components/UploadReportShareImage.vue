@@ -111,8 +111,8 @@
             <p class="sr-num-sub" :style="{ color: r.song.oldScore > 0 ? '#60a5fa' : '#94a3b8' }">{{ r.scoreSub }}</p>
           </div>
           <div class="sr-num">
-            <p class="sr-num-grade" :style="{ color: r.gradeColor }">{{ r.grade.grade || '—' }}</p>
-            <p class="sr-num-sub sr-muted">{{ r.grade.fromMax }}</p>
+            <p class="sr-num-grade" :style="{ color: r.gradeColor }">{{ r.grade.main || '—' }}</p>
+            <p class="sr-num-sub sr-muted">{{ r.grade.sub }}</p>
           </div>
           <div class="sr-num">
             <p :class="column === 'tier' ? 'sr-num-tier' : 'sr-num-main'" :style="{ color: r.ptColor }">{{ r.ptMain }}</p>
@@ -246,7 +246,8 @@ const LAMP_COLORS: Record<string, string> = {
 };
 const lampColor = (type: string) => LAMP_COLORS[type] ?? '#94a3b8';
 
-const GRADE_COLORS: Record<string, string> = { AAA: '#facc15', AA: '#60a5fa', A: '#4ade80' };
+/** DJ LEVEL 列の大きい文字の色（MAX-n は紫 = スコア一覧の MAX- と同じ purple-400）。 */
+const GRADE_COLORS: Record<string, string> = { MAX: '#facc15', 'MAX-': '#c084fc', AAA: '#facc15', AA: '#60a5fa', A: '#4ade80' };
 
 const metaLine = computed(() => [props.dateLabel, props.versionLabel].filter(Boolean).join('  ・  '));
 
@@ -406,7 +407,7 @@ const rows = computed<Row[]>(() => shownSongs.value.map((song) => {
     tier,
     scoreSub: song.oldScore > 0 ? (song.scoreIncrease > 0 ? `+${song.scoreIncrease}` : '±0') : t('report.newPlay'),
     grade,
-    gradeColor: GRADE_COLORS[grade.gradeName] ?? '#94a3b8',
+    gradeColor: GRADE_COLORS[grade.mainColorKey] ?? '#94a3b8',
     ...lastColumn(song, tier),
   };
 }));

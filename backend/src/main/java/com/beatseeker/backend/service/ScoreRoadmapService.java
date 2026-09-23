@@ -59,6 +59,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *    その時点の d に一番近い既存レベルへ追加する（レベルの数・番号は増やさない）。
  *  - 表の作り直しは管理者の「レベル表を作り直す」（{@link #refreeze()}）だけ。版番号を 1 つ上げて新しい行を足す。
  *
+ * AA ラインの追加（2026-09-24 ユーザー指定・サイレント追加）:
+ *  - 目標に AA（桶 140）を足し、1 譜面 3 目標（AA / AAA / MAX-）にした。d・k は他のラインと同じ手順で推定する。
+ *  - 既存の Lv.1〜 の番号と 0.02 枠はそのまま。AA 目標のうち Lv.1 の枠より易しいものは、その 0.02 枠を
+ *    Lv.0, −1, −2 … と下へ詰めた「負のレベル」に置き、それ以外は一番近い既存レベルへ入れる（判定にも使う）。
+ *  - 旧版（AA の無い表）は次のバッチで同じ版のまま AA を足して保存し直す（{@link #withAa}）。
+ *  - レベル 0 が実在のレベルになったので、「どのレベルも未達成」は null（内部では {@link #NO_LEVEL}）で表す。
+ *
  * 生データ約 100 万行は List&lt;Map&gt; に展開せず、カーソルで受けて int 配列へ詰める。
  */
 @Service
@@ -76,9 +83,13 @@ public class ScoreRoadmapService {
     private static final int STREAM_FETCH_SIZE = 5000;
     private static final String BUILD_STATEMENT_TIMEOUT = "300s";
 
-    /** ライン定義（桶番号）。AAA = 16/18、MAX- = 17/18。 */
+    /** ライン定義（桶番号）。AA = 14/18、AAA = 16/18、MAX- = 17/18。 */
+    public static final int LINE_AA = 140;
     public static final int LINE_AAA = 160;
     public static final int LINE_MAX_MINUS = 170;
+
+    /** レベル番号の「無し」（どのレベルも未達成 / 表に無い目標）。レベル 0 は実在するので 0 は使えない。 */
+    private static final int NO_LEVEL = Integer.MIN_VALUE;
 
     /** θ 推定に使う最低アンカー譜面数。 */
     private static final int MIN_ANCHOR_PLAYS = 30;
@@ -184,14 +195,14 @@ public class ScoreRoadmapService {
      */
     private record Base(String computedAt, Map<String, Object> model, List<Map<String, Object>> charts,
                         List<Map<String, Object>> ranking,
-                        Map<String, Integer> keyToIdx, int[] notes, double[] dAaa, double[] dMaxMinus,
-                        double kAaa, double kMaxMinus) {}
+                        Map<String, Integer> keyToIdx, int[] notes, double[] dAa, double[] dAaa, double[] dMaxMinus,
+                        double kAa, double kAaa, double kMaxMinus) {}
 
     /** 1 ライン分の目標（譜面 × ライン）の推定結果。 */
     private record LineResult(double k, double[] d, double[] se, int[] nFit, double[] rate) {}
 
     /** 統合モデルの推定結果（1 人 1 つの θ）。 */
-    private record JointResult(LineResult aaa, LineResult maxMinus, double[] thetaAll) {}
+    private record JointResult(LineResult aa, LineResult aaa, LineResult maxMinus, double[] thetaAll) {}
 
     /** 全体計算の結果一式（土台に変換して捨てる）。userIds / userStart / userChart / userBucket はランキング計算用。 */
     private record Snapshot(String[] titles, String[] diffs, int[] levels, int[] notes, int[] playerCounts,
@@ -200,15 +211,27 @@ public class ScoreRoadmapService {
     /**
      * 固定したレベル表。
      *
-     * @param slots   レベル番号 − 1 → そのレベルの 0.02 枠（枠番号 = floor(d / 0.02)）。昇順
-     * @param levelOf 譜面キー（曲名 + NUL + 難易度名）→ {AAA のレベル番号, MAX- のレベル番号}
-     * @param addedAt 譜面キー → 表に入った時刻（作り直し時の譜面は frozenAt と同じ）
+     * @param slots    レベル番号 − 1 → そのレベルの 0.02 枠（枠番号 = floor(d / 0.02)）。昇順
+     * @param negSlots −レベル番号 → 負のレベル（Lv.0, −1, …）の 0.02 枠。降順（negSlots[0] が Lv.0）。
+     *                 null = AA を足す前の旧版（次のバッチで {@link #withAa} が埋める）
+     * @param levelOf  譜面キー（曲名 + NUL + 難易度名）→ {AAA, MAX-, AA のレベル番号}（{@link #LINE_KEYS} の順。
+     *                 旧版や AA の d が無い譜面の AA は {@link #NO_LEVEL}）
+     * @param addedAt  譜面キー → 表に入った時刻（作り直し時の譜面は frozenAt と同じ）
      */
     private record LevelTable(int revision, String frozenAt, String updatedAt, int minPlayers, long[] slots,
-                              Map<String, int[]> levelOf, Map<String, String> addedAt) {}
+                              long[] negSlots, Map<String, int[]> levelOf, Map<String, String> addedAt) {
+        /** 一番易しいレベルの番号（負のレベルが無ければ 1）。 */
+        int minLevel() { return negSlots == null || negSlots.length == 0 ? 1 : 1 - negSlots.length; }
+        int maxLevel() { return slots.length; }
+        /** レベル番号 → 0.02 枠。 */
+        long slotOfLevel(int lv) { return lv >= 1 ? slots[lv - 1] : negSlots[-lv]; }
+    }
 
-    /** 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。v3 = ランキング追加、v4 = レベル表の固定。 */
-    private static final int PAYLOAD_VERSION = 4;
+    /**
+     * 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。
+     * v3 = ランキング追加、v4 = レベル表の固定、v5 = AA ライン・負のレベル。
+     */
+    private static final int PAYLOAD_VERSION = 5;
 
     /** レベルの幅（難度の目盛りで 0.02）。フロント（ScoreRoadmapView.vue の LEVEL_W）と必ず揃える。 */
     private static final double LEVEL_W = 0.02;
@@ -260,6 +283,7 @@ public class ScoreRoadmapService {
         if (b == null) return body;
         body.put("computedAt", b.computedAt());
         body.put("maxLevel", b.model().get("maxLevel"));
+        body.put("minLevel", b.model().get("minLevel"));
         body.put("entries", b.ranking());
         return body;
     }
@@ -320,7 +344,7 @@ public class ScoreRoadmapService {
      * 毎回それを読むのは重いので、ここで同じ規則（{@link #computeRanking} と utils/roadmapLevels.ts）で判定して数字だけ返す。
      * 最新のスコアで判定する（土台の d・レベル表は固定、スコアはその場で読む）。
      *
-     * @return {ready, level, maxLevel, clearedLevels, completeLevels}
+     * @return {ready, level（どのレベルも未達成なら null）, minLevel, maxLevel, clearedLevels, completeLevels}
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> userLevel(long userId) {
@@ -328,51 +352,57 @@ public class ScoreRoadmapService {
         if (base == null) startRebuild();
         Base b = base;
         Map<String, Object> body = new LinkedHashMap<>();
-        Object lt = b == null ? null : b.model().get("levelTable");
+        Map<String, Object> lt = b == null ? null : (Map<String, Object>) b.model().get("levelTable");
         body.put("ready", lt != null);
         if (lt == null) return body;
-        Object slots = ((Map<String, Object>) lt).get("slots");
-        int maxLevel = slots instanceof long[] a ? a.length : slots instanceof List<?> l ? l.size() : 0;
+        int maxLevel = ((Number) lt.get("maxLevel")).intValue();
+        int minLevel = ((Number) lt.get("minLevel")).intValue();
+        int off = -minLevel, size = maxLevel - minLevel + 1; // 配列の添字 = レベル番号 + off
 
         int[] bucketOf = new int[b.charts().size()];
         Arrays.fill(bucketOf, -1);
         for (int[] p : readUserPlays(b, userId)) bucketOf[p[0]] = p[1];
-        int[] n = new int[maxLevel + 1], played = new int[maxLevel + 1], done = new int[maxLevel + 1];
-        int[] lines = { LINE_AAA, LINE_MAX_MINUS };
+        int[] n = new int[size], played = new int[size], done = new int[size];
         for (int i = 0; i < b.charts().size(); i++) {
             Map<String, Object> lv = (Map<String, Object>) b.charts().get(i).get("levels");
             if (lv == null) continue;
-            for (int li = 0; li < 2; li++) {
-                int no = ((Number) lv.get(LINE_KEYS[li])).intValue();
-                if (no < 1 || no > maxLevel) continue;
-                n[no]++;
+            for (int li = 0; li < LINE_KEYS.length; li++) {
+                Object v = lv.get(LINE_KEYS[li]);
+                if (v == null) continue;
+                int no = ((Number) v).intValue();
+                if (no < minLevel || no > maxLevel) continue;
+                n[no + off]++;
                 if (bucketOf[i] < 0) continue;
-                played[no]++;
-                if (bucketOf[i] >= lines[li]) done[no]++;
+                played[no + off]++;
+                if (bucketOf[i] >= LINE_BUCKETS[li]) done[no + off]++;
             }
         }
-        int level = 0, cleared = 0, complete = 0;
-        for (int lv = 1; lv <= maxLevel; lv++) {
-            int minPlayed = Math.min(n[lv], Math.max(2, (n[lv] + 2) / 3));
-            if (n[lv] > 0 && played[lv] >= minPlayed && done[lv] * 3 >= played[lv] * 2) { level = lv; cleared++; }
-            if (n[lv] > 0 && done[lv] == n[lv]) complete++;
+        int level = NO_LEVEL, cleared = 0, complete = 0;
+        for (int x = 0; x < size; x++) {
+            int minPlayed = Math.min(n[x], Math.max(2, (n[x] + 2) / 3));
+            if (n[x] > 0 && played[x] >= minPlayed && done[x] * 3 >= played[x] * 2) { level = x - off; cleared++; }
+            if (n[x] > 0 && done[x] == n[x]) complete++;
         }
-        body.put("level", level);
+        body.put("level", level == NO_LEVEL ? null : level);
+        body.put("minLevel", minLevel);
         body.put("maxLevel", maxLevel);
         body.put("clearedLevels", cleared);
         body.put("completeLevels", complete);
         return body;
     }
 
-    /** 【メソッドの役割】 d・k 固定での θ（バッチの手順 (3) と同じ Newton・事前分布。AAA と MAX- の両目標を使う）。 */
+    /** 【メソッドの役割】 d・k 固定での θ（バッチの手順 (3) と同じ Newton・事前分布。AA・AAA・MAX- の全目標を使う）。 */
     private static double thetaFor(List<int[]> plays, Base b) {
         double th = THETA_ALL_PRIOR_MU;
+        double[] ks = { b.kAaa(), b.kMaxMinus(), b.kAa() };
+        double[][] ds = { b.dAaa(), b.dMaxMinus(), b.dAa() };
         for (int it = 0; it < 50; it++) {
             double g = -(th - THETA_ALL_PRIOR_MU) / THETA_ALL_PRIOR_VAR, h = -1.0 / THETA_ALL_PRIOR_VAR;
             for (int[] p : plays) {
-                for (int line : new int[] { LINE_AAA, LINE_MAX_MINUS }) {
-                    double k = line == LINE_AAA ? b.kAaa() : b.kMaxMinus();
-                    double dj = line == LINE_AAA ? b.dAaa()[p[0]] : b.dMaxMinus()[p[0]];
+                for (int li = 0; li < LINE_BUCKETS.length; li++) {
+                    int line = LINE_BUCKETS[li];
+                    double k = ks[li];
+                    double dj = ds[li][p[0]];
                     double pr = sig(k * (th - dj));
                     int y = p[1] >= line ? 1 : 0;
                     g += k * (y - pr);
@@ -449,22 +479,29 @@ public class ScoreRoadmapService {
             int moved = 0, up = 0, down = 0, added = 0, removed = 0;
             for (Map.Entry<String, int[]> e : next.levelOf().entrySet()) {
                 int[] old = cur == null ? null : cur.levelOf().get(e.getKey());
-                if (old == null) { added += 2; continue; }
-                for (int li = 0; li < 2; li++) {
+                for (int li = 0; li < LINE_KEYS.length; li++) {
+                    int to = e.getValue()[li];
+                    if (to == NO_LEVEL) continue;
+                    if (old == null || old[li] == NO_LEVEL) { added++; continue; }
                     // 番号は作り直しで振り直されるので、レベルの 0.02 枠どうしで比べる
-                    long from = cur.slots()[old[li] - 1], to = next.slots()[e.getValue()[li] - 1];
-                    if (from != to) { moved++; if (to > from) up++; else down++; }
+                    long fromSlot = cur.slotOfLevel(old[li]), toSlot = next.slotOfLevel(to);
+                    if (fromSlot != toSlot) { moved++; if (toSlot > fromSlot) up++; else down++; }
                 }
             }
             if (cur != null) {
-                for (String key : cur.levelOf().keySet()) if (!next.levelOf().containsKey(key)) removed += 2;
+                for (Map.Entry<String, int[]> e : cur.levelOf().entrySet()) {
+                    int[] now = next.levelOf().get(e.getKey());
+                    for (int li = 0; li < LINE_KEYS.length; li++) {
+                        if (e.getValue()[li] != NO_LEVEL && (now == null || now[li] == NO_LEVEL)) removed++;
+                    }
+                }
             }
             body.put("basedOn", b.computedAt());
             if (cur != null) {
                 body.put("current", Map.of("revision", cur.revision(), "frozenAt", cur.frozenAt(),
-                        "levels", cur.slots().length, "targets", cur.levelOf().size() * 2));
+                        "levels", cur.maxLevel() - cur.minLevel() + 1, "targets", countTargets(cur)));
             }
-            body.put("next", Map.of("levels", next.slots().length, "targets", next.levelOf().size() * 2));
+            body.put("next", Map.of("levels", next.maxLevel() - next.minLevel() + 1, "targets", countTargets(next)));
             body.put("moved", moved);
             body.put("movedUp", up);
             body.put("movedDown", down);
@@ -493,7 +530,7 @@ public class ScoreRoadmapService {
             saveLevelTable(next);
             levelTable = next;
             body.put("revision", next.revision());
-            body.put("levels", next.slots().length);
+            body.put("levels", next.maxLevel() - next.minLevel() + 1);
             log.info("Refroze score roadmap level table: revision {} ({} levels, {} charts)",
                     next.revision(), next.slots().length, next.levelOf().size());
         }
@@ -502,8 +539,9 @@ public class ScoreRoadmapService {
     }
 
     /**
-     * 【メソッドの役割】 バッチの結果に合わせてレベル表を用意する。無ければ作り（第 1 版）、あれば
-     * 200 人に達した譜面だけを一番近い既存レベルへ追加する。既存の割り当ては変えない。
+     * 【メソッドの役割】 バッチの結果に合わせてレベル表を用意する。無ければ作り（第 1 版）、AA の無い旧版なら
+     * 同じ版のまま AA を足し（{@link #withAa}）、200 人に達した譜面を一番近い既存レベルへ追加する。
+     * 既存の割り当て（AAA / MAX- の番号）は変えない。
      */
     private LevelTable syncLevelTable(List<Map<String, Object>> charts, String now) {
         synchronized (levelLock) {
@@ -513,16 +551,26 @@ public class ScoreRoadmapService {
                 saveLevelTable(first);
                 levelTable = first;
                 log.info("Froze score roadmap level table: revision 1 ({} levels, {} charts)",
-                        first.slots().length, first.levelOf().size());
+                        first.maxLevel() - first.minLevel() + 1, first.levelOf().size());
                 return first;
+            }
+            boolean changed = false;
+            if (cur.negSlots() == null) {
+                cur = withAa(cur, charts, now);
+                changed = true;
+                log.info("Added AA targets to score roadmap level table revision {} (levels Lv.{}..Lv.{})",
+                        cur.revision(), cur.minLevel(), cur.maxLevel());
             }
             LevelTable grown = withNewCharts(cur, charts, now);
             if (grown != null) {
-                saveLevelTable(grown);
-                levelTable = grown;
                 log.info("Added {} charts to score roadmap level table revision {}",
                         grown.levelOf().size() - cur.levelOf().size(), grown.revision());
-                return grown;
+                cur = grown;
+                changed = true;
+            }
+            if (changed) {
+                saveLevelTable(cur);
+                levelTable = cur;
             }
             return cur;
         }
@@ -543,26 +591,65 @@ public class ScoreRoadmapService {
         return (long) Math.floor(d / LEVEL_W + 1e-9);
     }
 
-    private static final String[] LINE_KEYS = { "aaa", "maxMinus" };
+    /** レベル表・応答の levels のライン（この順で levelOf の int[] に入る）と、その桶。 */
+    private static final String[] LINE_KEYS = { "aaa", "maxMinus", "aa" };
+    private static final int[] LINE_BUCKETS = { LINE_AAA, LINE_MAX_MINUS, LINE_AA };
+    /** levelOf の int[] での AA の位置。 */
+    private static final int AA = 2;
 
-    /** 【メソッドの役割】 200 人以上の譜面の目標がある 0.02 枠を易しい順に Lv.1 から連番にした表を作る。 */
+    /**
+     * 【メソッドの役割】 200 人以上の譜面の AAA / MAX- 目標がある 0.02 枠を易しい順に Lv.1 から連番にし、
+     * AA 目標を足した表を作る（Lv.1 より易しい AA は負のレベル）。
+     */
     private static LevelTable freezeLevels(List<Map<String, Object>> charts, int revision, String now) {
         java.util.TreeSet<Long> set = new java.util.TreeSet<>();
         for (Map<String, Object> c : charts) {
             if (!eligible(c)) continue;
-            for (String line : LINE_KEYS) set.add(slotOf(c, line));
+            set.add(slotOf(c, "aaa"));
+            set.add(slotOf(c, "maxMinus"));
         }
         long[] slots = set.stream().mapToLong(Long::longValue).toArray();
         Map<String, int[]> levelOf = new HashMap<>();
         Map<String, String> addedAt = new HashMap<>();
         for (Map<String, Object> c : charts) {
             if (!eligible(c)) continue;
-            int[] no = new int[2];
-            for (int li = 0; li < 2; li++) no[li] = Arrays.binarySearch(slots, slotOf(c, LINE_KEYS[li])) + 1;
+            int[] no = { Arrays.binarySearch(slots, slotOf(c, "aaa")) + 1,
+                         Arrays.binarySearch(slots, slotOf(c, "maxMinus")) + 1, NO_LEVEL };
             levelOf.put(chartKey(c), no);
             addedAt.put(chartKey(c), now);
         }
-        return new LevelTable(revision, now, now, MIN_PLAYERS_FOR_LEVEL, slots, levelOf, addedAt);
+        return withAa(new LevelTable(revision, now, now, MIN_PLAYERS_FOR_LEVEL, slots, null, levelOf, addedAt), charts, now);
+    }
+
+    /**
+     * 【メソッドの役割】 表の全譜面に AA 目標のレベルを付けた表を返す（AAA / MAX- の番号と枠はそのまま）。
+     *
+     * 表にある譜面の AA のうち Lv.1 の枠より易しいものの 0.02 枠を、易しくない順に Lv.0, −1, −2 … と連番にし
+     * （負のレベル）、各 AA は一番近いレベル（負のレベルを含む）へ入れる。今の土台に無い譜面（マスタから消えた等）の
+     * AA は付けない。版番号・固定日時は変えない。
+     */
+    private static LevelTable withAa(LevelTable t, List<Map<String, Object>> charts, String now) {
+        Map<String, Map<String, Object>> byKey = new HashMap<>();
+        for (Map<String, Object> c : charts) byKey.put(chartKey(c), c);
+        long lowest = t.slots()[0];
+        java.util.TreeSet<Long> below = new java.util.TreeSet<>(java.util.Comparator.reverseOrder());
+        for (String key : t.levelOf().keySet()) {
+            Map<String, Object> c = byKey.get(key);
+            if (c == null) continue;
+            long s = slotOf(c, "aa");
+            if (s < lowest) below.add(s);
+        }
+        long[] negSlots = below.stream().mapToLong(Long::longValue).toArray();
+        LevelTable withNeg = new LevelTable(t.revision(), t.frozenAt(), now, t.minPlayers(), t.slots(), negSlots,
+                t.levelOf(), t.addedAt());
+        Map<String, int[]> levelOf = new HashMap<>();
+        for (Map.Entry<String, int[]> e : t.levelOf().entrySet()) {
+            int[] no = Arrays.copyOf(e.getValue(), LINE_KEYS.length);
+            Map<String, Object> c = byKey.get(e.getKey());
+            no[AA] = c == null ? NO_LEVEL : nearestAnyLevel(withNeg, slotOf(c, "aa"));
+            levelOf.put(e.getKey(), no);
+        }
+        return new LevelTable(t.revision(), t.frozenAt(), now, t.minPlayers(), t.slots(), negSlots, levelOf, t.addedAt());
     }
 
     /** 【メソッドの役割】 表に無い 200 人以上の譜面を、一番近い既存レベルへ足した表を返す（足すものが無ければ null）。 */
@@ -573,13 +660,14 @@ public class ScoreRoadmapService {
             String key = chartKey(c);
             if (!eligible(c) || t.levelOf().containsKey(key)) continue;
             if (levelOf == null) { levelOf = new HashMap<>(t.levelOf()); addedAt = new HashMap<>(t.addedAt()); }
-            int[] no = new int[2];
-            for (int li = 0; li < 2; li++) no[li] = nearestLevel(t.slots(), slotOf(c, LINE_KEYS[li]));
+            // AAA / MAX- は従来どおり Lv.1 以上へ、AA は負のレベルも含めて一番近いレベルへ
+            int[] no = { nearestLevel(t.slots(), slotOf(c, "aaa")), nearestLevel(t.slots(), slotOf(c, "maxMinus")),
+                         nearestAnyLevel(t, slotOf(c, "aa")) };
             levelOf.put(key, no);
             addedAt.put(key, now);
         }
         if (levelOf == null) return null;
-        return new LevelTable(t.revision(), t.frozenAt(), now, t.minPlayers(), t.slots(), levelOf, addedAt);
+        return new LevelTable(t.revision(), t.frozenAt(), now, t.minPlayers(), t.slots(), t.negSlots(), levelOf, addedAt);
     }
 
     /** 枠 s に一番近いレベルの番号（同じ距離なら易しい方）。 */
@@ -590,6 +678,24 @@ public class ScoreRoadmapService {
         if (ins == 0) return 1;
         if (ins == slots.length) return slots.length;
         return s - slots[ins - 1] <= slots[ins] - s ? ins : ins + 1;
+    }
+
+    /** 枠 s に一番近いレベルの番号。負のレベルも候補に入れる（同じ距離なら易しい方）。 */
+    private static int nearestAnyLevel(LevelTable t, long s) {
+        int best = NO_LEVEL;
+        long bestDist = Long.MAX_VALUE;
+        for (int lv = t.minLevel(); lv <= t.maxLevel(); lv++) {
+            long dist = Math.abs(t.slotOfLevel(lv) - s);
+            if (dist < bestDist) { bestDist = dist; best = lv; }
+        }
+        return best;
+    }
+
+    /** 表の目標数（AA の付いていない譜面は 2、付いている譜面は 3）。 */
+    private static int countTargets(LevelTable t) {
+        int n = 0;
+        for (int[] no : t.levelOf().values()) for (int v : no) if (v != NO_LEVEL) n++;
+        return n;
     }
 
     /** 【メソッドの役割】 現行の版を DB から 1 回だけ読む（levelLock の中で呼ぶ）。読めない時は例外（勝手に作り直さない）。 */
@@ -606,10 +712,12 @@ public class ScoreRoadmapService {
                 Map<String, String> addedAt = new HashMap<>();
                 for (JsonLevelChart c : j.charts()) {
                     String key = c.title() + "\u0000" + c.difficultyName();
-                    levelOf.put(key, new int[] { c.aaa(), c.maxMinus() });
+                    levelOf.put(key, new int[] { c.aaa(), c.maxMinus(), c.aa() == null ? NO_LEVEL : c.aa() });
                     addedAt.put(key, c.addedAt());
                 }
-                levelTable = new LevelTable(j.revision(), j.frozenAt(), j.updatedAt(), j.minPlayers(), j.slots(), levelOf, addedAt);
+                // negSlots が無い = AA を足す前の旧版（次のバッチで withAa が埋める）
+                levelTable = new LevelTable(j.revision(), j.frozenAt(), j.updatedAt(), j.minPlayers(), j.slots(),
+                        j.negSlots(), levelOf, addedAt);
             } catch (Exception e) {
                 throw new IllegalStateException("score_roadmap_level_table を読めません: " + e.getMessage(), e);
             }
@@ -618,23 +726,24 @@ public class ScoreRoadmapService {
         return levelTable;
     }
 
-    /** 保存形式（JSON）。 */
+    /** 保存形式（JSON）。negSlots・aa は 2026-09-24 追加（旧版には無い = null）。 */
     private record JsonLevelTable(int revision, String frozenAt, String updatedAt, int minPlayers, long[] slots,
-                                  List<JsonLevelChart> charts) {}
-    private record JsonLevelChart(String title, String difficultyName, int aaa, int maxMinus, String addedAt) {}
+                                  long[] negSlots, List<JsonLevelChart> charts) {}
+    private record JsonLevelChart(String title, String difficultyName, int aaa, int maxMinus, Integer aa, String addedAt) {}
 
     /** 【メソッドの役割】 レベル表をその版の行として保存する（同じ版は上書き）。 */
     private void saveLevelTable(LevelTable t) {
         List<JsonLevelChart> list = new ArrayList<>();
         for (Map.Entry<String, int[]> e : t.levelOf().entrySet()) {
             String[] k = e.getKey().split("\u0000", 2);
-            list.add(new JsonLevelChart(k[0], k[1], e.getValue()[0], e.getValue()[1], t.addedAt().get(e.getKey())));
+            int[] no = e.getValue();
+            list.add(new JsonLevelChart(k[0], k[1], no[0], no[1], no[AA] == NO_LEVEL ? null : no[AA], t.addedAt().get(e.getKey())));
         }
         list.sort((a, b) -> a.aaa() != b.aaa() ? Integer.compare(a.aaa(), b.aaa()) : a.title().compareTo(b.title()));
         String json;
         try {
             json = objectMapper.writeValueAsString(
-                    new JsonLevelTable(t.revision(), t.frozenAt(), t.updatedAt(), t.minPlayers(), t.slots(), list));
+                    new JsonLevelTable(t.revision(), t.frozenAt(), t.updatedAt(), t.minPlayers(), t.slots(), t.negSlots(), list));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -646,7 +755,7 @@ public class ScoreRoadmapService {
         });
     }
 
-    /** 【メソッドの役割】 応答用の譜面に、レベル表の番号 {aaa, maxMinus} を付ける（表に無い譜面は付けない）。 */
+    /** 【メソッドの役割】 応答用の譜面に、レベル表の番号 {aaa, maxMinus, aa} を付ける（表に無い譜面は付けない）。 */
     private static List<Map<String, Object>> withLevels(List<Map<String, Object>> charts, LevelTable t) {
         List<Map<String, Object>> out = new ArrayList<>(charts.size());
         for (Map<String, Object> c : charts) {
@@ -654,8 +763,7 @@ public class ScoreRoadmapService {
             int[] no = t.levelOf().get(chartKey(c));
             if (no != null) {
                 Map<String, Object> lv = new LinkedHashMap<>();
-                lv.put("aaa", no[0]);
-                lv.put("maxMinus", no[1]);
+                for (int li = 0; li < LINE_KEYS.length; li++) if (no[li] != NO_LEVEL) lv.put(LINE_KEYS[li], no[li]);
                 m.put("levels", lv);
             } else {
                 m.remove("levels");
@@ -665,7 +773,10 @@ public class ScoreRoadmapService {
         return out;
     }
 
-    /** 応答の model に載せるレベル表の情報（フロントはこの slots でレベルの枠を表示する）。 */
+    /**
+     * 応答の model に載せるレベル表の情報。フロントは slots（Lv.1〜）と negSlots（Lv.0, −1, …）で
+     * レベルの枠を表示する。minLevel / maxLevel = 一番易しい / 難しいレベルの番号。
+     */
     private static Map<String, Object> levelTableInfo(LevelTable t) {
         Map<String, Object> m = new LinkedHashMap<>();
         m.put("revision", t.revision());
@@ -673,6 +784,9 @@ public class ScoreRoadmapService {
         m.put("updatedAt", t.updatedAt());
         m.put("minPlayers", t.minPlayers());
         m.put("slots", t.slots());
+        m.put("negSlots", t.negSlots() == null ? new long[0] : t.negSlots());
+        m.put("minLevel", t.minLevel());
+        m.put("maxLevel", t.maxLevel());
         return m;
     }
 
@@ -732,6 +846,7 @@ public class ScoreRoadmapService {
         for (int i = 0; i < th.length; i++) rounded[i] = round2(th[i]);
         Map<String, Object> model = new LinkedHashMap<>();
         // k は差分の θ 計算に使うので丸めすぎない
+        model.put("kAa", Math.round(jr.aa().k() * 10000.0) / 10000.0);
         model.put("kAaa", Math.round(jr.aaa().k() * 10000.0) / 10000.0);
         model.put("kMaxMinus", Math.round(jr.maxMinus().k() * 10000.0) / 10000.0);
         model.put("thetas", rounded); // 全ユーザーの θ（昇順）。「そのレベルに届いている人の割合」に使う
@@ -747,74 +862,79 @@ public class ScoreRoadmapService {
             c.put("playerCount", s.playerCounts()[j]);
             c.put("aaa", chartLine(jr.aaa(), j));
             c.put("maxMinus", chartLine(jr.maxMinus(), j));
+            c.put("aa", chartLine(jr.aa(), j));
             charts.add(c);
         }
         LevelTable t = syncLevelTable(charts, computedAt);
         List<Map<String, Object>> leveled = withLevels(charts, t);
-        Ranking r = computeRanking(s, leveled, t.slots().length);
-        model.put("maxLevel", r.maxLevel());
+        Ranking r = computeRanking(s, leveled, t.minLevel(), t.maxLevel());
+        model.put("maxLevel", t.maxLevel());
+        model.put("minLevel", t.minLevel());
         model.put("levelTable", levelTableInfo(t));
         return baseFromResponse(computedAt, model, leveled, r.entries());
     }
 
-    private record Ranking(int maxLevel, List<Map<String, Object>> entries) {}
+    private record Ranking(List<Map<String, Object>> entries) {}
 
     /**
      * 【メソッドの役割】 全ユーザーのロードマップレベルを計算し、ランキングにする。
      *
      * 判定はフロント（ScoreRoadmapView.vue の levels / myLevel）と同じ規則:
-     *  - 目標 = 譜面 × ライン（AAA / MAX-）。レベル番号は固定したレベル表（charts[].levels）のもの。
+     *  - 目標 = 譜面 × ライン（AA / AAA / MAX-）。レベル番号は固定したレベル表（charts[].levels）のもの（負のレベルを含む）。
      *    表に無い譜面（プレー人数 200 人未満）は判定に使わない。
      *  - 達成 = プレー済み目標 ≥ min(n, max(2, ⌈n/3⌉)) かつ 達成数 × 3 ≥ プレー済み × 2。完全制覇 = 全目標達成。
      *    目標が 0 件のレベル（マスタから消えた譜面だけのレベル）は達成にしない。
-     *  - その人のレベル = 達成レベルの最大番号。レベル 0（どのレベルも未達成）の人は載せない。
+     *  - その人のレベル = 達成レベルの最大番号。どのレベルも未達成の人は載せない。
      * 並びはレベル降順 → 達成レベル数 → 完全制覇数。順位は同じレベルなら同順位（1, 1, 3…）。
      */
     @SuppressWarnings("unchecked")
-    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts, int maxLevel) {
-        // 手順1: 譜面（元の添字 j）× ライン → レベル番号（0 = 表に無い）
-        int nc = s.titles().length;
+    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts, int minLevel, int maxLevel) {
+        // 手順1: 譜面（元の添字 j）× ライン → レベル番号（NO_LEVEL = 表に無い）。配列の添字 = レベル番号 + off
+        int nc = s.titles().length, nl = LINE_KEYS.length;
+        int off = -minLevel, size = maxLevel - minLevel + 1;
         // 曲名・難易度 → 元の添字（重複マスタ行は応答に載らないので、載っている譜面は一意）
         Map<String, Integer> idxOf = new HashMap<>(nc * 2);
         for (int j = 0; j < nc; j++) {
             if (!Double.isNaN(s.joint().aaa().d()[j])) idxOf.put(s.titles()[j] + "\u0000" + s.diffs()[j], j);
         }
-        int[][] levelOf = new int[2][nc];
-        int[] targetsPerLevel = new int[maxLevel + 1];
+        int[][] levelOf = new int[nl][nc];
+        for (int[] row : levelOf) Arrays.fill(row, NO_LEVEL);
+        int[] targetsPerLevel = new int[size];
         for (Map<String, Object> c : charts) {
             Map<String, Object> lv = (Map<String, Object>) c.get("levels");
             if (lv == null) continue;
             int j = idxOf.get(chartKey(c));
-            for (int li = 0; li < 2; li++) {
-                levelOf[li][j] = ((Number) lv.get(LINE_KEYS[li])).intValue();
-                targetsPerLevel[levelOf[li][j]]++;
+            for (int li = 0; li < nl; li++) {
+                Object v = lv.get(LINE_KEYS[li]);
+                if (v == null) continue;
+                levelOf[li][j] = ((Number) v).intValue();
+                targetsPerLevel[levelOf[li][j] + off]++;
             }
         }
-        int[] lines = { LINE_AAA, LINE_MAX_MINUS };
 
         // 手順2: ユーザーごとにレベル別のプレー済み数・達成数を数えて判定
         List<long[]> rows = new ArrayList<>(); // [userId, level, cleared, complete]
-        int[] played = new int[maxLevel + 1], done = new int[maxLevel + 1];
+        int[] played = new int[size], done = new int[size];
         for (int u = 0; u < s.userIds().length; u++) {
             Arrays.fill(played, 0);
             Arrays.fill(done, 0);
             for (int p = s.userStart()[u]; p < s.userStart()[u + 1]; p++) {
                 int j = s.userChart()[p], b = s.userBucket()[p] & 0xFF;
-                for (int li = 0; li < 2; li++) {
+                for (int li = 0; li < nl; li++) {
                     int lv = levelOf[li][j];
-                    if (lv == 0) continue;
-                    played[lv]++;
-                    if (b >= lines[li]) done[lv]++;
+                    if (lv == NO_LEVEL) continue;
+                    played[lv + off]++;
+                    if (b >= LINE_BUCKETS[li]) done[lv + off]++;
                 }
             }
-            int level = 0, cleared = 0, complete = 0;
-            for (int lv = 1; lv <= maxLevel; lv++) {
-                int n = targetsPerLevel[lv];
+            int level = NO_LEVEL, cleared = 0, complete = 0;
+            for (int x = 0; x < size; x++) {
+                int n = targetsPerLevel[x];
                 int minPlayed = Math.min(n, Math.max(2, (n + 2) / 3));
-                if (n > 0 && played[lv] >= minPlayed && done[lv] * 3 >= played[lv] * 2) { level = lv; cleared++; }
-                if (n > 0 && done[lv] == n) complete++;
+                if (n > 0 && played[x] >= minPlayed && done[x] * 3 >= played[x] * 2) { level = x - off; cleared++; }
+                if (n > 0 && done[x] == n) complete++;
             }
-            if (level > 0) rows.add(new long[] { s.userIds()[u], level, cleared, complete });
+            if (level != NO_LEVEL) rows.add(new long[] { s.userIds()[u], level, cleared, complete });
         }
 
         // 手順3: 並べて順位（同レベルは同順位）
@@ -832,7 +952,7 @@ public class ScoreRoadmapService {
             e.put("completeLevels", rows.get(i)[3]);
             entries.add(e);
         }
-        return new Ranking(maxLevel, entries);
+        return new Ranking(entries);
     }
 
     /** 【メソッドの役割】 応答用の形（DB 保存形式と同じ）から差分計算用の配列を組み立てる。 */
@@ -842,17 +962,20 @@ public class ScoreRoadmapService {
         int n = charts.size();
         Map<String, Integer> keyToIdx = new HashMap<>(n * 2);
         int[] notes = new int[n];
-        double[] dAaa = new double[n], dMm = new double[n];
+        double[] dAa = new double[n], dAaa = new double[n], dMm = new double[n];
         for (int i = 0; i < n; i++) {
             Map<String, Object> c = charts.get(i);
             keyToIdx.put(c.get("title") + "\u0000" + c.get("difficultyName"), i);
             notes[i] = ((Number) c.get("notes")).intValue();
+            dAa[i] = ((Number) ((Map<String, Object>) c.get("aa")).get("d")).doubleValue();
             dAaa[i] = ((Number) ((Map<String, Object>) c.get("aaa")).get("d")).doubleValue();
             dMm[i] = ((Number) ((Map<String, Object>) c.get("maxMinus")).get("d")).doubleValue();
         }
+        double kAa = ((Number) model.get("kAa")).doubleValue();
         double kAaa = ((Number) model.get("kAaa")).doubleValue();
         double kMm = ((Number) model.get("kMaxMinus")).doubleValue();
-        return new Base(computedAt, model, charts, ranking == null ? List.of() : ranking, keyToIdx, notes, dAaa, dMm, kAaa, kMm);
+        return new Base(computedAt, model, charts, ranking == null ? List.of() : ranking, keyToIdx, notes,
+                dAa, dAaa, dMm, kAa, kAaa, kMm);
     }
 
     private static Map<String, Object> chartLine(LineResult r, int j) {
@@ -973,6 +1096,12 @@ public class ScoreRoadmapService {
 
         /** AAA 目標の d の事前分布は、同じ譜面の MAX- の目安よりこれだけ易しい所に置く（試算の中央値差 0.76）。 */
         private static final double AAA_PRIOR_SHIFT = 0.7;
+        /**
+         * AA 目標の事前分布のずらし幅（桶 1 つあたり 0.07 = AAA の 0.7 / 10 桶を AA の 30 桶へ延長）。
+         * ほぼ全員が AA を取る譜面は d が事前分布に寄るので、負のレベルの下の方の並びはこの値で決まる。
+         * 2026-09-24 に同じ値で試算し、ユーザーに見せた表（負のレベル 29、☆12 の AA は負に入らない）と揃えてある。
+         */
+        private static final double AA_PRIOR_SHIFT = 2.1;
         /** (2) の d と k の交互推定の回数。 */
         private static final int JOINT_ROUNDS = 8;
 
@@ -1013,10 +1142,12 @@ public class ScoreRoadmapService {
             }
 
             // (2) θ 固定で、ラインごとに d と k を交互推定
+            LineResult aa = fitLine(LINE_AA, kAnchor, fitUser, theta);
             LineResult aaa = fitLine(LINE_AAA, kAnchor, fitUser, theta);
             LineResult mm = fitLine(LINE_MAX_MINUS, kAnchor, fitUser, theta);
 
-            // (3) d・k 固定で全ユーザーの θ を両ラインの目標から
+            // (3) d・k 固定で全ユーザーの θ を全ラインの目標から
+            LineResult[] lrs = { aaa, mm, aa };
             double[] thetaAll = new double[nu];
             for (int u = 0; u < nu; u++) {
                 double th = fitUser[u] ? theta[u] : THETA_ALL_PRIOR_MU;
@@ -1024,10 +1155,11 @@ public class ScoreRoadmapService {
                     double g = -(th - THETA_ALL_PRIOR_MU) / THETA_ALL_PRIOR_VAR, h = -1.0 / THETA_ALL_PRIOR_VAR;
                     for (int p = userStart[u]; p < userStart[u + 1]; p++) {
                         int c = userChart[p], b = userBucket[p] & 0xFF;
-                        for (LineResult lr : new LineResult[] { aaa, mm }) {
+                        for (int li = 0; li < lrs.length; li++) {
+                            LineResult lr = lrs[li];
                             double dj = lr.d()[c];
                             if (Double.isNaN(dj)) continue;
-                            int line = lr == aaa ? LINE_AAA : LINE_MAX_MINUS;
+                            int line = LINE_BUCKETS[li];
                             double pr = sig(lr.k() * (th - dj));
                             g += lr.k() * ((b >= line ? 1 : 0) - pr);
                             h -= lr.k() * lr.k() * pr * (1 - pr);
@@ -1039,14 +1171,14 @@ public class ScoreRoadmapService {
                 }
                 thetaAll[u] = th;
             }
-            return new JointResult(aaa, mm, thetaAll);
+            return new JointResult(aa, aaa, mm, thetaAll);
         }
 
         /** (2) の 1 ライン分: θ 固定で全譜面の d（弱い事前分布）と、そのラインの k を交互に推定する。 */
         private LineResult fitLine(int line, double k0, boolean[] fitUser, double[] theta) {
             double[] d = new double[nc], se = new double[nc], rate = new double[nc];
             int[] nFit = new int[nc];
-            double shift = line == LINE_AAA ? AAA_PRIOR_SHIFT : 0.0;
+            double shift = line == LINE_AA ? AA_PRIOR_SHIFT : line == LINE_AAA ? AAA_PRIOR_SHIFT : 0.0;
             for (int j = 0; j < nc; j++) {
                 int hit = 0;
                 for (int p = chartStart[j]; p < chartStart[j + 1]; p++) if ((chartBucket[p] & 0xFF) >= line) hit++;

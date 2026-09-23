@@ -53,7 +53,7 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
           <!-- 1. 目標とレベル -->
           <section>
             <h4 class="font-bold text-slate-900 dark:text-white mb-2">1. 目標とレベル</h4>
-            <p class="mb-3">1 つの譜面に「AAA」と「MAX-」の 2 つの目標があります。全目標を達成に必要な実力の順に並べ、難度 0.02 ごとに区切ったものがレベルです。</p>
+            <p class="mb-3">1 つの譜面に「AA」「AAA」「MAX-」の 3 つの目標があります。全目標を達成に必要な実力の順に並べ、難度 0.02 ごとに区切ったものがレベルです。</p>
             <div class="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
               <div class="flex items-center gap-2 text-[11px] text-slate-500 mb-2">
                 <span>易しい</span>
@@ -76,7 +76,8 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
                   </div>
                 </div>
               </div>
-              <p class="text-[11px] text-slate-500 mt-2">同じ曲でも AAA と MAX- は別のレベルに入ります（MAX- の方が必ず上）。</p>
+              <p class="text-[11px] text-slate-500 mt-2">同じ曲でも AA・AAA・MAX- は別のレベルに入ります（AA → AAA → MAX- の順に上）。</p>
+              <p class="text-[11px] text-slate-500 mt-1">Lv.1 より易しい AA の目標は、Lv.0・Lv.-1・Lv.-2 … と下に続くレベルに入ります。</p>
             </div>
           </section>
 
@@ -177,7 +178,7 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
               </li>
               <li>プレー人数 {{ minPlayers }} 人以上の譜面だけが入ります。後から {{ minPlayers }} 人に達した譜面は、一番近いレベルに追加されます。</li>
               <li>譜面の右に出る難度は最新の集計値です。</li>
-              <li>上部の絞り込み（AAA / MAX-・☆・未達成だけ）は表示を変えるだけで、レベルの番号や判定は変わりません。</li>
+              <li>上部の絞り込み（AA / AAA / MAX-・☆・未達成だけ）は表示を変えるだけで、レベルの番号や判定は変わりません。</li>
             </ul>
           </section>
         </div>

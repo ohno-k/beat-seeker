@@ -164,7 +164,7 @@
           >
             <p class="text-[10px] font-bold text-slate-400 mb-1">{{ t('dashboard.roadmapLevel') }}</p>
             <div class="flex items-end gap-2">
-              <span class="text-5xl font-bold text-blue-700 dark:text-blue-300 tabular-nums leading-none group-hover:underline">Lv.{{ roadmapLevel.level }}</span>
+              <span class="text-5xl font-bold text-blue-700 dark:text-blue-300 tabular-nums leading-none group-hover:underline">{{ formatRoadmapLevel(roadmapLevel.level) }}</span>
               <span class="text-sm font-bold text-slate-400 pb-1">/ {{ roadmapLevel.maxLevel }}</span>
             </div>
           </component>
@@ -286,6 +286,7 @@ import RankUpAdvice from './RankUpAdvice.vue';
 import ActivityFeed from './ActivityFeed.vue';
 import { useAuth } from '../composables/useAuth';
 import { flattenScores } from '../utils/scoreData';
+import { formatRoadmapLevel } from '../utils/roadmapLevels';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const { showRateTier } = useRateTierVisibility();
@@ -613,8 +614,11 @@ const myRankingPosition = computed(() => {
 });
 
 // ===== スコアロードマップのレベル（ランキング順位の隣。2026-09-23 追加） =====
-/** 表示対象のロードマップレベル（取得前・対象外・集計前は null で非表示）。 */
-const roadmapLevel = ref<{ level: number; maxLevel: number } | null>(null);
+/**
+ * 表示対象のロードマップレベル（取得前・対象外・集計前は null で非表示）。
+ * level は負のレベル（Lv.0 以下）もあり、どのレベルも未達成なら null（表示は「—」）。
+ */
+const roadmapLevel = ref<{ level: number | null; maxLevel: number } | null>(null);
 /**
  * 【computed の役割】 ロードマップレベルを取る相手。自分なら 'self'、管理者閲覧中はその人の ID。
  * フレンド・公開プロフィール等の他人閲覧では API が本人か管理者しか許さないので出さない（null）。

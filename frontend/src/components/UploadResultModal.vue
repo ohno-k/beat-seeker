@@ -280,7 +280,7 @@
                           <span v-if="song.songRank" class="tabular-nums" :class="song.songRank === 1 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">#{{ song.songRank }}<span class="font-medium">/{{ song.songRankTotal }}</span></span>
                           <span v-if="song.isInRateTop100 && song.newRatePt > 0 && showRateTier" class="max-sm:hidden text-emerald-600 dark:text-emerald-400 whitespace-nowrap">RATE TOP100</span>
                           <!-- スマホは DJ LEVEL 列を畳むので補足行に 1 つだけ出す。近い方のボーダー基準（MAX-12 / AAA-30 / AA+50）。 -->
-                          <span v-if="song.maxScore > 0" class="sm:hidden tabular-nums" :class="gradeColorClass(song)">{{ getScoreGradeInfo(song.newScore, song.maxScore).nearest }}</span>
+                          <span v-if="song.maxScore > 0" class="sm:hidden tabular-nums" :class="mainGradeColorClass(song)">{{ getScoreGradeInfo(song.newScore, song.maxScore).nearest }}</span>
                           <span v-for="v in votedLabels(song)" :key="v" class="text-blue-700 dark:text-blue-400 whitespace-nowrap">✔ {{ v }}</span>
                         </div>
                       </div>
@@ -307,8 +307,8 @@
                       <!-- DJ LEVEL / MAX-（PC のみ） -->
                       <div class="max-sm:hidden shrink-0 w-[76px] text-right tabular-nums">
                         <template v-if="song.maxScore > 0">
-                          <p class="text-xs font-bold leading-tight" :class="gradeColorClass(song)">{{ getScoreGradeInfo(song.newScore, song.maxScore).grade }}</p>
-                          <p class="text-[10px] font-bold text-slate-400 leading-tight">{{ getScoreGradeInfo(song.newScore, song.maxScore).fromMax }}</p>
+                          <p class="text-xs font-bold leading-tight" :class="mainGradeColorClass(song)">{{ getScoreGradeInfo(song.newScore, song.maxScore).main }}</p>
+                          <p class="text-[10px] font-bold text-slate-400 leading-tight">{{ getScoreGradeInfo(song.newScore, song.maxScore).sub }}</p>
                         </template>
                       </div>
 
@@ -416,14 +416,14 @@
               <!-- レベルの変化 -->
               <div class="mt-2 flex items-baseline gap-2 flex-wrap tabular-nums">
                 <template v-if="roadmapProgress.newLevel !== roadmapProgress.oldLevel">
-                  <span class="text-sm font-bold font-mono text-slate-400">Lv.{{ roadmapProgress.oldLevel }}</span>
+                  <span class="text-sm font-bold font-mono text-slate-400">{{ formatRoadmapLevel(roadmapProgress.oldLevel) }}</span>
                   <span class="text-slate-400">→</span>
-                  <span class="text-2xl font-bold font-mono text-blue-700 dark:text-blue-300">Lv.{{ roadmapProgress.newLevel }}</span>
-                  <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-blue-700 text-white">
+                  <span class="text-2xl font-bold font-mono text-blue-700 dark:text-blue-300">{{ formatRoadmapLevel(roadmapProgress.newLevel) }}</span>
+                  <span v-if="roadmapProgress.oldLevel != null && roadmapProgress.newLevel != null" class="text-xs font-bold px-1.5 py-0.5 rounded bg-blue-700 text-white">
                     {{ roadmapProgress.newLevel > roadmapProgress.oldLevel ? '+' : '' }}{{ roadmapProgress.newLevel - roadmapProgress.oldLevel }}
                   </span>
                 </template>
-                <span v-else class="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">Lv.{{ roadmapProgress.newLevel }}</span>
+                <span v-else class="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">{{ formatRoadmapLevel(roadmapProgress.newLevel) }}</span>
                 <span class="text-xs text-slate-400">/ {{ roadmapProgress.maxLevel }}</span>
               </div>
               <div class="mt-1 flex flex-wrap gap-1.5 text-[11px] font-bold">
@@ -445,7 +445,9 @@
                   <li v-for="tg in roadmapTargetsShown" :key="tg.key" class="px-2.5 py-1.5 flex items-center gap-2 text-xs">
                     <span
                       class="text-[10px] font-bold font-mono px-1.5 rounded w-11 text-center shrink-0"
-                      :class="tg.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'"
+                      :class="tg.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
+                        : tg.line === 'aaa' ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                        : 'border border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-300'"
                     >{{ ROADMAP_LINE_LABEL[tg.line] }}</span>
                     <span class="font-mono text-slate-400 shrink-0">☆{{ tg.level }}</span>
                     <span class="min-w-0 font-bold text-slate-800 dark:text-slate-100 break-words">{{ roadmapChartName(tg.title, tg.difficultyName) }}</span>
@@ -766,8 +768,9 @@ import { useAuth, API_BASE } from '../composables/useAuth';
 import { usePastScores, chartKey as pastChartKey } from '../composables/usePastScores';
 import {
   ROADMAP_LINES, ROADMAP_LINE_BUCKET, ROADMAP_LINE_LABEL, remainingToClear, scoreToBucket, summarizeRoadmap,
+  formatRoadmapLevel, roadmapMaxLevel,
 } from '../utils/roadmapLevels';
-import type { RoadmapChartLike, RoadmapLine } from '../utils/roadmapLevels';
+import type { RoadmapChartLike, RoadmapLevelTableLike, RoadmapLine } from '../utils/roadmapLevels';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
@@ -809,7 +812,7 @@ const leagueWeekLabel = computed(() => {
   return [lp.weekNo != null ? `#${lp.weekNo}` : '', range].filter(Boolean).join(' ');
 });
 
-/** 今回のアップロードで新たに達成したロードマップの目標（譜面 × AAA / MAX-）。 */
+/** 今回のアップロードで新たに達成したロードマップの目標（譜面 × AA / AAA / MAX-）。 */
 interface RoadmapNewTarget { key: string; title: string; difficultyName: string; level: number; line: RoadmapLine; no: number }
 
 /**
@@ -817,8 +820,9 @@ interface RoadmapNewTarget { key: string; title: string; difficultyName: string;
  * next = 今のレベルより上で最初の未達成レベルと、その達成までの残り件数。
  */
 const roadmapProgress = ref<null | {
-  oldLevel: number;
-  newLevel: number;
+  /** null = どのレベルも未達成（レベル 0 は実在するので 0 ではない）。 */
+  oldLevel: number | null;
+  newLevel: number | null;
   maxLevel: number;
   newlyCleared: number;
   newlyComplete: number;
@@ -853,8 +857,8 @@ const loadRoadmapProgress = async () => {
     } finally {
       clearTimeout(timer);
     }
-    const slots: number[] | undefined = data?.model?.levelTable?.slots;
-    if (!data?.ready || !slots?.length || !data.user?.found) return;
+    const table: RoadmapLevelTableLike | undefined = data?.model?.levelTable;
+    if (!data?.ready || !table?.slots?.length || !data.user?.found) return;
     const charts: RoadmapChartLike[] = data.charts;
     const newBuckets = new Map<number, number>(data.user.plays ?? []);
 
@@ -870,15 +874,17 @@ const loadRoadmapProgress = async () => {
       else oldBuckets.delete(c.i);
     }
 
-    const before = summarizeRoadmap(charts, slots.length, oldBuckets);
-    const after = summarizeRoadmap(charts, slots.length, newBuckets);
+    const before = summarizeRoadmap(charts, table, oldBuckets);
+    const after = summarizeRoadmap(charts, table, newBuckets);
     const targets: RoadmapNewTarget[] = [];
     for (const c of charts) {
       if (!c.levels) continue;
       for (const line of ROADMAP_LINES) {
+        const no = c.levels[line];
+        if (no == null) continue;
         const line0 = ROADMAP_LINE_BUCKET[line];
         if ((newBuckets.get(c.i) ?? -1) >= line0 && (oldBuckets.get(c.i) ?? -1) < line0) {
-          targets.push({ key: `${c.i}:${line}`, title: c.title, difficultyName: c.difficultyName, level: c.level, line, no: c.levels[line] });
+          targets.push({ key: `${c.i}:${line}`, title: c.title, difficultyName: c.difficultyName, level: c.level, line, no });
         }
       }
     }
@@ -886,12 +892,13 @@ const loadRoadmapProgress = async () => {
     const newlyComplete = after.levels.filter((l, k) => l.complete && !before.levels[k].complete).length;
     if (targets.length === 0 && newlyCleared === 0 && after.myLevel === before.myLevel) return;
 
-    targets.sort((a, b) => b.no - a.no || (a.line === b.line ? 0 : a.line === 'maxMinus' ? -1 : 1));
-    const nextLv = after.levels.find((l) => l.no > after.myLevel && !l.cleared);
+    // 難しいレベル順。同じレベルなら MAX- → AAA → AA
+    targets.sort((a, b) => b.no - a.no || ROADMAP_LINES.indexOf(b.line) - ROADMAP_LINES.indexOf(a.line));
+    const nextLv = after.levels.find((l) => l.no > (after.myLevel ?? -Infinity) && !l.cleared);
     roadmapProgress.value = {
       oldLevel: before.myLevel,
       newLevel: after.myLevel,
-      maxLevel: slots.length,
+      maxLevel: roadmapMaxLevel(table),
       newlyCleared,
       newlyComplete,
       targets,
@@ -1090,6 +1097,9 @@ const ptClass = (song: UpdatedSong) => {
 
 const GRADE_COLOR_CLASS: Record<string, string> = { AAA: 'text-yellow-500', AA: 'text-blue-400', A: 'text-green-500' };
 const gradeColorClass = (song: UpdatedSong) => GRADE_COLOR_CLASS[getScoreGradeInfo(song.newScore, song.maxScore).gradeName] ?? 'text-slate-400';
+/** DJ LEVEL 列の大きい文字（近い方の境界表記）の色。MAX-n は紫（スコア一覧の MAX- と同じ）。 */
+const MAIN_GRADE_COLOR_CLASS: Record<string, string> = { ...GRADE_COLOR_CLASS, MAX: 'text-yellow-500', 'MAX-': 'text-purple-500 dark:text-purple-400' };
+const mainGradeColorClass = (song: UpdatedSong) => MAIN_GRADE_COLOR_CLASS[getScoreGradeInfo(song.newScore, song.maxScore).mainColorKey] ?? 'text-slate-400';
 
 const emit = defineEmits<{
   (e: 'close'): void;

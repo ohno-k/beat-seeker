@@ -20,6 +20,10 @@
  *  - 2026-09-23 の本番データ試算（200 プレイ以上の 1,046 人）: 推定実力とのずれは中央値 0、
  *    ☆11/12 中心の人でも −2（未プレーを分母に入れていた旧ルールでは −35）。
  *
+ * AA ライン（2026-09-24 ユーザー指定・サイレント追加）: 1 譜面 3 目標（AA / AAA / MAX-）。Lv.1 より易しい AA は
+ * Lv.0, −1, −2 … の「負のレベル」（model.levelTable.negSlots）に入る。Lv.1 以上の番号・枠はそのまま。
+ * レベル 0 が実在するので、どのレベルも未達成の人のレベルは null（表示は「—」）。
+ *
  * データ: API `/api/scores/score-roadmap`（管理者専用）。サーバーは「土台（全目標の難度・全員の実力分布。
  * 3 時間ごとのバッチ、DB 保存）+ 差分（表示ユーザー 1 人分の最新スコアをその場で反映）」で返す。
  *  - charts[].aaa.d / maxMinus.d = 各目標の難度。model.thetas = 全プレイヤーの推定実力（昇順）。
@@ -30,7 +34,9 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { formatJstDateTime } from '../utils/jstTime';
-import { minPlayedFor, isLevelCleared, remainingToClear } from '../utils/roadmapLevels';
+import {
+  minPlayedFor, isLevelCleared, remainingToClear, roadmapMinLevel, roadmapMaxLevel, roadmapSlotOf, formatRoadmapLevel,
+} from '../utils/roadmapLevels';
 import ScoreRoadmapRankingModal from '../components/ScoreRoadmapRankingModal.vue';
 import ScoreRoadmapRulesModal from '../components/ScoreRoadmapRulesModal.vue';
 
@@ -39,22 +45,23 @@ const { authHeaders } = useAuth();
 const { isAdmin } = useAdmin();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-type LineKey = 'aaa' | 'maxMinus';
+type LineKey = 'aa' | 'aaa' | 'maxMinus';
 interface ChartLine { d: number; se: number; n: number; rate: number }
 interface Chart {
-  i: number; title: string; difficultyName: string; level: number; playerCount: number; aaa: ChartLine; maxMinus: ChartLine;
+  i: number; title: string; difficultyName: string; level: number; playerCount: number;
+  aa: ChartLine; aaa: ChartLine; maxMinus: ChartLine;
   /** 固定したレベル表での番号。表に無い譜面（プレー人数 200 人未満）は無し。 */
-  levels?: Record<LineKey, number>;
+  levels?: Partial<Record<LineKey, number>>;
 }
-interface LevelTableInfo { revision: number; frozenAt: string; updatedAt: string; minPlayers: number; slots: number[] }
+interface LevelTableInfo { revision: number; frozenAt: string; updatedAt: string; minPlayers: number; slots: number[]; negSlots?: number[] }
 interface Model { kAaa: number; kMaxMinus: number; thetas: number[]; levelTable?: LevelTableInfo }
 interface UserInfo { userId: number; label: string | null; found: boolean; theta?: number; plays?: [number, number][] }
 /** 目標 = 譜面 × ライン。no = 固定したレベル表でのレベル番号。 */
 interface Target { key: string; c: Chart; line: LineKey; d: number; no: number }
 
-const LINES: LineKey[] = ['aaa', 'maxMinus'];
-const LINE_BUCKET: Record<LineKey, number> = { aaa: 160, maxMinus: 170 };
-const LINE_LABEL: Record<LineKey, string> = { aaa: 'AAA', maxMinus: 'MAX-' };
+const LINES: LineKey[] = ['aa', 'aaa', 'maxMinus'];
+const LINE_BUCKET: Record<LineKey, number> = { aa: 140, aaa: 160, maxMinus: 170 };
+const LINE_LABEL: Record<LineKey, string> = { aa: 'AA', aaa: 'AAA', maxMinus: 'MAX-' };
 
 /**
  * 1 レベルの幅（難度の目盛りで 0.02）。推定の標準誤差（約 0.03）と同程度なので、
@@ -209,6 +216,7 @@ const targetKey = ref('1-12');
 const range = computed(() => TARGETS.find((t) => t.key === targetKey.value) ?? TARGETS[0]);
 const LINE_FILTERS = [
   { key: 'both', label: 'すべて' },
+  { key: 'aa', label: 'AA' },
   { key: 'aaa', label: 'AAA' },
   { key: 'maxMinus', label: 'MAX-' },
 ] as const;
@@ -226,7 +234,8 @@ const achieved = (t: Target) => (userBucket.value.get(t.c.i) ?? -1) >= LINE_BUCK
 /** レベル表に入っている譜面（プレー人数 200 人以上）。 */
 const levelCharts = computed(() => charts.value.filter((c) => c.levels));
 const targets = computed<Target[]>(() => levelCharts.value.flatMap((c) =>
-  LINES.map((line) => ({ key: `${c.i}:${line}`, c, line, d: c[line].d, no: c.levels![line] }))));
+  LINES.filter((line) => c.levels![line] != null && c[line])
+    .map((line) => ({ key: `${c.i}:${line}`, c, line, d: c[line].d, no: c.levels![line]! }))));
 const levelTable = computed(() => model.value?.levelTable ?? null);
 /** 曲名の表記: ANOTHER は表記なし、LEGGENDARIA は末尾に [L]（難易度表と同じ書き方）。 */
 const chartName = (c: Chart) => (c.difficultyName === 'LEGGENDARIA' ? `${c.title}[L]` : c.title);
@@ -249,15 +258,18 @@ interface Level {
   remaining: number; reachShare: number; group: number;
 }
 /**
- * 【computed の役割】 固定したレベル表の各レベル（slots[番号 − 1] = そのレベルの 0.02 枠）に目標を振り分ける。
+ * 【computed の役割】 固定したレベル表の各レベル（Lv.1〜 は slots[番号 − 1]、Lv.0 以下は negSlots[−番号] が
+ * そのレベルの 0.02 枠）に目標を振り分ける。易しい順（負のレベルから）。
  * 番号と判定は常に表の全目標で決める（表示フィルタで変わらない）。
  */
 const levels = computed<Level[]>(() => {
-  const slots = levelTable.value?.slots ?? [];
-  const byNo = slots.map(() => [] as Target[]);
-  for (const t of targets.value) byNo[t.no - 1]?.push(t);
-  return slots.map((slot, idx) => {
-    const items = byNo[idx];
+  const table = levelTable.value;
+  if (!table) return [];
+  const minNo = roadmapMinLevel(table), count = roadmapMaxLevel(table) - minNo + 1;
+  const byNo = Array.from({ length: count }, () => [] as Target[]);
+  for (const t of targets.value) byNo[t.no - minNo]?.push(t);
+  return byNo.map((items, idx) => {
+    const no = minNo + idx, slot = roadmapSlotOf(table, no);
     items.sort((a, b) => a.d - b.d);
     const n = items.length;
     const p = items.filter(played).length;
@@ -267,15 +279,18 @@ const levels = computed<Level[]>(() => {
     const cleared = isLevelCleared(n, p, x);
     const from = slot * LEVEL_W;
     return {
-      no: idx + 1, from, to: from + LEVEL_W, items, played: p, done: x, minPlayed, cleared,
+      no, from, to: from + LEVEL_W, items, played: p, done: x, minPlayed, cleared,
       complete: n > 0 && x === n, remaining: remainingToClear(n, p, x), reachShare: shareAtLeast(from + LEVEL_W), group: Math.floor(from / GROUP_W + 1e-9),
     };
   });
 });
-const maxLevelNo = computed(() => levels.value.length);
-/** その人のレベル = 達成しているレベルのうち一番高い番号。 */
-const myLevel = computed(() => {
-  let best = 0;
+/** 一番難しい / 易しいレベルの番号と、レベルの総数（負のレベルを含む）。 */
+const maxLevelNo = computed(() => levels.value.at(-1)?.no ?? 0);
+const minLevelNo = computed(() => levels.value[0]?.no ?? 1);
+const levelCount = computed(() => levels.value.length);
+/** その人のレベル = 達成しているレベルのうち一番高い番号（どのレベルも未達成なら null）。 */
+const myLevel = computed<number | null>(() => {
+  let best: number | null = null;
   for (const l of levels.value) if (l.cleared) best = l.no;
   return best;
 });
@@ -285,7 +300,7 @@ const completeCount = computed(() => levels.value.filter((l) => l.complete).leng
 const doneCount = computed(() => {
   const inRange = levelCharts.value.filter((c) => c.level >= range.value.min && c.level <= range.value.max);
   const count = (line: LineKey) => inRange.filter((c) => (userBucket.value.get(c.i) ?? -1) >= LINE_BUCKET[line]).length;
-  return { total: inRange.length, aaa: count('aaa'), maxMinus: count('maxMinus') };
+  return { total: inRange.length, aa: count('aa'), aaa: count('aaa'), maxMinus: count('maxMinus') };
 });
 const theta = computed(() => (user.value?.found ? user.value.theta ?? null : null));
 
@@ -298,7 +313,7 @@ const shownLevels = computed(() => levels.value
 const expanded = ref(new Set<number>());
 watch([myLevel, () => charts.value.length], () => {
   // 自分のレベルより上で、まだ達成していない最初のレベル（次の目標）を開いておく
-  const next = levels.value.find((l) => l.no > myLevel.value && !l.cleared);
+  const next = levels.value.find((l) => l.no > (myLevel.value ?? -Infinity) && !l.cleared);
   expanded.value = new Set(next ? [next.no] : []);
 }, { immediate: true });
 function toggleLevel(no: number) {
@@ -327,7 +342,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
     <div class="rm-card bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
       <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
         <div class="flex items-center gap-3">
-          <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコアロードマップ（AAA・MAX-）</h2>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコアロードマップ（AA・AAA・MAX-）</h2>
           <button
             v-if="isAdmin"
             class="px-3 py-1 text-xs font-bold rounded border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
@@ -344,7 +359,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
         </div>
       </div>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-5 flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span>各譜面の AAA・MAX- を難しさの順にレベル分けしています。各レベルで遊んだ目標の 3 分の 2 を達成するとクリア。</span>
+        <span>各譜面の AA・AAA・MAX- を難しさの順にレベル分けしています。各レベルで遊んだ目標の 3 分の 2 を達成するとクリア。</span>
         <button
           class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
           @click="showRules = true"
@@ -426,8 +441,8 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
         <div v-else class="grid gap-3 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))">
           <div class="rounded-md p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
             <div class="text-xs text-slate-500 dark:text-slate-400">ロードマップ レベル</div>
-            <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">Lv.{{ myLevel }}<span class="text-sm text-slate-400"> / {{ maxLevelNo }}</span></div>
-            <div class="text-xs text-slate-500 dark:text-slate-400">達成 {{ clearedCount }} / {{ maxLevelNo }} レベル（うち完全制覇 {{ completeCount }}）</div>
+            <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ formatRoadmapLevel(myLevel) }}<span class="text-sm text-slate-400"> / {{ maxLevelNo }}</span></div>
+            <div class="text-xs text-slate-500 dark:text-slate-400">達成 {{ clearedCount }} / {{ levelCount }} レベル（うち完全制覇 {{ completeCount }}）</div>
           </div>
           <div class="rounded-md bg-slate-50 dark:bg-slate-900/50 p-4">
             <div class="text-xs text-slate-500 dark:text-slate-400">推定実力（参考）</div>
@@ -437,11 +452,13 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
           <div class="rounded-md bg-slate-50 dark:bg-slate-900/50 p-4">
             <div class="text-xs text-slate-500 dark:text-slate-400">達成譜面（{{ range.label }}・歴代ベスト）</div>
             <div class="font-mono text-slate-900 dark:text-white">
-              <span class="text-xs text-slate-500">AAA</span> <span class="text-xl font-bold">{{ doneCount.aaa }}</span>
+              <span class="text-xs text-slate-500">AA</span> <span class="text-xl font-bold">{{ doneCount.aa }}</span>
+              <span class="text-xs text-slate-500 ml-3">AAA</span> <span class="text-xl font-bold">{{ doneCount.aaa }}</span>
               <span class="text-xs text-slate-500 ml-3">MAX-</span> <span class="text-xl font-bold">{{ doneCount.maxMinus }}</span>
               <span class="text-sm text-slate-400"> / {{ doneCount.total }}</span>
             </div>
             <div class="h-1.5 rounded bg-slate-200 dark:bg-slate-700 mt-2 overflow-hidden relative">
+              <div class="absolute inset-y-0 left-0 bg-blue-100 dark:bg-blue-900" :style="{ width: `${pct(doneCount.aa, doneCount.total)}%` }"></div>
               <div class="absolute inset-y-0 left-0 bg-blue-300 dark:bg-blue-700" :style="{ width: `${pct(doneCount.aaa, doneCount.total)}%` }"></div>
               <div class="absolute inset-y-0 left-0 bg-blue-600 dark:bg-blue-400" :style="{ width: `${pct(doneCount.maxMinus, doneCount.total)}%` }"></div>
             </div>
@@ -450,7 +467,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
 
         <!-- 凡例 -->
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400 mb-2">
-          <span>{{ maxLevelNo }} レベル中 {{ clearedCount }} レベル達成・{{ completeCount }} レベル完全制覇</span>
+          <span>{{ levelCount }} レベル中 {{ clearedCount }} レベル達成・{{ completeCount }} レベル完全制覇</span>
           <span class="inline-flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-amber-500 dark:text-amber-400"><path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.52 4.67a1 1 0 00.95.69h4.91c.97 0 1.37 1.24.59 1.81l-3.98 2.89a1 1 0 00-.36 1.12l1.52 4.67c.3.92-.76 1.69-1.54 1.12l-3.97-2.89a1 1 0 00-1.18 0l-3.97 2.89c-.78.57-1.84-.2-1.54-1.12l1.52-4.67a1 1 0 00-.36-1.12L1.08 10.1c-.78-.57-.38-1.81.59-1.81h4.91a1 1 0 00.95-.69l1.52-4.67z" /></svg>完全制覇（全目標を達成）
           </span>
@@ -489,7 +506,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
                 <span class="rm-no font-bold font-mono text-slate-900 dark:text-white">Lv.{{ l.no }}</span>
                 <span class="rm-range font-mono text-slate-500">{{ l.from.toFixed(2) }}〜{{ l.to.toFixed(2) }}</span>
                 <span class="rm-meta1 inline-flex flex-wrap items-center gap-x-3">
-                  <span v-if="l.no === 1" class="font-bold text-blue-700 dark:text-blue-300">スタート</span>
+                  <span v-if="l.no === minLevelNo" class="font-bold text-blue-700 dark:text-blue-300">スタート</span>
                   <span v-if="l.no === maxLevelNo" class="font-bold text-blue-700 dark:text-blue-300">最終レベル</span>
                   <span v-if="l.no === myLevel" class="font-bold text-blue-700 dark:text-blue-300">あなたのレベル</span>
                   <span class="text-slate-500">{{ l.items.length }}目標</span>
@@ -517,7 +534,9 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
                       </span>
                       <span
                         class="rm-tag text-[10px] font-bold font-mono px-1.5 rounded text-center"
-                        :class="t.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'"
+                        :class="t.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
+                          : t.line === 'aaa' ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'
+                          : 'border border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-300'"
                       >{{ LINE_LABEL[t.line] }}</span>
                       <span class="rm-star font-mono text-xs text-slate-400">☆{{ t.c.level }}</span>
                       <span class="rm-title" :class="achieved(t) ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'">{{ chartName(t.c) }}</span>
