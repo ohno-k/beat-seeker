@@ -310,16 +310,35 @@ const shownLevels = computed(() => levels.value
   .filter((x) => x.shown.length > 0));
 
 // ===== 展開状態 =====
+/** 開いているレベル（目標の一覧を出す）。 */
 const expanded = ref(new Set<number>());
+/**
+ * 開いている難度帯（0.2 ごとのグループ）。2026-09-24 ユーザー要望（ページが長い）で帯ごとに畳めるようにした。
+ * 閉じた帯は見出しだけ出し、中のレベルは出さない。
+ */
+const openGroups = ref(new Set<number>());
+/** 次の目標 = 自分のレベルより上で、まだ達成していない最初のレベル。 */
+const nextLevel = computed(() => levels.value.find((l) => l.no > (myLevel.value ?? -Infinity) && !l.cleared) ?? null);
 watch([myLevel, () => charts.value.length], () => {
-  // 自分のレベルより上で、まだ達成していない最初のレベル（次の目標）を開いておく
-  const next = levels.value.find((l) => l.no > (myLevel.value ?? -Infinity) && !l.cleared);
+  // 次の目標のレベルと、その難度帯だけを開いておく
+  const next = nextLevel.value;
   expanded.value = new Set(next ? [next.no] : []);
+  openGroups.value = new Set(next ? [next.group] : []);
 }, { immediate: true });
 function toggleLevel(no: number) {
   const next = new Set(expanded.value);
   if (next.has(no)) next.delete(no); else next.add(no);
   expanded.value = next;
+}
+function toggleGroup(group: number) {
+  const next = new Set(openGroups.value);
+  if (next.has(group)) next.delete(group); else next.add(group);
+  openGroups.value = next;
+}
+/** 全部の難度帯を開く / 閉じる。 */
+const allGroupsOpen = computed(() => [...groupStats.value.keys()].every((g) => openGroups.value.has(g)));
+function setAllGroups(open: boolean) {
+  openGroups.value = new Set(open ? groupStats.value.keys() : []);
 }
 
 /** 【関数の役割】 0.2 ごとの見出しを、そのグループで最初に表示されるレベルの前にだけ出す。 */
@@ -474,20 +493,34 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
           <span class="inline-flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400"></span>達成（プレー済みの 3 分の 2）</span>
           <span class="inline-flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full border-2 border-slate-300 dark:border-slate-600"></span>未達成</span>
           <span>曲名の表記: 表記なし = ANOTHER、[L] = LEGGENDARIA</span>
+          <button
+            class="ml-auto px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+            @click="setAllGroups(!allGroupsOpen)"
+          >{{ allGroupsOpen ? 'すべて閉じる' : 'すべて開く' }}</button>
         </div>
 
         <!-- レベル一覧（0.02 刻み。0.2 ごとに見出し） -->
         <div class="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
           <template v-for="({ l, shown }, li) in shownLevels" :key="l.no">
-            <div v-if="isGroupHead(li)" class="flex flex-wrap items-center gap-x-3 px-3 py-1.5 bg-slate-100 dark:bg-slate-900/60 text-xs border-b border-slate-200 dark:border-slate-700">
+            <!-- 難度帯（0.2 ごと）の見出し。押すと帯ごと開閉する -->
+            <button
+              v-if="isGroupHead(li)"
+              class="w-full text-left flex flex-wrap items-center gap-x-3 px-3 py-1.5 bg-slate-100 dark:bg-slate-900/60 hover:bg-slate-200/70 dark:hover:bg-slate-900 text-xs border-b border-slate-200 dark:border-slate-700"
+              :aria-expanded="openGroups.has(l.group)"
+              @click="toggleGroup(l.group)"
+            >
+              <span class="text-slate-400 w-3">{{ openGroups.has(l.group) ? '▾' : '▸' }}</span>
               <span class="font-bold font-mono text-slate-700 dark:text-slate-200">難度 {{ (l.group * GROUP_W).toFixed(1) }}〜{{ ((l.group + 1) * GROUP_W).toFixed(1) }}</span>
               <span class="text-slate-500">Lv.{{ groupStats.get(l.group)!.firstNo }}〜{{ groupStats.get(l.group)!.lastNo }}</span>
+              <span v-if="myLevel != null && groupStats.get(l.group)!.firstNo <= myLevel && myLevel <= groupStats.get(l.group)!.lastNo" class="font-bold text-blue-700 dark:text-blue-300">あなたのレベル</span>
+              <span v-if="nextLevel && nextLevel.group === l.group" class="font-bold text-blue-700 dark:text-blue-300">次の目標</span>
               <span class="ml-auto font-mono text-slate-600 dark:text-slate-300">
                 {{ groupStats.get(l.group)!.cleared }}/{{ groupStats.get(l.group)!.levels }} レベル達成
                 <template v-if="groupStats.get(l.group)!.complete">・制覇 {{ groupStats.get(l.group)!.complete }}</template>
               </span>
-            </div>
+            </button>
             <div
+              v-if="openGroups.has(l.group)"
               class="rm-level border-b border-slate-100 dark:border-slate-700/60"
               :class="l.no === myLevel ? 'bg-blue-50/70 dark:bg-blue-900/20' : l.complete ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''"
             >
