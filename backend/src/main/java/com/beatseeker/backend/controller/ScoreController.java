@@ -1146,6 +1146,43 @@ public class ScoreController {
     }
 
     /**
+     * 【メソッドの役割】 スコアロードマップのレベルランキング。管理者専用。
+     *
+     * レベルは土台作成時点（3 時間ごとのバッチ）の値。表示名・BEAT-PT・前作 PT（ティアアイコン用）は
+     * ここで最新のユーザー情報から付ける。管理者向けなので公開設定に関わらず全員を載せる。
+     *
+     * @return {ready, computedAt, maxLevel, entries:[{rank, userId, displayName, level, clearedLevels,
+     *         completeLevels, totalBeatPt, previousBeatPt}]}。管理者以外は 403
+     */
+    @GetMapping("/score-roadmap/ranking")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<Map<String, Object>> getScoreRoadmapRanking(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()
+                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        Map<String, Object> body = new java.util.LinkedHashMap<>(scoreRoadmapService.ranking());
+        List<Map<String, Object>> entries = (List<Map<String, Object>>) body.get("entries");
+        if (entries == null) return ResponseEntity.ok(body);
+        List<Long> ids = entries.stream().map(e -> ((Number) e.get("userId")).longValue()).toList();
+        Map<Long, User> users = new HashMap<>();
+        for (User u : userRepository.findAllById(ids)) users.put(u.getId(), u);
+        List<Map<String, Object>> enriched = new java.util.ArrayList<>(entries.size());
+        for (Map<String, Object> e : entries) {
+            long id = ((Number) e.get("userId")).longValue();
+            User u = users.get(id);
+            if (u == null) continue; // バッチ後に退会した人
+            Map<String, Object> row = new java.util.LinkedHashMap<>(e);
+            row.put("displayName", u.getDisplayName());
+            row.put("totalBeatPt", u.getTotalBeatPt() != null ? u.getTotalBeatPt() : 0.0);
+            previousVersionPtService.putPrevious(row, id);
+            enriched.add(row);
+        }
+        body.put("entries", enriched);
+        return ResponseEntity.ok(body);
+    }
+
+    /**
      * 【メソッドの役割】 AAA ロードマップで他ユーザーを表示するための、ユーザー名サジェスト。管理者専用。
      *
      * 表示名・IIDX ID の部分一致で最大 10 件（{@code /api/friends/search} は完全一致なので使えない）。

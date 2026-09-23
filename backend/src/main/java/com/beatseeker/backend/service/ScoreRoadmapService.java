@@ -158,6 +158,7 @@ public class ScoreRoadmapService {
      * @param charts     譜面ごとの {i, title, difficultyName, level, notes, playerCount, aaa{...}, maxMinus{...}}（応答用）
      */
     private record Base(String computedAt, Map<String, Object> model, List<Map<String, Object>> charts,
+                        List<Map<String, Object>> ranking,
                         Map<String, Integer> keyToIdx, int[] notes, double[] dAaa, double[] dMaxMinus,
                         double kAaa, double kMaxMinus) {}
 
@@ -167,12 +168,15 @@ public class ScoreRoadmapService {
     /** 統合モデルの推定結果（1 人 1 つの θ）。 */
     private record JointResult(LineResult aaa, LineResult maxMinus, double[] thetaAll) {}
 
-    /** 全体計算の結果一式（土台に変換して捨てる）。 */
+    /** 全体計算の結果一式（土台に変換して捨てる）。userIds / userStart / userChart / userBucket はランキング計算用。 */
     private record Snapshot(String[] titles, String[] diffs, int[] levels, int[] notes, int[] playerCounts,
-                            JointResult joint) {}
+                            JointResult joint, long[] userIds, int[] userStart, int[] userChart, byte[] userBucket) {}
 
-    /** 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。 */
-    private static final int PAYLOAD_VERSION = 2;
+    /** 保存形式の版。モデルや形を変えたら上げる（古い版は復元せず作り直す）。v3 = ランキング追加。 */
+    private static final int PAYLOAD_VERSION = 3;
+
+    /** レベルの幅（難度の目盛りで 0.02）。フロント（ScoreRoadmapView.vue の LEVEL_W）と必ず揃える。 */
+    private static final double LEVEL_W = 0.02;
 
     // ===================================================================================
     // 公開 API
@@ -202,6 +206,26 @@ public class ScoreRoadmapService {
         body.put("model", b.model());
         body.put("charts", b.charts());
         if (userId != null) body.put("user", userDelta(b, userId, userLabel));
+        return body;
+    }
+
+    /**
+     * 【メソッドの役割】 ロードマップのレベルランキング（土台作成時点。最大 3 時間前）を返す。
+     *
+     * 名前やティアは呼び出し側（Controller）が最新のユーザー情報で付ける。
+     *
+     * @return {ready, computedAt, maxLevel, entries:[{rank, userId, level, clearedLevels, completeLevels}]}
+     */
+    public Map<String, Object> ranking() {
+        if (base == null) restoreFromDbOnce();
+        if (base == null) startRebuild();
+        Base b = base;
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("ready", b != null);
+        if (b == null) return body;
+        body.put("computedAt", b.computedAt());
+        body.put("maxLevel", b.model().get("maxLevel"));
+        body.put("entries", b.ranking());
         return body;
     }
 
@@ -302,6 +326,7 @@ public class ScoreRoadmapService {
         payload.put("v", PAYLOAD_VERSION);
         payload.put("model", b.model());
         payload.put("charts", b.charts());
+        payload.put("ranking", b.ranking());
         String json = objectMapper.writeValueAsString(payload);
         writeTx.executeWithoutResult(status -> {
             jdbcTemplate.execute(CREATE_TABLE_SQL);
@@ -333,7 +358,9 @@ public class ScoreRoadmapService {
             Map<String, Object> model = (Map<String, Object>) payload.get("model");
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> charts = (List<Map<String, Object>>) payload.get("charts");
-            this.base = baseFromResponse(computedAt, model, charts);
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> ranking = (List<Map<String, Object>>) payload.get("ranking");
+            this.base = baseFromResponse(computedAt, model, charts, ranking);
             log.info("Restored score roadmap base computed at {} ({} charts)", computedAt, charts.size());
         } catch (Exception e) {
             log.warn("Could not restore score roadmap base from DB: {}", e.getMessage());
@@ -366,12 +393,104 @@ public class ScoreRoadmapService {
             c.put("maxMinus", chartLine(jr.maxMinus(), j));
             charts.add(c);
         }
-        return baseFromResponse(computedAt, model, charts);
+        Ranking r = computeRanking(s, charts);
+        model.put("maxLevel", r.maxLevel());
+        return baseFromResponse(computedAt, model, charts, r.entries());
+    }
+
+    private record Ranking(int maxLevel, List<Map<String, Object>> entries) {}
+
+    /**
+     * 【メソッドの役割】 全ユーザーのロードマップレベルを計算し、ランキングにする。
+     *
+     * 判定はフロント（ScoreRoadmapView.vue の levels / myLevel）と同じ規則:
+     *  - 目標 = 譜面 × ライン（AAA / MAX-）。難度は応答に載せる丸め後の値（小数 4 桁）を使う
+     *    （丸め前の値で枠を決めると、枠の境目でフロントと 1 レベルずれることがあるため）。
+     *  - 0.02 枠で目標のある枠を易しい順に Lv.1 から連番。
+     *  - 達成 = プレー済み目標 ≥ min(n, max(2, ⌈n/3⌉)) かつ 達成数 × 3 ≥ プレー済み × 2。完全制覇 = 全目標達成。
+     *  - その人のレベル = 達成レベルの最大番号。レベル 0（どのレベルも未達成）の人は載せない。
+     * 並びはレベル降順 → 達成レベル数 → 完全制覇数。順位は同じレベルなら同順位（1, 1, 3…）。
+     */
+    @SuppressWarnings("unchecked")
+    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts) {
+        // 手順1: 譜面（元の添字 j）× ライン → レベル番号
+        int nc = s.titles().length;
+        double[][] d = new double[2][nc];
+        for (double[] row : d) Arrays.fill(row, Double.NaN);
+        // 曲名・難易度 → 元の添字（重複マスタ行は応答に載らないので、載っている譜面は一意）
+        Map<String, Integer> idxOf = new HashMap<>(nc * 2);
+        for (int j = 0; j < nc; j++) {
+            if (!Double.isNaN(s.joint().aaa().d()[j])) idxOf.put(s.titles()[j] + "\u0000" + s.diffs()[j], j);
+        }
+        for (Map<String, Object> c : charts) {
+            int j = idxOf.get(c.get("title") + "\u0000" + c.get("difficultyName"));
+            d[0][j] = ((Number) ((Map<String, Object>) c.get("aaa")).get("d")).doubleValue();
+            d[1][j] = ((Number) ((Map<String, Object>) c.get("maxMinus")).get("d")).doubleValue();
+        }
+        java.util.TreeSet<Long> slots = new java.util.TreeSet<>();
+        for (double[] row : d) for (double v : row) if (!Double.isNaN(v)) slots.add((long) Math.floor(v / LEVEL_W + 1e-9));
+        Map<Long, Integer> noOfSlot = new HashMap<>();
+        int no = 0;
+        for (long slot : slots) noOfSlot.put(slot, ++no);
+        int maxLevel = no;
+        int[][] levelOf = new int[2][nc];
+        int[] targetsPerLevel = new int[maxLevel + 1];
+        for (int li = 0; li < 2; li++) {
+            for (int j = 0; j < nc; j++) {
+                if (Double.isNaN(d[li][j])) { levelOf[li][j] = 0; continue; }
+                levelOf[li][j] = noOfSlot.get((long) Math.floor(d[li][j] / LEVEL_W + 1e-9));
+                targetsPerLevel[levelOf[li][j]]++;
+            }
+        }
+        int[] lines = { LINE_AAA, LINE_MAX_MINUS };
+
+        // 手順2: ユーザーごとにレベル別のプレー済み数・達成数を数えて判定
+        List<long[]> rows = new ArrayList<>(); // [userId, level, cleared, complete]
+        int[] played = new int[maxLevel + 1], done = new int[maxLevel + 1];
+        for (int u = 0; u < s.userIds().length; u++) {
+            Arrays.fill(played, 0);
+            Arrays.fill(done, 0);
+            for (int p = s.userStart()[u]; p < s.userStart()[u + 1]; p++) {
+                int j = s.userChart()[p], b = s.userBucket()[p] & 0xFF;
+                for (int li = 0; li < 2; li++) {
+                    int lv = levelOf[li][j];
+                    if (lv == 0) continue;
+                    played[lv]++;
+                    if (b >= lines[li]) done[lv]++;
+                }
+            }
+            int level = 0, cleared = 0, complete = 0;
+            for (int lv = 1; lv <= maxLevel; lv++) {
+                int n = targetsPerLevel[lv];
+                int minPlayed = Math.min(n, Math.max(2, (n + 2) / 3));
+                if (played[lv] >= minPlayed && done[lv] * 3 >= played[lv] * 2) { level = lv; cleared++; }
+                if (n > 0 && done[lv] == n) complete++;
+            }
+            if (level > 0) rows.add(new long[] { s.userIds()[u], level, cleared, complete });
+        }
+
+        // 手順3: 並べて順位（同レベルは同順位）
+        rows.sort((a, b) -> a[1] != b[1] ? Long.compare(b[1], a[1])
+                : a[2] != b[2] ? Long.compare(b[2], a[2]) : Long.compare(b[3], a[3]));
+        List<Map<String, Object>> entries = new ArrayList<>(rows.size());
+        int rank = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            if (i == 0 || rows.get(i)[1] != rows.get(i - 1)[1]) rank = i + 1;
+            Map<String, Object> e = new LinkedHashMap<>();
+            e.put("rank", rank);
+            e.put("userId", rows.get(i)[0]);
+            e.put("level", rows.get(i)[1]);
+            e.put("clearedLevels", rows.get(i)[2]);
+            e.put("completeLevels", rows.get(i)[3]);
+            entries.add(e);
+        }
+        return new Ranking(maxLevel, entries);
     }
 
     /** 【メソッドの役割】 応答用の形（DB 保存形式と同じ）から差分計算用の配列を組み立てる。 */
     @SuppressWarnings("unchecked")
-    private static Base baseFromResponse(String computedAt, Map<String, Object> model, List<Map<String, Object>> charts) {
+    private static Base baseFromResponse(String computedAt, Map<String, Object> model, List<Map<String, Object>> charts,
+                                         List<Map<String, Object>> ranking) {
         int n = charts.size();
         Map<String, Integer> keyToIdx = new HashMap<>(n * 2);
         int[] notes = new int[n];
@@ -385,7 +504,7 @@ public class ScoreRoadmapService {
         }
         double kAaa = ((Number) model.get("kAaa")).doubleValue();
         double kMm = ((Number) model.get("kMaxMinus")).doubleValue();
-        return new Base(computedAt, model, charts, keyToIdx, notes, dAaa, dMm, kAaa, kMm);
+        return new Base(computedAt, model, charts, ranking == null ? List.of() : ranking, keyToIdx, notes, dAaa, dMm, kAaa, kMm);
     }
 
     private static Map<String, Object> chartLine(LineResult r, int j) {
@@ -494,7 +613,9 @@ public class ScoreRoadmapService {
         for (int j = 0; j < nc; j++) playerCounts[j] = chartStart[j + 1] - chartStart[j];
 
         Model m = new Model(nc, nu, table, prior, dup, userStart, userChart, userBucket, chartStart, chartUser, chartBucket);
-        return new Snapshot(titles, diffs, levels, notes, playerCounts, m.fitJoint());
+        long[] userIds = new long[nu];
+        for (Map.Entry<Long, Integer> e : userIdx.entrySet()) userIds[e.getValue()] = e.getKey();
+        return new Snapshot(titles, diffs, levels, notes, playerCounts, m.fitJoint(), userIds, userStart, userChart, userBucket);
     }
 
     /** 推定計算（純粋計算。DB に触らない）。 */
