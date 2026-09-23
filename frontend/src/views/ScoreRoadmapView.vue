@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * 【Viewの役割】 スコアロードマップ（AAA / MAX- 統合）。管理者（ID18）専用の検証ページ。
+ * 【Viewの役割】 スコアロードマップ（AAA / MAX- 統合）。2026-09-23 に一般公開（要ログイン、自分の現在地だけ）。
+ * 他ユーザー表示・ランキング・再集計・レベル表の作り直しは管理者だけ。
  *
  * ANOTHER / LEGGENDARIA 全譜面（☆1〜12）の「AAA」「MAX-」を 1 つずつの目標とし、全目標を
  * 「達成に必要な実力」の 1 本の目盛り（難易度表と同じ 11.0〜13.1 の目盛り）に並べて、難度 0.02 刻みの
@@ -10,7 +11,7 @@
  *  - 番号: サーバーが固定したレベル表（model.levelTable、charts[].levels）のもの。作った時点で目標がある 0.02 枠を
  *    易しい順に Lv.1 から連番にしてあり、3 時間ごとの集計で難度が動いても変わらない（作り直しは管理者の操作だけ）。
  *    プレー人数 200 人未満の譜面は表に入らず、ここにも出さない。200 人に達すると一番近い既存レベルへ追加される。
- *    表示フィルタ（☆・AAA/MAX-）では変わらない。
+ *    表示フィルタ（☆・AAA/MAX-・未達成だけ）では変わらない。
  *  - 達成: そのレベルの全目標のうち「プレー済み（その譜面を遊んだことがある）」目標の 3 分の 2 以上を達成。
  *    ただしプレー済みが max(2, ⌈n/3⌉) 件（n = そのレベルの目標数、n 以下）に満たないレベルは判定しない
  *    （1 曲だけ遊んで高いレベルを取れないように）。判定は常に全目標で行い、表示フィルタの影響を受けない。
@@ -27,10 +28,14 @@
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
+import { useAdmin } from '../composables/useAdmin';
 import { formatJstDateTime } from '../utils/jstTime';
 import ScoreRoadmapRankingModal from '../components/ScoreRoadmapRankingModal.vue';
+import ScoreRoadmapRulesModal from '../components/ScoreRoadmapRulesModal.vue';
 
 const { authHeaders } = useAuth();
+/** 管理者だけ: 他ユーザー表示・ランキング・再集計・レベル表の作り直し（API 側でも 403）。 */
+const { isAdmin } = useAdmin();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
 type LineKey = 'aaa' | 'maxMinus';
@@ -78,7 +83,7 @@ async function load(force = false) {
   try {
     const res = await fetch(`${API_BASE}/api/scores/score-roadmap?${params}`, { headers: authHeaders() });
     if (!res.ok) {
-      errorMsg.value = res.status === 403 ? '管理者専用のページです' : `APIエラー: ${res.status}`;
+      errorMsg.value = res.status === 403 ? 'このユーザーは表示できません' : `APIエラー: ${res.status}`;
       isLoading.value = false;
       return;
     }
@@ -168,6 +173,8 @@ async function refreezeLevels() {
 
 /** ランキングモーダルの表示フラグ。 */
 const showRanking = ref(false);
+/** ルール説明モーダルの表示フラグ。 */
+const showRules = ref(false);
 /** 【関数の役割】 ランキングの行から選んだユーザーのロードマップを表示する。 */
 function selectFromRanking(userId: number, displayName: string | null) {
   chooseUser({ id: userId, displayName, iidxId: null });
@@ -200,9 +207,9 @@ const TARGETS = [
 const targetKey = ref('1-12');
 const range = computed(() => TARGETS.find((t) => t.key === targetKey.value) ?? TARGETS[0]);
 const LINE_FILTERS = [
-  { key: 'both', label: 'AAA と MAX-' },
-  { key: 'aaa', label: 'AAA だけ' },
-  { key: 'maxMinus', label: 'MAX- だけ' },
+  { key: 'both', label: 'すべて' },
+  { key: 'aaa', label: 'AAA' },
+  { key: 'maxMinus', label: 'MAX-' },
 ] as const;
 const lineFilter = ref<'both' | LineKey>('both');
 const onlyOpen = ref(false);
@@ -325,25 +332,29 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
         <div class="flex items-center gap-3">
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコアロードマップ（AAA・MAX-）</h2>
           <button
+            v-if="isAdmin"
             class="px-3 py-1 text-xs font-bold rounded border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
             @click="showRanking = true"
           >ランキング</button>
         </div>
-        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span v-if="computedAt" title="全目標の難度と全プレイヤーの分布は 3 時間ごとに作り直します。表示中のユーザーの達成状況は最新のスコアです">難度の集計: {{ formatJstDateTime(computedAt) }}（3 時間ごと）</span>
           <span v-if="serverRefreshing" class="text-blue-600 dark:text-blue-400">集計し直し中…</span>
-          <button class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50" :disabled="serverRefreshing" @click="load(true)">今すぐ集計し直す</button>
-          <button class="px-2 py-1 rounded border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 disabled:opacity-50" :disabled="serverRefreshing || refreezing" @click="refreezeLevels">レベル表を作り直す</button>
+          <template v-if="isAdmin">
+            <button class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50" :disabled="serverRefreshing" @click="load(true)">今すぐ集計し直す</button>
+            <button class="px-2 py-1 rounded border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 disabled:opacity-50" :disabled="serverRefreshing || refreezing" @click="refreezeLevels">レベル表を作り直す</button>
+          </template>
         </div>
       </div>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
-        ANOTHER・LEGGENDARIA の譜面（プレー人数 {{ levelTable?.minPlayers ?? 200 }} 人以上）の「AAA」と「MAX-」をそれぞれ 1 つの目標として、達成に必要な実力の順に並べ、難度 0.02 刻みのレベルに分けています（難度は難易度表と同じ目盛り。0.2 ごとに見出し）。
-        各レベルで、遊んだことのある譜面の目標の 3 分の 2 以上を達成するとそのレベルを達成（遊んだ目標がレベルの 3 分の 1 かつ 2 件以上必要）。達成したレベルのうち一番高いものがあなたのレベルです（自己歴代ベストで判定）。
-        レベルの番号と判定は常に全譜面で決まり、下の絞り込みは表示だけを変えます。
-      </p>
-      <p v-if="levelTable" class="text-xs text-slate-500 dark:text-slate-400 mb-5">
-        レベル表は第{{ levelTable.revision }}版（{{ formatJstDateTime(levelTable.frozenAt) }} に固定）。各レベルの課題曲は自動では変わりません。
-        新しく {{ levelTable.minPlayers }} 人に達した譜面は、一番近いレベルに追加されます（最終追加 {{ formatJstDateTime(levelTable.updatedAt) }}）。譜面右の難度は最新の集計値です。
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-5 flex flex-wrap items-center gap-x-2 gap-y-1">
+        <span>各譜面の AAA・MAX- を難しさの順にレベル分けしています。各レベルで遊んだ目標の 3 分の 2 を達成するとクリア。</span>
+        <button
+          class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          @click="showRules = true"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+          ルールを見る
+        </button>
       </p>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">
@@ -369,7 +380,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
             </select>
           </label>
           <!-- ユーザー名検索（管理者が他ユーザーを表示する） -->
-          <div class="relative inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+          <div v-if="isAdmin" class="relative inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
             <label for="roadmap-user" class="shrink-0">ユーザー</label>
             <input
               id="roadmap-user"
@@ -517,6 +528,13 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
       </template>
     </div>
 
+    <ScoreRoadmapRulesModal
+      v-if="showRules"
+      :min-players="levelTable?.minPlayers ?? 200"
+      :revision="levelTable?.revision ?? null"
+      :frozen-at="levelTable?.frozenAt ?? null"
+      @close="showRules = false"
+    />
     <ScoreRoadmapRankingModal
       v-if="showRanking"
       :highlight-user-id="user?.userId ?? null"

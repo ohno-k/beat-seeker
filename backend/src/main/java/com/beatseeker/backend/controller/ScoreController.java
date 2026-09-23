@@ -1031,20 +1031,27 @@ public class ScoreController {
      * 推定は {@link com.beatseeker.backend.service.ScoreRoadmapService} がバックグラウンドで行い、
      * 未計算・計算中は {@code ready=false} を返す（フロントがポーリング）。
      *
-     * @param refresh true ならキャッシュの鮮度に関係なく再計算を起動する
-     * @param userId  現在地を表示するユーザー ID（省略時はログイン中の管理者本人）
-     * @return 推定結果。管理者以外は 403
+     * 2026-09-23 に一般公開（ログインユーザーなら誰でも自分の現在地を見られる）。
+     * 他ユーザーの表示（userId）と再計算の起動（refresh）は管理者だけ。
+     *
+     * @param refresh true ならキャッシュの鮮度に関係なく再計算を起動する（管理者のみ）
+     * @param userId  現在地を表示するユーザー ID（省略時はログイン中の本人。本人以外は管理者のみ）
+     * @return 推定結果。未ログインは 401、管理者以外が他ユーザー / refresh を指定したら 403
      */
     @GetMapping("/score-roadmap")
     public ResponseEntity<Map<String, Object>> getScoreRoadmap(
             Authentication auth,
             @RequestParam(defaultValue = "false") boolean refresh,
             @RequestParam(required = false) Long userId) {
-        if (auth == null || !auth.isAuthenticated()
-                || !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        User me = getUser(auth);
+        boolean admin = adminAuthService.isAdminByIidxId((String) auth.getPrincipal());
+        if (!admin && (refresh || (userId != null && !userId.equals(me.getId())))) {
             return ResponseEntity.status(403).build();
         }
-        User target = userId == null ? getUser(auth) : userRepository.findById(userId).orElse(null);
+        User target = userId == null ? me : userRepository.findById(userId).orElse(null);
         return ResponseEntity.ok(scoreRoadmapService.requestSnapshot(
                 refresh,
                 target == null ? userId : target.getId(),

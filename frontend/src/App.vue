@@ -302,13 +302,13 @@ const isCmdkOpen = ref(false);
  */
 const availableCmdkTabIds = computed<string[]>(() => {
   const ALL = [
-    'dashboard', 'table', 'profile', 'ranking', 'friends', 'history', 'arena',
+    'dashboard', 'table', 'profile', 'ranking', 'score-roadmap', 'friends', 'history', 'arena',
     'arcade-assist', 'tier-voting', 'song-avg', 'diff-table', 'rank-comparison',
     'score-prediction', 'score-scatter', 'changelog', 'about',
   ];
   // Sidebar.vue navigationItems と同じ判定
-  const REQUIRES_AUTH = new Set(['profile', 'friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
-  const HIDE_ON_VIEWING = new Set(['friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
+  const REQUIRES_AUTH = new Set(['score-roadmap', 'profile', 'friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
+  const HIDE_ON_VIEWING = new Set(['score-roadmap', 'friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
   const RANK_COMPARISON_ALLOWED_IDS = [18, 23, 24];
 
   return ALL.filter((id) => {
@@ -2435,8 +2435,8 @@ const handleUnifiedClose = async () => {
           <ScoreSpectrumView class="w-full max-w-7xl mx-auto animate-fade-in" />
         </template>
 
-        <!-- AAA ロードマップ（管理者 ID18 のみ） -->
-        <template v-else-if="activeTab === 'score-roadmap' && user?.id === 18">
+        <!-- スコアロードマップ（要ログイン。管理者向けの操作は画面内で出し分け） -->
+        <template v-else-if="activeTab === 'score-roadmap' && isLoggedIn">
           <ScoreRoadmapView class="w-full max-w-6xl mx-auto animate-fade-in" />
         </template>
 
