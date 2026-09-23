@@ -1098,6 +1098,29 @@ public class ScoreController {
     }
 
     /**
+     * 【メソッドの役割】 スコアロードマップのレベルだけを返す（ダッシュボードのランキング順位の隣に出す）。
+     *
+     * 全譜面の JSON を返す {@code /score-roadmap} より軽い。本人の分はログインしていれば誰でも、
+     * 他ユーザーの分（userId 指定）は管理者のみ。
+     *
+     * @return {ready, level, maxLevel, clearedLevels, completeLevels}。未ログインは 401、権限なしは 403
+     */
+    @GetMapping("/score-roadmap/level")
+    public ResponseEntity<Map<String, Object>> getScoreRoadmapLevel(
+            Authentication auth,
+            @RequestParam(required = false) Long userId) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        User me = getUser(auth);
+        if (userId != null && !userId.equals(me.getId())
+                && !adminAuthService.isAdminByIidxId((String) auth.getPrincipal())) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(scoreRoadmapService.userLevel(userId != null ? userId : me.getId()));
+    }
+
+    /**
      * 【メソッドの役割】 スコアロードマップのレベル表を作り直した場合の変化（保存しない）。管理者専用。
      *
      * @return {ready, basedOn, current, next, moved, movedUp, movedDown, added, removed}。管理者以外は 403

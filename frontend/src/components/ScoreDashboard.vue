@@ -137,6 +137,8 @@
     <div v-if="!isTopRankerView && !isPrivateView" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
         <!-- Ranking Position -->
         <div v-if="!isTopRankerView && !isPrivateView" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
+          <!-- 順位とロードマップレベルを横並び（狭い画面では折り返す。flex-col/sm: は output.css に負けるので使わない） -->
+          <div class="flex flex-wrap items-end gap-x-10 gap-y-4">
           <div>
             <p class="text-[10px] font-bold text-slate-400 mb-1">{{ t('dashboard.currentRank') }}</p>
             <div class="flex items-end gap-3">
@@ -150,6 +152,22 @@
                 <span v-else class="text-[11px] font-bold text-slate-400 dark:text-slate-500">{{ t('dashboard.rankNoChange') }}</span>
               </div>
             </div>
+          </div>
+          <!-- スコアロードマップのレベル（自分の分は押すとロードマップを開く） -->
+          <component
+            :is="roadmapTarget === 'self' ? 'button' : 'div'"
+            v-if="roadmapLevel"
+            class="text-left rounded-md"
+            :class="roadmapTarget === 'self' ? 'group cursor-pointer' : ''"
+            :title="roadmapTarget === 'self' ? t('dashboard.roadmapOpen') : undefined"
+            @click="roadmapTarget === 'self' && emit('open-roadmap')"
+          >
+            <p class="text-[10px] font-bold text-slate-400 mb-1">{{ t('dashboard.roadmapLevel') }}</p>
+            <div class="flex items-end gap-2">
+              <span class="text-5xl font-bold text-blue-700 dark:text-blue-300 tabular-nums leading-none group-hover:underline">Lv.{{ roadmapLevel.level }}</span>
+              <span class="text-sm font-bold text-slate-400 pb-1">/ {{ roadmapLevel.maxLevel }}</span>
+            </div>
+          </component>
           </div>
           <div v-if="myRankingPosition" class="flex items-center gap-2 self-end sm:self-auto">
             <div class="text-right">
@@ -272,10 +290,10 @@ import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
-const { user } = useAuth();
+const { user, authHeaders } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-const emit = defineEmits<{ (e: 'open-profile-edit'): void }>();
+const emit = defineEmits<{ (e: 'open-profile-edit'): void; (e: 'open-roadmap'): void }>();
 
 const props = defineProps<{
   scores: ScoreData[];
@@ -593,6 +611,37 @@ const myRankingPosition = computed(() => {
   if (idx === -1) return null;
   return { position: idx + 1, total: rankingData.value.length, rankChange: rankingData.value[idx].rankChange };
 });
+
+// ===== スコアロードマップのレベル（ランキング順位の隣。2026-09-23 追加） =====
+/** 表示対象のロードマップレベル（取得前・対象外・集計前は null で非表示）。 */
+const roadmapLevel = ref<{ level: number; maxLevel: number } | null>(null);
+/**
+ * 【computed の役割】 ロードマップレベルを取る相手。自分なら 'self'、管理者閲覧中はその人の ID。
+ * フレンド・公開プロフィール等の他人閲覧では API が本人か管理者しか許さないので出さない（null）。
+ */
+const roadmapTarget = computed<'self' | number | null>(() => {
+  if (!user.value) return null;
+  if (!isViewingOther.value) return 'self';
+  return props.viewingMode === 'admin' && props.viewingUserId ? props.viewingUserId : null;
+});
+let roadmapSeq = 0;
+/** 【関数の役割】 軽量 API（/score-roadmap/level）でレベルだけ取る。失敗しても表示しないだけ。 */
+const loadRoadmapLevel = async () => {
+  const target = roadmapTarget.value;
+  const seq = ++roadmapSeq;
+  if (target == null) { roadmapLevel.value = null; return; }
+  try {
+    const q = target === 'self' ? '' : `?userId=${target}`;
+    const res = await fetch(`${API_BASE}/api/scores/score-roadmap/level${q}`, { headers: authHeaders() });
+    if (seq !== roadmapSeq) return;
+    const data = res.ok ? await res.json() : null;
+    roadmapLevel.value = data?.ready ? { level: data.level, maxLevel: data.maxLevel } : null;
+  } catch {
+    if (seq === roadmapSeq) roadmapLevel.value = null;
+  }
+};
+// 対象が変わったとき・スコアが入れ替わったとき（アップロード後など）に取り直す
+watch([roadmapTarget, () => props.scores], loadRoadmapLevel, { immediate: true });
 
 /** 【computed の役割】 自分の 1 個上と 1 個下のランキングエントリを返す（追い越し表示用）。 */
 const rankingNeighbors = computed(() => {

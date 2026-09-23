@@ -288,13 +288,7 @@ public class ScoreRoadmapService {
      * @return {userId, label, found, theta, plays:[[譜面 i, 桶]...]}
      */
     private Map<String, Object> userDelta(Base b, long userId, String label) {
-        List<int[]> plays = new ArrayList<>();
-        jdbcTemplate.query(USER_BEST_SQL, rs -> {
-            Integer i = b.keyToIdx().get(rs.getString(1) + "\u0000" + rs.getString(2));
-            if (i == null) return;
-            int bucket = (int) Math.min(180L, (long) rs.getInt(3) * 90L / b.notes()[i]);
-            plays.add(new int[] { i, bucket });
-        }, userId, userId);
+        List<int[]> plays = readUserPlays(b, userId);
 
         Map<String, Object> u = new LinkedHashMap<>();
         u.put("userId", userId);
@@ -305,6 +299,69 @@ public class ScoreRoadmapService {
             u.put("plays", plays);
         }
         return u;
+    }
+
+    /** 【メソッドの役割】 1 人分の歴代ベストを [譜面 i, 桶] で読む（土台に載っていない譜面は捨てる）。 */
+    private List<int[]> readUserPlays(Base b, long userId) {
+        List<int[]> plays = new ArrayList<>();
+        jdbcTemplate.query(USER_BEST_SQL, rs -> {
+            Integer i = b.keyToIdx().get(rs.getString(1) + "\u0000" + rs.getString(2));
+            if (i == null) return;
+            int bucket = (int) Math.min(180L, (long) rs.getInt(3) * 90L / b.notes()[i]);
+            plays.add(new int[] { i, bucket });
+        }, userId, userId);
+        return plays;
+    }
+
+    /**
+     * 【メソッドの役割】 1 人分のロードマップレベルだけを返す（ダッシュボードの表示用。2026-09-23 追加）。
+     *
+     * 画面（/score-roadmap）は全譜面の JSON（約 600 KB）を受け取ってフロントで判定するが、ダッシュボードで
+     * 毎回それを読むのは重いので、ここで同じ規則（{@link #computeRanking} と utils/roadmapLevels.ts）で判定して数字だけ返す。
+     * 最新のスコアで判定する（土台の d・レベル表は固定、スコアはその場で読む）。
+     *
+     * @return {ready, level, maxLevel, clearedLevels, completeLevels}
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> userLevel(long userId) {
+        if (base == null) restoreFromDbOnce();
+        if (base == null) startRebuild();
+        Base b = base;
+        Map<String, Object> body = new LinkedHashMap<>();
+        Object lt = b == null ? null : b.model().get("levelTable");
+        body.put("ready", lt != null);
+        if (lt == null) return body;
+        Object slots = ((Map<String, Object>) lt).get("slots");
+        int maxLevel = slots instanceof long[] a ? a.length : slots instanceof List<?> l ? l.size() : 0;
+
+        int[] bucketOf = new int[b.charts().size()];
+        Arrays.fill(bucketOf, -1);
+        for (int[] p : readUserPlays(b, userId)) bucketOf[p[0]] = p[1];
+        int[] n = new int[maxLevel + 1], played = new int[maxLevel + 1], done = new int[maxLevel + 1];
+        int[] lines = { LINE_AAA, LINE_MAX_MINUS };
+        for (int i = 0; i < b.charts().size(); i++) {
+            Map<String, Object> lv = (Map<String, Object>) b.charts().get(i).get("levels");
+            if (lv == null) continue;
+            for (int li = 0; li < 2; li++) {
+                int no = ((Number) lv.get(LINE_KEYS[li])).intValue();
+                if (no < 1 || no > maxLevel) continue;
+                n[no]++;
+                if (bucketOf[i] < 0) continue;
+                played[no]++;
+                if (bucketOf[i] >= lines[li]) done[no]++;
+            }
+        }
+        int level = 0, cleared = 0, complete = 0;
+        for (int lv = 1; lv <= maxLevel; lv++) {
+            int minPlayed = Math.min(n[lv], Math.max(2, (n[lv] + 2) / 3));
+            if (n[lv] > 0 && played[lv] >= minPlayed && done[lv] * 3 >= played[lv] * 2) { level = lv; cleared++; }
+            if (n[lv] > 0 && done[lv] == n[lv]) complete++;
+        }
+        body.put("level", level);
+        body.put("maxLevel", maxLevel);
+        body.put("clearedLevels", cleared);
+        body.put("completeLevels", complete);
+        return body;
     }
 
     /** 【メソッドの役割】 d・k 固定での θ（バッチの手順 (3) と同じ Newton・事前分布。AAA と MAX- の両目標を使う）。 */

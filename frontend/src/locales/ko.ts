@@ -220,6 +220,8 @@ export const ko = {
   'dashboard.registerNow': '지금 바로 등록',
   'dashboard.currentDivision': '현재 DIVISION',
   'dashboard.currentRank': '현재 랭킹 순위',
+  'dashboard.roadmapLevel': '로드맵 레벨',
+  'dashboard.roadmapOpen': '스코어 로드맵 열기',
   'dashboard.outOf': '명 중',
   'dashboard.newEntry': 'NEW ENTRY',
   'dashboard.rankUp': '▲ {n}위 상승',

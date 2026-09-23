@@ -221,6 +221,8 @@ export const en = {
   'dashboard.registerNow': 'Register Now',
   'dashboard.currentDivision': 'Current DIVISION',
   'dashboard.currentRank': 'Current Ranking',
+  'dashboard.roadmapLevel': 'Roadmap Level',
+  'dashboard.roadmapOpen': 'Open Score Roadmap',
   'dashboard.outOf': 'of',
   'dashboard.newEntry': 'NEW ENTRY',
   'dashboard.rankUp': '▲ Up {n}',

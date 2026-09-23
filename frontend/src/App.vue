@@ -2643,6 +2643,7 @@ const handleUnifiedClose = async () => {
                 :rate-tier-points-override="privateRateTierPoints"
                 class="w-full"
                 @open-profile-edit="isProfileModalOpen = true"
+                @open-roadmap="activeTab = 'score-roadmap'"
               />
             </div>
 

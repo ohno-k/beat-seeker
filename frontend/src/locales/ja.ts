@@ -225,6 +225,8 @@ export const ja = {
   'dashboard.registerNow': '今すぐ登録',
   'dashboard.currentDivision': '現在のDIVISION',
   'dashboard.currentRank': '現在のランキング順位',
+  'dashboard.roadmapLevel': 'ロードマップ レベル',
+  'dashboard.roadmapOpen': 'スコアロードマップを開く',
   'dashboard.outOf': '人中',
   'dashboard.newEntry': 'NEW ENTRY',
   'dashboard.rankUp': '▲ {n} 位上昇',
