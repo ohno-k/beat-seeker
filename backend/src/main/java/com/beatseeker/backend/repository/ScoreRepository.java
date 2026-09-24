@@ -1053,6 +1053,45 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
     List<Map<String, Object>> findAllSongRankingAggregates();
 
     /**
+     * 【メソッドの役割】 ユーザーごとに「BEAT-PT 対象曲（上位 100 曲枠）が何曲埋まっているか」を返す。
+     *
+     * BEAT-PT の対象になる譜面（active 難易度表に載っている ANOTHER/LEGGENDARIA で、
+     * スコア率 > 66.666%）の数を数え、上限 100 で丸める。
+     * 算式・絞り込みは {@link #findAllSongRankingAggregates()} と同じ。
+     * ランキングで「対象曲が埋まっていない（100 曲未満の）ユーザー」を薄く表示するのに使う。
+     *
+     * 返却キー: userId / beatPtSongCount
+     *
+     * @return ユーザーごとの対象曲数（対象曲が 1 曲も無いユーザーは含まれない）
+     */
+    @Query(value =
+        "WITH " + WEIGHT_MAP_VALUES + ", " +
+        "song_ranks AS ( " +
+        "  SELECT drs.song_title AS mapped_title, wm.wt AS weight " +
+        "  FROM difficulty_ranks dr " +
+        "  JOIN difficulty_rank_songs drs ON dr.id = drs.difficulty_rank_id " +
+        "  LEFT JOIN weight_map wm ON wm.rv = SUBSTRING(dr.rank_value FROM '^\\d+\\.\\d+') " +
+        "  WHERE dr.revision = 'active' " +
+        "), " +
+        "scored_data AS ( " +
+        "  SELECT s.user_id, s.title, s.difficulty_name, sr.weight, " +
+        "    " + SCORE_RATE_FORMULA + " AS score_rate " +
+        "  FROM (SELECT user_id, title, difficulty_name, MAX(score) AS score FROM scores " +
+        "        WHERE difficulty_name IN ('ANOTHER', 'LEGGENDARIA') AND score > 0 " +
+        "        GROUP BY user_id, title, difficulty_name) s " +
+        "  JOIN song_definitions sd ON s.title = sd.title AND sd.revision = 'active' " +
+        "    AND ((s.difficulty_name = 'ANOTHER' AND sd.difficulty = '4') OR (s.difficulty_name = 'LEGGENDARIA' AND sd.difficulty = '10')) " +
+        // 注意: ランク表の LEGGENDARIA は「タイトル + '[L]'」（スペース無し）。
+        "  JOIN song_ranks sr ON sr.mapped_title = (CASE WHEN s.difficulty_name = 'LEGGENDARIA' THEN s.title || '[L]' ELSE s.title END) " +
+        ") " +
+        "SELECT user_id AS \"userId\", " +
+        "       LEAST(COUNT(DISTINCT (title, difficulty_name)), 100) AS \"beatPtSongCount\" " +
+        "FROM scored_data " +
+        "WHERE score_rate > 66.666 AND weight IS NOT NULL " +
+        "GROUP BY user_id", nativeQuery = true)
+    List<Map<String, Object>> findBeatPtSongCounts();
+
+    /**
      * 【メソッドの役割】 レベル 11/12 の ANOTHER/LEGGENDARIA について、曲×譜面ごとの平均スコアと
      * プレイ人数を集計する。
      *
