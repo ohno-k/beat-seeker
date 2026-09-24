@@ -650,6 +650,7 @@ export const ko = {
   'ranking.colTier': 'TIER',
   'ranking.colPoints': '{type}-PT',
   'ranking.colUpdatedAt': '마지막 업데이트',
+  'ranking.beatPtSlotsUnfilled': 'BEAT-PT 대상곡 미충족 ({count} / {total}곡)',
   'ranking.title': '랭킹',
   'ranking.beatTierRanking': 'BEAT-TIER 랭킹',
   'ranking.rateTierRanking': 'RATE-TIER 랭킹',

@@ -651,6 +651,7 @@ export const en = {
   'ranking.colTier': 'TIER',
   'ranking.colPoints': '{type}-PT',
   'ranking.colUpdatedAt': 'Last Updated',
+  'ranking.beatPtSlotsUnfilled': 'BEAT-PT slots not filled ({count} / {total} songs)',
   'ranking.title': 'Ranking',
   'ranking.beatTierRanking': 'BEAT-TIER Ranking',
   'ranking.rateTierRanking': 'RATE-TIER Ranking',

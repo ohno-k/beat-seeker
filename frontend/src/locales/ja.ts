@@ -656,6 +656,7 @@ export const ja = {
   'ranking.colTier': 'TIER',
   'ranking.colPoints': '{type}-PT',
   'ranking.colUpdatedAt': '最終更新',
+  'ranking.beatPtSlotsUnfilled': 'BEAT-PT対象曲が未充足（{count} / {total} 曲）',
   'ranking.title': 'ランキング',
   'ranking.beatTierRanking': 'BEAT-TIER ランキング',
   'ranking.rateTierRanking': 'RATE-TIER ランキング',
