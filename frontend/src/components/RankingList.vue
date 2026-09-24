@@ -40,6 +40,16 @@ interface BeatRankingEntry {
   isSupporter?: boolean;
   /** 前作の最終 BEAT-PT（ティアアイコンの外枠用。記録が無ければ null）。 */
   previousBeatPt?: number | null;
+  /** BEAT-PT 対象曲（上位 100 曲枠）が何曲埋まっているか。100 未満の行は薄く表示する。 */
+  beatPtSongCount?: number;
+}
+
+/** BEAT-PT の対象曲枠（上位 100 曲）。 */
+const BEAT_PT_SONG_SLOTS = 100;
+
+/** 【関数の役割】 BEAT-PT 対象曲枠が埋まっていない（100 曲未満の）エントリかを判定する。件数未取得（過去作など）は対象外。 */
+function isBeatPtSlotsUnfilled(entry: BeatRankingEntry): boolean {
+  return entry.beatPtSongCount != null && entry.beatPtSongCount < BEAT_PT_SONG_SLOTS;
 }
 
 interface TopRankerEntry {
@@ -900,8 +910,10 @@ watch(selectedVersion, async () => {
                       user && row.entry.iidxId === user.iidxId
                         ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
                         : 'hover:bg-slate-50 dark:hover:bg-slate-700/30',
-                      row.entry.userId != null ? 'cursor-pointer' : ''
+                      row.entry.userId != null ? 'cursor-pointer' : '',
+                      isBeatPtSlotsUnfilled(row.entry) ? 'opacity-50' : ''
                     ]"
+                    :title="isBeatPtSlotsUnfilled(row.entry) ? t('ranking.beatPtSlotsUnfilled', { count: row.entry.beatPtSongCount ?? 0, total: BEAT_PT_SONG_SLOTS }) : undefined"
                     @touchstart="handleTouchStart" @touchmove="handleTouchMove" @click="handleUserRowClick(row.entry)">
                     <td class="py-3 pl-4">
                       <div class="flex items-center gap-2">

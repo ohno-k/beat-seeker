@@ -779,7 +779,19 @@ public class ScoreController {
         }
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
         // 前作の最終 PT を添える（ティアアイコンの外枠 = 前作ティアの色）
-        return ResponseEntity.ok(previousVersionPtService.decorate(ranking, "userId"));
+        List<Map<String, Object>> decorated = previousVersionPtService.decorate(ranking, "userId");
+        // BEAT-PT 対象曲（上位 100 曲枠）の埋まり数を添える（100 曲未満の行はフロントで薄く表示する）
+        Map<Long, Integer> songCounts = new HashMap<>();
+        for (Map<String, Object> row : scoreRepository.findBeatPtSongCounts()) {
+            if (row.get("userId") instanceof Number id && row.get("beatPtSongCount") instanceof Number c) {
+                songCounts.put(id.longValue(), c.intValue());
+            }
+        }
+        for (Map<String, Object> row : decorated) {
+            Long userId = row.get("userId") instanceof Number id ? id.longValue() : null;
+            row.put("beatPtSongCount", userId == null ? 0 : songCounts.getOrDefault(userId, 0));
+        }
+        return ResponseEntity.ok(decorated);
     }
 
     /**
