@@ -254,8 +254,8 @@ export function sortUpdatedSongs(songs: UpdatedSong[], sort: SongSort): UpdatedS
   }
 }
 
-/** 共有画像に載せる更新曲の上限。 */
-export const SHARE_MAX_SONGS = 10;
+/** 共有画像に載せる更新曲の上限（1080×1920 = 9:16 に収まる行数。UploadReportShareImage の行の高さと連動）。 */
+export const SHARE_MAX_SONGS = 18;
 
 /** 共有画像の右端の列に出す指標（BEAT-PT / RATE-PT / 単曲ティア）。 */
 export type ShareColumn = 'beat' | 'rate' | 'tier';

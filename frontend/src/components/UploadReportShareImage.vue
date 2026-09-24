@@ -141,8 +141,9 @@
  * UploadResultModal が画面外に 1 つ（キャプチャ用）、共有オプションのプレビューに 1 つ（CSS で縮小）置く。
  * 親は expose している `el`（ルートの div）を html2canvas に渡す。
  *
- * レイアウト: 横 1080px 固定・高さは内容に応じて可変（TOP10 満載で約 1430px ≒ 3:4）。
- * 3:4 は X のタイムラインで上下が切られない縦長の上限。更新曲が少ないときは高さが縮んで横長寄りになる。
+ * レイアウト: 横 1080px 固定・高さは内容に応じて可変（18 曲満載で約 1914px ≒ 9:16）。
+ * 固定部分（ヘッダー〜リスト見出し + フッター）が約 732px、1 行が 60px + 間隔 6px なので 18 行で 1920px に収まる。
+ * 行の高さを変えるときは SHARE_MAX_SONGS も合わせて見直すこと。更新曲が少ないときは高さが縮む。
  *
  * html2canvas 向けの決まり事:
  *  - 配色はテーマに依存しない固定のダーク（dark: バリアントを使わない）
@@ -340,7 +341,7 @@ const statTiles = computed(() => pickStatTiles(computeReportStats(props.diffData
 
 const totalSongs = computed(() => props.diffData.updatedSongs.length);
 
-/** 載せる曲。親が上限を守って渡してくるが、レイアウト（3:4）が崩れないよう念のためここでも切る。 */
+/** 載せる曲。親が上限を守って渡してくるが、レイアウト（9:16）が崩れないよう念のためここでも切る。 */
 const shownSongs = computed<UpdatedSong[]>(() => props.songs.slice(0, SHARE_MAX_SONGS));
 
 /** 曲名の収まり（キー → 表示テキストとフォントサイズ）。fitTitles が埋める。 */
@@ -579,7 +580,7 @@ defineExpose({ el: root });
 
 .sr-rows { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
 .sr-row {
-  height: 64px; border-radius: 12px;
+  height: 60px; border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background-color: rgba(255, 255, 255, 0.04);
 }

@@ -505,7 +505,7 @@
                 </div>
               </div>
               <div class="flex-1 min-w-0 space-y-2">
-                <!-- 載せる曲の選び方（並び順の上位 10 曲 / 自由選択） -->
+                <!-- 載せる曲の選び方（並び順の上位 SHARE_MAX_SONGS 曲 / 自由選択） -->
                 <div role="radiogroup" :aria-label="t('report.outputOptionsSub')" class="grid grid-cols-2 gap-2">
                   <button
                     v-for="opt in shareModeOptions"
@@ -527,7 +527,7 @@
                   </button>
                 </div>
 
-                <!-- 自由選択: 更新曲の中から最大 10 曲。選んだ順がそのまま画像の並び順になる -->
+                <!-- 自由選択: 更新曲の中から最大 SHARE_MAX_SONGS 曲。選んだ順がそのまま画像の並び順になる -->
                 <div v-if="shareMode === 'custom'" class="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
                   <div class="flex items-center justify-between gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-700">
                     <p class="text-xs font-bold text-slate-700 dark:text-slate-200">
@@ -1178,8 +1178,11 @@ const castVote = async (title: string, difficultyName: string, optionType: strin
 
 /** 共有画像の横幅（px）。UploadReportShareImage の .sr の幅と揃える。 */
 const SHARE_WIDTH = 1080;
-/** キャプチャ倍率。出力は 1620px 幅になる。 */
-const SHARE_SCALE = 1.5;
+/**
+ * キャプチャ倍率。X は長辺 2048px に縮小するので、1080×1920(9:16) の長辺がちょうど 2048px になる倍率で頭打ち
+ * （出力は約 1152×2048）。これ以上は容量が増えるだけ。
+ */
+const SHARE_SCALE = 2048 / 1920;
 /** オプション画面のプレビュー倍率（1080px → 270px）。 */
 const PREVIEW_SCALE = 0.25;
 const SHOW_NAME_KEY = 'beat-seeker-report-show-name';
@@ -1188,15 +1191,15 @@ const SHOW_NAME_KEY = 'beat-seeker-report-show-name';
 const captureImage = ref<InstanceType<typeof UploadReportShareImage> | null>(null);
 const previewImage = ref<InstanceType<typeof UploadReportShareImage> | null>(null);
 /** プレビューの元の高さ（px）。内容で変わるので描画後に測る。 */
-const previewHeight = ref(1440);
+const previewHeight = ref(1920);
 /** 画像生成 + シェア進行中フラグ（ボタンにスピナー表示）。 */
 const isSharing = ref(false);
 /** シェアオプション（並び順など）の開閉。 */
 const isShareOptionsOpen = ref(false);
 /**
- * 共有画像に載せる曲の選び方。'beat' / 'rate' / 'tier' はその順の上位 10 曲、
- * 'allTime' は歴代自己ベストを更新した曲だけを BEAT-PT 順に上位 10 曲、
- * 'custom' は更新曲の中からユーザーが選んだ曲（最大 10 曲、選んだ順）。
+ * 共有画像に載せる曲の選び方。'beat' / 'rate' / 'tier' はその順の上位 SHARE_MAX_SONGS 曲、
+ * 'allTime' は歴代自己ベストを更新した曲だけを BEAT-PT 順に上位 SHARE_MAX_SONGS 曲、
+ * 'custom' は更新曲の中からユーザーが選んだ曲（最大 SHARE_MAX_SONGS 曲、選んだ順）。
  */
 type ShareMode = 'beat' | 'rate' | 'tier' | 'allTime' | 'custom';
 const shareMode = ref<ShareMode>('beat');
@@ -1240,10 +1243,10 @@ const allTimeBestSongs = computed<UpdatedSong[]>(() => {
 /** 選び方の選択肢。RATE-PT 順は Rate-Tier を表示しているユーザーにだけ出す。 */
 const shareModeOptions = computed(() => {
   const opts: { value: ShareMode; label: string; desc: string; tone: 'blue' | 'emerald' | 'amber' | 'slate' }[] = [
-    { value: 'beat', label: t('report.sortByBeatPt'), desc: t('report.sortByBeatPtDesc'), tone: 'blue' },
+    { value: 'beat', label: t('report.sortByBeatPt'), desc: t('report.sortByBeatPtDesc', { max: SHARE_MAX_SONGS }), tone: 'blue' },
   ];
-  if (showRateTier.value) opts.push({ value: 'rate', label: t('report.sortByRatePt'), desc: t('report.sortByRatePtDesc'), tone: 'emerald' });
-  opts.push({ value: 'tier', label: t('report.sortBySongTier'), desc: t('report.sortBySongTierDesc'), tone: 'amber' });
+  if (showRateTier.value) opts.push({ value: 'rate', label: t('report.sortByRatePt'), desc: t('report.sortByRatePtDesc', { max: SHARE_MAX_SONGS }), tone: 'emerald' });
+  opts.push({ value: 'tier', label: t('report.sortBySongTier'), desc: t('report.sortBySongTierDesc', { max: SHARE_MAX_SONGS }), tone: 'amber' });
   if (allTimeBestSongs.value.length > 0) {
     opts.push({ value: 'allTime', label: `★ ${t('report.onlyAllTimeBest')}`, desc: t('report.onlyAllTimeBestDesc', { max: SHARE_MAX_SONGS }), tone: 'amber' });
   }
@@ -1332,7 +1335,7 @@ const pickMetric = (song: UpdatedSong) => {
 };
 
 /**
- * 【関数の役割】 選び方を切り替える。自由選択へ初めて入るときは、直前に表示していた上位 10 曲を
+ * 【関数の役割】 選び方を切り替える。自由選択へ初めて入るときは、直前に表示していた上位の曲を
  * 選択済みにしておく（空の画像から始めさせない。「上位から 2〜3 曲だけ入れ替える」使い方もしやすい）。
  */
 const selectShareMode = (mode: ShareMode) => {
@@ -1403,7 +1406,6 @@ const generateShareImage = async () => {
     const target = captureImage.value?.el;
     if (!target) return;
     const canvas = await withHtml2canvasTextFix(() => html2canvas(target, {
-      // X は長辺 2048px に縮小するので、1080×1440 の 1.5 倍（1620×2160）で頭打ち。2 倍は容量が増えるだけ。
       scale: SHARE_SCALE,
       backgroundColor: '#0a0f1d',
       logging: false,
