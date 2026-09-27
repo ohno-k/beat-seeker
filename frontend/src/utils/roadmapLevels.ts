@@ -8,6 +8,9 @@
  *
  * 2026-09-24: AA ラインを追加。Lv.1 より易しい AA は Lv.0, −1, −2 … の「負のレベル」に入るので、
  * レベル番号は minLevel（≤ 1）〜 maxLevel。レベル 0 は実在するレベルなので「未達成」は null で表す。
+ *
+ * 2026-09-28: 保持レベル。一度達成したレベル（サーバーが記録し、API の user.keptLevels で返す）は、
+ * 今の判定で未達成でも達成として扱う（新しい譜面を初プレーしてラインに届かないとレベルが下がっていたため）。
  */
 
 export type RoadmapLine = 'aa' | 'aaa' | 'maxMinus';
@@ -55,7 +58,13 @@ export const isLevelCleared = (n: number, played: number, done: number) =>
 export const remainingToClear = (n: number, played: number, done: number) =>
   Math.max(0, Math.ceil((Math.max(played, minPlayedFor(n)) * 2) / 3) - done);
 
-export interface RoadmapLevelState { no: number; n: number; played: number; done: number; cleared: boolean; complete: boolean }
+/** API の user.keptLevels の 1 件（記録済みの達成レベル）。clearedAt = 記録した時刻（ISO-8601 UTC）。 */
+export interface RoadmapKeptLevel { no: number; clearedAt: string }
+
+/**
+ * 1 レベルの状態。cleared = 達成（今の判定 or 保持）。kept = 今の判定では未達成だが、以前達成したので達成のまま。
+ */
+export interface RoadmapLevelState { no: number; n: number; played: number; done: number; cleared: boolean; kept: boolean; complete: boolean }
 export interface RoadmapSummary { levels: RoadmapLevelState[]; myLevel: number | null; clearedCount: number; completeCount: number }
 
 /**
@@ -64,12 +73,14 @@ export interface RoadmapSummary { levels: RoadmapLevelState[]; myLevel: number |
  * @param charts  譜面（levels の無い譜面は無視）
  * @param table   レベル表（slots / negSlots）
  * @param buckets 譜面 i → 歴代ベストの桶（未プレーは無し）
+ * @param kept    保持レベルの番号（一度達成したレベル。今の判定に関わらず達成）
  * @returns levels は易しい順（minLevel から）
  */
-export function summarizeRoadmap(charts: RoadmapChartLike[], table: RoadmapLevelTableLike, buckets: Map<number, number>): RoadmapSummary {
+export function summarizeRoadmap(charts: RoadmapChartLike[], table: RoadmapLevelTableLike, buckets: Map<number, number>,
+  kept: ReadonlySet<number> = new Set()): RoadmapSummary {
   const minLevel = roadmapMinLevel(table), maxLevel = roadmapMaxLevel(table);
   const levels: RoadmapLevelState[] = Array.from({ length: maxLevel - minLevel + 1 }, (_, k) =>
-    ({ no: minLevel + k, n: 0, played: 0, done: 0, cleared: false, complete: false }));
+    ({ no: minLevel + k, n: 0, played: 0, done: 0, cleared: false, kept: false, complete: false }));
   for (const c of charts) {
     if (!c.levels) continue;
     const b = buckets.get(c.i);
@@ -86,7 +97,9 @@ export function summarizeRoadmap(charts: RoadmapChartLike[], table: RoadmapLevel
   }
   let myLevel: number | null = null, clearedCount = 0, completeCount = 0;
   for (const lv of levels) {
-    lv.cleared = isLevelCleared(lv.n, lv.played, lv.done);
+    const now = isLevelCleared(lv.n, lv.played, lv.done);
+    lv.kept = !now && kept.has(lv.no);
+    lv.cleared = now || lv.kept;
     lv.complete = lv.n > 0 && lv.done === lv.n;
     if (lv.cleared) { myLevel = lv.no; clearedCount++; }
     if (lv.complete) completeCount++;

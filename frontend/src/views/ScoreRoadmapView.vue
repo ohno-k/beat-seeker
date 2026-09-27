@@ -36,6 +36,7 @@ import { useAdmin } from '../composables/useAdmin';
 import { formatJstDateTime } from '../utils/jstTime';
 import {
   minPlayedFor, isLevelCleared, remainingToClear, roadmapMinLevel, roadmapMaxLevel, roadmapSlotOf, formatRoadmapLevel,
+  type RoadmapKeptLevel,
 } from '../utils/roadmapLevels';
 import ScoreRoadmapRankingModal from '../components/ScoreRoadmapRankingModal.vue';
 import ScoreRoadmapRulesModal from '../components/ScoreRoadmapRulesModal.vue';
@@ -55,7 +56,7 @@ interface Chart {
 }
 interface LevelTableInfo { revision: number; frozenAt: string; updatedAt: string; minPlayers: number; slots: number[]; negSlots?: number[] }
 interface Model { kAaa: number; kMaxMinus: number; thetas: number[]; levelTable?: LevelTableInfo }
-interface UserInfo { userId: number; label: string | null; found: boolean; theta?: number; plays?: [number, number][] }
+interface UserInfo { userId: number; label: string | null; found: boolean; theta?: number; plays?: [number, number][]; keptLevels?: RoadmapKeptLevel[] }
 /** 目標 = 譜面 × ライン。no = 固定したレベル表でのレベル番号。 */
 interface Target { key: string; c: Chart; line: LineKey; d: number; no: number }
 
@@ -237,6 +238,8 @@ const targets = computed<Target[]>(() => levelCharts.value.flatMap((c) =>
   LINES.filter((line) => c.levels![line] != null && c[line])
     .map((line) => ({ key: `${c.i}:${line}`, c, line, d: c[line].d, no: c.levels![line]! }))));
 const levelTable = computed(() => model.value?.levelTable ?? null);
+/** 保持レベル（一度達成したレベル）の番号。 */
+const keptNos = computed(() => new Set((user.value?.keptLevels ?? []).map((k) => k.no)));
 /** 曲名の表記: ANOTHER は表記なし、LEGGENDARIA は末尾に [L]（難易度表と同じ書き方）。 */
 const chartName = (c: Chart) => (c.difficultyName === 'LEGGENDARIA' ? `${c.title}[L]` : c.title);
 
@@ -253,6 +256,8 @@ function shareAtLeast(x: number): number {
 interface Level {
   no: number; from: number; to: number; items: Target[];
   played: number; done: number; minPlayed: number; cleared: boolean;
+  /** 今の判定では未達成だが、以前達成したので達成のまま（保持レベル）。 */
+  kept: boolean;
   /** 完全制覇: そのレベルの全目標（未プレーも含む）を達成。「達成」とは別の状態として見せる。 */
   complete: boolean;
   remaining: number; reachShare: number; group: number;
@@ -275,11 +280,14 @@ const levels = computed<Level[]>(() => {
     const p = items.filter(played).length;
     const x = items.filter(achieved).length;
     const minPlayed = minPlayedFor(n);
-    // 判定規則は utils/roadmapLevels.ts（プレイ成果レポートと共用）。目標 0 件のレベルは達成にしない
-    const cleared = isLevelCleared(n, p, x);
+    // 判定規則は utils/roadmapLevels.ts（プレイ成果レポートと共用）。目標 0 件のレベルは達成にしない。
+    // 一度達成したレベル（サーバーの記録）は今の判定で届かなくても達成のまま
+    const now = isLevelCleared(n, p, x);
+    const kept = !now && keptNos.value.has(no);
+    const cleared = now || kept;
     const from = slot * LEVEL_W;
     return {
-      no, from, to: from + LEVEL_W, items, played: p, done: x, minPlayed, cleared,
+      no, from, to: from + LEVEL_W, items, played: p, done: x, minPlayed, cleared, kept,
       complete: n > 0 && x === n, remaining: remainingToClear(n, p, x), reachShare: shareAtLeast(from + LEVEL_W), group: Math.floor(from / GROUP_W + 1e-9),
     };
   });
@@ -550,6 +558,11 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
                   <span class="font-mono text-slate-700 dark:text-slate-300" title="達成した目標数 / プレー済みの目標数">達成 {{ l.done }}/{{ l.played }}</span>
                 </span>
                 <span v-if="l.complete" class="rm-state font-bold text-amber-600 dark:text-amber-400">完全制覇</span>
+                <span
+                  v-else-if="l.kept"
+                  class="rm-state font-bold text-blue-700 dark:text-blue-300"
+                  title="以前このレベルを達成しています。一度達成したレベルは、その後に未達成の目標をプレーしても達成のままです"
+                >達成済み</span>
                 <span v-else-if="l.cleared" class="rm-state font-bold text-blue-700 dark:text-blue-300">レベル達成</span>
                 <span v-else class="rm-state text-slate-500">あと {{ l.remaining }} 件</span>
                 <span class="rm-arrow text-slate-400">{{ expanded.has(l.no) ? '▾' : '▸' }}</span>

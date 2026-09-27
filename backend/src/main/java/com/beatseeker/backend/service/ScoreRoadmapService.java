@@ -66,6 +66,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  - 旧版（AA の無い表）は次のバッチで同じ版のまま AA を足して保存し直す（{@link #withAa}）。
  *  - レベル 0 が実在のレベルになったので、「どのレベルも未達成」は null（内部では {@link #NO_LEVEL}）で表す。
  *
+ * 保持レベル（2026-09-28 ユーザー指定）:
+ *  - 一度達成したレベルは {@code score_roadmap_kept_levels} に版ごとに記録し、以後は未達成に戻さない
+ *    （新しい譜面を初プレーしてラインに届かないと 3 分の 2 を割り、レベルが下がっていたため）。
+ *
  * 生データ約 100 万行は List&lt;Map&gt; に展開せず、カーソルで受けて int 配列へ詰める。
  */
 @Service
@@ -115,6 +119,18 @@ public class ScoreRoadmapService {
         "  frozen_at VARCHAR(40) NOT NULL," +
         "  updated_at VARCHAR(40) NOT NULL," +
         "  payload TEXT NOT NULL)";
+
+    /**
+     * 保持レベル（一度達成したレベル）の記録。レベル表の版ごと（作り直すと番号が変わるので引き継がない）。
+     * cleared_at = 記録した時刻（ISO-8601 UTC。実際に達成した時刻より遅れることがある）。
+     */
+    private static final String CREATE_KEPT_SQL =
+        "CREATE TABLE IF NOT EXISTS score_roadmap_kept_levels (" +
+        "  user_id BIGINT NOT NULL," +
+        "  revision INTEGER NOT NULL," +
+        "  level_no INTEGER NOT NULL," +
+        "  cleared_at VARCHAR(40) NOT NULL," +
+        "  PRIMARY KEY (user_id, revision, level_no))";
 
     /** レベル表に入れる譜面の最低プレー人数（歴代ベストがある人数）。 */
     private static final int MIN_PLAYERS_FOR_LEVEL = 200;
@@ -176,6 +192,10 @@ public class ScoreRoadmapService {
     private LevelTable levelTable = null;
     private boolean levelTableLoaded = false;
     private final Object levelLock = new Object();
+
+    /** 保持レベルの読み書きを直列にする（閲覧とバッチが同じ行を二重に入れないように）。 */
+    private final Object keptLock = new Object();
+    private volatile boolean keptTableReady = false;
 
     public ScoreRoadmapService(DataSource dataSource, JdbcTemplate jdbcTemplate,
             PlatformTransactionManager transactionManager) {
@@ -309,7 +329,8 @@ public class ScoreRoadmapService {
     /**
      * 【メソッドの役割】 1 人分の歴代ベストをその場で読み、土台の d 固定で達成状況と θ を出す。
      *
-     * @return {userId, label, found, theta, plays:[[譜面 i, 桶]...]}
+     * @return {userId, label, found, theta, plays:[[譜面 i, 桶]...], keptLevels:[{no, clearedAt}...]}
+     *         keptLevels = 記録済みの達成レベル（今回の表示で新たに達成したものも含む）。フロントは今の判定と合わせて達成とする
      */
     private Map<String, Object> userDelta(Base b, long userId, String label) {
         List<int[]> plays = readUserPlays(b, userId);
@@ -322,6 +343,14 @@ public class ScoreRoadmapService {
             u.put("theta", round2(thetaFor(plays, b)));
             u.put("plays", plays);
         }
+        LevelCounts lc = levelCounts(b, plays);
+        List<Map<String, Object>> kept = new ArrayList<>();
+        if (lc != null) {
+            for (Map.Entry<Integer, String> e : recordAndLoadKept(userId, lc).entrySet()) {
+                kept.add(Map.of("no", e.getKey(), "clearedAt", e.getValue()));
+            }
+        }
+        u.put("keptLevels", kept);
         return u;
     }
 
@@ -345,23 +374,62 @@ public class ScoreRoadmapService {
      * 最新のスコアで判定する（土台の d・レベル表は固定、スコアはその場で読む）。
      *
      * @return {ready, level（どのレベルも未達成なら null）, minLevel, maxLevel, clearedLevels, completeLevels}
+     *          （達成・レベルは保持レベルを含む。{@link #recordAndLoadKept}）
      */
-    @SuppressWarnings("unchecked")
     public Map<String, Object> userLevel(long userId) {
         if (base == null) restoreFromDbOnce();
         if (base == null) startRebuild();
         Base b = base;
         Map<String, Object> body = new LinkedHashMap<>();
-        Map<String, Object> lt = b == null ? null : (Map<String, Object>) b.model().get("levelTable");
-        body.put("ready", lt != null);
-        if (lt == null) return body;
+        LevelCounts lc = b == null ? null : levelCounts(b, readUserPlays(b, userId));
+        body.put("ready", lc != null);
+        if (lc == null) return body;
+        java.util.Set<Integer> kept = recordAndLoadKept(userId, lc).keySet();
+
+        int level = NO_LEVEL, cleared = 0, complete = 0;
+        for (int x = 0; x < lc.n().length; x++) {
+            int no = x + lc.minLevel();
+            if (lc.cleared(x) || kept.contains(no)) { level = no; cleared++; }
+            if (lc.n()[x] > 0 && lc.done()[x] == lc.n()[x]) complete++;
+        }
+        body.put("level", level == NO_LEVEL ? null : level);
+        body.put("minLevel", lc.minLevel());
+        body.put("maxLevel", lc.maxLevel());
+        body.put("clearedLevels", cleared);
+        body.put("completeLevels", complete);
+        return body;
+    }
+
+    /**
+     * 1 人分のレベル別の件数（配列の添字 = レベル番号 − minLevel）。
+     *
+     * @param revision レベル表の版（保持レベルの記録に使う）
+     */
+    private record LevelCounts(int revision, int minLevel, int maxLevel, int[] n, int[] played, int[] done) {
+        boolean cleared(int x) { return isLevelCleared(n[x], played[x], done[x]); }
+    }
+
+    /**
+     * 【メソッドの役割】 1 レベル分の達成判定（今のスコアでの判定。保持レベルは含まない）。
+     * 規則はフロントの utils/roadmapLevels.ts と同じ: プレー済み ≥ min(n, max(2, ⌈n/3⌉)) かつ 達成数 × 3 ≥ プレー済み × 2。
+     */
+    private static boolean isLevelCleared(int n, int played, int done) {
+        int minPlayed = Math.min(n, Math.max(2, (n + 2) / 3));
+        return n > 0 && played >= minPlayed && done * 3 >= played * 2;
+    }
+
+    /** 【メソッドの役割】 1 人分の [譜面 i, 桶] からレベル別の目標数・プレー済み数・達成数を数える（レベル表が無ければ null）。 */
+    @SuppressWarnings("unchecked")
+    private static LevelCounts levelCounts(Base b, List<int[]> plays) {
+        Map<String, Object> lt = (Map<String, Object>) b.model().get("levelTable");
+        if (lt == null) return null;
         int maxLevel = ((Number) lt.get("maxLevel")).intValue();
         int minLevel = ((Number) lt.get("minLevel")).intValue();
         int off = -minLevel, size = maxLevel - minLevel + 1; // 配列の添字 = レベル番号 + off
 
         int[] bucketOf = new int[b.charts().size()];
         Arrays.fill(bucketOf, -1);
-        for (int[] p : readUserPlays(b, userId)) bucketOf[p[0]] = p[1];
+        for (int[] p : plays) bucketOf[p[0]] = p[1];
         int[] n = new int[size], played = new int[size], done = new int[size];
         for (int i = 0; i < b.charts().size(); i++) {
             Map<String, Object> lv = (Map<String, Object>) b.charts().get(i).get("levels");
@@ -377,18 +445,96 @@ public class ScoreRoadmapService {
                 if (bucketOf[i] >= LINE_BUCKETS[li]) done[no + off]++;
             }
         }
-        int level = NO_LEVEL, cleared = 0, complete = 0;
-        for (int x = 0; x < size; x++) {
-            int minPlayed = Math.min(n[x], Math.max(2, (n[x] + 2) / 3));
-            if (n[x] > 0 && played[x] >= minPlayed && done[x] * 3 >= played[x] * 2) { level = x - off; cleared++; }
-            if (n[x] > 0 && done[x] == n[x]) complete++;
+        return new LevelCounts(((Number) lt.get("revision")).intValue(), minLevel, maxLevel, n, played, done);
+    }
+
+    // ===================================================================================
+    // 保持レベル（一度達成したレベルは未達成に戻さない）
+    // ===================================================================================
+
+    /**
+     * 【メソッドの役割】 今達成しているレベルのうち未記録のものを記録し、記録済みの全レベル（番号 → 記録日時）を返す。
+     *
+     * 2026-09-28 ユーザー指定: 判定は「プレー済みの 3 分の 2」なので、新しい譜面を初プレーしてラインに届かないと
+     * そのレベルが未達成に戻り、レベルが下がることがあった（公開後 5 日で 7 人）。一度達成したレベルは
+     * レベル表の版ごとに記録し、以後は今の判定に関わらず達成として扱う。記録する時点は
+     * ロードマップ画面・ダッシュボードのレベル表示（本人・管理者の閲覧）と、3 時間おきのバッチ（全員）。
+     * 記録に失敗しても表示は止めない（今の判定だけで返す）。
+     */
+    private Map<Integer, String> recordAndLoadKept(long userId, LevelCounts lc) {
+        try {
+            synchronized (keptLock) {
+                ensureKeptTable();
+                Map<Integer, String> kept = new java.util.TreeMap<>();
+                jdbcTemplate.query("SELECT level_no, cleared_at FROM score_roadmap_kept_levels WHERE user_id = ? AND revision = ?",
+                        rs -> { kept.put(rs.getInt(1), rs.getString(2)); }, userId, lc.revision());
+                String now = Instant.now().toString();
+                List<Object[]> add = new ArrayList<>();
+                for (int x = 0; x < lc.n().length; x++) {
+                    int no = x + lc.minLevel();
+                    if (lc.cleared(x) && !kept.containsKey(no)) {
+                        add.add(new Object[] { userId, lc.revision(), no, now });
+                        kept.put(no, now);
+                    }
+                }
+                if (!add.isEmpty()) insertKept(add);
+                return kept;
+            }
+        } catch (Exception e) {
+            log.warn("Could not record kept roadmap levels for user {}: {}", userId, e.getMessage());
+            return Map.of();
         }
-        body.put("level", level == NO_LEVEL ? null : level);
-        body.put("minLevel", minLevel);
-        body.put("maxLevel", maxLevel);
-        body.put("clearedLevels", cleared);
-        body.put("completeLevels", complete);
-        return body;
+    }
+
+    /** 【メソッドの役割】 ある版の全ユーザーの記録済みレベルを読む（バッチのランキング用）。読めなければ空。 */
+    private Map<Long, java.util.Set<Integer>> loadAllKept(int revision) {
+        Map<Long, java.util.Set<Integer>> out = new HashMap<>();
+        try {
+            synchronized (keptLock) {
+                ensureKeptTable();
+                jdbcTemplate.query("SELECT user_id, level_no FROM score_roadmap_kept_levels WHERE revision = ?",
+                        rs -> { out.computeIfAbsent(rs.getLong(1), k -> new java.util.HashSet<>()).add(rs.getInt(2)); }, revision);
+            }
+        } catch (Exception e) {
+            log.warn("Could not load kept roadmap levels (revision {}): {}", revision, e.getMessage());
+        }
+        return out;
+    }
+
+    /** 【メソッドの役割】 バッチで今達成しているレベル（[userId, レベル番号]）のうち未記録のものをまとめて記録する。 */
+    private void recordKeptBatch(int revision, List<long[]> clearedNow, String now) {
+        if (clearedNow.isEmpty()) return;
+        try {
+            synchronized (keptLock) {
+                ensureKeptTable();
+                // バッチの計算中に閲覧で記録された行と重ならないよう、ロックの中で読み直して差分だけ入れる
+                java.util.Set<Long> existing = new java.util.HashSet<>();
+                jdbcTemplate.query("SELECT user_id, level_no FROM score_roadmap_kept_levels WHERE revision = ?",
+                        rs -> { existing.add(keptKey(rs.getLong(1), rs.getInt(2))); }, revision);
+                List<Object[]> add = new ArrayList<>();
+                for (long[] r : clearedNow) {
+                    if (existing.add(keptKey(r[0], (int) r[1]))) add.add(new Object[] { r[0], revision, (int) r[1], now });
+                }
+                if (!add.isEmpty()) insertKept(add);
+                log.info("Recorded {} kept roadmap levels (revision {})", add.size(), revision);
+            }
+        } catch (Exception e) {
+            log.warn("Could not record kept roadmap levels in batch: {}", e.getMessage());
+        }
+    }
+
+    /** (userId, レベル番号) を 1 つの long にする（レベル番号は −500〜499 の範囲に収まる）。 */
+    private static long keptKey(long userId, int levelNo) { return userId * 1000L + (levelNo + 500); }
+
+    private void insertKept(List<Object[]> rows) {
+        writeTx.executeWithoutResult(status -> jdbcTemplate.batchUpdate(
+                "INSERT INTO score_roadmap_kept_levels (user_id, revision, level_no, cleared_at) VALUES (?, ?, ?, ?)", rows));
+    }
+
+    private void ensureKeptTable() {
+        if (keptTableReady) return;
+        jdbcTemplate.execute(CREATE_KEPT_SQL);
+        keptTableReady = true;
     }
 
     /** 【メソッドの役割】 d・k 固定での θ（バッチの手順 (3) と同じ Newton・事前分布。AA・AAA・MAX- の全目標を使う）。 */
@@ -867,14 +1013,16 @@ public class ScoreRoadmapService {
         }
         LevelTable t = syncLevelTable(charts, computedAt);
         List<Map<String, Object>> leveled = withLevels(charts, t);
-        Ranking r = computeRanking(s, leveled, t.minLevel(), t.maxLevel());
+        Ranking r = computeRanking(s, leveled, t.minLevel(), t.maxLevel(), loadAllKept(t.revision()));
+        recordKeptBatch(t.revision(), r.clearedNow(), computedAt);
         model.put("maxLevel", t.maxLevel());
         model.put("minLevel", t.minLevel());
         model.put("levelTable", levelTableInfo(t));
         return baseFromResponse(computedAt, model, leveled, r.entries());
     }
 
-    private record Ranking(List<Map<String, Object>> entries) {}
+    /** @param clearedNow 今のスコアで達成している [userId, レベル番号]（保持レベルの記録用） */
+    private record Ranking(List<Map<String, Object>> entries, List<long[]> clearedNow) {}
 
     /**
      * 【メソッドの役割】 全ユーザーのロードマップレベルを計算し、ランキングにする。
@@ -884,11 +1032,13 @@ public class ScoreRoadmapService {
      *    表に無い譜面（プレー人数 200 人未満）は判定に使わない。
      *  - 達成 = プレー済み目標 ≥ min(n, max(2, ⌈n/3⌉)) かつ 達成数 × 3 ≥ プレー済み × 2。完全制覇 = 全目標達成。
      *    目標が 0 件のレベル（マスタから消えた譜面だけのレベル）は達成にしない。
+     *  - 保持レベル（kept = 記録済みの達成レベル）は今の判定に関わらず達成とする。
      *  - その人のレベル = 達成レベルの最大番号。どのレベルも未達成の人は載せない。
      * 並びはレベル降順 → 達成レベル数 → 完全制覇数。順位は同じレベルなら同順位（1, 1, 3…）。
      */
     @SuppressWarnings("unchecked")
-    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts, int minLevel, int maxLevel) {
+    private static Ranking computeRanking(Snapshot s, List<Map<String, Object>> charts, int minLevel, int maxLevel,
+                                          Map<Long, java.util.Set<Integer>> kept) {
         // 手順1: 譜面（元の添字 j）× ライン → レベル番号（NO_LEVEL = 表に無い）。配列の添字 = レベル番号 + off
         int nc = s.titles().length, nl = LINE_KEYS.length;
         int off = -minLevel, size = maxLevel - minLevel + 1;
@@ -914,8 +1064,10 @@ public class ScoreRoadmapService {
 
         // 手順2: ユーザーごとにレベル別のプレー済み数・達成数を数えて判定
         List<long[]> rows = new ArrayList<>(); // [userId, level, cleared, complete]
+        List<long[]> clearedNow = new ArrayList<>(); // [userId, レベル番号]
         int[] played = new int[size], done = new int[size];
         for (int u = 0; u < s.userIds().length; u++) {
+            java.util.Set<Integer> keptOfUser = kept.getOrDefault(s.userIds()[u], java.util.Set.of());
             Arrays.fill(played, 0);
             Arrays.fill(done, 0);
             for (int p = s.userStart()[u]; p < s.userStart()[u + 1]; p++) {
@@ -930,8 +1082,9 @@ public class ScoreRoadmapService {
             int level = NO_LEVEL, cleared = 0, complete = 0;
             for (int x = 0; x < size; x++) {
                 int n = targetsPerLevel[x];
-                int minPlayed = Math.min(n, Math.max(2, (n + 2) / 3));
-                if (n > 0 && played[x] >= minPlayed && done[x] * 3 >= played[x] * 2) { level = x - off; cleared++; }
+                boolean now = isLevelCleared(n, played[x], done[x]);
+                if (now) clearedNow.add(new long[] { s.userIds()[u], x - off });
+                if (now || keptOfUser.contains(x - off)) { level = x - off; cleared++; }
                 if (n > 0 && done[x] == n) complete++;
             }
             if (level != NO_LEVEL) rows.add(new long[] { s.userIds()[u], level, cleared, complete });
@@ -952,7 +1105,7 @@ public class ScoreRoadmapService {
             e.put("completeLevels", rows.get(i)[3]);
             entries.add(e);
         }
-        return new Ranking(entries);
+        return new Ranking(entries, clearedNow);
     }
 
     /** 【メソッドの役割】 応答用の形（DB 保存形式と同じ）から差分計算用の配列を組み立てる。 */

@@ -770,7 +770,7 @@ import {
   ROADMAP_LINES, ROADMAP_LINE_BUCKET, ROADMAP_LINE_LABEL, remainingToClear, scoreToBucket, summarizeRoadmap,
   formatRoadmapLevel, roadmapMaxLevel,
 } from '../utils/roadmapLevels';
-import type { RoadmapChartLike, RoadmapLevelTableLike, RoadmapLine } from '../utils/roadmapLevels';
+import type { RoadmapChartLike, RoadmapKeptLevel, RoadmapLevelTableLike, RoadmapLine } from '../utils/roadmapLevels';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
 import { useI18n } from '../composables/useI18n';
 import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
@@ -831,6 +831,11 @@ const roadmapProgress = ref<null | {
 }>(null);
 /** 新たに達成した目標のうち、最初に見せる件数。 */
 const ROADMAP_TARGETS_SHOWN = 8;
+/**
+ * この時間内に記録された保持レベルは「今回のアップロードで達成した」とみなし、更新前の判定に含めない
+ * （アップロード直後にダッシュボードのレベル取得が先に記録することがあるため）。
+ */
+const RECENT_KEPT_MS = 5 * 60 * 1000;
 const showAllRoadmapTargets = ref(false);
 
 /**
@@ -846,6 +851,7 @@ const loadRoadmapProgress = async () => {
   showAllRoadmapTargets.value = false;
   const updates = props.diffData?.updatedSongs ?? [];
   if (!user.value || props.reportDate || updates.length === 0) return;
+  const startedAt = Date.now();
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 15000);
@@ -874,8 +880,14 @@ const loadRoadmapProgress = async () => {
       else oldBuckets.delete(c.i);
     }
 
-    const before = summarizeRoadmap(charts, table, oldBuckets);
-    const after = summarizeRoadmap(charts, table, newBuckets);
+    // 保持レベル（一度達成したレベル）。サーバーは閲覧のたびに今の達成を記録するので、今回の更新で達成した
+    // レベルもダッシュボードの取得などで既に記録されていることがある。更新前の判定には、少し前（RECENT_KEPT_MS より前）
+    // から記録されていたものだけを使う
+    const kept: RoadmapKeptLevel[] = data.user.keptLevels ?? [];
+    const keptAfter = new Set(kept.map((k) => k.no));
+    const keptBefore = new Set(kept.filter((k) => Date.parse(k.clearedAt) < startedAt - RECENT_KEPT_MS).map((k) => k.no));
+    const before = summarizeRoadmap(charts, table, oldBuckets, keptBefore);
+    const after = summarizeRoadmap(charts, table, newBuckets, keptAfter);
     const targets: RoadmapNewTarget[] = [];
     for (const c of charts) {
       if (!c.levels) continue;

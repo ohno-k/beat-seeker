@@ -130,6 +130,9 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
                 <span class="text-xs text-slate-500">{{ ex.note }}</span>
               </div>
             </div>
+            <p class="mt-3 rounded-md bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-xs text-slate-700 dark:text-slate-200">
+              <b>一度達成したレベルは、未達成に戻りません。</b>達成後に新しい目標をプレーして 3 分の 2 を下回っても、そのレベルは「達成済み」のままです。気にせず新しい譜面に挑戦してください。
+            </p>
           </section>
 
           <!-- 3. 完全制覇 -->
@@ -178,6 +181,7 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
               </li>
               <li>プレー人数 {{ minPlayers }} 人以上の譜面だけが入ります。後から {{ minPlayers }} 人に達した譜面は、一番近いレベルに追加されます。</li>
               <li>譜面の右に出る難度は最新の集計値です。</li>
+              <li>レベル表を作り直した場合（新しい版）は、レベル番号が変わるため、達成の記録も新しい版で数え直します。</li>
               <li>上部の絞り込み（AA / AAA / MAX-・☆・未達成だけ）は表示を変えるだけで、レベルの番号や判定は変わりません。</li>
             </ul>
           </section>
