@@ -790,6 +790,21 @@
               <input type="checkbox" v-model="showVirtualUsers" class="w-4 h-4 rounded accent-amber-500" />
               TOPランカー仮想ユーザーを表示
             </label>
+            <!-- 作品セレクト（前作の曲別ランキング）。前作のアーカイブがある期間だけ出す -->
+            <label v-if="rankingVersionOptions.length > 1" class="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-200" :title="t('table.rankingVersionHint')">
+              <span>{{ t('ranking.versionSelect') }}</span>
+              <select
+                v-model.number="rankingVersion"
+                class="px-2 py-1 text-xs font-semibold border rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option v-for="v in rankingVersionOptions" :key="v.num" :value="v.num">
+                  {{ v.num }} {{ versionName(v.num) }}
+                </option>
+              </select>
+            </label>
+            <span v-if="isPastRanking" class="text-[11px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-300 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-700">
+              {{ t('ranking.archiveBadge', { name: versionName(rankingVersion) }) }}
+            </span>
             <!-- 管理者は公開設定に関係なく全員を表示（運用確認用） -->
             <span v-if="isAdmin" class="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-300 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-700">
               {{ t('table.adminSeeAll') }}
@@ -805,9 +820,14 @@
             <div class="h-40"><BarChart :data="songTierDist.data" :options="songTierDistOpts" /></div>
           </div>
 
-          <div v-if="isLoadingRivals || isLoadingSongRanking" class="flex flex-col items-center justify-center py-20">
+          <p v-if="isPastRanking" class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">{{ t('table.pastRankingNote') }}</p>
+
+          <div v-if="isLoadingRivals || isLoadingSongRanking || isLoadingPastSongRanking" class="flex flex-col items-center justify-center py-20">
             <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
             <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
+          </div>
+          <div v-else-if="isPastRanking && activeSongRankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+            <p class="font-bold">{{ t('table.pastRankingEmpty', { name: versionName(rankingVersion) }) }}</p>
           </div>
           <div v-else-if="rankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1528,7 +1548,7 @@ import { DJ_LEVELS } from '../composables/constants';
 import { usePastScores } from '../composables/usePastScores';
 import type { ChartHistory } from '../composables/usePastScores';
 import { chartKey } from '../composables/usePastScores';
-import { versionShort, versionName, versionBadgeClass, CURRENT_VERSION, SUPPORTED_VERSIONS } from '../utils/iidxVersions';
+import { versionShort, versionName, versionBadgeClass, CURRENT_VERSION, SUPPORTED_VERSIONS, HISTORY_VERSIONS } from '../utils/iidxVersions';
 import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
@@ -2205,6 +2225,70 @@ const fetchSongRanking = async () => {
   }
 };
 
+// --- 前作の曲別ランキング（作品セレクト）---
+// 世代切り替え時に全員分が past_scores へ複製された前作だけを選べる（全体ランキングの作品セレクトと同じ範囲）。
+/** ランキングタブの作品セレクトに出す作品（新しい順）。1 作品しか無ければセレクト自体を出さない。 */
+const rankingVersionOptions = HISTORY_VERSIONS;
+/** ランキングタブで表示中の作品。譜面を切り替えると現行作へ戻す。 */
+const rankingVersion = ref<number>(CURRENT_VERSION);
+/** 前作のランキングを表示中か。 */
+const isPastRanking = computed(() => rankingVersion.value !== CURRENT_VERSION);
+/** 前作の曲別ランキングのキャッシュ（作品番号 → 行）。取得済みなら空配列でもキーが入る。 */
+const pastSongRankingCache = ref<Record<number, SongRankingEntry[]>>({});
+/** 前作の曲別ランキング取得中フラグ。 */
+const isLoadingPastSongRanking = ref(false);
+/** 取得中のリクエストのキー（`version|title|difficultyName`）。同じ取得の二重発行だけを防ぐ。 */
+let pastSongRankingInFlight: string | null = null;
+
+/**
+ * 【関数の役割】 前作の曲別ランキングを取得してキャッシュする（同じ作品は 1 回だけ）。
+ * 応答が返る前に譜面が切り替わった場合は、古い譜面の結果を捨てる。
+ */
+const fetchPastSongRanking = async (version: number) => {
+  const rec = selectedRecord.value;
+  if (!rec || pastSongRankingCache.value[version]) return;
+  const recKey = `${rec.title}|${rec.difficultyName}`;
+  const requestKey = `${version}|${recKey}`;
+  if (pastSongRankingInFlight === requestKey) return;
+  pastSongRankingInFlight = requestKey;
+  isLoadingPastSongRanking.value = true;
+  try {
+    const params = new URLSearchParams({
+      title: rec.title,
+      difficultyName: rec.difficultyName,
+      version: String(version),
+    });
+    const res = await fetch(`${API_BASE}/api/scores/song-ranking?${params}`, { headers: authHeaders() });
+    const cur = selectedRecord.value;
+    if (!cur || `${cur.title}|${cur.difficultyName}` !== recKey) return;
+    pastSongRankingCache.value = { ...pastSongRankingCache.value, [version]: res.ok ? await res.json() : [] };
+  } catch {
+    // 握り潰し: 補助情報なので失敗してもモーダルは動かす
+  } finally {
+    // 後から別の取得が始まっていたら、そちらのフラグは触らない
+    if (pastSongRankingInFlight === requestKey) {
+      pastSongRankingInFlight = null;
+      isLoadingPastSongRanking.value = false;
+    }
+  }
+};
+
+watch(rankingVersion, v => {
+  if (v !== CURRENT_VERSION && modalTab.value === 'rivals') fetchPastSongRanking(v);
+});
+
+/** ランキングタブで使う実ユーザー行の出どころ（現行作 = songRankingList / 前作 = キャッシュ）。 */
+const activeSongRankingList = computed<SongRankingEntry[]>(() =>
+  isPastRanking.value ? (pastSongRankingCache.value[rankingVersion.value] ?? []) : songRankingList.value);
+
+/** 前作表示中の自分の行（API 結果から拾う。記録が無ければ null）。 */
+const pastSelfEntry = computed<SongRankingEntry | null>(() => {
+  if (!isPastRanking.value) return null;
+  const myIidx = user.value?.iidxId ?? '';
+  if (!myIidx) return null;
+  return activeSongRankingList.value.find(e => e.iidxId === myIidx) ?? null;
+});
+
 /** 詳細モーダルのランキングタブで描画する行の共通型。実ユーザー行と仮想ユーザー行を一本化する。 */
 /**
  * 【関数の役割】 ランキング行のスコアから単曲ランク（必要スコアレート表対応）を求める。
@@ -2221,6 +2305,7 @@ const songRankOfScore = (score: number | null | undefined): RankInfo | null => {
  *
  *  - 集計対象: songRankingList の全実ユーザー（非公開のため匿名化された行も含む）
  *    + フレンド（rivalScores、iidxId で重複排除）+ 自分。仮想 TOP ランカーは除外。
+ *    前作表示中は前作の API 結果だけで集計する（自分も API 結果に含まれる）。
  *  - ProfileDashboard の単曲ティア分布に準じた 51 バー構成
  *    （各ブロック I〜V / Legend、I=淡 → V=濃、左=低位 → 右=高位）。
  *    Beginner 帯（レート 66.666% 以下）はスコアはあっても分布には算入しない。
@@ -2234,22 +2319,23 @@ const songTierDist = computed(() => {
   // --- スコアレートの収集（実ユーザーのみ） ---
   const rates: number[] = [];
   const seen = new Set<string>();
-  for (const entry of songRankingList.value) {
+  const past = isPastRanking.value;
+  for (const entry of activeSongRankingList.value) {
     if (entry.score == null || entry.score <= 0) continue;
     const iidxId = entry.iidxId ?? '';
     if (iidxId) {
-      if (iidxId === myIidx || seen.has(iidxId)) continue;
+      if ((iidxId === myIidx && !past) || seen.has(iidxId)) continue;
       seen.add(iidxId);
     }
     rates.push(entry.score / rec.maxScore * 100);
   }
-  for (const f of rivalScores.value) {
+  if (!past) for (const f of rivalScores.value) {
     if (!f.iidxId || f.iidxId === myIidx || seen.has(f.iidxId)) continue;
     if (f.score == null || f.score <= 0) continue;
     seen.add(f.iidxId);
     rates.push(f.score / rec.maxScore * 100);
   }
-  if (rec.score > 0) rates.push(rec.scoreRate);
+  if (!past && rec.score > 0) rates.push(rec.scoreRate);
   if (rates.length === 0) return null;
 
   // --- 51 バー定義（Beginner を除く。配色は ProfileDashboard の単曲ティア分布と同じ） ---
@@ -2385,6 +2471,11 @@ interface RankingRow {
  *         仮想ユーザー（TOP ランカー）はプレイ実績ではないため順位対象から外す。
  *  手順6: 表示用にフィルタ: 自分 + 仮想 + 公開フレンド + (showPublicUsers かつ privacy=0)。
  *  手順7: スコア降順でソートして返す。スコア null は末尾。
+ *
+ * 前作表示中（isPastRanking）の違い:
+ *  - 実ユーザー行は前作の API 結果（activeSongRankingList）から作り、rivalScores（現行作のフレンドスコア）は混ぜない。
+ *  - 自分の行も前作の API 結果から作る（記録が無ければスコア無し）。
+ *  - 仮想ユーザーはその作品の TOP ランカーだけに絞る（歴代の行は出さない）。
  */
 const rankingList = computed<RankingRow[]>(() => {
   if (!selectedRecord.value) return [];
@@ -2400,7 +2491,8 @@ const rankingList = computed<RankingRow[]>(() => {
   const usersByIidx = new Map<string, RankingRow>();
   const hiddenRows: RankingRow[] = [];
   let hiddenIdx = 0;
-  for (const entry of songRankingList.value) {
+  const past = isPastRanking.value;
+  for (const entry of activeSongRankingList.value) {
     const iidxId = entry.iidxId ?? '';
     if (iidxId === myIidx && iidxId) continue;
     if (!iidxId) {
@@ -2426,11 +2518,13 @@ const rankingList = computed<RankingRow[]>(() => {
       djLevel: entry.djLevel,
       privacyLevel: entry.privacyLevel ?? null,
       totalBeatPt: entry.totalBeatPt ?? 0,
-      isFriend: friendIidxSet.has(iidxId),
+      // 前作表示中は rivalScores に現行作の未プレー者が含まれないことがあるため、
+      // 「フレンド限定公開なのに識別情報が見えている」行もフレンドとみなす（API がフレンドにしか見せないため）。
+      isFriend: friendIidxSet.has(iidxId) || (past && !isAdmin.value && (entry.privacyLevel ?? 1) === 1),
       rank: null,
     });
   }
-  for (const f of rivalScores.value) {
+  if (!past) for (const f of rivalScores.value) {
     if (!f.iidxId || f.iidxId === myIidx) continue;
     const existing = usersByIidx.get(f.iidxId);
     if (existing) {
@@ -2454,29 +2548,49 @@ const rankingList = computed<RankingRow[]>(() => {
   }
 
   // 手順3: 自分の行を合成（displayName は固定で「あなた」）。
-  const selfRow: RankingRow = {
-    key: 'self',
-    kind: 'user',
-    displayName: 'あなた',
-    iidxId: myIidx,
-    userId: null,
-    score: rec.score > 0 ? rec.score : null,
-    clearType: rec.clearType,
-    djLevel: rec.djLevel,
-    privacyLevel: null,
-    totalBeatPt: totalBeatTierPoints.value,
-    isSelf: true,
-    rank: null,
-  };
+  const pastSelf = pastSelfEntry.value;
+  const selfRow: RankingRow = past
+    ? {
+      key: 'self',
+      kind: 'user',
+      displayName: 'あなた',
+      iidxId: myIidx,
+      userId: null,
+      score: pastSelf && pastSelf.score > 0 ? pastSelf.score : null,
+      clearType: pastSelf?.clearType ?? undefined,
+      djLevel: pastSelf?.djLevel ?? undefined,
+      privacyLevel: null,
+      totalBeatPt: pastSelf?.totalBeatPt ?? 0,
+      isSelf: true,
+      rank: null,
+    }
+    : {
+      key: 'self',
+      kind: 'user',
+      displayName: 'あなた',
+      iidxId: myIidx,
+      userId: null,
+      score: rec.score > 0 ? rec.score : null,
+      clearType: rec.clearType,
+      djLevel: rec.djLevel,
+      privacyLevel: null,
+      totalBeatPt: totalBeatTierPoints.value,
+      isSelf: true,
+      rank: null,
+    };
 
   // 手順4: 仮想ユーザー行を構築。各バッジの判定ロジックは以下。
   // 表示フィルタは後段で行う。登録済みの仮想ライバルはフレンド扱いで常時表示するため、
   // ここでは showVirtualUsers の値に関係なく全件作ってから絞り込む。
   const virtualRows: RankingRow[] = [];
+  // 前作表示中はその作品の TOP ランカーだけを対象にする（歴代 = versionNum 0 も外れるのでバッジは versionTop / top になる）。
+  const topRankers = past
+    ? songTopRankersList.value.filter(e => e.versionNum === rankingVersion.value)
+    : songTopRankersList.value;
   {
     // 県別の歴代 TOP を集める（versionNum === 0 が「歴代」の意味）。
     const allTimeByPref = new Map<number, { djName: string; score: number }>();
-    for (const e of songTopRankersList.value) {
+    for (const e of topRankers) {
       if (e.versionNum === 0) allTimeByPref.set(e.prefectureFileNum, { djName: e.djName, score: e.score });
     }
     // 全国（prefectureFileNum === 0）の歴代 TOP。
@@ -2494,7 +2608,7 @@ const rankingList = computed<RankingRow[]>(() => {
     }
     // バージョン別 全国 TOP を集める。
     const globalTopByVersion = new Map<number, { djName: string; score: number }>();
-    for (const e of songTopRankersList.value) {
+    for (const e of topRankers) {
       if (e.versionNum !== 0 && e.prefectureFileNum === 0) {
         globalTopByVersion.set(e.versionNum, { djName: e.djName, score: e.score });
       }
@@ -2502,7 +2616,7 @@ const rankingList = computed<RankingRow[]>(() => {
     // 「バージョン別 全国 TOP」と同じスコア/名前を持つ「バージョン別 県別 TOP」があるバージョンを検出。
     // 該当する場合、バージョン別 全国行は冗長なので後段で除外する。
     const versionHasPrefectureMatch = new Set<number>();
-    for (const e of songTopRankersList.value) {
+    for (const e of topRankers) {
       if (e.versionNum === 0 || e.prefectureFileNum === 0) continue;
       const g = globalTopByVersion.get(e.versionNum);
       if (g && g.djName === e.djName && g.score === e.score) versionHasPrefectureMatch.add(e.versionNum);
@@ -2510,7 +2624,7 @@ const rankingList = computed<RankingRow[]>(() => {
     // key 用のユニークインデックス。
     let idx = 0;
     // バージョンごとのエントリを走査し、バッジを決める。versionNum === 0（歴代行）はバージョン列の前段で既に処理済みなのでスキップ。
-    for (const e of songTopRankersList.value) {
+    for (const e of topRankers) {
       if (e.versionNum === 0) continue;
       // このエントリが、県別歴代 TOP と同一（= 歴代記録）か判定。
       const at = allTimeByPref.get(e.prefectureFileNum);
@@ -2663,6 +2777,9 @@ const handleRivalTabClick = () => {
   }
   if (!virtualRivalsLoaded.value) {
     loadRegisteredVirtualRivals();
+  }
+  if (isPastRanking.value) {
+    fetchPastSongRanking(rankingVersion.value);
   }
 };
 
@@ -2967,6 +3084,8 @@ watch(() => selectedRecord.value ? `${selectedRecord.value.title}|${selectedReco
   rivalScores.value = [];
   songRankingList.value = [];
   songTopRankersList.value = [];
+  pastSongRankingCache.value = {};
+  rankingVersion.value = CURRENT_VERSION;
   songHistory.value = [];
   milestoneScores.value = [];
   milestonePlayerCount.value = 0;
