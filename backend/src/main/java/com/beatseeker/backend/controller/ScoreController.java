@@ -11,6 +11,7 @@ import com.beatseeker.backend.entity.VirtualRival;
 import com.beatseeker.backend.repository.ActivityLogRepository;
 import com.beatseeker.backend.repository.AppNotificationRepository;
 import com.beatseeker.backend.repository.FriendshipRepository;
+import com.beatseeker.backend.repository.PastScoreRepository;
 import com.beatseeker.backend.repository.ScoreRepository;
 import com.beatseeker.backend.repository.ScoreHistoryLogRepository;
 import com.beatseeker.backend.repository.TimelineEventRepository;
@@ -143,6 +144,9 @@ public class ScoreController {
     /** 前作の最終 PT（ランキング行のティアアイコンの外枠用）。 */
     private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
 
+    /** 過去作スコア。前作の曲別ランキング（song-ranking?version=）でだけ使う。 */
+    private final PastScoreRepository pastScoreRepository;
+
     /**
      * upload がサーバー側で作った成長記録を、フロントの /save-history-log が
      * 「同じアップロードのもの」とみなして仕上げられる猶予（分）。
@@ -179,8 +183,10 @@ public class ScoreController {
             com.beatseeker.backend.service.LeagueNotificationService leagueNotificationService,
             com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService,
             com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService,
-            com.beatseeker.backend.service.ScoreRoadmapService scoreRoadmapService) {
+            com.beatseeker.backend.service.ScoreRoadmapService scoreRoadmapService,
+            PastScoreRepository pastScoreRepository) {
         this.previousVersionPtService = previousVersionPtService;
+        this.pastScoreRepository = pastScoreRepository;
         this.songScoreSpectrumCacheService = songScoreSpectrumCacheService;
         this.scoreRoadmapService = scoreRoadmapService;
         this.scoreRepository = scoreRepository;
@@ -1239,16 +1245,27 @@ public class ScoreController {
      *  1. ログインユーザーのフレンド ID 配列を取得。フレンドが居なければ -1 だけ入れて SQL に NULL を渡さないようにする。
      *  2. リポジトリに「自分 / フレンド / 公開ユーザー」のいずれかに該当する行のみを返すクエリを委譲する。
      *
+     * 前作（例: 33）を {@code version} で指定すると、世代切り替え時に {@code past_scores} へ複製された
+     * その作品のスコアで同じ形のランキングを返す（BEAT-PT は {@code version_pt_snapshots} の最終値）。
+     * 受け付けるのはアーカイブのある前作だけ。それ以外の過去作（30〜32）は本人が任意で取り込んだ
+     * 記録で母数が揃わないため、400 を返す。
+     *
      * @param auth           認証情報
      * @param title          曲名
      * @param difficultyName 難易度名
+     * @param version        作品バージョン（省略時・現行作指定時は現行作）
      * @return 可視範囲に絞った曲別ランキング
      */
     @GetMapping("/song-ranking")
     public ResponseEntity<List<Map<String, Object>>> getSongRanking(
             Authentication auth,
             @RequestParam String title,
-            @RequestParam String difficultyName) {
+            @RequestParam String difficultyName,
+            @RequestParam(required = false) Integer version) {
+        boolean archived = version != null && version != IidxVersions.current();
+        if (archived && !isArchivedSongRankingVersion(version)) {
+            return ResponseEntity.badRequest().build();
+        }
         User me = getUser(auth);
         // 手順1: フレンド ID を収集する。IN 句に空リストを渡すと SQL エラーになるので、
         // 空なら存在し得ない値（-1）を一件入れておく。
@@ -1258,9 +1275,19 @@ public class ScoreController {
         if (friendIds.isEmpty()) friendIds = List.of(-1L);
         // 手順2: 可視性フィルタ付きクエリに委譲。管理者は公開設定に関係なく全員を見られる（運用確認用）。
         boolean seeAll = adminAuthService.isAdminByIidxId(me.getIidxId());
-        List<Map<String, Object>> ranking = scoreRepository.findSongRanking(
-                title, difficultyName, me.getId(), friendIds, seeAll);
+        List<Map<String, Object>> ranking = archived
+                ? pastScoreRepository.findArchivedSongRanking(version, title, difficultyName, me.getId(), friendIds, seeAll)
+                : scoreRepository.findSongRanking(title, difficultyName, me.getId(), friendIds, seeAll);
         return ResponseEntity.ok(ranking);
+    }
+
+    /**
+     * 【メソッドの役割】 曲別ランキングを過去作で見てよい作品か（= 世代切り替えで全員分が複製された前作か）。
+     *
+     * 切替前（現行作 = PREVIOUS）はまだアーカイブが無いので false。
+     */
+    static boolean isArchivedSongRankingVersion(int version) {
+        return IidxVersions.current() != IidxVersions.PREVIOUS && version == IidxVersions.PREVIOUS;
     }
 
     /**

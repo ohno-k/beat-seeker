@@ -27,6 +27,8 @@ import java.time.LocalDateTime;
  *      {@code ScoreRepository#findLifetimeSongScoresWithBeatTier} /
  *      {@code ScoreRepository#findLifetimeSongAvgStats}。統計ページ用の匿名集計）
  *    - リーグの有効ライン・課題曲選定（{@code app.league.baseline-includes-past}）
+ *   例外（作品を指定して単独で見る過去作ランキング。現行作の集計には混ざらない）:
+ *    - 前作の曲別ランキング（{@code GET /api/scores/song-ranking?version=}。アーカイブのある作品のみ）
  *
  * 一意性制約: (user_id, version, title, difficultyName) の 4 項目。
  *   {@link Score} と異なり difficultyLevel（★）をキーに含めない。★は作品間で変動するため、
@@ -40,7 +42,9 @@ import java.time.LocalDateTime;
         @UniqueConstraint(name = "uk_past_scores_user_ver_chart",
                 columnNames = { "user_id", "version", "title", "difficultyName" })
 }, indexes = {
-        @Index(name = "idx_past_scores_user_ver", columnList = "user_id,version")
+        @Index(name = "idx_past_scores_user_ver", columnList = "user_id,version"),
+        // 前作の曲別ランキング（譜面単位で全ユーザーを引く）用
+        @Index(name = "idx_past_scores_ver_chart", columnList = "version,title,difficultyName")
 })
 @Data
 @NoArgsConstructor
