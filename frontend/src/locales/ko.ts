@@ -410,6 +410,12 @@ export const ko = {
   'table.sortRateAsc': '레이트 낮은 순',
   'table.sortTitle': '곡명 순',
   'table.songRankDist': '단일 곡 랭크 분포',
+  'table.songDistChartBar': '티어별',
+  'table.songDistChartScatter': '산점도',
+  'table.songDistChartEmpty': '표시할 데이터가 없습니다',
+  'table.judgeScatter': 'EXSCORE × (PGREAT+GREAT)/NOTES',
+  'table.judgeScatterNote': '점은 표시 중인 플레이어, 회귀선은 점수가 있는 전체 유저(비공개 포함·익명)로 산출',
+  'table.judgeScatterRegression': '회귀선 (전체 {n}명)',
   'table.noUnofficialData': '비공식 난이도 데이터를 찾을 수 없습니다. 대상 레벨(☆11, ☆12)이 포함되어 있는지 확인해 주세요.',
 
   'beatTierInfo.title': 'Beat-Tier 통계 시스템',
