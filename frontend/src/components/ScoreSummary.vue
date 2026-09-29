@@ -812,12 +812,37 @@
           </div>
 
           <!-- ===== 単曲ランク分布: スコアのある全実ユーザー（非公開含む・匿名集計）の単曲ランクをヒストグラム表示 ===== -->
-          <div v-if="songTierDist" class="mb-4 p-4 bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700">
-            <div class="flex flex-wrap items-baseline justify-between gap-2 mb-2">
-              <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('table.songRankDist') }}</h4>
-              <span class="text-[10px] text-slate-400 dark:text-slate-500">{{ t('table.songRankDistNote', { n: songTierDist.total }) }}</span>
+          <!--     「散布図」に切り替えると EXSCORE × (PGREAT+GREAT)/NOTES の散布図（点は可視範囲、回帰線は全ユーザー）を表示 -->
+          <div v-if="songTierDist || judgeScatter" class="mb-4 p-4 bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">
+                {{ songDistChartMode === 'bar' ? t('table.songRankDist') : t('table.judgeScatter') }}
+              </h4>
+              <div class="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-0.5">
+                <button
+                  v-for="opt in (['bar', 'scatter'] as const)"
+                  :key="opt"
+                  type="button"
+                  @click="songDistChartMode = opt"
+                  class="px-2.5 py-1 text-[11px] font-bold rounded-md transition-colors"
+                  :class="songDistChartMode === opt ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                >{{ opt === 'bar' ? t('table.songDistChartBar') : t('table.songDistChartScatter') }}</button>
+              </div>
             </div>
-            <div class="h-40"><BarChart :data="songTierDist.data" :options="songTierDistOpts" /></div>
+            <template v-if="songDistChartMode === 'bar'">
+              <template v-if="songTierDist">
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-1">{{ t('table.songRankDistNote', { n: songTierDist.total }) }}</p>
+                <div class="h-40"><BarChart :data="songTierDist.data" :options="songTierDistOpts" /></div>
+              </template>
+              <p v-else class="py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ t('table.songDistChartEmpty') }}</p>
+            </template>
+            <template v-else>
+              <template v-if="judgeScatter">
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-1">{{ t('table.judgeScatterNote') }}</p>
+                <SongJudgeScatterChart :points="judgeScatter.points" :regression="judgeScatter.regression" :max-score="judgeScatter.maxScore" />
+              </template>
+              <p v-else class="py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ t('table.songDistChartEmpty') }}</p>
+            </template>
           </div>
 
           <p v-if="isPastRanking" class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">{{ t('table.pastRankingNote') }}</p>
@@ -1553,6 +1578,7 @@ import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
 import { Bar as BarChart } from 'vue-chartjs';
+import SongJudgeScatterChart, { type JudgeScatterPoint, type JudgeRegression } from './SongJudgeScatterChart.vue';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, BarController, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Tooltip, Legend);
@@ -2149,6 +2175,10 @@ interface SongRankingEntry {
   score: number;
   clearType?: string | null;
   djLevel?: string | null;
+  pgreat?: number | null;
+  great?: number | null;
+  /** PGREAT+GREAT。非可視ユーザーでも匿名値として返る（散布図の全ユーザー回帰線用）。 */
+  pgreatGreat?: number | null;
   totalBeatPt: number | null;
 }
 /** 譜面ランキング（公開/フレンド/自分）の生データ。 */
@@ -2448,6 +2478,8 @@ interface RankingRow {
   djLevel?: string;
   privacyLevel?: number | null;
   totalBeatPt?: number;
+  pgreat?: number | null;
+  great?: number | null;
   virtualEntry?: SongTopRankerEntry;
   virtualBadge?: 'allTimeGlobal' | 'globalAllTime' | 'allTimeArea' | 'versionTop' | 'top';
   rank: number | null;
@@ -2518,6 +2550,8 @@ const rankingList = computed<RankingRow[]>(() => {
       djLevel: entry.djLevel,
       privacyLevel: entry.privacyLevel ?? null,
       totalBeatPt: entry.totalBeatPt ?? 0,
+      pgreat: entry.pgreat ?? null,
+      great: entry.great ?? null,
       // 前作表示中は rivalScores に現行作の未プレー者が含まれないことがあるため、
       // 「フレンド限定公開なのに識別情報が見えている」行もフレンドとみなす（API がフレンドにしか見せないため）。
       isFriend: friendIidxSet.has(iidxId) || (past && !isAdmin.value && (entry.privacyLevel ?? 1) === 1),
@@ -2541,6 +2575,8 @@ const rankingList = computed<RankingRow[]>(() => {
         djLevel: f.djLevel,
         privacyLevel: f.privacyLevel ?? null,
         totalBeatPt: 0,
+        pgreat: f.pgreat ?? null,
+        great: f.great ?? null,
         isFriend: true,
         rank: null,
       });
@@ -2561,6 +2597,8 @@ const rankingList = computed<RankingRow[]>(() => {
       djLevel: pastSelf?.djLevel ?? undefined,
       privacyLevel: null,
       totalBeatPt: pastSelf?.totalBeatPt ?? 0,
+      pgreat: pastSelf?.pgreat ?? null,
+      great: pastSelf?.great ?? null,
       isSelf: true,
       rank: null,
     }
@@ -2575,6 +2613,8 @@ const rankingList = computed<RankingRow[]>(() => {
       djLevel: rec.djLevel,
       privacyLevel: null,
       totalBeatPt: totalBeatTierPoints.value,
+      pgreat: rec.pgreat,
+      great: rec.great,
       isSelf: true,
       rank: null,
     };
@@ -2705,6 +2745,79 @@ const rankingList = computed<RankingRow[]>(() => {
   });
 
   return display;
+});
+
+/** ランキングタブ先頭のグラフ切替（ティア別棒グラフ / EXSCORE × (PG+GR)/NOTES 散布図）。 */
+const songDistChartMode = ref<'bar' | 'scatter'>('bar');
+
+/**
+ * 【computed の役割】 ランキングタブの「EXSCORE × (PGREAT+GREAT)/NOTES」散布図データを組み立てる。
+ *
+ *  - 点: rankingList と同じ可視範囲の実ユーザー（管理者は全員 / 一般ユーザーは自分 + フレンド
+ *        + 「スコア公開ユーザーも表示」ON 時の公開ユーザー）。仮想 TOP ランカーは判定内訳が無いので除外。
+ *  - 回帰線: スコアのある全実ユーザー（非公開含む・匿名の pgreatGreat）で最小二乗直線を求める。
+ *        現行作では自分の値は API 結果ではなく手元のレコード（アップロード直後の最新値）を使う。
+ *  - NOTES は maxScore / 2。集計不能（NOTES 不明・点が無い）なら null。
+ */
+const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRegression | null; maxScore: number } | null>(() => {
+  const rec = selectedRecord.value;
+  if (!rec || rec.maxScore <= 0) return null;
+  const notes = rec.maxScore / 2;
+  const rateOf = (pgGr: number) => pgGr / notes * 100;
+
+  // --- 表示する点（可視範囲） ---
+  const points: JudgeScatterPoint[] = [];
+  for (const r of rankingList.value) {
+    if (r.kind !== 'user' || r.score == null || r.score <= 0) continue;
+    if (r.pgreat == null || r.great == null) continue;
+    points.push({
+      key: r.key,
+      displayName: r.displayName,
+      score: r.score,
+      judgeRate: rateOf(r.pgreat + r.great),
+      isSelf: !!r.isSelf,
+      isFriend: !!r.isFriend,
+    });
+  }
+
+  // --- 回帰線（全実ユーザー・匿名） ---
+  const myIidx = user.value?.iidxId ?? '';
+  const past = isPastRanking.value;
+  const xs: number[] = [];
+  const ys: number[] = [];
+  const seen = new Set<string>();
+  for (const entry of activeSongRankingList.value) {
+    if (entry.score == null || entry.score <= 0 || entry.pgreatGreat == null) continue;
+    const iidxId = entry.iidxId ?? '';
+    if (iidxId) {
+      if ((iidxId === myIidx && !past) || seen.has(iidxId)) continue;
+      seen.add(iidxId);
+    }
+    xs.push(entry.score);
+    ys.push(rateOf(entry.pgreatGreat));
+  }
+  if (!past && rec.score > 0) {
+    xs.push(rec.score);
+    ys.push(rateOf(rec.pgreat + rec.great));
+  }
+  let regression: JudgeRegression | null = null;
+  const n = xs.length;
+  if (n >= 2) {
+    const mx = xs.reduce((a, b) => a + b, 0) / n;
+    const my = ys.reduce((a, b) => a + b, 0) / n;
+    let sxx = 0, sxy = 0;
+    for (let i = 0; i < n; i++) {
+      sxx += (xs[i] - mx) ** 2;
+      sxy += (xs[i] - mx) * (ys[i] - my);
+    }
+    if (sxx > 0) {
+      const slope = sxy / sxx;
+      regression = { slope, intercept: my - slope * mx, xMin: Math.min(...xs), xMax: Math.max(...xs), n };
+    }
+  }
+
+  if (points.length === 0 && !regression) return null;
+  return { points, regression, maxScore: rec.maxScore };
 });
 
 /** ランキング一覧の初期描画件数（重い RankIcon を大量描画してモバイルでクラッシュするのを防ぐ）。 */

@@ -571,7 +571,9 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
      *  - スコア降順で並べる
      *
      * 返却キー: userId / iidxId / displayName / privacyLevel / score / clearType / djLevel /
-     *           pgreat / great / missCount / totalBeatPt
+     *           pgreat / great / missCount / pgreatGreat / totalBeatPt
+     *  - pgreatGreat（PGREAT+GREAT）は散布図の全ユーザー回帰線用に、非可視ユーザーでもマスクせず返す
+     *    （score と同じく識別情報なしの匿名値）
      *
      * @param title 曲タイトル
      * @param difficultyName 難易度名
@@ -609,6 +611,7 @@ public interface ScoreRepository extends JpaRepository<Score, Long> {
         "  CASE WHEN vis THEN pgreat ELSE NULL END as \"pgreat\", " +
         "  CASE WHEN vis THEN great ELSE NULL END as \"great\", " +
         "  CASE WHEN vis THEN miss_count ELSE NULL END as \"missCount\", " +
+        "  (pgreat + great) as \"pgreatGreat\", " +
         "  CASE WHEN vis THEN COALESCE(total_beat_pt, 0) ELSE NULL END as \"totalBeatPt\" " +
         "FROM v " +
         "ORDER BY score DESC",

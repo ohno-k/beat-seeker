@@ -93,6 +93,7 @@ public interface PastScoreRepository extends JpaRepository<PastScore, Long> {
      *
      * 可視性はランキングを見る「今」の関係で決める（現在の privacy_level / フレンド）。
      * 非可視ユーザーも順位算出のため返すが、識別情報は NULL でマスクする。
+     * pgreatGreat（PGREAT+GREAT）は散布図の全ユーザー回帰線用に、score と同じく匿名値としてマスクしない。
      *
      * @param version        作品バージョン（例: 33）
      * @param title          曲タイトル
@@ -128,6 +129,7 @@ public interface PastScoreRepository extends JpaRepository<PastScore, Long> {
         "  CASE WHEN vis THEN pgreat ELSE NULL END as \"pgreat\", " +
         "  CASE WHEN vis THEN great ELSE NULL END as \"great\", " +
         "  CASE WHEN vis THEN miss_count ELSE NULL END as \"missCount\", " +
+        "  (pgreat + great) as \"pgreatGreat\", " +
         "  CASE WHEN vis THEN COALESCE(total_beat_pt, 0) ELSE NULL END as \"totalBeatPt\" " +
         "FROM v " +
         "ORDER BY score DESC",

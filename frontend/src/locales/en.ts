@@ -411,6 +411,12 @@ export const en = {
   'table.sortRateAsc': 'Rate: low',
   'table.sortTitle': 'Title',
   'table.songRankDist': 'Per-Song Rank Distribution',
+  'table.songDistChartBar': 'By Tier',
+  'table.songDistChartScatter': 'Scatter',
+  'table.songDistChartEmpty': 'No data to display',
+  'table.judgeScatter': 'EXSCORE × (PGREAT+GREAT)/NOTES',
+  'table.judgeScatterNote': 'Dots are the players shown below; the regression line uses every player with a score (incl. private, anonymized)',
+  'table.judgeScatterRegression': 'Regression (all {n})',
   'table.noUnofficialData': 'No unofficial difficulty data found. Please check if level ☆11/☆12 scores are included.',
 
   'beatTierInfo.title': 'Beat-Tier Stats System',
