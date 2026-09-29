@@ -839,7 +839,7 @@
             <template v-else>
               <template v-if="judgeScatter">
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-1">{{ t('table.judgeScatterNote') }}</p>
-                <SongJudgeScatterChart :points="judgeScatter.points" :regression="judgeScatter.regression" :max-score="judgeScatter.maxScore" />
+                <SongJudgeScatterChart :points="judgeScatter.points" :regression="judgeScatter.regression" :max-score="judgeScatter.maxScore" :min-score="judgeScatter.minScore" />
               </template>
               <p v-else class="py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ t('table.songDistChartEmpty') }}</p>
             </template>
@@ -2759,7 +2759,7 @@ const songDistChartMode = ref<'bar' | 'scatter'>('bar');
  *        現行作では自分の値は API 結果ではなく手元のレコード（アップロード直後の最新値）を使う。
  *  - NOTES は maxScore / 2。集計不能（NOTES 不明・点が無い）なら null。
  */
-const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRegression | null; maxScore: number } | null>(() => {
+const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRegression | null; maxScore: number; minScore: number } | null>(() => {
   const rec = selectedRecord.value;
   if (!rec || rec.maxScore <= 0) return null;
   const notes = rec.maxScore / 2;
@@ -2817,7 +2817,11 @@ const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRe
   }
 
   if (points.length === 0 && !regression) return null;
-  return { points, regression, maxScore: rec.maxScore };
+  // X 軸の左端は単曲ティア Novice I（FOLDER_RANK_DEFS の末尾）の必要スコア。ティア別棒グラフと同じく
+  // Beginner 帯を枠外にしてズームする。非公式ランクが無い譜面は 0（= データ範囲に合わせる）。
+  const noviceIRate = getFolderRankThresholdRateAt(FOLDER_RANK_DEFS.length - 1, rec.informalRank);
+  const minScore = noviceIRate > 0 ? Math.min(rec.maxScore, Math.ceil(rec.maxScore * noviceIRate / 100)) : 0;
+  return { points, regression, maxScore: rec.maxScore, minScore };
 });
 
 /** ランキング一覧の初期描画件数（重い RankIcon を大量描画してモバイルでクラッシュするのを防ぐ）。 */

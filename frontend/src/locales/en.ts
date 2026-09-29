@@ -415,7 +415,7 @@ export const en = {
   'table.songDistChartScatter': 'Scatter',
   'table.songDistChartEmpty': 'No data to display',
   'table.judgeScatter': 'EXSCORE × (PGREAT+GREAT)/NOTES',
-  'table.judgeScatterNote': 'Dots are the players shown below; the regression line uses every player with a score (incl. private, anonymized)',
+  'table.judgeScatterNote': 'Dots are the players shown below (left edge = per-song tier Novice I; lower scores are off-chart); the regression line uses every player with a score (incl. private, anonymized)',
   'table.judgeScatterRegression': 'Regression (all {n})',
   'table.noUnofficialData': 'No unofficial difficulty data found. Please check if level ☆11/☆12 scores are included.',
 

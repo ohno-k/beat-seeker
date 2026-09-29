@@ -2,7 +2,8 @@
 /**
  * 【コンポーネントの役割】 譜面ごとの EXSCORE × (PGREAT+GREAT)/NOTES 散布図を描画する。
  *
- * - X 軸: EXSCORE（0〜理論値。データの範囲に合わせて下限を詰める）
+ * - X 軸: EXSCORE（左端 = 単曲ティア Novice I の必要スコア、右端 = 理論値）。
+ *        Novice I に届かない（Beginner 帯の）点は枠外。回帰線も枠内だけ描く。
  * - Y 軸: (PGREAT+GREAT)/NOTES（%）
  * - 点: 呼び出し側が可視範囲に絞った実ユーザー（自分 / フレンド / その他）
  * - 回帰線: 呼び出し側が全ユーザー（非公開含む・匿名）で求めた最小二乗直線
@@ -41,13 +42,19 @@ const props = defineProps<{
   points: JudgeScatterPoint[];
   regression: JudgeRegression | null;
   maxScore: number;
+  /** X 軸の左端（単曲ティア Novice I の必要 EXSCORE）。0 ならデータの範囲に合わせて詰める。 */
+  minScore: number;
 }>();
 
 const { t } = useI18n();
 const { isDarkMode } = useDarkMode();
 
-/** X 軸下限: 表示中の点と回帰線の最小値から少し余白を取り、100 単位に丸める。 */
+/**
+ * X 軸下限: Novice I の必要スコアが分かればそこを左端にする。
+ * 分からない譜面（非公式ランク無し等）は表示中の点と回帰線の最小値から余白を取り、100 単位に丸める。
+ */
 const xMin = computed(() => {
+  if (props.minScore > 0) return props.minScore;
   const xs = props.points.map(p => p.score);
   if (props.regression) xs.push(props.regression.xMin);
   if (xs.length === 0) return 0;
@@ -56,11 +63,27 @@ const xMin = computed(() => {
   return Math.max(0, Math.floor((lo - pad) / 100) * 100);
 });
 
+/** 表示中の点（X 軸下限以上）。 */
+const visiblePoints = computed(() => props.points.filter(p => p.score >= xMin.value));
+
+/** 回帰線を X 軸の枠内に切り詰めた両端。枠内に掛からなければ null。 */
+const regressionSegment = computed(() => {
+  const reg = props.regression;
+  if (!reg) return null;
+  const x0 = Math.max(reg.xMin, xMin.value);
+  const x1 = props.maxScore > 0 ? Math.min(reg.xMax, props.maxScore) : reg.xMax;
+  if (x1 <= x0) return null;
+  return [
+    { x: x0, y: reg.intercept + reg.slope * x0 },
+    { x: x1, y: reg.intercept + reg.slope * x1 },
+  ];
+});
+
 /** Y 軸下限: 表示中の点と回帰線の最小値から少し余白を取り、5% 単位に丸める。 */
 const yMin = computed(() => {
-  const ys = props.points.map(p => p.judgeRate);
-  const reg = props.regression;
-  if (reg) ys.push(reg.intercept + reg.slope * reg.xMin, reg.intercept + reg.slope * reg.xMax);
+  const ys = visiblePoints.value.map(p => p.judgeRate);
+  const seg = regressionSegment.value;
+  if (seg) ys.push(seg[0].y, seg[1].y);
   if (ys.length === 0) return 0;
   return Math.max(0, Math.floor((Math.min(...ys) - 2) / 5) * 5);
 });
@@ -68,19 +91,18 @@ const yMin = computed(() => {
 const chartData = computed(() => {
   const dark = isDarkMode.value;
   const toXY = (p: JudgeScatterPoint) => ({ x: p.score, y: p.judgeRate, _meta: p });
-  const others = props.points.filter(p => !p.isSelf && !p.isFriend);
-  const friends = props.points.filter(p => !p.isSelf && p.isFriend);
-  const self = props.points.filter(p => p.isSelf);
+  const visible = visiblePoints.value;
+  const others = visible.filter(p => !p.isSelf && !p.isFriend);
+  const friends = visible.filter(p => !p.isSelf && p.isFriend);
+  const self = visible.filter(p => p.isSelf);
 
   const datasets: any[] = [];
   const reg = props.regression;
-  if (reg) {
+  const seg = regressionSegment.value;
+  if (reg && seg) {
     datasets.push({
       label: t('table.judgeScatterRegression', { n: reg.n }),
-      data: [
-        { x: reg.xMin, y: reg.intercept + reg.slope * reg.xMin },
-        { x: reg.xMax, y: reg.intercept + reg.slope * reg.xMax },
-      ],
+      data: seg,
       showLine: true,
       borderColor: dark ? 'rgba(148,163,184,0.9)' : 'rgba(71,85,105,0.85)',
       backgroundColor: 'transparent',
