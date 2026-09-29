@@ -416,6 +416,9 @@ export const ko = {
   'table.judgeScatter': 'EXSCORE × (PGREAT+GREAT)/NOTES',
   'table.judgeScatterNote': '점은 표시 중인 플레이어(왼쪽 끝 = 단일 곡 티어 Novice I, 미만은 범위 밖, 아래쪽 끝 = 회귀선의 왼쪽 끝), 회귀선은 점수가 있는 전체 유저(비공개 포함·익명)로 산출',
   'table.judgeScatterRegression': '회귀선 (전체 {n}명)',
+  'table.judgeScatterTier': '단일 곡 티어',
+  'table.judgeScatterZoomSelf': '내 주변 확대',
+  'table.judgeScatterZoomReset': '전체 보기',
   'table.noUnofficialData': '비공식 난이도 데이터를 찾을 수 없습니다. 대상 레벨(☆11, ☆12)이 포함되어 있는지 확인해 주세요.',
 
   'beatTierInfo.title': 'Beat-Tier 통계 시스템',
