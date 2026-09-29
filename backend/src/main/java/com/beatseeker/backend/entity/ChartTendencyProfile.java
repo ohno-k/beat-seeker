@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Persistable;
 
+import java.time.LocalDateTime;
+
 /**
  * 【エンティティの役割】 各譜面の「譜面傾向」分析結果を保存するプロファイル。
  *
@@ -33,6 +35,15 @@ public class ChartTendencyProfile implements Persistable<String> {
     /** Persistable の新規判定。INSERT か UPDATE かを JPA に知らせる。 */
     @Override
     public boolean isNew() { return isNewEntity; }
+
+    /**
+     * DB から読んだ行・保存済みの行は「新規でない」にする。
+     * これが無いと読み込んだ行も isNew() = true のままで、Spring Data の delete() が
+     * 「未保存のエンティティ」とみなして何もしない（save() も merge ではなく INSERT を試みる）。
+     */
+    @PostLoad
+    @PostPersist
+    void markNotNew() { this.isNewEntity = false; }
 
     /** textage URL フラグメント（例: "22/chrono_p.html?1AC00"）。主キー。 */
     @Id
@@ -153,4 +164,18 @@ public class ChartTendencyProfile implements Persistable<String> {
     /** 小節ごとの皿ノーツ数（JSON 配列）。 */
     @Column(columnDefinition = "TEXT")
     private String measureNotesScrJson;
+
+    // ── 解析の出どころ ─────────────────────────────────────────
+
+    /**
+     * 解析方式の版。{@link com.beatseeker.backend.service.TextageChartSyncService#ANALYZER_VERSION}
+     * （textage のページ JS を実行して sp[] を取り出す方式）で解析した行に入る。
+     * null は旧方式（tools/batch_analyze.py の正規表現解析、2026-04 に一括投入）の行で、
+     * 譜面の取り違え・ノーツの欠け・解析値の無いプレースホルダがあるため、同期が順次再解析する。
+     */
+    @Column(length = 32)
+    private String analyzerVersion;
+
+    /** 解析日時（他の日時列と同じく JVM のローカル時刻。表示は JstTime で変換）。旧方式の行は null。 */
+    private LocalDateTime analyzedAt;
 }

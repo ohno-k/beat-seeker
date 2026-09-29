@@ -119,6 +119,17 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.18.1</version>
 		</dependency>
+		<!--
+			textage.cc の譜面ページに埋め込まれた JavaScript（sp[] / c1[] / ln[] の代入）を実行するための JS エンジン。
+			service/TextagePageRunner で使用。ページの JS は難易度フラグ（a / l / kuro 等）で分岐して
+			譜面データを組み立てるので、正規表現で追うより実行したほうが正確（2026-09 に全ページで検証）。
+			Java からは何も見えない安全なスコープで、命令数の上限つきで実行する。
+		-->
+		<dependency>
+			<groupId>org.mozilla</groupId>
+			<artifactId>rhino</artifactId>
+			<version>1.8.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

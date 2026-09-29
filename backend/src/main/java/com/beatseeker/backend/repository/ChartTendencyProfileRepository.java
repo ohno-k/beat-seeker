@@ -81,6 +81,26 @@ public interface ChartTendencyProfileRepository extends JpaRepository<ChartTende
     List<String> findAllIds();
 
     /**
+     * 【メソッドの役割】 全プロファイルの (textage, title, difficulty, analyzerVersion) だけを返す。
+     *
+     * textage 譜面同期が「プロファイルの無い譜面・旧方式の譜面」を探すのに使う。
+     * JSON 列（小節別ノーツ数など）を読まないので全件でも軽い。
+     *
+     * @return 各行 [textage, title, difficulty, analyzerVersion]
+     */
+    @Query("SELECT p.textage, p.title, p.difficulty, p.analyzerVersion FROM ChartTendencyProfile p")
+    List<Object[]> findAllKeys();
+
+    /**
+     * 【メソッドの役割】 曲名と難易度コードが一致するプロファイルを全件返す（重複行の掃除用）。
+     *
+     * @param title      曲名
+     * @param difficulty 難易度コード
+     * @return 該当プロファイル
+     */
+    List<ChartTendencyProfile> findAllByTitleAndDifficulty(String title, String difficulty);
+
+    /**
      * 【メソッドの役割】 ベース URL（クエリパラメータを含まない部分）で前方一致検索し、
      * 同一曲の全難易度のプロファイルを返す。
      *

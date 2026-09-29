@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -225,17 +226,18 @@ public class ChartTendencyService {
     // ── インポート ──────────────────────────────────────────────
 
     /**
-     * 【メソッドの役割】 chart_cache/profiles/ 以下の全 JSON ファイルを
-     * 一気に DB へ登録する（全置換）。
+     * 【メソッドの役割】 chart_cache/profiles/ 以下の全 JSON ファイルを DB へ取り込む（textage をキーに追加・上書き）。
      *
      * 処理の流れ:
      *  - 手順1: 再帰的に .json を走査して {@link ChartTendencyProfile} に変換
      *  - 手順2: textage をキーにしたマップに詰め、重複は後勝ちで排除
-     *  - 手順3: 既存レコードを deleteAllInBatch で全削除
-     *  - 手順4: 500 件ずつ saveAll + flush + entityManager.clear で効率的にバルク INSERT
+     *  - 手順3: {@link #upsertProfiles} で追加・上書き（ファイルに無い行は消さない）
+     *
+     * 2026-09 までは「全削除 → 全件 INSERT」の置換式だったが、textage 譜面同期
+     * （{@link TextageChartSyncService}）が DB に直接足した譜面を消してしまうので追加・上書きに変えた。
      *
      * @param profilesDirPath profiles ディレクトリのパス (例: "../chart_cache/profiles")
-     * @return 処理件数サマリー（inserted / replaced / skipped / total）
+     * @return 処理件数サマリー（inserted / updated / keptNewer / skipped / total）
      * @throws IOException ディレクトリ走査に失敗した場合
      */
     @Transactional
@@ -270,36 +272,14 @@ public class ChartTendencyService {
             }
         }
 
-        List<ChartTendencyProfile> toSave = new ArrayList<>(profileMap.values());
-
-        // 既存を全削除 → バルク INSERT（SELECT 不要で高速）
-        int previousCount = (int) profileRepo.count();
-        profileRepo.deleteAllInBatch();
-        profileRepo.flush();
-
-        // 500 件ずつ saveAll（JPA バッチ INSERT が効く）
-        int batchSize = BULK_INSERT_BATCH_SIZE;
-        for (int i = 0; i < toSave.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, toSave.size());
-            profileRepo.saveAll(toSave.subList(i, end));
-            profileRepo.flush();
-            entityManager.clear();
-        }
-
-        return Map.of(
-                "inserted", toSave.size(),
-                "replaced", previousCount,
-                "skipped", skipped,
-                "total", toSave.size()
-        );
+        return upsertProfiles(profileMap.values(), skipped);
     }
 
     /**
-     * 【メソッドの役割】 API リクエストボディから渡された JSON 配列を直接インポートする。
+     * 【メソッドの役割】 API リクエストボディから渡された JSON 配列を取り込む（textage をキーに追加・上書き）。
      *
      * chart_cache ディレクトリが存在しない本番環境（コンテナデプロイ時）に使う。
-     * 仕組みは {@link #importFromDirectory(String)} と同じで、既存を全削除してから
-     * バッチ INSERT する。
+     * 仕組みは {@link #importFromDirectory(String)} と同じ。
      *
      * @param arrayNode 譜面プロファイルを含む JSON 配列
      * @return 処理件数サマリー
@@ -326,12 +306,44 @@ public class ChartTendencyService {
             }
         }
 
-        List<ChartTendencyProfile> toSave = new ArrayList<>(profileMap.values());
+        return upsertProfiles(profileMap.values(), skipped);
+    }
 
-        int previousCount = (int) profileRepo.count();
-        profileRepo.deleteAllInBatch();
-        profileRepo.flush();
+    /**
+     * 【メソッドの役割】 取り込み用の共通処理。textage が既存なら上書き、無ければ追加する（削除はしない）。
+     *
+     * 新方式（{@code analyzerVersion} あり）で解析済みの行を、旧方式のファイル（{@code analyzer_version} なし。
+     * 例: 2026-04 の all_profiles.json）で巻き戻さないよう、その組み合わせは上書きせず keptNewer に数える。
+     *
+     * @param profiles 取り込む行（textage で重複排除済み）
+     * @param skipped  変換段階で読み飛ばした件数（結果にそのまま載せる）
+     * @return {@code inserted / updated / keptNewer / skipped / total}
+     */
+    private Map<String, Object> upsertProfiles(Collection<ChartTendencyProfile> profiles, int skipped) {
+        Map<String, String> existingVersion = new HashMap<>();
+        for (Object[] row : profileRepo.findAllKeys()) {
+            existingVersion.put((String) row[0], row[3] != null ? (String) row[3] : "");
+        }
 
+        List<ChartTendencyProfile> toSave = new ArrayList<>();
+        int inserted = 0;
+        int updated = 0;
+        int keptNewer = 0;
+        for (ChartTendencyProfile p : profiles) {
+            String current = existingVersion.get(p.getTextage());
+            if (current == null) {
+                inserted++;
+            } else if (!current.isEmpty() && p.getAnalyzerVersion() == null) {
+                keptNewer++;
+                continue;
+            } else {
+                p.setNewEntity(false);
+                updated++;
+            }
+            toSave.add(p);
+        }
+
+        // 500 件ずつ saveAll（JPA バッチが効く）
         int batchSize = BULK_INSERT_BATCH_SIZE;
         for (int i = 0; i < toSave.size(); i += batchSize) {
             int end = Math.min(i + batchSize, toSave.size());
@@ -341,11 +353,44 @@ public class ChartTendencyService {
         }
 
         return Map.of(
-                "inserted", toSave.size(),
-                "replaced", previousCount,
+                "inserted", inserted,
+                "updated", updated,
+                "keptNewer", keptNewer,
                 "skipped", skipped,
-                "total", toSave.size()
+                "total", inserted + updated
         );
+    }
+
+    /**
+     * 【メソッドの役割】 textage 譜面同期が解析したプロファイルを保存する。
+     *
+     * {@link ChartTendencyAnalyzer#profile} の出力（chart_cache/profiles と同じ形の Map）をエンティティに変換し、
+     * textage をキーに追加・上書きする。同じ (曲名, 難易度) の別キーの行（旧方式で別ページに紐づいていた行）は
+     * 予測計算の曲名引きで重複しないよう削除する。
+     *
+     * @param profiles        プロファイル（textage / title / difficulty / level / notes 等を含む）
+     * @param analyzerVersion 解析方式の版
+     * @return 新規に追加した textage の集合（残りは上書き）
+     */
+    @Transactional
+    public Set<String> saveAnalyzedProfiles(List<Map<String, Object>> profiles, String analyzerVersion) {
+        Set<String> inserted = new LinkedHashSet<>();
+        LocalDateTime now = LocalDateTime.now();
+        for (Map<String, Object> m : profiles) {
+            ChartTendencyProfile p = jsonToProfile(objectMapper.valueToTree(m));
+            if (p == null) continue;
+            p.setAnalyzerVersion(analyzerVersion);
+            p.setAnalyzedAt(now);
+            for (ChartTendencyProfile other : profileRepo.findAllByTitleAndDifficulty(p.getTitle(), p.getDifficulty())) {
+                if (!other.getTextage().equals(p.getTextage())) profileRepo.delete(other);
+            }
+            boolean exists = profileRepo.existsById(p.getTextage());
+            p.setNewEntity(!exists);
+            if (!exists) inserted.add(p.getTextage());
+            profileRepo.save(p);
+        }
+        profileRepo.flush();
+        return inserted;
     }
 
     /**
@@ -436,6 +481,8 @@ public class ChartTendencyService {
             try { p.setMeasureNotesScrJson(objectMapper.writeValueAsString(n.get("measure_notes_scr"))); }
             catch (Exception ignored) {}
         }
+
+        if (n.hasNonNull("analyzer_version")) p.setAnalyzerVersion(n.path("analyzer_version").asText());
 
         return p;
     }

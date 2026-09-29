@@ -10,7 +10,7 @@ beatmania IIDX score management and skill visualization tool.
 - `sql/`: ワンショット実行用の SQL（マイグレーション・データ修復など）
 - `data/`: スクリプトの入出力データ（`draft_changes*.json` 等）と曲リスト（`data/songlists/`）
 - `docs/`: 設計書・運用ドキュメント・画像
-- `chart_cache/`: 譜面傾向データ（`tools/batch_analyze.py` が生成）
+- `chart_cache/`: 2026-04 に一括投入した譜面傾向データの元データ（textage の HTML キャッシュと投入時のプロファイル）。以後の譜面傾向はバックエンドが textage から自動で取り込み DB に保存する（[docs/textage譜面自動取り込み.md](docs/textage%E8%AD%9C%E9%9D%A2%E8%87%AA%E5%8B%95%E5%8F%96%E3%82%8A%E8%BE%BC%E3%81%BF.md)）
 
 ## How to Run
 
@@ -48,6 +48,7 @@ npm run dev
 ## Repository Docs
 
 - [docs/完全設計書.md](docs/%E5%AE%8C%E5%85%A8%E8%A8%AD%E8%A8%88%E6%9B%B8.md) — 機能・構造・API仕様のワンドキュメント
+- [docs/textage譜面自動取り込み.md](docs/textage%E8%AD%9C%E9%9D%A2%E8%87%AA%E5%8B%95%E5%8F%96%E3%82%8A%E8%BE%BC%E3%81%BF.md) — textage からの譜面傾向プロファイルの自動取り込みと、既存プロファイルの保存方法の見直し
 - [docs/コスパ埋めレコメンド.md](docs/%E3%82%B3%E3%82%B9%E3%83%91%E5%9F%8B%E3%82%81%E3%83%AC%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%89.md) — ランクアップアドバイス（期待 BEAT-PT による埋め推薦）の算出式
 - [SCRIPTS.md](SCRIPTS.md) — プロジェクトルート直下のスクリプト説明
 - [backend/SCRIPTS.md](backend/SCRIPTS.md) — backend のビルド・テスト用バッチ説明

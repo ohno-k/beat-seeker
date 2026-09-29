@@ -325,7 +325,7 @@ const onProfileFileSelected = async (event: Event) => {
   if (!file) return;
   input.value = ''; // 同じファイルを再選択可能にするためクリア。
 
-  if (!confirm(`${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) をDBに投入します。\n既存データは上書きされます。続行しますか？`)) return;
+  if (!confirm(`${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) をDBに投入します。\n同じ譜面（textage）は上書きし、ファイルに無い譜面は残します（textage 同期で解析済みの譜面は旧方式のファイルでは上書きしません）。続行しますか？`)) return;
 
   isImportingProfiles.value = true;
   recalculateError.value = '';
@@ -350,7 +350,7 @@ const onProfileFileSelected = async (event: Event) => {
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? `API error: ${res.status}`);
-    recalculateSuccess.value = `譜面プロファイルを投入しました: ${data.inserted} 件登録、${data.skipped} 件スキップ`;
+    recalculateSuccess.value = `譜面プロファイルを投入しました: ${data.inserted} 件追加、${data.updated ?? 0} 件上書き、${data.keptNewer ?? 0} 件据え置き（解析済み）、${data.skipped} 件スキップ`;
   } catch (e: any) {
     recalculateError.value = '投入に失敗しました: ' + e.message;
   } finally {
