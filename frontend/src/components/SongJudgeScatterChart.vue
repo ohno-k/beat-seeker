@@ -8,7 +8,7 @@
  * - 背景: 単曲ティア（Novice I〜Legend）の EXSCORE 帯を、ティア別棒グラフと同じ色（I=淡 → V=濃）で塗る。
  * - 点: 呼び出し側が可視範囲に絞った実ユーザー（自分 / フレンド / その他）
  * - 回帰線: 呼び出し側が全ユーザー（非公開含む・匿名）で求めた最小二乗直線
- * - 「自分の周辺」ボタン: 自分の点の前後 2 ティアずつに X 軸を絞り、Y 軸はその範囲の点に合わせる。
+ * - 「自分の周辺」ボタン: 自分の点の前後 2 ティアずつに X 軸を絞る。Y 軸は下限 = 回帰線の左端、上限 = その範囲の点に合わせる。
  */
 import { computed, ref } from 'vue';
 import {
@@ -166,7 +166,9 @@ const regressionSegment = computed(() => {
  * Y 軸の範囲。
  * - 全体表示: 回帰線が右上がりなら下限 = その左端の値（線を左下の角から始める）。
  *   そうでなければ点と回帰線の最小値から余白を取り 5% 単位に丸める。上限は 100%。
- * - ズーム時: X 範囲内の点と回帰線の最小〜最大に余白を付ける（上限 100%）。
+ * - ズーム時: 回帰線が右上がりなら下限 = ズーム範囲の左端での回帰線の値（全体表示と同じく線を左下の角から始める）。
+ *   上限は X 範囲内の点と回帰線の最大値に余白を付ける（100% まで）。
+ *   回帰線が右上がりでなければ、X 範囲内の点と回帰線の最小〜最大に余白を付ける。
  */
 const yRange = computed<[number, number]>(() => {
   const seg = regressionSegment.value;
@@ -174,6 +176,11 @@ const yRange = computed<[number, number]>(() => {
     const [lo, hi] = xRange.value;
     const ys = props.points.filter(p => p.score >= lo && p.score <= hi).map(p => p.judgeRate);
     if (seg) ys.push(seg[0].y, seg[1].y);
+    if (seg && seg[1].y > seg[0].y && seg[0].y >= 0 && seg[0].y < 100) {
+      const yHi = Math.max(...ys);
+      const pad = Math.max(0.5, (yHi - seg[0].y) * 0.1);
+      return [seg[0].y, Math.min(100, yHi + pad)];
+    }
     const yLo = Math.min(...ys);
     const yHi = Math.max(...ys);
     const pad = Math.max(0.5, (yHi - yLo) * 0.1);
