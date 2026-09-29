@@ -3,7 +3,8 @@
  * 【コンポーネントの役割】 譜面ごとの EXSCORE × (PGREAT+GREAT)/NOTES 散布図を描画する。
  *
  * - X 軸: EXSCORE（左端 = 単曲ティア Novice I の必要スコア、右端 = 理論値）。
- *        Novice I に届かない（Beginner 帯の）点は枠外。回帰線も枠内だけ描く。
+ *        Novice I に届かない（Beginner 帯の）点は枠外。
+ * - Y 軸: 下限 = 回帰線の左端の値（回帰線が左下の角から伸びるようにズーム）。上限は 100%。
  * - Y 軸: (PGREAT+GREAT)/NOTES（%）
  * - 点: 呼び出し側が可視範囲に絞った実ユーザー（自分 / フレンド / その他）
  * - 回帰線: 呼び出し側が全ユーザー（非公開含む・匿名）で求めた最小二乗直線
@@ -66,11 +67,14 @@ const xMin = computed(() => {
 /** 表示中の点（X 軸下限以上）。 */
 const visiblePoints = computed(() => props.points.filter(p => p.score >= xMin.value));
 
-/** 回帰線を X 軸の枠内に切り詰めた両端。枠内に掛からなければ null。 */
+/**
+ * 回帰線を描く両端。左端は X 軸の左端まで延ばし（Y 軸下限と合わせて左下の角から始まるように）、
+ * 右端はデータの最大値（理論値を超えない）まで。枠内に掛からなければ null。
+ */
 const regressionSegment = computed(() => {
   const reg = props.regression;
   if (!reg) return null;
-  const x0 = Math.max(reg.xMin, xMin.value);
+  const x0 = xMin.value;
   const x1 = props.maxScore > 0 ? Math.min(reg.xMax, props.maxScore) : reg.xMax;
   if (x1 <= x0) return null;
   return [
@@ -79,8 +83,13 @@ const regressionSegment = computed(() => {
   ];
 });
 
-/** Y 軸下限: 表示中の点と回帰線の最小値から少し余白を取り、5% 単位に丸める。 */
+/**
+ * Y 軸下限: 回帰線が右上がりなら、その左端の値にして線を左下の角から始める（それより下の点は枠外）。
+ * 回帰線が無い・右上がりでない場合は、表示中の点と回帰線の最小値から余白を取り 5% 単位に丸める。
+ */
 const yMin = computed(() => {
+  const seg0 = regressionSegment.value;
+  if (seg0 && seg0[1].y > seg0[0].y && seg0[0].y >= 0 && seg0[0].y < 100) return seg0[0].y;
   const ys = visiblePoints.value.map(p => p.judgeRate);
   const seg = regressionSegment.value;
   if (seg) ys.push(seg[0].y, seg[1].y);
@@ -174,7 +183,7 @@ const chartOptions = computed(() => {
         max: 100,
         title: { display: true, text: '(PGREAT+GREAT) / NOTES', color: titleColor, font: { weight: 'bold' as const, size: 12 } },
         grid: { color: gridColor },
-        ticks: { color: tickColor, font: { size: 10 }, callback: (v: number | string) => `${v}%` },
+        ticks: { color: tickColor, font: { size: 10 }, callback: (v: number | string) => `${Number(Number(v).toFixed(1))}%` },
       },
     },
     plugins: {

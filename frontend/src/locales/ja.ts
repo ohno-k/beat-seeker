@@ -398,7 +398,7 @@ export const ja = {
   'table.songDistChartScatter': '散布図',
   'table.songDistChartEmpty': '表示できるデータがありません',
   'table.judgeScatter': 'EXSCORE × (PGREAT+GREAT)/NOTES',
-  'table.judgeScatterNote': '点は表示中のプレイヤー（左端 = 単曲ティア Novice I。未満は枠外）、回帰線はスコアのある全ユーザー（非公開含む・匿名）から算出',
+  'table.judgeScatterNote': '点は表示中のプレイヤー（左端 = 単曲ティア Novice I。未満は枠外。下端 = 回帰線の左端）、回帰線はスコアのある全ユーザー（非公開含む・匿名）から算出',
   'table.judgeScatterRegression': '回帰線（全{n}人）',
   'table.songRankDistNote': '{n}人のスコアを集計（非公開ユーザー含む・匿名）',
   'table.milestone': '大台',
