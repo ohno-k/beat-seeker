@@ -839,7 +839,7 @@
             <template v-else>
               <template v-if="judgeScatter">
                 <p class="text-[10px] text-slate-400 dark:text-slate-500 mb-1">{{ t('table.judgeScatterNote') }}</p>
-                <SongJudgeScatterChart :points="judgeScatter.points" :regression="judgeScatter.regression" :max-score="judgeScatter.maxScore" :min-score="judgeScatter.minScore" />
+                <SongJudgeScatterChart :points="judgeScatter.points" :regression="judgeScatter.regression" :max-score="judgeScatter.maxScore" :min-score="judgeScatter.minScore" :tier-bands="judgeScatter.tierBands" />
               </template>
               <p v-else class="py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ t('table.songDistChartEmpty') }}</p>
             </template>
@@ -1578,7 +1578,7 @@ import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
 import { Bar as BarChart } from 'vue-chartjs';
-import SongJudgeScatterChart, { type JudgeScatterPoint, type JudgeRegression } from './SongJudgeScatterChart.vue';
+import SongJudgeScatterChart, { type JudgeScatterPoint, type JudgeRegression, type JudgeTierBand } from './SongJudgeScatterChart.vue';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, BarController, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Tooltip, Legend);
@@ -2759,7 +2759,7 @@ const songDistChartMode = ref<'bar' | 'scatter'>('bar');
  *        現行作では自分の値は API 結果ではなく手元のレコード（アップロード直後の最新値）を使う。
  *  - NOTES は maxScore / 2。集計不能（NOTES 不明・点が無い）なら null。
  */
-const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRegression | null; maxScore: number; minScore: number } | null>(() => {
+const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRegression | null; maxScore: number; minScore: number; tierBands: JudgeTierBand[] } | null>(() => {
   const rec = selectedRecord.value;
   if (!rec || rec.maxScore <= 0) return null;
   const notes = rec.maxScore / 2;
@@ -2821,7 +2821,21 @@ const judgeScatter = computed<{ points: JudgeScatterPoint[]; regression: JudgeRe
   // Beginner 帯を枠外にしてズームする。非公式ランクが無い譜面は 0（= データ範囲に合わせる）。
   const noviceIRate = getFolderRankThresholdRateAt(FOLDER_RANK_DEFS.length - 1, rec.informalRank);
   const minScore = noviceIRate > 0 ? Math.min(rec.maxScore, Math.ceil(rec.maxScore * noviceIRate / 100)) : 0;
-  return { points, regression, maxScore: rec.maxScore, minScore };
+
+  // 背景の単曲ティア帯（Novice I → Legend の低い順）。各ティアの必要 EXSCORE から次のティアの必要 EXSCORE まで。
+  const tierBands: JudgeTierBand[] = [];
+  if (noviceIRate > 0) {
+    const starts = FOLDER_RANK_DEFS.map((_, i) =>
+      Math.ceil(rec.maxScore * getFolderRankThresholdRateAt(i, rec.informalRank) / 100));
+    for (let i = FOLDER_RANK_DEFS.length - 1; i >= 0; i--) {
+      const start = starts[i];
+      const end = i > 0 ? starts[i - 1] : rec.maxScore;
+      if (end <= start) continue;
+      const def = FOLDER_RANK_DEFS[i];
+      tierBands.push({ start, end, name: def.name, tier: def.tier });
+    }
+  }
+  return { points, regression, maxScore: rec.maxScore, minScore, tierBands };
 });
 
 /** ランキング一覧の初期描画件数（重い RankIcon を大量描画してモバイルでクラッシュするのを防ぐ）。 */

@@ -417,6 +417,9 @@ export const en = {
   'table.judgeScatter': 'EXSCORE × (PGREAT+GREAT)/NOTES',
   'table.judgeScatterNote': 'Dots are the players shown below (left edge = per-song tier Novice I; lower scores are off-chart; bottom edge = regression line at the left edge); the regression line uses every player with a score (incl. private, anonymized)',
   'table.judgeScatterRegression': 'Regression (all {n})',
+  'table.judgeScatterTier': 'Song tier',
+  'table.judgeScatterZoomSelf': 'Zoom to me',
+  'table.judgeScatterZoomReset': 'Show all',
   'table.noUnofficialData': 'No unofficial difficulty data found. Please check if level ☆11/☆12 scores are included.',
 
   'beatTierInfo.title': 'Beat-Tier Stats System',
