@@ -7,6 +7,7 @@ import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.AdminAuthService;
 import com.beatseeker.backend.service.DifficultyRevisionService;
 import com.beatseeker.backend.service.GameDataService;
+import com.beatseeker.backend.service.TextageChartSyncService;
 import com.beatseeker.backend.service.WikiSongSyncService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -47,6 +48,8 @@ public class GameDataController {
     private final DifficultyRevisionService difficultyRevisionService;
     /** bemaniwiki 新曲リストの取り込み（定期実行の手動トリガと履歴表示）。 */
     private final WikiSongSyncService wikiSongSyncService;
+    /** textage からの譜面傾向プロファイルの拡充（wiki-sync の source=textage で手動実行する）。 */
+    private final TextageChartSyncService textageChartSyncService;
 
     /**
      * 【コンストラクタ】 Spring が Service/Repository を DI で注入する。
@@ -55,12 +58,14 @@ public class GameDataController {
                               UserRepository userRepository,
                               AdminAuthService adminAuthService,
                               DifficultyRevisionService difficultyRevisionService,
-                              WikiSongSyncService wikiSongSyncService) {
+                              WikiSongSyncService wikiSongSyncService,
+                              TextageChartSyncService textageChartSyncService) {
         this.gameDataService = gameDataService;
         this.userRepository = userRepository;
         this.adminAuthService = adminAuthService;
         this.difficultyRevisionService = difficultyRevisionService;
         this.wikiSongSyncService = wikiSongSyncService;
+        this.textageChartSyncService = textageChartSyncService;
     }
 
     // ── 公開エンドポイント ──────────────────────────────
@@ -408,6 +413,10 @@ public class GameDataController {
      * 取得〜反映は数秒（旧曲は 2 ページ取得するので 10 秒前後）で終わるので同期的に実行し、
      * 内訳（追加・更新・保留・警告）をそのまま返す。手動実行には旧曲リストの自動反映の上限はかからない。
      *
+     * {@code "source": "textage"} は textage からの譜面傾向プロファイルの拡充（{@link TextageChartSyncService}）。
+     * 結果の形は同じで、実行記録も同じ一覧（wiki-sync/runs）に載る。手動では取得ページ数を
+     * {@code app.textage-sync.manual-max-pages}（既定 20、30 秒前後）に抑える。
+     *
      * @param auth 管理者認証
      * @param body 省略可。{@code dryRun}（既定 false）、{@code source}（既定 new）
      * @return {@link WikiSongSyncService.SyncResult}。source が不正なら 400、実行中なら 409、失敗なら 500
@@ -420,6 +429,9 @@ public class GameDataController {
         Object sourceParam = body != null ? body.get("source") : null;
         String source = sourceParam != null ? String.valueOf(sourceParam) : WikiSongSyncService.SOURCE_NEW;
         try {
+            if (TextageChartSyncService.SOURCE.equals(source)) {
+                return ResponseEntity.ok(textageChartSyncService.sync(WikiSongSyncService.TRIGGER_MANUAL, dryRun));
+            }
             return ResponseEntity.ok(wikiSongSyncService.sync(source, WikiSongSyncService.TRIGGER_MANUAL, dryRun));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

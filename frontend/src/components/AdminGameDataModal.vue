@@ -70,11 +70,11 @@
 
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
-            <!-- bemaniwiki 楽曲同期（新曲リスト / 旧曲リスト） -->
+            <!-- 楽曲・譜面の自動同期（bemaniwiki 新曲リスト / 旧曲リスト、textage 譜面） -->
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div class="flex items-center gap-2">
-                  <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">bemaniwiki 楽曲同期</h3>
+                  <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">楽曲・譜面の自動同期</h3>
                   <div class="inline-flex rounded-lg border border-slate-300 dark:border-slate-600 overflow-hidden text-xs font-bold">
                     <button
                       v-for="opt in wikiSyncSourceOptions"
@@ -109,6 +109,12 @@
                 Lv11/12 の ANOTHER/LEGGENDARIA は難易度表の Uncategorized に入ります。自動実行は毎日 0:20 / 6:20 / 12:20 / 18:20。
                 未解禁（灰色表記）・未記載の譜面は wiki が埋まり次第、次回以降に取り込みます。
               </p>
+              <p v-else-if="wikiSyncSource === 'textage'" class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                textage.cc から、譜面傾向プロファイル（スコア予測・スキルツリー・曲詳細の譜面傾向に使う）が無い SP 譜面を取得・解析して保存し、楽曲の textage リンクも記録します。
+                ページのノーツ数が登録値と一致した譜面だけ採用し、一致しない譜面（textage に未掲載・別譜面）は保留します。
+                旧方式（2026-04 の一括投入）のプロファイルも順次解析し直し、誤ったリンクは訂正します。
+                自動実行は毎日 4:50 / 16:50（1 回最大 120 ページ）。ここからの実行は 20 ページまで（30 秒ほどかかります）。
+              </p>
               <p v-else class="text-xs text-slate-500 dark:text-slate-400 mb-2">
                 ZINRAI 旧曲リスト + 旧曲総ノーツ数リストから、レベル変更・ノーツ数の訂正・旧曲への譜面追加・復活曲を公開中の楽曲へ直接反映します。
                 公式 CSV と表記が違う曲名（ÆTHER → ATHER など）は ARTIST・GENRE・ノーツ数で既存曲に読み替え、二重登録しません。
@@ -126,7 +132,7 @@
                 </details>
               </div>
               <div v-if="wikiSyncRunsShown.length > 0" class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
-                <div class="font-bold">最近の実行（{{ wikiSyncSource === 'old' ? '旧曲リスト' : '新曲リスト' }}）</div>
+                <div class="font-bold">最近の実行（{{ wikiSyncSourceLabel }}）</div>
                 <div v-for="r in wikiSyncRunsShown" :key="r.id" class="flex flex-wrap gap-x-2">
                   <span>{{ formatWikiRunTime(r.startedAt) }}</span>
                   <span>{{ r.trigger === 'scheduled' ? '定期' : '手動' }}{{ r.dryRun ? '(確認のみ)' : '' }}</span>
@@ -578,12 +584,19 @@ const draftSongs = ref<any[]>([]);
 const activeSongs = ref<any[]>([]);
 
 // ── bemaniwiki 楽曲同期（新曲リスト / 旧曲リスト）──────────
-/** 取得元。new = 新曲リスト、old = 旧曲リスト + 旧曲総ノーツ数リスト（バックエンドの WikiSongSyncService.SOURCE_*）。 */
-type WikiSyncSource = 'new' | 'old';
+/**
+ * 取得元。new = 新曲リスト、old = 旧曲リスト + 旧曲総ノーツ数リスト（バックエンドの WikiSongSyncService.SOURCE_*）、
+ * textage = textage.cc からの譜面傾向プロファイルの拡充（TextageChartSyncService.SOURCE）。
+ */
+type WikiSyncSource = 'new' | 'old' | 'textage';
 const wikiSyncSourceOptions: { value: WikiSyncSource; label: string }[] = [
   { value: 'new', label: '新曲リスト' },
   { value: 'old', label: '旧曲リスト' },
+  { value: 'textage', label: 'textage 譜面' },
 ];
+/** 【computed の役割】 選択中の取得元の表示名。 */
+const wikiSyncSourceLabel = computed(() =>
+  wikiSyncSourceOptions.find(o => o.value === wikiSyncSource.value)?.label ?? '');
 /** パネルで操作・表示する取得元。 */
 const wikiSyncSource = ref<WikiSyncSource>('new');
 /** 同期の実行中フラグ（差分確認・本実行の両方）。 */
@@ -607,6 +620,17 @@ const wikiSyncRunsShown = computed(() =>
 const wikiSyncSections = computed(() => {
   const r = wikiSyncResultShown.value;
   if (!r) return [];
+  // textage 譜面は同じ形のレスポンスで欄の意味が違う（TextageChartSyncService.sync の説明どおり）
+  if (r.source === 'textage') {
+    return [
+      { key: 'added', label: '新規に解析', items: (r.added ?? []) as string[] },
+      { key: 'updated', label: '再解析（旧方式から）', items: (r.updated ?? []) as string[] },
+      { key: 'titleMatches', label: 'textage のページを特定・訂正', items: (r.titleMatches ?? []) as string[] },
+      { key: 'held', label: '保留', items: (r.held ?? []) as string[] },
+      { key: 'skippedSongs', label: '取得上限で次回に回した曲', items: (r.skippedSongs ?? []) as string[] },
+      { key: 'warnings', label: '警告', items: (r.warnings ?? []) as string[] },
+    ].filter(sec => sec.items.length > 0);
+  }
   return [
     { key: 'added', label: '追加', items: (r.added ?? []) as string[] },
     { key: 'updated', label: '更新', items: (r.updated ?? []) as string[] },
@@ -1217,7 +1241,7 @@ const handleWikiSync = async (dryRun: boolean) => {
       if (activeSongsRes.ok) activeSongs.value = await activeSongsRes.json();
     }
   } catch (e: any) {
-    errorMsg.value = 'bemaniwiki 同期エラー: ' + e.message;
+    errorMsg.value = (wikiSyncSource.value === 'textage' ? 'textage 譜面同期エラー: ' : 'bemaniwiki 同期エラー: ') + e.message;
   } finally {
     isWikiSyncing.value = false;
     await loadWikiSyncRuns();

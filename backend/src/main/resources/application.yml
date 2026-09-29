@@ -143,6 +143,26 @@ app:
       # 定期実行 1 回で変更のかかる曲数がこれを超えたら反映を見送り、NEEDS_REVIEW として記録・通知する
       # （表構成の変化などで全曲を書き換えてしまう事故の歯止め。0 で無制限）。手動の「今すぐ同期」は制限なし。
       max-auto-songs: ${WIKI_OLD_SONG_SYNC_MAX_AUTO_SONGS:30}
+  # ── textage からの譜面傾向プロファイルの拡充（TextageChartSyncService）──
+  # 公開中の SP 譜面のうちプロファイルが無いもの（bemaniwiki 同期で増えた新曲・譜面）を textage.cc から取得・解析して
+  # chart_tendency_profiles に保存し、楽曲マスタの textage も記録する。ページのノーツ数が公式ノーツ数と一致した譜面だけ採用。
+  # 旧方式（2026-04 の tools/batch_analyze.py 一括投入）のプロファイルも、取得上限の残りで順次解析し直す。
+  # 管理画面「楽曲追加 → bemaniwiki 楽曲同期」の「textage 譜面」から手動実行・確認・履歴確認ができる。
+  textage-sync:
+    # 定期実行の有効/無効（app.scheduling.enabled=false のときも止まる）。
+    enabled: ${TEXTAGE_SYNC_ENABLED:true}
+    # 実行時刻（JST の Spring cron）。既定は 4:50 / 16:50 の 1 日 2 回（textage への取得は 1 回最大 max-pages ページ）。
+    cron: "${TEXTAGE_SYNC_CRON:0 50 4,16 * * *}"
+    base-url: "${TEXTAGE_SYNC_BASE_URL:https://textage.cc/score/}"
+    # false にすると定期実行は取得・解析・記録だけで DB（プロファイル・楽曲マスタ）を変更しない。
+    auto-apply: ${TEXTAGE_SYNC_AUTO_APPLY:true}
+    # 1 回に取得するページ数の上限（titletbl.js を含む）。定期実行 / 管理画面からの手動実行。
+    max-pages: ${TEXTAGE_SYNC_MAX_PAGES:120}
+    manual-max-pages: ${TEXTAGE_SYNC_MANUAL_MAX_PAGES:20}
+    # textage へのリクエストの間隔（ミリ秒）。
+    request-interval-ms: ${TEXTAGE_SYNC_REQUEST_INTERVAL_MS:1200}
+    # 旧方式で解析されたプロファイルも解析し直すか（新しい譜面が優先。旧方式は約 6,000 譜面 / 2,700 ページ）。
+    reanalyze-legacy: ${TEXTAGE_SYNC_REANALYZE_LEGACY:true}
 
 vapid:
   # ブラウザ通知（Web Push）の鍵ペア。tools/generate_vapid.js で生成し、両方とも環境変数で渡す。

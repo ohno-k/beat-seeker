@@ -4,6 +4,8 @@ import com.beatseeker.backend.entity.SongDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -109,4 +111,21 @@ public interface SongDefinitionRepository extends JpaRepository<SongDefinition, 
     @Modifying
     @Query("UPDATE SongDefinition s SET s.revision = :newRevision WHERE s.revision = :oldRevision")
     void updateRevision(String oldRevision, String newRevision);
+
+    /**
+     * 【メソッドの役割】 (曲名, 難易度) の textage を書き換える（active・draft の両方）。
+     *
+     * textage 譜面同期（TextageChartSyncService）が、照合できたページを楽曲マスタに記録するのに使う。
+     * 行全体を save し直さないので、同時に走る bemaniwiki 同期の変更（レベル・ノーツ数）を上書きしない。
+     * draft も揃えるのは、編集中の draft を「楽曲を適用」したときに textage が消えないようにするため。
+     *
+     * @return 更新した行数
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Transactional
+    @Query("UPDATE SongDefinition s SET s.textage = :textage WHERE s.title = :title AND s.difficulty = :difficulty"
+            + " AND (s.textage IS NULL OR s.textage <> :textage)")
+    int updateTextage(@Param("title") String title,
+                      @Param("difficulty") String difficulty,
+                      @Param("textage") String textage);
 }

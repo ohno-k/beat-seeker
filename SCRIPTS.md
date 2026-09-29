@@ -17,6 +17,11 @@
 
 ### 1.1 譜面傾向分析フロー（`chart_cache/` を生成）
 
+> **2026-09-29 以降は旧方式**。譜面傾向プロファイルはバックエンドの textage 譜面同期（`TextageChartSyncService`）が
+> textage から自動で取り込み、DB を正とする（[docs/textage譜面自動取り込み.md](docs/textage譜面自動取り込み.md)）。
+> 下の Python ツールは正規表現でページの JS を追うため、譜面の取り違え・ノーツの欠けがある（同ドキュメント参照）。
+> 2026-04 の一括投入の記録と、オフラインでの調査用に残している。`raw/` と `all_profiles.json` は追跡対象外（再生成可能）。
+
 | スクリプト | 用途 | 入出力 |
 |------------|------|--------|
 | [batch_analyze.py](tools/batch_analyze.py) | 全 SP 譜面をバッチ取得・分析。textage から HTML を取得し、全難易度（SPB/SPN/SPH/SPA/SPL）を一括パースして `chart_cache/` に出力。HTMLキャッシュにより再取得なしで再分析可能。 | 入力: textage.cc / 出力: `chart_cache/cache_index.json`, `chart_cache/raw/`, `chart_cache/profiles/` |
@@ -124,4 +129,4 @@ node scripts/backfill-rate-tier.js
 
 1. **DB 接続情報はスクリプト内にハードコード** されています（`tools/apply_votes_draft.py`, `tools/fetch_votes.py`, `scripts/backfill-rate-tier.js`）。本番 DB を直接更新するものもあるため、実行前に対象環境を必ず確認してください。
 2. **出力ファイル（`*.json`, `*.csv`, `*.txt`）** のうち、ルート直下でコミットされていたログ・一時出力・DB出力は追跡解除済み（`git rm --cached` 実施済み）。スクリプトの入出力データは `data/`、生成 SQL は `sql/` に集約しています。
-3. **`chart_cache/`** は 14,000+ ファイルを含む譜面傾向データで、現状 git にトラッキングされています。サイズが非常に大きいため、LFS または別管理への移行を検討してもよい対象です。
+3. **`chart_cache/`** は譜面傾向データの元データ。2026-09-29 に派生物の `raw/`（中間データ）と `all_profiles.json`（投入用にまとめたもの）の追跡を外し、`html/`（textage のページのキャッシュ。UTF-8 と Shift_JIS が混在）と `profiles/`（2026-04 の投入データの控え）だけを残した。以後の新しい譜面は DB にだけ入る。

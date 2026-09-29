@@ -20,6 +20,8 @@ BEMANIWiki 2nd の次のページを定期的に取得し、新しく載った�
 | NOTE(SP) の B / N / H / A / L | `notes` |
 
 DP、TIME、MOVIE、LAYER、WR、AVG、係数、textage は扱わない（従来どおり手動・別ツール）。
+取り込んだ譜面の textage リンクと譜面傾向プロファイルは、別の同期（[textage譜面自動取り込み.md](textage譜面自動取り込み.md)、2026-09-29 導入）が
+textage.cc から自動で埋める。
 
 ## 取り込みのルール
 
