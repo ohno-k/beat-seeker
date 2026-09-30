@@ -28,6 +28,7 @@
  *   1P の皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で重さを変える:
  *   親指だけの打鍵と親指以外の打鍵の交互は軽く（{@link THUMB_ALT_COST}）、6・7 のトリルは重く（{@link TRILL67_COST}）。
  *   2 鍵ずつの同時押しの交互は、やりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数える（{@link TWO_TWO}）。
+ *   1P の皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数える（{@link SCRATCH_ALT}）。
  *   この 3 つは 16 分の割れでも、同じ手の続きでも（程度に応じて）割れたものとして数える
  *
  * ほかの負荷（同じく 0〜1 にそろえて重み 1 で足す）:
@@ -36,12 +37,14 @@
  *
  * 1 つの手が自分のレーンの鍵盤をまとめて押す和音（白黒分けで 246 を片手など）は普通の押し方なので、負荷に数えない。
  *
- * 総合は小さいほど押しやすい。手の分け方は「皿側の手が皿に近い鍵盤を何個持つか」
- * （1P なら 1〜n 番、2P なら 7〜(8-n) 番のレーン）で決める。
+ * 総合は小さいほど押しやすい。手の分け方は皿側の手が皿に近い 3 レーン（1P なら 1〜3、2P なら 5〜7）を持つ形に固定
+ * （{@link SCRATCH_HAND_LANES}。1P の運指 4 人差し指・5 親指・6 中指・7 薬指/小指 と合わせてある）。
  * 評価は並びの目安で、指の置き方（運指）や CN の押しっぱなしは考えていない。
  */
 import type { ChartTimeline } from './chartPlayback';
 
+/** 皿側の手が持つレーンの数（皿に近い側から）。1P = レーン 1〜3、2P = レーン 5〜7 */
+export const SCRATCH_HAND_LANES = 3;
 /** 皿の前後とみなす皿との時間差（秒）。 */
 export const SCRATCH_WINDOW = 0.1;
 /** 片手の速い連打とみなす間隔（秒。BPM 150 の 16 分 = 0.1 秒）。 */
@@ -195,12 +198,11 @@ function prepare(tl: ChartTimeline): Prepared {
  *
  * @param tl          譜面
  * @param side        1P（皿が左）/ 2P（皿が右）
- * @param scratchKeys 皿側の手が担当する鍵盤の数（皿に近いレーンから数える。1〜6）
  */
-export function evaluateRandom(tl: ChartTimeline, side: 1 | 2, scratchKeys: number): RandomEvaluation {
+export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation {
   const prep = prepare(tl);
   const patterns = allPatterns();
-  const raw: RandomMetrics[] = patterns.map(p => measure(prep, p, side, scratchKeys));
+  const raw: RandomMetrics[] = patterns.map(p => measure(prep, p, side));
 
   // どの指標も、この譜面で一番良い並びを 0、一番悪い並びを 1 に引き伸ばしてから重みをかける
   // （譜面ごとに並びで動かせる幅が違う。両手の和音はどの並びでも交互にならない等）
@@ -267,6 +269,44 @@ function twoTwo(a: number[], b: number[]) {
 }
 
 /**
+ * 1P の皿側の手（レーン 1〜3）の交互。ユーザー（上級者）の案内による、やりやすい順:
+ * 13⇔2 → 1⇔23 → 12⇔3。cost・split の意味は {@link TWO_TWO} と同じ。
+ */
+const SCRATCH_ALT: { a: number; b: number; cost: number; split: number }[] = [
+  { a: 0b101, b: 0b010, cost: 0.2, split: 1.0 }, // 13 ⇔ 2
+  { a: 0b001, b: 0b110, cost: 0.5, split: 0.8 }, // 1 ⇔ 23
+  { a: 0b011, b: 0b100, cost: 1.0, split: 0.5 }, // 12 ⇔ 3
+];
+/** レーン 1〜3 の集合 → ビット（1 = 1、2 = 2、3 = 4）。1〜3 以外を含むと -1 */
+function leftMask(lanes: number[]): number {
+  let m = 0;
+  for (const l of lanes) { if (l < 1 || l > 3) return -1; m |= 1 << (l - 1); }
+  return m;
+}
+/** 2 つの打鍵が皿側の手の交互の表に当たれば、その行 */
+function scratchAlt(a: number[], b: number[]) {
+  const ma = leftMask(a), mb = leftMask(b);
+  if (ma <= 0 || mb <= 0) return null;
+  return SCRATCH_ALT.find(t => (t.a === ma && t.b === mb) || (t.a === mb && t.b === ma)) ?? null;
+}
+/** 新しく押すレーンごとに、直前の打鍵の一番近いレーンとの距離で数える（隣 1.0、1 つ飛ばし 1.3 …）。同じレーンは数えない */
+function distanceCost(cur: number[], prev: number[]): number {
+  let cost = 0;
+  for (const lane of cur) {
+    if (prev.includes(lane)) continue;
+    const dist = Math.min(...prev.map(p => Math.abs(p - lane)));
+    cost += 1 + 0.3 * (dist - 1);
+  }
+  return cost;
+}
+/** 1P の皿側の手の、直前の打鍵から今の打鍵への速い移動の重さ（表に当たれば軽く、ほかはレーンの距離） */
+function scratchHandMoveCost(cur: number[], prev: number[], gap: number): number {
+  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return 0;
+  const t = scratchAlt(cur, prev);
+  return t ? t.cost : distanceCost(cur, prev);
+}
+
+/**
  * 1P の皿を回さない手の、直前の打鍵から今の打鍵への速い移動の重さ。
  * 6 と 7 の単打どうしの交互（トリル）は {@link TRILL67_COST}。
  * 片方が親指だけ・もう片方が親指を使わない（重ならない）交互はいちばん楽なので {@link THUMB_ALT_COST}。
@@ -283,17 +323,11 @@ function fingerMoveCost(cur: number[], prev: number[], gap: number): { cost: num
   if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
     return { cost: THUMB_ALT_COST, trill67: false };
   }
-  let cost = 0;
-  for (const lane of cur) {
-    if (prev.includes(lane)) continue;
-    const dist = Math.min(...prev.map(p => Math.abs(p - lane)));
-    cost += 1 + 0.3 * (dist - 1);
-  }
-  return { cost, trill67: false };
+  return { cost: distanceCost(cur, prev), trill67: false };
 }
 
 /** 1 つの並びの指標。 */
-function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: number): RandomMetrics {
+function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights } = prep;
   // 元の鍵盤 → 手（0 = 皿側の手、1 = もう一方の手）とレーン（1〜7、左から）
   const laneOf = new Array<number>(8).fill(0);
@@ -301,7 +335,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
   const handOfKey = new Array<number>(8).fill(0);
   for (let key = 1; key <= 7; key++) {
     const lane = laneOf[key];
-    handOfKey[key] = side === 1 ? (lane <= scratchKeys ? 0 : 1) : (lane >= 8 - scratchKeys ? 0 : 1);
+    handOfKey[key] = side === 1 ? (lane <= SCRATCH_HAND_LANES ? 0 : 1) : (lane >= 8 - SCRATCH_HAND_LANES ? 0 : 1);
   }
 
   let scratchSimulOk = 0;
@@ -312,23 +346,32 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
   let fastSameHand = 0;
   let trill67 = 0;
   let chordStraddle = 0;
-  // 和音ごとの、1P の皿を回さない手のレーン（2-2 交互の割れの判定用）
+  // 和音ごとの、1P の皿側の手・皿を回さない手のレーン（交互の表での割れの判定用）
+  const leftLanes: number[][] = new Array(chords.length);
   const rightLanes: number[][] = new Array(chords.length);
   const lastTime = [-Infinity, -Infinity];
   const lastLane = [0, 0];
   const handTimes: number[][] = [[], []];
   // 和音ごとに使う手（ビット 1 = 皿側の手、2 = もう一方の手）
   const chordHands = new Int8Array(chords.length);
-  // 1P の皿を回さない手は指の割り当てがほぼ決まっている（4 人差し指・5 親指・6 中指・7 薬指/小指）ので、
-  // 打鍵単位（和音ごと）で親指の交互を見分ける。2P と皿側の手は運指がまちまちなので従来どおりレーンの距離で数える
+  // 1P は両手とも打鍵単位（和音ごと）で数える: 皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で、
+  // 皿側の手は交互の表（13⇔2 など）で。2P は運指がまちまちなので、音符ごとのレーンの距離で数える
   const fingerModel = side === 1;
   let lastSet: number[] = [];
+  let lastSetLeft: number[] = [];
 
   for (let c = 0; c < chords.length; c++) {
     const [i, j] = chords[c];
     const w = chordWeights[c];
     const chordCount = [0, 0];
     if (fingerModel) {
+      const curLeft: number[] = [];
+      for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 0) curLeft.push(laneOf[events[k].key]);
+      leftLanes[c] = curLeft;
+      if (curLeft.length > 0) {
+        fastSameHand += scratchHandMoveCost(curLeft, lastSetLeft, events[i].time - lastTime[0]) * w;
+        lastSetLeft = curLeft;
+      }
       const cur: number[] = [];
       for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 1) cur.push(laneOf[events[k].key]);
       rightLanes[c] = cur;
@@ -355,7 +398,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
       }
       if (hand === 0 && nearScratch[k]) scratchNear += w;
       const gap = events[k].time - lastTime[hand];
-      if (!(fingerModel && hand === 1) && gap > 1e-6 && gap < FAST_GAP && lastLane[hand] !== lane) {
+      if (!fingerModel && gap > 1e-6 && gap < FAST_GAP && lastLane[hand] !== lane) {
         // 離れたレーンへの速い移動ほど重い（隣 1.0、1 つ飛ばし 1.3、2 つ飛ばし 1.6 …）
         fastSameHand += (1 + 0.3 * (Math.abs(lane - lastLane[hand]) - 1)) * w;
       }
@@ -377,10 +420,12 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
     const shared = chordHands[c] & chordHands[c + 1];
     if (shared === 0) {
       split16 += pairWeights[n];
-    } else if (fingerModel && shared === 2) {
-      // 皿を回さない手だけが続くとき、2-2 交互の表に当たれば程度に応じて割れたものとして数える
-      const tt = twoTwo(rightLanes[c] ?? [], rightLanes[c + 1] ?? []);
-      if (tt) split16 += pairWeights[n] * tt.split;
+    } else if (fingerModel) {
+      // 同じ手が続くとき、交互の表（皿側 13⇔2 など・皿を回さない手 45⇔67 など）に当たれば程度に応じて割れたものとして数える
+      let credit = 1;
+      if (shared & 1) credit *= scratchAlt(leftLanes[c] ?? [], leftLanes[c + 1] ?? [])?.split ?? 0;
+      if (shared & 2) credit *= twoTwo(rightLanes[c] ?? [], rightLanes[c + 1] ?? [])?.split ?? 0;
+      split16 += pairWeights[n] * credit;
     }
   });
 

@@ -35,8 +35,6 @@ function cells(keys: number[], pattern: string) {
 }
 
 // ── 配置評価 ─────────────────────────────────────────────
-const SCRATCH_KEY_OPTIONS = [2, 3, 4];
-const scratchKeys = ref(3);
 const evaluation = ref<RandomEvaluation | null>(null);
 const computing = ref(false);
 const showWorst = ref(false);
@@ -45,12 +43,12 @@ function evaluate() {
   computing.value = true;
   // 計算（0.1〜0.3 秒）の前に「計算中」を描かせる
   setTimeout(() => {
-    evaluation.value = evaluateRandom(props.timeline, props.side, scratchKeys.value);
+    evaluation.value = evaluateRandom(props.timeline, props.side);
     computing.value = false;
   }, 30);
 }
-// 評価済みなら、手の分け方やサイドを変えたときに計算し直す
-watch([scratchKeys, () => props.side], () => { if (evaluation.value) evaluate(); });
+// 評価済みなら、サイドを変えたときに計算し直す
+watch(() => props.side, () => { if (evaluation.value) evaluate(); });
 
 const current = computed(() => (props.currentPattern ? evaluation.value?.byPattern.get(props.currentPattern) ?? null : null));
 /** 同じ順位の並びを 1 組にまとめる（代表 = 辞書順で最初の並び、others = 同点のほかの並びの数） */
@@ -118,7 +116,7 @@ function metricLine(m: RandomMetrics) {
 <template>
   <div class="random-panel mt-4 flex flex-col gap-3 text-xs text-slate-600 dark:text-slate-300">
     <!-- ── 判別 ── -->
-    <details class="panel" open>
+    <details class="panel">
       <summary class="panel-title">RANDOM の判別（白鍵がどこに来たか）</summary>
       <div class="panel-body">
         <p v-if="ident.whiteAt !== null" class="leading-relaxed">
@@ -170,12 +168,9 @@ function metricLine(m: RandomMetrics) {
       <summary class="panel-title">RANDOM の配置評価（当たり乱探し）</summary>
       <div class="panel-body">
         <div class="flex flex-wrap items-center gap-2">
-          <span class="font-semibold text-slate-500 dark:text-slate-400">皿側の手が持つ鍵盤</span>
-          <div class="seg">
-            <button v-for="n in SCRATCH_KEY_OPTIONS" :key="n" type="button" :class="{ on: scratchKeys === n }" @click="scratchKeys = n">
-              {{ side === 1 ? `1〜${n}` : `${8 - n}〜7` }}
-            </button>
-          </div>
+          <span class="text-slate-500 dark:text-slate-400">
+            皿側の手が {{ side === 1 ? '1〜3' : '5〜7' }}、もう一方の手が {{ side === 1 ? '4〜7' : '1〜4' }} レーンを押す前提で評価します。
+          </span>
           <button v-if="!evaluation" type="button" class="eval-btn" :disabled="computing" @click="evaluate">
             {{ computing ? '計算中…' : '5,040 通りを評価する' }}
           </button>
@@ -280,7 +275,8 @@ function metricLine(m: RandomMetrics) {
             密度の高い区間（難所）ほど重く数えます（デニム配置が割れるか、など）。どの並びでも割れない組があるので 100% にはなりません。
             片手の速い連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵の数（離れたレーンほど重く数える。少ないほど良い）。
             1P の皿を回さない手は、4 人差し指・5 親指・6 中指・7 薬指（小指）の運指で数えます: 親指だけの打鍵と親指以外の打鍵の交互（467 と 5 のトリルなど）は軽く、
-            6・7 のトリルは大きく減点し、2 鍵ずつの同時押しの交互はやりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数えます（同じ手で続いても、この形なら割れたものとして扱います）。（2P と皿側の手は運指が人によって違うので、レーンの距離だけで数えます）。
+            6・7 のトリルは大きく減点し、2 鍵ずつの同時押しの交互はやりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数えます（同じ手で続いても、この形なら割れたものとして扱います）。
+            皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数えます。（2P と皿側の手は運指が人によって違うので、レーンの距離だけで数えます）。
             次に、皿と同時に取れる＝単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる）を、上の 3 つより軽く見ています。
             どれもこの譜面で一番良い並びを 0、一番悪い並びを 1 にそろえて重みづけして足し、さらに次の負荷で差をつけています:
             皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ（連皿の最中は除く）、片手最大＝片手の 1 秒あたりの最大ノーツ数。
