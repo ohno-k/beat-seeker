@@ -54,6 +54,8 @@ export interface ChartTimeline {
   /** 打鍵（通常ノーツと CN の先頭）の時刻とキー。時刻の昇順 */
   hitTimes: Float64Array;
   hitKeys: Uint8Array;
+  /** 打鍵イベントの出どころ（通常ノーツ i → i、CN j → -(j + 1)）。譜面オプションで置き換えたレーンを引くのに使う */
+  hitSources: Int32Array;
   /** ノーツ数に数えるもの（通常ノーツ・CN の先頭と終端）の時刻。昇順 */
   judgeTimes: Float64Array;
   tickToTime(tick: number): number;
@@ -145,14 +147,15 @@ export function buildChartTimeline(data: ChartPlaybackData): ChartTimeline {
   const noteTimes = toTimes(noteTicks);
 
   // 打鍵イベント（通常ノーツ + CN の先頭）と、ノーツ数に数えるもの（+ CN の終端）
-  const hits: [number, number][] = [];
+  // [時刻, 元のキー, 出どころ（通常ノーツ i → i、CN j → -(j + 1)）]
+  const hits: [number, number, number][] = [];
   const judges: number[] = [];
   for (let i = 0; i < noteTimes.length; i++) {
-    hits.push([noteTimes[i], noteKeys[i]]);
+    hits.push([noteTimes[i], noteKeys[i], i]);
     judges.push(noteTimes[i]);
   }
   for (let i = 0; i < cnStartTimes.length; i++) {
-    if (cnFlags[i] & 1) { hits.push([cnStartTimes[i], cnKeys[i]]); judges.push(cnStartTimes[i]); }
+    if (cnFlags[i] & 1) { hits.push([cnStartTimes[i], cnKeys[i], -(i + 1)]); judges.push(cnStartTimes[i]); }
     if (cnFlags[i] & 2) judges.push(cnEndTimes[i]);
   }
   hits.sort((a, b) => a[0] - b[0]);
@@ -180,9 +183,153 @@ export function buildChartTimeline(data: ChartPlaybackData): ChartTimeline {
     cnMaxLenTimes,
     hitTimes: Float64Array.from(hits, h => h[0]),
     hitKeys: Uint8Array.from(hits, h => h[1]),
+    hitSources: Int32Array.from(hits, h => h[2]),
     judgeTimes: Float64Array.from(judges),
     tickToTime,
     timeToTick,
     bpmAt,
   };
+}
+
+// ── 譜面オプション ─────────────────────────────────────────
+
+/** 譜面オプション（皿は動かさない。鍵盤 1〜7 の並べ替え）。 */
+export type ChartOption = 'off' | 'mirror' | 'random' | 'rrandom' | 'srandom';
+
+/**
+ * 鍵盤の並び。左のレーンから順に「元の譜面の何番の鍵盤か」を書いた 7 文字（実機のランダム表記と同じ）。
+ * 正規 = "1234567"、MIRROR = "7654321"。
+ */
+export const OFF_PATTERN = '1234567';
+export const MIRROR_PATTERN = '7654321';
+
+/** 1〜7 を 1 回ずつ使った 7 文字か。 */
+export function isValidPattern(p: string): boolean {
+  return /^[1-7]{7}$/.test(p) && new Set(p).size === 7;
+}
+
+/** 再現できる乱数（mulberry32）。S-RANDOM の「引き直し」を種で持つため。 */
+export function seededRandom(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** RANDOM の並びを引く（7! 通りから一様に）。 */
+export function randomPattern(rand: () => number = Math.random): string {
+  const keys = ['1', '2', '3', '4', '5', '6', '7'];
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+  return keys.join('');
+}
+
+/** R-RANDOM の並びを引く（正規またはミラーを 1〜6 レーンずらしたもの。ずらし 0 は出さない）。 */
+export function rRandomPattern(rand: () => number = Math.random): string {
+  const base = rand() < 0.5 ? OFF_PATTERN : MIRROR_PATTERN;
+  const shift = 1 + Math.floor(rand() * 6);
+  return base.slice(shift) + base.slice(0, shift);
+}
+
+/** オプションを当てたあとの各オブジェクトのレーン（0 = 皿、1〜7 = 鍵盤。左から数える）。 */
+export interface LaneAssignment {
+  noteLanes: Uint8Array;
+  cnLanes: Uint8Array;
+  /** {@link ChartTimeline.hitTimes} と同じ並び */
+  hitLanes: Uint8Array;
+}
+
+/**
+ * 【関数の役割】 譜面オプションを当てたレーンを決める。
+ *
+ * - 正規・MIRROR・RANDOM・R-RANDOM: 鍵盤の並び（pattern）どおりに置き換える
+ * - S-RANDOM: ノーツごとに鍵盤を選び直す。同じタイミングのノーツどうし・押している最中の CN とは重ねない。
+ *   CN は小節ごとに区切られているので、先頭から終端までを 1 本にまとめて同じレーンに置く
+ *
+ * @param pattern 鍵盤の並び（S-RANDOM では使わない）
+ * @param seed    S-RANDOM の乱数の種
+ */
+export function assignLanes(tl: ChartTimeline, option: ChartOption, pattern: string, seed: number): LaneAssignment {
+  const noteLanes = new Uint8Array(tl.noteKeys.length);
+  const cnLanes = new Uint8Array(tl.cnKeys.length);
+
+  if (option !== 'srandom') {
+    const p = option === 'off' ? OFF_PATTERN : option === 'mirror' ? MIRROR_PATTERN : (isValidPattern(pattern) ? pattern : OFF_PATTERN);
+    // 元の鍵盤 → レーン
+    const laneOf = new Uint8Array(8);
+    for (let lane = 1; lane <= 7; lane++) laneOf[Number(p[lane - 1])] = lane;
+    for (let i = 0; i < noteLanes.length; i++) noteLanes[i] = tl.noteKeys[i] === 0 ? 0 : laneOf[tl.noteKeys[i]];
+    for (let i = 0; i < cnLanes.length; i++) cnLanes[i] = tl.cnKeys[i] === 0 ? 0 : laneOf[tl.cnKeys[i]];
+  } else {
+    assignSRandom(tl, seededRandom(seed), noteLanes, cnLanes);
+  }
+
+  const hitLanes = Uint8Array.from(tl.hitSources, src => (src >= 0 ? noteLanes[src] : cnLanes[-src - 1]));
+  return { noteLanes, cnLanes, hitLanes };
+}
+
+/**
+ * textage の CN の長さは実際より 2 単位（6 tick）短く書かれている（128 → 126、48 → 46）。
+ * 離すタイミングは終端 + 6 tick のグリッド上なので、そこまで同じレーンに他のノーツを置かない。
+ */
+const CN_RELEASE_PAD = 6;
+
+function assignSRandom(tl: ChartTimeline, rand: () => number, noteLanes: Uint8Array, cnLanes: Uint8Array) {
+  // CN の区間を 1 本ずつにまとめる（同じ鍵盤で、前の区間の終わりから続き、前の区間に終端が無いもの）
+  const groupOf = new Int32Array(tl.cnKeys.length).fill(-1);
+  const groups: { start: number; end: number; key: number }[] = [];
+  const open = new Map<number, number>(); // 元の鍵盤 → まだ終端の来ていない CN のまとまり
+  for (let i = 0; i < tl.cnKeys.length; i++) {
+    const key = tl.cnKeys[i];
+    const g = open.get(key);
+    if (g !== undefined && !(tl.cnFlags[i] & 1) && Math.abs(groups[g].end - tl.cnStartTicks[i]) < 1e-6) {
+      groupOf[i] = g;
+      groups[g].end = tl.cnEndTicks[i];
+    } else {
+      groupOf[i] = groups.length;
+      groups.push({ start: tl.cnStartTicks[i], end: tl.cnEndTicks[i], key });
+    }
+    if (tl.cnFlags[i] & 2) open.delete(key);
+    else open.set(key, groupOf[i]);
+  }
+
+  // タイミング順にレーンを決める（同じ tick では CN を先に置く）
+  type Ev = { tick: number; kind: 0 | 1; idx: number };
+  const evs: Ev[] = [];
+  groups.forEach((g, idx) => { if (g.key !== 0) evs.push({ tick: g.start, kind: 0, idx }); });
+  for (let i = 0; i < tl.noteKeys.length; i++) if (tl.noteKeys[i] !== 0) evs.push({ tick: tl.noteTicks[i], kind: 1, idx: i });
+  evs.sort((a, b) => a.tick - b.tick || a.kind - b.kind);
+
+  const heldUntil = new Float64Array(8).fill(-Infinity); // レーン → CN の終わり
+  const groupLane = new Uint8Array(groups.length);
+  let curTick = NaN;
+  let usedAtTick = new Set<number>();
+  for (const ev of evs) {
+    if (ev.tick !== curTick) { curTick = ev.tick; usedAtTick = new Set(); }
+    const free: number[] = [];
+    for (let lane = 1; lane <= 7; lane++) {
+      if (!usedAtTick.has(lane) && heldUntil[lane] < ev.tick) free.push(lane);
+    }
+    // 空きが無い（譜面側で 7 鍵を超える重なり）ときは重なりを許して選ぶ
+    const pool = free.length > 0 ? free : [1, 2, 3, 4, 5, 6, 7];
+    const lane = pool[Math.floor(rand() * pool.length)];
+    usedAtTick.add(lane);
+    if (ev.kind === 0) {
+      groupLane[ev.idx] = lane;
+      heldUntil[lane] = groups[ev.idx].end + CN_RELEASE_PAD;
+    } else {
+      noteLanes[ev.idx] = lane;
+    }
+  }
+  for (let i = 0; i < cnLanes.length; i++) {
+    const g = groupOf[i];
+    cnLanes[i] = groups[g].key === 0 ? 0 : groupLane[g];
+  }
+  // 皿はそのまま（noteLanes は 0 で初期化済み）
 }

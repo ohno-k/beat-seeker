@@ -19,7 +19,10 @@
  */
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { API_BASE } from '../composables/useAuth';
-import { formatBpmLabel, buildChartTimeline, type ChartPlaybackData, type ChartTimeline } from '../utils/chartPlayback';
+import {
+  formatBpmLabel, buildChartTimeline, assignLanes, randomPattern, rRandomPattern, isValidPattern, MIRROR_PATTERN, OFF_PATTERN,
+  type ChartPlaybackData, type ChartTimeline, type ChartOption,
+} from '../utils/chartPlayback';
 
 const props = defineProps<{
   textage: string;
@@ -57,8 +60,16 @@ async function open() {
 
 // ── 設定 ──────────────────────────────────────────────────
 const SETTINGS_KEY = 'chartPlayer.settings';
-interface Settings { visibleSec: number; rate: number; mode: 'beat' | 'time'; side: 1 | 2; sound: boolean; }
-const DEFAULTS: Settings = { visibleSec: 1.2, rate: 1, mode: 'beat', side: 1, sound: false };
+interface Settings {
+  visibleSec: number; rate: number; mode: 'beat' | 'time'; side: 1 | 2; sound: boolean;
+  /** ノーツの太さ（縦の厚み、CSS px） */
+  noteSize: number;
+  /** 譜面オプションと、RANDOM / R-RANDOM の鍵盤の並び（左のレーンから元の鍵盤番号） */
+  option: ChartOption; pattern: string;
+}
+const DEFAULTS: Settings = {
+  visibleSec: 1.2, rate: 1, mode: 'beat', side: 1, sound: false, noteSize: 7, option: 'off', pattern: OFF_PATTERN,
+};
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
@@ -75,6 +86,63 @@ watch(settings, (s) => {
 const RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5];
 // 緑数字 ≒ 表示時間(ms) × 0.6（60fps 基準の目安）
 const greenNumber = computed(() => Math.round(settings.value.visibleSec * 600));
+
+// ── 譜面オプション ─────────────────────────────────────────
+const OPTIONS: { value: ChartOption; label: string; title: string }[] = [
+  { value: 'off', label: '正規', title: 'OFF（正規）' },
+  { value: 'mirror', label: 'MIR', title: 'MIRROR' },
+  { value: 'random', label: 'RAN', title: 'RANDOM' },
+  { value: 'rrandom', label: 'R-RAN', title: 'R-RANDOM' },
+  { value: 'srandom', label: 'S-RAN', title: 'S-RANDOM' },
+];
+/** S-RANDOM の乱数の種（「引き直す」で変わる。保存はしない）。 */
+const sRandomSeed = ref(Math.floor(Math.random() * 2 ** 31));
+/** 並びの入力欄（RANDOM のときは直接打ち込める。正しい 7 文字になったら反映） */
+const patternInput = ref(settings.value.pattern);
+
+function setOption(o: ChartOption) {
+  const s = settings.value;
+  if (o === 'random' && s.option !== 'random') s.pattern = randomPattern();
+  if (o === 'rrandom' && s.option !== 'rrandom') s.pattern = rRandomPattern();
+  s.option = o;
+  patternInput.value = shownPattern.value;
+}
+
+/** 同じオプションのまま引き直す。 */
+function reroll() {
+  const s = settings.value;
+  if (s.option === 'random') s.pattern = randomPattern();
+  else if (s.option === 'rrandom') s.pattern = rRandomPattern();
+  else if (s.option === 'srandom') sRandomSeed.value = Math.floor(Math.random() * 2 ** 31);
+  patternInput.value = shownPattern.value;
+}
+
+function onPatternInput(e: Event) {
+  const v = (e.target as HTMLInputElement).value.replace(/[^1-7]/g, '').slice(0, 7);
+  patternInput.value = v;
+  if (isValidPattern(v)) settings.value.pattern = v;
+}
+
+/** 今の鍵盤の並び（S-RANDOM は並びが無いので空） */
+const shownPattern = computed(() => {
+  const s = settings.value;
+  if (s.option === 'off') return OFF_PATTERN;
+  if (s.option === 'mirror') return MIRROR_PATTERN;
+  if (s.option === 'srandom') return '';
+  return isValidPattern(s.pattern) ? s.pattern : OFF_PATTERN;
+});
+const patternInvalid = computed(() => settings.value.option === 'random' && !isValidPattern(patternInput.value));
+
+/** オプションを当てたレーン。描画・打鍵処理はこれを引く */
+const lanes = computed(() => {
+  const tl = timeline.value;
+  if (!tl) return null;
+  return assignLanes(tl, settings.value.option, settings.value.pattern, sRandomSeed.value);
+});
+watch(lanes, () => {
+  laneHit.fill(-99);
+  draw();
+});
 
 // ── 再生状態 ──────────────────────────────────────────────
 /** 曲頭の前に空ける秒数（最初のノーツが上から落ちてくるように）。 */
@@ -163,8 +231,9 @@ function frame(now: number) {
 function processHits(tl: ChartTimeline) {
   let clicks = 0;
   let scratch = false;
+  const la = lanes.value;
   while (hitIdx < tl.hitTimes.length && tl.hitTimes[hitIdx] <= curTime) {
-    const key = tl.hitKeys[hitIdx];
+    const key = la ? la.hitLanes[hitIdx] : tl.hitKeys[hitIdx];
     laneHit[key] = tl.hitTimes[hitIdx];
     if (curTime - tl.hitTimes[hitIdx] < 0.08) {
       clicks++;
@@ -263,6 +332,7 @@ function draw() {
   const tl = timeline.value;
   if (!g || !tl || cssW === 0) return;
   const s = settings.value;
+  const la = lanes.value;
   const W = cssW;
   const H = cssH;
   const judgeY = H - 56;
@@ -322,14 +392,14 @@ function draw() {
     g.textAlign = 'left';
   }
 
-  const noteH = 7;
+  const noteH = s.noteSize;
   // CN（本体 → 先頭・終端）
   const cStart = beat ? tl.cnStartTicks : tl.cnStartTimes;
   const cEnd = beat ? tl.cnEndTicks : tl.cnEndTimes;
   const maxLen = beat ? tl.cnMaxLenTicks : tl.cnMaxLenTimes;
   for (let i = lowerBound(cStart, posNow - maxLen); i < cStart.length && cStart[i] <= posTop; i++) {
     if (cEnd[i] < posNow) continue;
-    const lane = tl.cnKeys[i];
+    const lane = la ? la.cnLanes[i] : tl.cnKeys[i];
     const flags = tl.cnFlags[i];
     const yTop = yOf(Math.min(cEnd[i], posTop + 1));
     const yBottom = yOf(Math.max(cStart[i], posNow));
@@ -346,7 +416,7 @@ function draw() {
   // 通常ノーツ
   const nPos = beat ? tl.noteTicks : tl.noteTimes;
   for (let i = lowerBound(nPos, posNow); i < nPos.length && nPos[i] <= posTop; i++) {
-    const lane = tl.noteKeys[i];
+    const lane = la ? la.noteLanes[i] : tl.noteKeys[i];
     g.fillStyle = NOTE_COLOR[lane];
     g.fillRect(xs[lane] + 1, Math.round(yOf(nPos[i])) - noteH, ws[lane] - 2, noteH);
   }
@@ -532,10 +602,15 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 
         <!-- 設定 -->
         <div class="player-settings mt-3 text-xs text-slate-600 dark:text-slate-300">
-          <label class="setting">
+          <label class="setting setting-slider setting-wide">
             <span class="setting-label">表示時間</span>
             <input v-model.number="settings.visibleSec" type="range" min="0.4" max="3" step="0.05" class="setting-range accent-blue-600" />
-            <span class="tabular-nums whitespace-nowrap">{{ settings.visibleSec.toFixed(2) }}秒<span class="text-slate-400 dark:text-slate-500">（緑数字 約{{ greenNumber }}）</span></span>
+            <span class="slider-value tabular-nums whitespace-nowrap">{{ settings.visibleSec.toFixed(2) }}秒<span class="text-slate-400 dark:text-slate-500">（緑数字 約{{ greenNumber }}）</span></span>
+          </label>
+          <label class="setting setting-slider setting-wide">
+            <span class="setting-label">ノーツの太さ</span>
+            <input v-model.number="settings.noteSize" type="range" min="3" max="16" step="1" class="setting-range accent-blue-600" />
+            <span class="slider-value tabular-nums whitespace-nowrap">{{ settings.noteSize }}px</span>
           </label>
           <label class="setting">
             <span class="setting-label">再生速度</span>
@@ -549,6 +624,27 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
             <div class="seg">
               <button type="button" :class="{ on: settings.mode === 'beat' }" @click="settings.mode = 'beat'">ソフラン再現</button>
               <button type="button" :class="{ on: settings.mode === 'time' }" @click="settings.mode = 'time'">一定速度</button>
+            </div>
+          </div>
+          <div class="setting setting-wide setting-option">
+            <span class="setting-label">譜面</span>
+            <div class="option-body">
+              <div class="seg">
+                <button v-for="o in OPTIONS" :key="o.value" type="button" :title="o.title"
+                  :class="{ on: settings.option === o.value }" @click="setOption(o.value)">{{ o.label }}</button>
+              </div>
+              <div v-if="settings.option !== 'off'" class="option-detail">
+                <template v-if="settings.option === 'random'">
+                  <input :value="patternInput" type="text" inputmode="numeric" maxlength="7" aria-label="鍵盤の並び"
+                    class="pattern-input tabular-nums rounded border bg-white dark:bg-slate-700 px-2 py-1.5"
+                    :class="patternInvalid ? 'border-red-400 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'"
+                    @input="onPatternInput" />
+                </template>
+                <span v-else-if="shownPattern" class="pattern-text tabular-nums">{{ shownPattern }}</span>
+                <span v-else class="text-slate-400 dark:text-slate-500">ノーツごとにランダム</span>
+                <button v-if="settings.option !== 'mirror'" type="button" class="reroll" @click="reroll">引き直す</button>
+                <span v-if="patternInvalid" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
+              </div>
             </div>
           </div>
           <div class="setting">
@@ -639,11 +735,23 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 }
 .setting-label {
   flex: none;
-  width: 4.5rem;
+  width: 5rem;
   font-weight: 600;
   color: rgb(100 116 139);
 }
 .setting-range { flex: 1; min-width: 0; height: 1.5rem; }
+/* スマホ幅では値の表示（「1.20秒（緑数字 約720）」）を次の行へ送り、スライダーに行の幅を全部使わせる */
+.setting-slider { flex-wrap: wrap; row-gap: 0.1rem; }
+/* 幅の狭いスマホでは譜面オプションの見出しを上に置き、5 つのボタンに行の幅を全部使わせる */
+@media (max-width: 419px) {
+  .setting-option { flex-wrap: wrap; row-gap: 0.4rem; }
+  .setting-option .option-body { flex-basis: 100%; }
+  .setting-option .option-body .seg { max-width: none; }
+}
+@media (max-width: 639px) {
+  .setting-slider .setting-range { flex-basis: calc(100% - 5.6rem); height: 2rem; }
+  .setting-slider .slider-value { flex-basis: 100%; padding-left: 5.6rem; }
+}
 .seg {
   display: inline-flex;
   border-radius: 0.375rem;
@@ -663,12 +771,42 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 .dark .seg button + button { border-left-color: rgb(71 85 105); }
 .dark .seg button.on { color: white; background: rgb(37 99 235); }
 
+.option-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+.seg button { white-space: nowrap; }
+/* 譜面オプションは 5 つ並ぶので、スマホ幅でも 1 行に収まるよう行いっぱいに等分する */
+.option-body .seg { display: flex; flex: 1 1 16rem; max-width: 20rem; }
+.option-body .seg button { flex: 1 1 0; padding-left: 0.2rem; padding-right: 0.2rem; }
+.option-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pattern-input { width: 5.5rem; letter-spacing: 0.12em; font-weight: 700; }
+.pattern-text { font-weight: 700; letter-spacing: 0.12em; }
+.reroll {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  color: rgb(37 99 235);
+  border: 1px solid rgb(147 197 253);
+}
+.reroll:hover { background: rgb(239 246 255); }
+.dark .reroll { color: rgb(147 197 253); border-color: rgb(30 64 175); }
+.dark .reroll:hover { background: rgb(30 41 59); }
+
 .pc-only { display: none; }
 @media (hover: hover) and (pointer: fine) {
   .pc-only { display: inline; }
 }
 @media (min-width: 640px) {
   .player-settings { grid-template-columns: 1fr 1fr; }
-  .setting:first-child { grid-column: 1 / -1; }
+  .setting:first-child, .setting-wide { grid-column: 1 / -1; }
 }
 </style>
