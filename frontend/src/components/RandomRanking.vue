@@ -164,7 +164,7 @@ const levelLabel = (l: number) => `☆${l}`;
           <button type="button" :class="{ on: level === 11 }" @click="level = 11">☆11</button>
           <button type="button" :class="{ on: level === 'low' }" @click="level = 'low'">☆10以下</button>
         </div>
-        <input v-model="query" type="search" placeholder="曲名で絞り込み" aria-label="曲名で絞り込み"
+        <input v-model="query" type="search" placeholder="曲名で絞り込み" aria-label="曲名で絞り込み" autocomplete="off"
           class="search rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1.5" />
       </div>
     </div>
@@ -178,6 +178,10 @@ const levelLabel = (l: number) => `☆${l}`;
         <template v-else>
           <span class="tabular-nums">{{ rows.length }} 譜面</span>
           <span class="tabular-nums">上位 5% に入る譜面 <b class="text-amber-600 dark:text-amber-400">{{ topCount }}</b></span>
+          <span v-if="query.trim() && rows.length === 0" class="text-red-500 dark:text-red-400">
+            曲名「{{ query.trim() }}」に一致する譜面がありません
+            <button type="button" class="ml-1 underline font-semibold" @click="query = ''">絞り込みを解除</button>
+          </span>
         </template>
       </div>
 

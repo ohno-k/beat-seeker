@@ -32,7 +32,10 @@
  *   2 打鍵目までは普通の隣への移動）は 3 打鍵目から重く（{@link TRILL67_COST}）。
  *   2 鍵ずつの同時押しの交互は、やりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数える（{@link TWO_TWO}）。
  *   1P の皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数える（{@link SCRATCH_ALT}）。
- *   この 3 つは 16 分の割れでも、同じ手の続きでも（程度に応じて）割れたものとして数える
+ *   この 3 つは 16 分の割れでも、同じ手の続きでも（程度に応じて）割れたものとして数える。
+ *   1P では、同じ手で同じ 2 つの形を速く行き来する（トリル）ほど重く数える: 3 打鍵目から移動の重さに
+ *   {@link trillGrowth}（1 打鍵ごとに {@link TRILL_GROWTH_STEP} 倍ずつ増え、{@link TRILL_GROWTH_MAX} 倍まで）をかける。
+ *   長いトリルは左右の手に分かれる並びが当たり
  *
  * - 16 分縦連の衝突（重み {@link KEY_WEIGHT}）: 16 分で続く縦連のある鍵盤と、それと一緒に動かない（同じ和音で出ない）
  *   別の連打鍵盤が同じ手に来る量（少ないほど良い）。冥の 55〜62 小節の 2 鍵・3 鍵の連打は左右に分けるのが当たり。
@@ -382,6 +385,27 @@ const THUMB_ALT_COST = 0.2;
 /** 6 と 7（中指と薬指/小指）の速い交互（3 打鍵目から）の重さ。指の作り上いちばん押しにくいので、隣のレーンへの普通の移動（1.0）より大きく減点する */
 const TRILL67_COST = 4;
 
+/** 同じ手のトリルの長さによる重さの増え方（3 打鍵目から 1 打鍵ごと）と上限 */
+const TRILL_GROWTH_STEP = 0.25;
+const TRILL_GROWTH_MAX = 3;
+/** 同じ手のトリルで len 打鍵目の移動にかける倍率（2 打鍵目までは 1） */
+function trillGrowth(len: number): number {
+  return len >= 3 ? Math.min(TRILL_GROWTH_MAX, 1 + TRILL_GROWTH_STEP * (len - 2)) : 1;
+}
+/** 片手の打鍵の続き（トリルの長さを数える）。prev = 直前の打鍵のレーン、prev2 = その前、len = 今の交互の打鍵数 */
+interface HandRun { prev: number[]; prev2: number[]; len: number }
+const sameLanes = (a: number[], b: number[]) => a.length === b.length && a.every(l => b.includes(l));
+/** 今の打鍵で交互がどこまで続いたか（速い移動で、直前と重ならず、2 つ前と同じ形なら続き）を数えて返す */
+function stepRun(run: HandRun, cur: number[], gap: number): number {
+  const fast = gap > 1e-6 && gap < FAST_GAP && run.prev.length > 0;
+  let len = 1;
+  if (fast && cur.every(l => !run.prev.includes(l))) len = run.len >= 2 && sameLanes(cur, run.prev2) ? run.len + 1 : 2;
+  run.prev2 = run.prev;
+  run.prev = cur;
+  run.len = len;
+  return len;
+}
+
 /**
  * 1P の皿を回さない手（レーン 4〜7）の 2 鍵ずつの同時押しの交互。ユーザー（上級者）の案内による、やりやすい順:
  * 45⇔67（人差し指+親指 ⇔ 中指+薬指）→ 57⇔46 → 47⇔56。
@@ -497,8 +521,8 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   // 1P は両手とも打鍵単位（和音ごと）で数える: 皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で、
   // 皿側の手は交互の表（13⇔2 など）で。2P は運指がまちまちなので、音符ごとのレーンの距離で数える
   const fingerModel = side === 1;
-  let lastSet: number[] = [];
-  let lastSetLeft: number[] = [];
+  const runLeft: HandRun = { prev: [], prev2: [], len: 0 };
+  const runRight: HandRun = { prev: [], prev2: [], len: 0 };
   let lastAlt67 = false; // 皿を回さない手の直前の移動が 6⇔7 の速い交互だったか
 
   for (let c = 0; c < chords.length; c++) {
@@ -510,18 +534,19 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 0) curLeft.push(laneOf[events[k].key]);
       leftLanes[c] = curLeft;
       if (curLeft.length > 0) {
-        fastSameHand += scratchHandMoveCost(curLeft, lastSetLeft, events[i].time - lastTime[0]) * w;
-        lastSetLeft = curLeft;
+        const gap = events[i].time - lastTime[0];
+        const moveCost = scratchHandMoveCost(curLeft, runLeft.prev, gap);
+        fastSameHand += moveCost * trillGrowth(stepRun(runLeft, curLeft, gap)) * w;
       }
       const cur: number[] = [];
       for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 1) cur.push(laneOf[events[k].key]);
       rightLanes[c] = cur;
       if (cur.length > 0) {
-        const move = fingerMoveCost(cur, lastSet, events[i].time - lastTime[1], lastAlt67);
-        fastSameHand += move.cost * w;
+        const gap = events[i].time - lastTime[1];
+        const move = fingerMoveCost(cur, runRight.prev, gap, lastAlt67);
+        fastSameHand += move.cost * trillGrowth(stepRun(runRight, cur, gap)) * w;
         if (move.trill67) trill67++;
         lastAlt67 = move.alt67;
-        lastSet = cur;
       }
     }
     for (let k = i; k < j; k++) {
