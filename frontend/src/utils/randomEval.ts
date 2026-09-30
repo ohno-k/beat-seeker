@@ -7,6 +7,9 @@
  * RANDOM は鍵盤をレーンごと入れ替えるだけなので、同じ鍵盤の縦連打や総ノーツ数はどの並びでも変わらない。
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
+ * 密度の高いところほど配置を優先する: どの指標も、打鍵ごとに周り ±{@link DENSITY_HALF} 秒のノーツ数（皿を含む）を
+ * 譜面内の最大で割って {@link HARD_POWER} 乗した重みで数える（難所の配置ほど順位に効き、スカスカの区間はほとんど効かない）。
+ *
  * 当たり配置の決め手として重く見る指標（譜面内の最良の並びを 0、最悪を 1 にして重みをかける）:
  * - 皿と同時に取れる（重み {@link SIMUL_WEIGHT}。ほかより低い）: 単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合
  *   （皿と一緒に同じ手で取れる。1P の皿＋1 など）
@@ -39,7 +42,7 @@ import type { ChartTimeline } from './chartPlayback';
 export const SCRATCH_WINDOW = 0.1;
 /** 片手の速い連打とみなす間隔（秒。BPM 150 の 16 分 = 0.1 秒）。 */
 export const FAST_GAP = 0.105;
-/** 難所重視の重み: 組の周り ±DENSITY_HALF 秒のノーツ数を譜面内の最大で割って HARD_POWER 乗 */
+/** 難所重視の重み: 打鍵の周り ±DENSITY_HALF 秒のノーツ数（皿を含む）を譜面内の最大で割って HARD_POWER 乗 */
 const DENSITY_HALF = 1.0;
 const HARD_POWER = 4;
 /** 16 分とみなす打鍵の間隔（tick。4 分 = 96、16 分 = 24。わずかに詰まった配置も含める） */
@@ -56,10 +59,10 @@ export const SIMUL_WEIGHT = 1.5;
 const DENSITY_WINDOW = 1.0;
 
 export interface RandomMetrics {
-  /** 単発の皿と同時の鍵盤のうち、皿側の手に来る数 / 単発の皿と同時の鍵盤の総数 */
+  /** 単発の皿と同時の鍵盤のうち、皿側の手に来る数 / 単発の皿と同時の鍵盤の総数（いずれも密度の重みつき） */
   scratchSimulOk: number;
   scratchSimulTotal: number;
-  /** 連皿の最中の鍵盤のうち、皿を回さない方の手に来る数 / 連皿の最中の鍵盤の総数 */
+  /** 連皿の最中の鍵盤のうち、皿を回さない方の手に来る数 / 連皿の最中の鍵盤の総数（いずれも密度の重みつき） */
   streamOk: number;
   streamTotal: number;
   /** 16 分で続く打鍵の組のうち、左右に割れる組の重み（難所重視）の合計 / 全部の組の重みの合計 */
@@ -125,8 +128,10 @@ interface Prepared {
   nearScratch: boolean[];
   /** 16 分間隔で続く和音の組（chords の添字 i と i + 1） */
   pairs16: number[];
-  /** pairs16 と同じ並びの重み（難所重視） */
+  /** pairs16 と同じ並びの重み（難所重視。後ろの打鍵の chordWeights） */
   pairWeights: number[];
+  /** 和音ごとの重み（難所重視） */
+  chordWeights: number[];
 }
 
 function prepare(tl: ChartTimeline): Prepared {
@@ -167,15 +172,16 @@ function prepare(tl: ChartTimeline): Prepared {
     const gap = events[chords[c + 1][0]].tick - events[chords[c][0]].tick;
     if (gap >= SIXTEENTH_MIN && gap <= SIXTEENTH_MAX) pairs16.push(c);
   }
-  // 組ごとの重み: 後ろの打鍵の周り ±DENSITY_HALF 秒の鍵盤ノーツ数（二本の添字で数える）
-  const times = events.map(e => e.time);
-  const density = pairs16.map(c => {
-    const t = events[chords[c + 1][0]].time;
+  // 和音ごとの重み: 周り ±DENSITY_HALF 秒のノーツ数（鍵盤と皿）。密度の高いところほど重く
+  const times = [...events.map(e => e.time), ...scratchTimes].sort((a, b) => a - b);
+  const density = chords.map(([i]) => {
+    const t = events[i].time;
     return upperBoundNum(times, t + DENSITY_HALF) - lowerBoundNum(times, t - DENSITY_HALF);
   });
   const dMax = Math.max(1, ...density);
-  const pairWeights = density.map(d => Math.pow(d / dMax, HARD_POWER));
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights };
+  const chordWeights = density.map(d => Math.pow(d / dMax, HARD_POWER));
+  const pairWeights = pairs16.map(c => chordWeights[c + 1]);
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights };
 }
 
 /**
@@ -254,7 +260,7 @@ function fingerMoveCost(cur: number[], prev: number[], gap: number): { cost: num
 
 /** 1 つの並びの指標。 */
 function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: number): RandomMetrics {
-  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights } = prep;
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights } = prep;
   // 元の鍵盤 → 手（0 = 皿側の手、1 = もう一方の手）とレーン（1〜7、左から）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = lane;
@@ -283,13 +289,14 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
 
   for (let c = 0; c < chords.length; c++) {
     const [i, j] = chords[c];
+    const w = chordWeights[c];
     const chordCount = [0, 0];
     if (fingerModel) {
       const cur: number[] = [];
       for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 1) cur.push(laneOf[events[k].key]);
       if (cur.length > 0) {
         const move = fingerMoveCost(cur, lastSet, events[i].time - lastTime[1]);
-        fastSameHand += move.cost;
+        fastSameHand += move.cost * w;
         if (move.trill67) trill67++;
         lastSet = cur;
       }
@@ -301,18 +308,18 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
       chordCount[hand]++;
       handTimes[hand].push(events[k].time);
       if (simulScratch[k]) {
-        scratchSimulTotal++;
-        if (hand === 0) scratchSimulOk++;
+        scratchSimulTotal += w;
+        if (hand === 0) scratchSimulOk += w;
       }
       if (inStream[k]) {
-        streamTotal++;
-        if (hand === 1) streamOk++;
+        streamTotal += w;
+        if (hand === 1) streamOk += w;
       }
-      if (hand === 0 && nearScratch[k]) scratchNear++;
+      if (hand === 0 && nearScratch[k]) scratchNear += w;
       const gap = events[k].time - lastTime[hand];
       if (!(fingerModel && hand === 1) && gap > 1e-6 && gap < FAST_GAP && lastLane[hand] !== lane) {
         // 離れたレーンへの速い移動ほど重い（隣 1.0、1 つ飛ばし 1.3、2 つ飛ばし 1.6 …）
-        fastSameHand += 1 + 0.3 * (Math.abs(lane - lastLane[hand]) - 1);
+        fastSameHand += (1 + 0.3 * (Math.abs(lane - lastLane[hand]) - 1)) * w;
       }
     }
     for (let k = i; k < j; k++) {
@@ -331,15 +338,16 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
     if ((chordHands[c] & chordHands[c + 1]) === 0) split16 += pairWeights[n];
   });
 
+  const r3 = (v: number) => Math.round(v * 1000) / 1000;
   return {
-    scratchSimulOk,
-    scratchSimulTotal,
-    streamOk,
-    streamTotal,
+    scratchSimulOk: r3(scratchSimulOk),
+    scratchSimulTotal: r3(scratchSimulTotal),
+    streamOk: r3(streamOk),
+    streamTotal: r3(streamTotal),
     split16: Math.round(split16 * 1000) / 1000,
     split16Total: Math.round(split16Total * 1000) / 1000,
-    scratchNear,
-    fastSameHand: Math.round(fastSameHand * 10) / 10,
+    scratchNear: r3(scratchNear),
+    fastSameHand: r3(fastSameHand),
     trill67,
     peakHandDensity: Math.max(peakDensity(handTimes[0]), peakDensity(handTimes[1])),
   };
