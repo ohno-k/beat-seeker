@@ -9,7 +9,7 @@
  */
 import { ref, computed, watch } from 'vue';
 import type { ChartTimeline } from '../utils/chartPlayback';
-import { evaluateRandom, identifyRandom, WHITE_KEYS, type RandomEvaluation, type RandomCandidate, type RandomMetrics } from '../utils/randomEval';
+import { evaluateRandom, identifyRandom, rankLayouts, layoutOf, WHITE_KEYS, type RandomEvaluation, type RandomCandidate, type RandomMetrics } from '../utils/randomEval';
 import PatternChips from './PatternChips.vue';
 
 const props = defineProps<{
@@ -75,6 +75,11 @@ const bestRRandom = computed(() => {
   for (const base of ['1234567', '7654321']) for (let s = 1; s <= 6; s++) rots.push(base.slice(s) + base.slice(0, s));
   return rots.map(p => ev.byPattern.get(p)!).sort((a, b) => a.rank - b.rank)[0];
 });
+/** 白黒の配置（35 通り）の順位。上位 5 つと、今の並びの配置 */
+const layouts = computed(() => (evaluation.value ? rankLayouts(evaluation.value) : []));
+const topLayouts = computed(() => layouts.value.slice(0, 5));
+const currentLayout = computed(() => (props.currentPattern ? layouts.value.find(l => l.layout === layoutOf(props.currentPattern)) ?? null : null));
+
 /** 正規・MIRROR・R-RANDOM の最良（評価の前は空） */
 const baseRows = computed(() => {
   const rows: { label: string; cand: RandomCandidate }[] = [];
@@ -83,22 +88,29 @@ const baseRows = computed(() => {
   if (bestRRandom.value) rows.push({ label: 'R-RAN 最良', cand: bestRRandom.value });
   return rows;
 });
+/** 上位 5%（5,040 通り中 252 位以内）。正規・MIRROR・R-RANDOM がここに入るなら、RANDOM を使わなくても当たりに近い */
+const TOP_TENTH = 252;
+const isTopTenth = (rank: number) => rank <= TOP_TENTH;
+const topTenthLabels = computed(() => baseRows.value.filter(b => isTopTenth(b.cand.rank)).map(b => b.label));
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
 /** 割合の表示（分母 0 は「—」） */
 function rate(ok: number, total: number): string {
   return total > 0 ? `${Math.round((ok / total) * 100)}%` : '—';
 }
-/** 重く見る 3 つ（皿同時・連皿中は逆の手・16 分交互）。連皿の無い譜面では連皿を出さない */
+/** 重く見る指標。連皿・6-7 トリルは無い譜面（並び）では出さない */
 function keyLine(m: RandomMetrics) {
-  const parts = [`皿と同時に取れる ${rate(m.scratchSimulOk, m.scratchSimulTotal)}`];
+  const parts: string[] = [];
   if (m.streamTotal > 0) parts.push(`連皿中は逆の手 ${rate(m.streamOk, m.streamTotal)}`);
-  parts.push(`16分の左右交互 ${rate(m.alt16, m.sixteenthPairs)}`);
+  parts.push(`16分が左右に割れる ${rate(m.split16, m.split16Total)}`);
+  parts.push(`片手の速い連打 ${Math.round(m.fastSameHand)}`);
+  if (m.trill67 > 0) parts.push(`6・7トリル ${m.trill67}`);
+  parts.push(`皿と同時に取れる ${rate(m.scratchSimulOk, m.scratchSimulTotal)}`);
   return parts.join(' ／ ');
 }
 /** そのほかの負荷 */
 function metricLine(m: RandomMetrics) {
-  return `皿の前後 ${m.scratchNear} ／ 片手連打 ${Math.round(m.fastSameHand)} ／ 片手3鍵以上 ${m.bigChords} ／ 片手最大 ${m.peakHandDensity}/秒`;
+  return `皿の前後 ${m.scratchNear} ／ 片手最大 ${m.peakHandDensity}/秒`;
 }
 </script>
 
@@ -171,6 +183,9 @@ function metricLine(m: RandomMetrics) {
 
         <template v-if="evaluation">
           <div class="mt-3 flex flex-col gap-1">
+            <p v-if="topTenthLabels.length" class="top-notice">
+              ★ {{ topTenthLabels.join('・') }} が 5,040 通りの上位5%に入っています（RANDOM を使わなくても当たりに近い配置です）
+            </p>
             <div v-if="current" class="flex flex-wrap items-center gap-1.5">
               今の並び <PatternChips :pattern="current.pattern" small />
               <b class="text-slate-800 dark:text-white tabular-nums">{{ current.rank }} 位</b>
@@ -179,15 +194,39 @@ function metricLine(m: RandomMetrics) {
             <div v-if="current" class="key-line">{{ keyLine(current.metrics) }}</div>
           </div>
 
+          <!-- 白黒の配置（黒鍵 3 つがどのレーンに来るか、35 通り）。プレーヤーは RANDOM をこの単位で語ることが多い -->
+          <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">白黒の配置の順位（35 通り）</div>
+          <div v-if="currentLayout" class="mt-1 flex flex-wrap items-center gap-1.5">
+            今の並びの配置
+            <span class="layout"><span v-for="(c, i) in currentLayout.layout" :key="i" class="lcell" :class="c === 'W' ? 'w' : 'b'"></span></span>
+            <b class="text-slate-800 dark:text-white tabular-nums">{{ currentLayout.rank }} 位</b>
+          </div>
+          <ol class="cand-list">
+            <li v-for="l in topLayouts" :key="l.layout" :class="{ current: currentLayout?.layout === l.layout }">
+              <span class="rank tabular-nums">{{ l.rank }}</span>
+              <span class="cand-pattern">
+                <span class="layout"><span v-for="(c, i) in l.layout" :key="i" class="lcell" :class="c === 'W' ? 'w' : 'b'"></span></span>
+                <span class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">最良</span>
+                <PatternChips :pattern="l.best.pattern" small />
+              </span>
+              <button type="button" class="apply-btn" @click="emit('apply', l.best.pattern)">この並びで再生</button>
+              <span class="cand-metrics">
+                <span class="key-line">{{ keyLine(l.best.metrics) }}</span>
+              </span>
+            </li>
+          </ol>
+
           <!-- 正規・MIRROR・R-RANDOM の最良がどこに来るか（RANDOM を使うか決める目安） -->
           <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">正規・MIRROR の順位</div>
           <ol class="cand-list">
-            <li v-for="b in baseRows" :key="b.label" :class="{ current: b.cand.pattern === currentPattern }">
+            <li v-for="b in baseRows" :key="b.label"
+              :class="{ current: b.cand.pattern === currentPattern, 'top-tenth': isTopTenth(b.cand.rank) }">
               <span class="rank tabular-nums">{{ b.cand.rank }}</span>
               <span class="cand-pattern">
                 <span class="base-label">{{ b.label }}</span>
                 <PatternChips :pattern="b.cand.pattern" />
-                <span class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">上位 {{ percent(b.cand.rank) }}%</span>
+                <span v-if="isTopTenth(b.cand.rank)" class="top-badge">上位5%</span>
+                <span v-else class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">上位 {{ percent(b.cand.rank) }}%</span>
               </span>
               <button type="button" class="apply-btn" @click="emit('apply', b.cand.pattern)">この並びで再生</button>
               <span class="cand-metrics">
@@ -232,13 +271,17 @@ function metricLine(m: RandomMetrics) {
           </ol>
 
           <p class="mt-3 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。当たり配置の決め手として次の 3 つを特に重く見ています:
-            皿と同時に取れる＝単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる）。
+            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。白黒の配置の順位は、その配置の中で一番良い並びで比べています。当たり配置の決め手として次の 3 つを特に重く見ています:
             連皿中は逆の手＝連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿を回さない方の手に来る割合（連皿の無い譜面では出しません）。
-            16分の左右交互＝16 分で続く打鍵が左右の手で交互になる割合（両手の和音をはさむ組はどの並びでも交互にならないので、100% にはなりません）。
-            この 3 つはこの譜面で一番良い並びとの差を重みづけして足し、さらに次の負荷で差をつけています:
-            皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ（連皿の最中は除く）、片手連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵（離れたレーンほど重い）、
-            片手3鍵以上＝1 つの手で 3 鍵以上の同時押し、片手最大＝片手の 1 秒あたりの最大ノーツ数。
+            16分が左右に割れる＝16 分で続く 2 つの打鍵で、どちらの手も片方の打鍵にしか鍵盤が無い（手が形を切り替えない）割合。
+            密度の高い区間（難所）ほど重く数えます（デニム配置が割れるか、など）。どの並びでも割れない組があるので 100% にはなりません。
+            片手の速い連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵の数（離れたレーンほど重く数える。少ないほど良い）。
+            1P の皿を回さない手は、4 人差し指・5 親指・6 中指・7 薬指（小指）の運指で数えます: 親指だけの打鍵と親指以外の打鍵の交互（467 と 5 のトリルなど）は軽く、
+            6・7 のトリルは大きく減点します（2P と皿側の手は運指が人によって違うので、レーンの距離だけで数えます）。
+            次に、皿と同時に取れる＝単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる）を、上の 3 つより軽く見ています。
+            どれもこの譜面で一番良い並びを 0、一番悪い並びを 1 にそろえて重みづけして足し、さらに次の負荷で差をつけています:
+            皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ（連皿の最中は除く）、片手最大＝片手の 1 秒あたりの最大ノーツ数。
+            片手で自分のレーンの鍵盤をまとめて押す和音（白黒分けの 246 など）は普通の押し方なので負荷に数えていません。
             運指や CN の押しっぱなしは考えていない目安です。
           </p>
         </template>
@@ -320,6 +363,33 @@ function metricLine(m: RandomMetrics) {
 .rank { font-weight: 700; text-align: right; color: rgb(100 116 139); }
 .cand-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
 .cand-metrics { grid-column: 2 / -1; }
+/* 正規・MIRROR・R-RANDOM が上位 5% に入ったとき */
+.cand-list li.top-tenth { background: rgb(254 243 199); box-shadow: inset 0 0 0 2px rgb(245 158 11); }
+.dark .cand-list li.top-tenth { background: rgb(120 53 15 / 0.35); box-shadow: inset 0 0 0 2px rgb(217 119 6); }
+.cand-list li.top-tenth.current { box-shadow: inset 0 0 0 2px rgb(245 158 11), inset 0 0 0 4px rgb(37 99 235); }
+.top-badge {
+  padding: 0.05rem 0.4rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: rgb(69 26 3);
+  background: rgb(251 191 36);
+}
+.top-notice {
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  color: rgb(146 64 14);
+  background: rgb(254 243 199);
+}
+.dark .top-notice { color: rgb(253 230 138); background: rgb(120 53 15 / 0.35); }
+.layout { display: inline-flex; gap: 2px; }
+.lcell { width: 0.7rem; height: 1.2rem; border-radius: 2px; }
+.lcell.w { background: white; box-shadow: inset 0 0 0 1px rgb(148 163 184); }
+.lcell.b { background: rgb(37 99 235); }
+.dark .lcell.w { background: rgb(226 232 240); box-shadow: none; }
+.dark .lcell.b { background: rgb(59 130 246); }
 .base-label { font-weight: 700; color: rgb(51 65 85); white-space: nowrap; }
 .dark .base-label { color: rgb(226 232 240); }
 .key-line { display: block; font-size: 11px; font-weight: 600; color: rgb(4 120 87); }

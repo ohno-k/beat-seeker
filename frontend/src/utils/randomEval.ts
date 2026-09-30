@@ -7,17 +7,27 @@
  * RANDOM は鍵盤をレーンごと入れ替えるだけなので、同じ鍵盤の縦連打や総ノーツ数はどの並びでも変わらない。
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
- * 当たり配置の決め手として特に重く見る 3 つ（譜面内の最良の並びとの差を 0〜1 にして × {@link KEY_WEIGHT}）:
- * - 皿と同時に取れる: 単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる。1P の皿＋1 など）
+ * 当たり配置の決め手として重く見る指標（譜面内の最良の並びを 0、最悪を 1 にして重みをかける）:
+ * - 皿と同時に取れる（重み {@link SIMUL_WEIGHT}。ほかより低い）: 単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合
+ *   （皿と一緒に同じ手で取れる。1P の皿＋1 など）
+ * - 以下 3 つは重み {@link KEY_WEIGHT}
  * - 連皿中は逆の手: 連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、
  *   皿を回さない方の手に来る割合（連皿中は皿側の手が塞がるので、同じ手に来ない方が良い）
- * - 16 分の左右交互: 16 分間隔で続く打鍵が、左右の手で交互になる割合（1 つの手だけの打鍵どうしが別の手なら交互）
+ * - 16 分が左右に割れる（難所重視）: 16 分間隔で続く 2 つの打鍵（和音）で、どちらの手も片方の打鍵にしか鍵盤が無い
+ *   （手が形を切り替えずに済む。デニム配置などが「割れる」）割合。組ごとに周り ±{@link DENSITY_HALF} 秒のノーツ数の
+ *   {@link HARD_POWER} 乗で重みをつけ、譜面の密度の高い区間（難所）ほど効かせる。嘆きの樹 59 小節からの密集地帯で
+ *   黒黒黒白白白白（2461357 など）・白白白黒白黒黒（3572146 など）が上に来るのはこれ
+ * - 片手の速い連打: 同じ手で {@link FAST_GAP} 秒未満に続く、別レーンへの打鍵（離れたレーンほど重く数える）。
+ *   16 分の割れは「割れた組」しか見ず、階段やトリルが多い譜面では多くの並びが同点になるので、
+ *   同じ手の中の動きの大きさで差をつける（嘆きの樹で 2461357 のような白黒分けが上に来るのはこれ）。
+ *   1P の皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で重さを変える:
+ *   親指だけの打鍵と親指以外の打鍵の交互は軽く（{@link THUMB_ALT_COST}）、6・7 のトリルは重く（{@link TRILL67_COST}）
  *
- * ほかの負荷（全 5,040 通りの中央値で割ってそろえ、そのまま足す。同じくらいの並びの差をつける）:
+ * ほかの負荷（同じく 0〜1 にそろえて重み 1 で足す）:
  * - 皿の前後: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に、皿側の手へ来るノーツの数（連皿の最中は除く）
- * - 片手の速い連打: 同じ手で {@link FAST_GAP} 秒未満に続く、別レーンへの打鍵（離れたレーンほど重く数える）
- * - 片手の多鍵同時押し: 1 つの手が 3 鍵以上を同時に押す回数
  * - 片手の最大密度: どちらかの手の 1 秒あたりのノーツ数の最大
+ *
+ * 1 つの手が自分のレーンの鍵盤をまとめて押す和音（白黒分けで 246 を片手など）は普通の押し方なので、負荷に数えない。
  *
  * 総合は小さいほど押しやすい。手の分け方は「皿側の手が皿に近い鍵盤を何個持つか」
  * （1P なら 1〜n 番、2P なら 7〜(8-n) 番のレーン）で決める。
@@ -29,14 +39,19 @@ import type { ChartTimeline } from './chartPlayback';
 export const SCRATCH_WINDOW = 0.1;
 /** 片手の速い連打とみなす間隔（秒。BPM 150 の 16 分 = 0.1 秒）。 */
 export const FAST_GAP = 0.105;
+/** 難所重視の重み: 組の周り ±DENSITY_HALF 秒のノーツ数を譜面内の最大で割って HARD_POWER 乗 */
+const DENSITY_HALF = 1.0;
+const HARD_POWER = 4;
 /** 16 分とみなす打鍵の間隔（tick。4 分 = 96、16 分 = 24。わずかに詰まった配置も含める） */
 const SIXTEENTH_MIN = 20;
 const SIXTEENTH_MAX = 24;
 /** 連続スクラッチとみなす皿どうしの間隔（秒。BPM 140 の 16 分 = 60 / 140 / 4）と、続く回数 */
 const STREAM_GAP = 60 / 140 / 4 + 1e-6;
 const STREAM_MIN_NOTES = 3;
-/** 「皿と同時に取れる」「連皿中は逆の手」「16 分の左右交互」の重み（それぞれ譜面内の最良〜最悪を 0〜1 にした不足分にかける。ほかの負荷は中央値で 1 前後にそろえてある） */
+/** 「皿と同時に取れる」「連皿中は逆の手」「16 分の左右交互」「片手の速い連打」の重み（それぞれ譜面内の最良〜最悪を 0〜1 にした不足分にかける。ほかの負荷は中央値で 1 前後にそろえてある） */
 export const KEY_WEIGHT = 4;
+/** 「皿と同時に取れる」の重み（当たりの要素ではあるが優先度は高くない） */
+export const SIMUL_WEIGHT = 1.5;
 /** 片手の最大密度を数える窓（秒）。 */
 const DENSITY_WINDOW = 1.0;
 
@@ -47,18 +62,15 @@ export interface RandomMetrics {
   /** 連皿の最中の鍵盤のうち、皿を回さない方の手に来る数 / 連皿の最中の鍵盤の総数 */
   streamOk: number;
   streamTotal: number;
-  /** 16 分で続く打鍵のうち、左右の手で交互になる組の数 / 16 分で続く組の総数 */
-  alt16: number;
-  sixteenthPairs: number;
+  /** 16 分で続く打鍵の組のうち、左右に割れる組の重み（難所重視）の合計 / 全部の組の重みの合計 */
+  split16: number;
+  split16Total: number;
   scratchNear: number;
   fastSameHand: number;
-  bigChords: number;
+  /** 1P の皿を回さない手の、6 と 7 の速い交互（トリル）の回数（fastSameHand に重く含まれている。表示用） */
+  trill67: number;
   peakHandDensity: number;
 }
-
-/** 中央値で割ってそろえる負荷。 */
-type LoadKey = 'scratchNear' | 'fastSameHand' | 'bigChords' | 'peakHandDensity';
-const LOAD_KEYS: LoadKey[] = ['scratchNear', 'fastSameHand', 'bigChords', 'peakHandDensity'];
 
 export interface RandomCandidate {
   /** 左のレーンから元の鍵盤番号（例: "3726145"） */
@@ -75,8 +87,8 @@ export interface RandomEvaluation {
   candidates: RandomCandidate[];
   /** 並び → 候補 */
   byPattern: Map<string, RandomCandidate>;
-  /** 負荷の全並びでの中央値（総合の正規化に使った値） */
-  medians: Record<LoadKey, number>;
+  /** 各指標の全並びでの最良・最悪（総合の正規化に使った値） */
+  ranges: Record<'scratchSimulOk' | 'streamOk' | 'split16' | 'fastSameHand' | 'scratchNear' | 'peakHandDensity', [number, number]>;
 }
 
 /** 鍵盤の打鍵（皿を除く）。時刻順で、同じ時刻の和音は連続して並ぶ。 */
@@ -113,6 +125,8 @@ interface Prepared {
   nearScratch: boolean[];
   /** 16 分間隔で続く和音の組（chords の添字 i と i + 1） */
   pairs16: number[];
+  /** pairs16 と同じ並びの重み（難所重視） */
+  pairWeights: number[];
 }
 
 function prepare(tl: ChartTimeline): Prepared {
@@ -153,7 +167,15 @@ function prepare(tl: ChartTimeline): Prepared {
     const gap = events[chords[c + 1][0]].tick - events[chords[c][0]].tick;
     if (gap >= SIXTEENTH_MIN && gap <= SIXTEENTH_MAX) pairs16.push(c);
   }
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16 };
+  // 組ごとの重み: 後ろの打鍵の周り ±DENSITY_HALF 秒の鍵盤ノーツ数（二本の添字で数える）
+  const times = events.map(e => e.time);
+  const density = pairs16.map(c => {
+    const t = events[chords[c + 1][0]].time;
+    return upperBoundNum(times, t + DENSITY_HALF) - lowerBoundNum(times, t - DENSITY_HALF);
+  });
+  const dMax = Math.max(1, ...density);
+  const pairWeights = density.map(d => Math.pow(d / dMax, HARD_POWER));
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights };
 }
 
 /**
@@ -168,23 +190,27 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2, scratchKeys: numb
   const patterns = allPatterns();
   const raw: RandomMetrics[] = patterns.map(p => measure(prep, p, side, scratchKeys));
 
-  const medians = Object.fromEntries(LOAD_KEYS.map(k => [k, median(raw.map(m => m[k]))])) as Record<LoadKey, number>;
-  const norm = (v: number, med: number) => (med > 0 ? v / med : v > 0 ? 1 + v : 0);
-  // 皿同時・16 分交互は、譜面ごとに並びで動かせる幅が違う（両手の和音はどの並びでも交互にならない等）ので、
-  // この譜面で一番良い並びを 0、一番悪い並びを 1 に引き伸ばしてから重みをかける
-  const shortfall = (v: number, best: number, worst: number) => (best > worst ? (best - v) / (best - worst) : 0);
-  const range = (vals: number[]) => [Math.max(...vals), Math.min(...vals)];
-  const [simulBest, simulWorst] = range(raw.map(m => m.scratchSimulOk));
-  const [streamBest, streamWorst] = range(raw.map(m => m.streamOk));
-  const [altBest, altWorst] = range(raw.map(m => m.alt16));
+  // どの指標も、この譜面で一番良い並びを 0、一番悪い並びを 1 に引き伸ばしてから重みをかける
+  // （譜面ごとに並びで動かせる幅が違う。両手の和音はどの並びでも交互にならない等）
+  const range = (vals: number[], higherIsBetter: boolean): [number, number] => {
+    const hi = Math.max(...vals), lo = Math.min(...vals);
+    return higherIsBetter ? [hi, lo] : [lo, hi];
+  };
+  const ranges = {
+    scratchSimulOk: range(raw.map(m => m.scratchSimulOk), true),
+    streamOk: range(raw.map(m => m.streamOk), true),
+    split16: range(raw.map(m => m.split16), true),
+    fastSameHand: range(raw.map(m => m.fastSameHand), false),
+    scratchNear: range(raw.map(m => m.scratchNear), false),
+    peakHandDensity: range(raw.map(m => m.peakHandDensity), false),
+  };
+  const shortfall = (v: number, [best, worst]: [number, number]) => (best !== worst ? (v - best) / (worst - best) : 0);
 
   const candidates: RandomCandidate[] = patterns.map((pattern, i) => {
     const m = raw[i];
-    let score = 0;
-    for (const k of LOAD_KEYS) score += norm(m[k], medians[k]);
-    score += KEY_WEIGHT * shortfall(m.scratchSimulOk, simulBest, simulWorst);
-    score += KEY_WEIGHT * shortfall(m.streamOk, streamBest, streamWorst);
-    score += KEY_WEIGHT * shortfall(m.alt16, altBest, altWorst);
+    const score = SIMUL_WEIGHT * shortfall(m.scratchSimulOk, ranges.scratchSimulOk)
+      + KEY_WEIGHT * (shortfall(m.streamOk, ranges.streamOk) + shortfall(m.split16, ranges.split16) + shortfall(m.fastSameHand, ranges.fastSameHand))
+      + shortfall(m.scratchNear, ranges.scratchNear) + shortfall(m.peakHandDensity, ranges.peakHandDensity);
     return { pattern, metrics: m, score, rank: 0 };
   });
   candidates.sort((a, b) => a.score - b.score || a.pattern.localeCompare(b.pattern));
@@ -192,12 +218,43 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2, scratchKeys: numb
   candidates.forEach((c, i) => {
     c.rank = i > 0 && Math.abs(c.score - candidates[i - 1].score) < 1e-9 ? candidates[i - 1].rank : i + 1;
   });
-  return { candidates, byPattern: new Map(candidates.map(c => [c.pattern, c])), medians };
+  return { candidates, byPattern: new Map(candidates.map(c => [c.pattern, c])), ranges };
+}
+
+/** 1P の皿を回さない手で親指が押すレーン。 */
+const THUMB_LANE = 5;
+/** 親指だけの打鍵と、親指を使わない打鍵の速い交互（467 と 5 の 16 分トリルなど）の重さ。ほかの速い移動は 1 以上 */
+const THUMB_ALT_COST = 0.2;
+/** 6 と 7（中指と薬指/小指）の速い交互の重さ。指の作り上いちばん押しにくいので、隣のレーンへの普通の移動（1.0）より大きく減点する */
+const TRILL67_COST = 4;
+
+/**
+ * 1P の皿を回さない手の、直前の打鍵から今の打鍵への速い移動の重さ。
+ * 6 と 7 の単打どうしの交互（トリル）は {@link TRILL67_COST}。
+ * 片方が親指だけ・もう片方が親指を使わない（重ならない）交互はいちばん楽なので {@link THUMB_ALT_COST}。
+ * それ以外は、新しく押すレーンごとに直前の打鍵の一番近いレーンとの距離で数える（隣 1.0、1 つ飛ばし 1.3 …）。
+ * 同じレーンの連打（縦連）は並びで変わらないので数えない。
+ */
+function fingerMoveCost(cur: number[], prev: number[], gap: number): { cost: number; trill67: boolean } {
+  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return { cost: 0, trill67: false };
+  const only = (s: number[], lane: number) => s.length === 1 && s[0] === lane;
+  if ((only(cur, 6) && only(prev, 7)) || (only(cur, 7) && only(prev, 6))) return { cost: TRILL67_COST, trill67: true };
+  const disjoint = cur.every(l => !prev.includes(l));
+  if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
+    return { cost: THUMB_ALT_COST, trill67: false };
+  }
+  let cost = 0;
+  for (const lane of cur) {
+    if (prev.includes(lane)) continue;
+    const dist = Math.min(...prev.map(p => Math.abs(p - lane)));
+    cost += 1 + 0.3 * (dist - 1);
+  }
+  return { cost, trill67: false };
 }
 
 /** 1 つの並びの指標。 */
 function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: number): RandomMetrics {
-  const { events, chords, simulScratch, inStream, nearScratch, pairs16 } = prep;
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights } = prep;
   // 元の鍵盤 → 手（0 = 皿側の手、1 = もう一方の手）とレーン（1〜7、左から）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = lane;
@@ -213,16 +270,30 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
   let streamTotal = 0;
   let scratchNear = 0;
   let fastSameHand = 0;
-  let bigChords = 0;
+  let trill67 = 0;
   const lastTime = [-Infinity, -Infinity];
   const lastLane = [0, 0];
   const handTimes: number[][] = [[], []];
-  // 和音ごとの手の使い方（0 = 皿側の手だけ、1 = もう一方の手だけ、2 = 両手）
-  const chordHand = new Int8Array(chords.length);
+  // 和音ごとに使う手（ビット 1 = 皿側の手、2 = もう一方の手）
+  const chordHands = new Int8Array(chords.length);
+  // 1P の皿を回さない手は指の割り当てがほぼ決まっている（4 人差し指・5 親指・6 中指・7 薬指/小指）ので、
+  // 打鍵単位（和音ごと）で親指の交互を見分ける。2P と皿側の手は運指がまちまちなので従来どおりレーンの距離で数える
+  const fingerModel = side === 1;
+  let lastSet: number[] = [];
 
   for (let c = 0; c < chords.length; c++) {
     const [i, j] = chords[c];
     const chordCount = [0, 0];
+    if (fingerModel) {
+      const cur: number[] = [];
+      for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 1) cur.push(laneOf[events[k].key]);
+      if (cur.length > 0) {
+        const move = fingerMoveCost(cur, lastSet, events[i].time - lastTime[1]);
+        fastSameHand += move.cost;
+        if (move.trill67) trill67++;
+        lastSet = cur;
+      }
+    }
     for (let k = i; k < j; k++) {
       const key = events[k].key;
       const lane = laneOf[key];
@@ -239,7 +310,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
       }
       if (hand === 0 && nearScratch[k]) scratchNear++;
       const gap = events[k].time - lastTime[hand];
-      if (gap > 1e-6 && gap < FAST_GAP && lastLane[hand] !== lane) {
+      if (!(fingerModel && hand === 1) && gap > 1e-6 && gap < FAST_GAP && lastLane[hand] !== lane) {
         // 離れたレーンへの速い移動ほど重い（隣 1.0、1 つ飛ばし 1.3、2 つ飛ばし 1.6 …）
         fastSameHand += 1 + 0.3 * (Math.abs(lane - lastLane[hand]) - 1);
       }
@@ -249,28 +320,27 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
       lastTime[hand] = events[k].time;
       lastLane[hand] = laneOf[events[k].key];
     }
-    if (chordCount[0] >= 3) bigChords++;
-    if (chordCount[1] >= 3) bigChords++;
-    chordHand[c] = chordCount[0] > 0 && chordCount[1] > 0 ? 2 : chordCount[0] > 0 ? 0 : 1;
+    chordHands[c] = (chordCount[0] > 0 ? 1 : 0) | (chordCount[1] > 0 ? 2 : 0);
   }
 
-  let alt16 = 0;
-  for (const c of pairs16) {
-    const a = chordHand[c];
-    const b = chordHand[c + 1];
-    if (a !== 2 && b !== 2 && a !== b) alt16++;
-  }
+  // どちらの手も片方の打鍵にしか鍵盤が無ければ「割れる」（同じ手が続けて押す組は割れない）
+  let split16 = 0;
+  let split16Total = 0;
+  pairs16.forEach((c, n) => {
+    split16Total += pairWeights[n];
+    if ((chordHands[c] & chordHands[c + 1]) === 0) split16 += pairWeights[n];
+  });
 
   return {
     scratchSimulOk,
     scratchSimulTotal,
     streamOk,
     streamTotal,
-    alt16,
-    sixteenthPairs: pairs16.length,
+    split16: Math.round(split16 * 1000) / 1000,
+    split16Total: Math.round(split16Total * 1000) / 1000,
     scratchNear,
     fastSameHand: Math.round(fastSameHand * 10) / 10,
-    bigChords,
+    trill67,
     peakHandDensity: Math.max(peakDensity(handTimes[0]), peakDensity(handTimes[1])),
   };
 }
@@ -286,6 +356,46 @@ function peakDensity(times: number[]): number {
   return best / DENSITY_WINDOW;
 }
 
+function lowerBoundNum(a: number[], x: number): number {
+  let lo = 0, hi = a.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (a[mid] < x) lo = mid + 1; else hi = mid; }
+  return lo;
+}
+function upperBoundNum(a: number[], x: number): number {
+  let lo = 0, hi = a.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (a[mid] <= x) lo = mid + 1; else hi = mid; }
+  return lo;
+}
+
+// ── 白黒の配置 ────────────────────────────────────────────
+
+/** 並びの白黒の配置（左のレーンから、元の白鍵 = "W"・元の黒鍵 = "B"。例: 2461357 → "BBBWWWW"） */
+export function layoutOf(pattern: string): string {
+  return [...pattern].map(d => ('1357'.includes(d) ? 'W' : 'B')).join('');
+}
+
+export interface LayoutRow {
+  /** "BBBWWWW" など */
+  layout: string;
+  /** この配置の中で一番良い並び */
+  best: RandomCandidate;
+  /** 35 通りの配置の中の順位（一番良い並びで比べる） */
+  rank: number;
+}
+
+/**
+ * 【関数の役割】 5,040 通りを白黒の配置（黒鍵 3 つがどのレーンに来るか、35 通り）でまとめ、
+ * それぞれの一番良い並びで順位をつける。プレーヤーは RANDOM を白黒の配置で語ることが多い（「黒黒黒白白白白」など）。
+ */
+export function rankLayouts(ev: RandomEvaluation): LayoutRow[] {
+  const best = new Map<string, RandomCandidate>();
+  for (const c of ev.candidates) { // 押しやすい順なので最初に出たものが最良
+    const l = layoutOf(c.pattern);
+    if (!best.has(l)) best.set(l, c);
+  }
+  return [...best.entries()].map(([layout, c], i) => ({ layout, best: c, rank: i + 1 }));
+}
+
 /** 昇順の times に t ± w 秒のものがあるか。 */
 function hasNear(times: number[], t: number, w: number): boolean {
   let lo = 0, hi = times.length;
@@ -294,13 +404,6 @@ function hasNear(times: number[], t: number, w: number): boolean {
     if (times[mid] < t - w) lo = mid + 1; else hi = mid;
   }
   return lo < times.length && times[lo] <= t + w;
-}
-
-function median(v: number[]): number {
-  const s = [...v].sort((a, b) => a - b);
-  const n = s.length;
-  if (n === 0) return 0;
-  return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;
 }
 
 // ── RANDOM の判別 ─────────────────────────────────────────
