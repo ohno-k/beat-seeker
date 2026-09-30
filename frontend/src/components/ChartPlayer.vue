@@ -23,6 +23,8 @@ import {
   formatBpmLabel, buildChartTimeline, assignLanes, randomPattern, rRandomPattern, isValidPattern, MIRROR_PATTERN, OFF_PATTERN,
   type ChartPlaybackData, type ChartTimeline, type ChartOption,
 } from '../utils/chartPlayback';
+import PatternChips from './PatternChips.vue';
+import RandomPanel from './RandomPanel.vue';
 
 const props = defineProps<{
   textage: string;
@@ -47,6 +49,8 @@ async function open() {
       return;
     }
     timeline.value = buildChartTimeline(data as ChartPlaybackData);
+    loopA.value = 0;
+    loopB.value = Math.min(3, timeline.value.measureTicks.length - 1);
     loading.value = false; // canvas を表示してから大きさを測る
     await nextTick();
     setupCanvas();
@@ -64,11 +68,13 @@ interface Settings {
   visibleSec: number; rate: number; mode: 'beat' | 'time'; side: 1 | 2; sound: boolean;
   /** ノーツの太さ（縦の厚み、CSS px） */
   noteSize: number;
+  /** ノーツの色: lane = 落ちてくるレーンの色（実機と同じ）、key = 元の鍵盤の色（RANDOM で元の白鍵がどこに来たか見える） */
+  noteColor: 'lane' | 'key';
   /** 譜面オプションと、RANDOM / R-RANDOM の鍵盤の並び（左のレーンから元の鍵盤番号） */
   option: ChartOption; pattern: string;
 }
 const DEFAULTS: Settings = {
-  visibleSec: 1.2, rate: 1, mode: 'beat', side: 1, sound: false, noteSize: 7, option: 'off', pattern: OFF_PATTERN,
+  visibleSec: 1.2, rate: 1, mode: 'beat', side: 1, sound: false, noteSize: 7, noteColor: 'lane', option: 'off', pattern: OFF_PATTERN,
 };
 function loadSettings(): Settings {
   try {
@@ -117,6 +123,13 @@ function reroll() {
   patternInput.value = shownPattern.value;
 }
 
+/** 配置評価で選んだ並びを RANDOM として当てる。 */
+function applyPattern(p: string) {
+  settings.value.option = 'random';
+  settings.value.pattern = p;
+  patternInput.value = p;
+}
+
 function onPatternInput(e: Event) {
   const v = (e.target as HTMLInputElement).value.replace(/[^1-7]/g, '').slice(0, 7);
   patternInput.value = v;
@@ -158,10 +171,58 @@ let uiUpdatedAt = 0;
 
 const totalTime = computed(() => timeline.value?.totalTime ?? 0);
 
+// ── 区間リピート（A〜B 小節を繰り返す） ─────────────────────────
+/** 繰り返しの頭に戻るとき、A の小節頭より何秒前から流すか（ノーツが上から落ちてくるように） */
+const LOOP_PREROLL = 1.0;
+const loopOn = ref(false);
+const loopA = ref(0);   // 小節の添字（measureTicks の何番目か）
+const loopB = ref(0);
+const measureOptions = computed(() => {
+  const tl = timeline.value;
+  if (!tl) return [];
+  return Array.from(tl.measureTicks, (_, i) => ({ index: i, label: tl.firstMeasure + i }));
+});
+/** 区間の [開始, 終了) 秒 */
+function loopRange(tl: ChartTimeline): [number, number] {
+  const a = Math.min(loopA.value, loopB.value);
+  const b = Math.max(loopA.value, loopB.value);
+  const end = b + 1 < tl.measureTimes.length ? tl.measureTimes[b + 1] : tl.totalTime;
+  return [tl.measureTimes[a], end];
+}
+function seekLoopStart() {
+  const tl = timeline.value;
+  if (!tl) return;
+  seek(loopRange(tl)[0] - LOOP_PREROLL);
+}
+/** 今いる小節の添字 */
+function currentMeasureIndex(): number {
+  const tl = timeline.value;
+  if (!tl) return 0;
+  return Math.max(upperBound(tl.measureTimes, curTime + 1e-6) - 1, 0);
+}
+function setLoopPoint(which: 'a' | 'b') {
+  const i = currentMeasureIndex();
+  if (which === 'a') { loopA.value = i; if (loopB.value < i) loopB.value = i; }
+  else { loopB.value = i; if (loopA.value > i) loopA.value = i; }
+}
+function setLoopOn(on: boolean) {
+  loopOn.value = on;
+  const tl = timeline.value;
+  if (on && tl) {
+    const [start, end] = loopRange(tl);
+    if (curTime < start - LOOP_PREROLL || curTime >= end) seekLoopStart();
+  }
+}
+watch([loopA, loopB], () => { if (loopA.value > loopB.value) loopB.value = loopA.value; });
+
 function play() {
   const tl = timeline.value;
   if (!tl) return;
   if (curTime >= tl.totalTime) seek(LEAD_IN);
+  if (loopOn.value) {
+    const [start, end] = loopRange(tl);
+    if (curTime < start - LOOP_PREROLL || curTime >= end) seekLoopStart();
+  }
   ensureAudio();
   playing.value = true;
   lastFrame = performance.now();
@@ -212,6 +273,7 @@ function frame(now: number) {
   const dt = Math.min((now - lastFrame) / 1000, 0.1);
   lastFrame = now;
   curTime += dt * settings.value.rate;
+  if (loopOn.value && curTime >= loopRange(tl)[1]) seekLoopStart();
   processHits(tl);
   if (curTime >= tl.totalTime) {
     curTime = tl.totalTime;
@@ -400,13 +462,14 @@ function draw() {
   for (let i = lowerBound(cStart, posNow - maxLen); i < cStart.length && cStart[i] <= posTop; i++) {
     if (cEnd[i] < posNow) continue;
     const lane = la ? la.cnLanes[i] : tl.cnKeys[i];
+    const color = s.noteColor === 'key' ? tl.cnKeys[i] : lane;
     const flags = tl.cnFlags[i];
     const yTop = yOf(Math.min(cEnd[i], posTop + 1));
     const yBottom = yOf(Math.max(cStart[i], posNow));
     const inset = ws[lane] * 0.18;
-    g.fillStyle = CN_BODY[lane];
+    g.fillStyle = CN_BODY[color];
     g.fillRect(xs[lane] + inset, yTop, ws[lane] - inset * 2, yBottom - yTop);
-    g.fillStyle = NOTE_COLOR[lane];
+    g.fillStyle = NOTE_COLOR[color];
     if (flags & 1 && cStart[i] >= posNow) g.fillRect(xs[lane] + 1, yOf(cStart[i]) - noteH, ws[lane] - 2, noteH);
     if (flags & 2 && cEnd[i] <= posTop) g.fillRect(xs[lane] + 1, yOf(cEnd[i]) - noteH, ws[lane] - 2, noteH);
     // 押している最中の CN はレーンを光らせ続ける
@@ -417,7 +480,7 @@ function draw() {
   const nPos = beat ? tl.noteTicks : tl.noteTimes;
   for (let i = lowerBound(nPos, posNow); i < nPos.length && nPos[i] <= posTop; i++) {
     const lane = la ? la.noteLanes[i] : tl.noteKeys[i];
-    g.fillStyle = NOTE_COLOR[lane];
+    g.fillStyle = NOTE_COLOR[s.noteColor === 'key' ? tl.noteKeys[i] : lane];
     g.fillRect(xs[lane] + 1, Math.round(yOf(nPos[i])) - noteH, ws[lane] - 2, noteH);
   }
 
@@ -639,11 +702,45 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                     class="pattern-input tabular-nums rounded border bg-white dark:bg-slate-700 px-2 py-1.5"
                     :class="patternInvalid ? 'border-red-400 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'"
                     @input="onPatternInput" />
+                  <PatternChips v-if="!patternInvalid" :pattern="shownPattern" />
                 </template>
-                <span v-else-if="shownPattern" class="pattern-text tabular-nums">{{ shownPattern }}</span>
+                <PatternChips v-else-if="shownPattern" :pattern="shownPattern" />
                 <span v-else class="text-slate-400 dark:text-slate-500">ノーツごとにランダム</span>
                 <button v-if="settings.option !== 'mirror'" type="button" class="reroll" @click="reroll">引き直す</button>
                 <span v-if="patternInvalid" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
+              </div>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="setting-label">ノーツの色</span>
+            <div class="seg">
+              <button type="button" :class="{ on: settings.noteColor === 'lane' }" @click="settings.noteColor = 'lane'">レーン</button>
+              <button type="button" :class="{ on: settings.noteColor === 'key' }" title="元の白鍵を白、元の黒鍵を青で塗る"
+                @click="settings.noteColor = 'key'">元の鍵盤</button>
+            </div>
+          </div>
+          <div class="setting setting-wide setting-loop">
+            <span class="setting-label">区間リピート</span>
+            <div class="loop-body">
+              <label class="loop-point">
+                <span class="loop-tag">A</span>
+                <select v-model.number="loopA" aria-label="区間の開始小節"
+                  class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-1.5 py-1.5">
+                  <option v-for="m in measureOptions" :key="m.index" :value="m.index">小節 {{ m.label }}</option>
+                </select>
+                <button type="button" class="loop-here" title="今の小節を A にする" @click="setLoopPoint('a')">今</button>
+              </label>
+              <label class="loop-point">
+                <span class="loop-tag">B</span>
+                <select v-model.number="loopB" aria-label="区間の終了小節"
+                  class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-1.5 py-1.5">
+                  <option v-for="m in measureOptions" :key="m.index" :value="m.index" :disabled="m.index < loopA">小節 {{ m.label }}</option>
+                </select>
+                <button type="button" class="loop-here" title="今の小節を B にする" @click="setLoopPoint('b')">今</button>
+              </label>
+              <div class="seg">
+                <button type="button" :class="{ on: loopOn }" @click="setLoopOn(true)">ON</button>
+                <button type="button" :class="{ on: !loopOn }" @click="setLoopOn(false)">OFF</button>
               </div>
             </div>
           </div>
@@ -664,7 +761,10 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
         </div>
         <p class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
           楽曲の音声は再生されません。譜面をタップ（クリック）で再生／一時停止<span class="pc-only">、マウスの上下ドラッグで前後に移動、←→キーで小節送り</span>できます。
+          区間リピートは B の小節の終わりまで流すと、A の 1 秒前に戻ります。
         </p>
+        <RandomPanel v-if="timeline" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
+          @apply="applyPattern" />
       </div>
     </template>
   </div>
@@ -789,7 +889,6 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   gap: 0.5rem;
 }
 .pattern-input { width: 5.5rem; letter-spacing: 0.12em; font-weight: 700; }
-.pattern-text { font-weight: 700; letter-spacing: 0.12em; }
 .reroll {
   padding: 0.35rem 0.7rem;
   border-radius: 0.375rem;
@@ -800,6 +899,35 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 .reroll:hover { background: rgb(239 246 255); }
 .dark .reroll { color: rgb(147 197 253); border-color: rgb(30 64 175); }
 .dark .reroll:hover { background: rgb(30 41 59); }
+
+.loop-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+.loop-point { display: inline-flex; align-items: center; gap: 0.3rem; }
+.loop-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  color: white;
+  background: rgb(100 116 139);
+}
+.loop-here {
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  color: rgb(37 99 235);
+  border: 1px solid rgb(147 197 253);
+}
+.dark .loop-here { color: rgb(147 197 253); border-color: rgb(30 64 175); }
 
 .pc-only { display: none; }
 @media (hover: hover) and (pointer: fine) {
