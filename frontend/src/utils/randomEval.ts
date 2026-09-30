@@ -7,6 +7,7 @@
  * RANDOM は鍵盤をレーンごと入れ替えるだけなので、同じ鍵盤の縦連打や総ノーツ数はどの並びでも変わらない。
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
+ * 16 分より速い音符ほど少しずつ重く数える（{@link speedFactor}。24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍）。
  * 密度の高いところほど配置を優先する: どの指標も、打鍵ごとに周り ±{@link DENSITY_HALF} 秒のノーツ数（皿を含む）を
  * 譜面内の最大で割って {@link HARD_POWER} 乗した重みで数える（難所の配置ほど順位に効き、スカスカの区間はほとんど効かない）。
  *
@@ -18,7 +19,7 @@
  *   片手ずつに収められる配置が当たり（rage against usual の 25-36-47-36-25-14 で皿側に 1・4・7、嘆きの樹の白黒分けなど）
  * - 連皿中は逆の手: 連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、
  *   皿を回さない方の手に来る割合（連皿中は皿側の手が塞がるので、同じ手に来ない方が良い）
- * - 16 分が左右に割れる（難所重視）: 16 分間隔で続く 2 つの打鍵（和音）で、どちらの手も片方の打鍵にしか鍵盤が無い
+ * - 16 分が左右に割れる（難所重視）: 16 分以上の速さ（16 分・24 分・32 分…）で続く 2 つの打鍵（和音）で、どちらの手も片方の打鍵にしか鍵盤が無い
  *   （手が形を切り替えずに済む。デニム配置などが「割れる」）割合。組ごとに周り ±{@link DENSITY_HALF} 秒のノーツ数の
  *   {@link HARD_POWER} 乗で重みをつけ、譜面の密度の高い区間（難所）ほど効かせる。嘆きの樹 59 小節からの密集地帯で
  *   黒黒黒白白白白（2461357 など）・白白白黒白黒黒（3572146 など）が上に来るのはこれ
@@ -58,9 +59,22 @@ export const FAST_GAP = 0.105;
 /** 難所重視の重み: 打鍵の周り ±DENSITY_HALF 秒のノーツ数（皿を含む）を譜面内の最大で割って HARD_POWER 乗 */
 const DENSITY_HALF = 1.0;
 const HARD_POWER = 4;
-/** 16 分とみなす打鍵の間隔（tick。4 分 = 96、16 分 = 24。わずかに詰まった配置も含める） */
-const SIXTEENTH_MIN = 20;
+/**
+ * 16 分以上の速さとみなす打鍵の間隔（tick。4 分 = 96、16 分 = 24、24 分 = 16、32 分 = 12）。
+ * 16 分が左右に割れるかは、この間隔で続く組（16 分と、それより速い 24 分・32 分など）を見る
+ */
+const SIXTEENTH_MIN = 1;
 const SIXTEENTH_MAX = 24;
+/**
+ * 16 分より速い音符ほど少しずつ重く数える（速さの重み）。直前・直後の打鍵との近い方の間隔で決め、
+ * 16 分以上の間隔は 1、24 分 1.25、32 分 1.5、48 分以上の速さは 2（上限）。密度の重みに掛けるので、どの指標にも効く
+ */
+const SPEED_BASE_TICKS = 24;
+const SPEED_MAX = 2;
+function speedFactor(gapTicks: number): number {
+  if (!(gapTicks > 0) || gapTicks >= SPEED_BASE_TICKS) return 1;
+  return Math.min(SPEED_MAX, 1 + 0.5 * (SPEED_BASE_TICKS / gapTicks - 1));
+}
 /** 連続スクラッチとみなす皿どうしの間隔（秒。BPM 140 の 16 分 = 60 / 140 / 4）と、続く回数 */
 const STREAM_GAP = 60 / 140 / 4 + 1e-6;
 const STREAM_MIN_NOTES = 3;
@@ -212,7 +226,13 @@ function prepare(tl: ChartTimeline): Prepared {
     return upperBoundNum(times, t + DENSITY_HALF) - lowerBoundNum(times, t - DENSITY_HALF);
   });
   const dMax = Math.max(1, ...density);
-  const chordWeights = density.map(d => Math.pow(d / dMax, HARD_POWER));
+  // 密度の重み × 速さの重み（直前・直後の打鍵との近い方の間隔。16 分より速いほど重い）
+  const tickOf = (c: number) => events[chords[c][0]].tick;
+  const chordWeights = density.map((d, c) => {
+    const gapPrev = c > 0 ? tickOf(c) - tickOf(c - 1) : Infinity;
+    const gapNext = c + 1 < chords.length ? tickOf(c + 1) - tickOf(c) : Infinity;
+    return Math.pow(d / dMax, HARD_POWER) * speedFactor(Math.min(gapPrev, gapNext));
+  });
   const pairWeights = pairs16.map(c => chordWeights[c + 1]);
 
   // 16 分縦連の衝突: 窓ごとに、鍵盤ごとの 16 分縦連・連打・打鍵の量と、鍵盤の組が同じ和音で出た量を数え、
