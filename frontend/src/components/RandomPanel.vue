@@ -9,7 +9,7 @@
  */
 import { ref, computed, watch } from 'vue';
 import type { ChartTimeline } from '../utils/chartPlayback';
-import { evaluateRandom, identifyRandom, WHITE_KEYS, type RandomEvaluation, type RandomCandidate } from '../utils/randomEval';
+import { evaluateRandom, identifyRandom, WHITE_KEYS, type RandomEvaluation, type RandomCandidate, type RandomMetrics } from '../utils/randomEval';
 import PatternChips from './PatternChips.vue';
 
 const props = defineProps<{
@@ -77,8 +77,17 @@ const bestRRandom = computed(() => {
 });
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
-function metricLine(m: { scratchCombo: number; fastSameHand: number; bigChords: number; peakHandDensity: number }) {
-  return `皿複合 ${m.scratchCombo} ／ 片手連打 ${Math.round(m.fastSameHand)} ／ 片手3鍵以上 ${m.bigChords} ／ 片手最大 ${m.peakHandDensity}/秒`;
+/** 割合の表示（分母 0 は「—」） */
+function rate(ok: number, total: number): string {
+  return total > 0 ? `${Math.round((ok / total) * 100)}%` : '—';
+}
+/** 重く見る 2 つ（皿同時・16 分交互） */
+function keyLine(m: RandomMetrics) {
+  return `皿と同時に取れる ${rate(m.scratchSimulOk, m.scratchSimulTotal)} ／ 16分の左右交互 ${rate(m.alt16, m.sixteenthPairs)}`;
+}
+/** そのほかの負荷 */
+function metricLine(m: RandomMetrics) {
+  return `皿の前後 ${m.scratchNear} ／ 片手連打 ${Math.round(m.fastSameHand)} ／ 片手3鍵以上 ${m.bigChords} ／ 片手最大 ${m.peakHandDensity}/秒`;
 }
 </script>
 
@@ -156,6 +165,7 @@ function metricLine(m: { scratchCombo: number; fastSameHand: number; bigChords: 
               <b class="text-slate-800 dark:text-white tabular-nums">{{ current.rank }} 位</b>
               <span class="text-slate-400 dark:text-slate-500">（上位 {{ percent(current.rank) }}%）</span>
             </div>
+            <div v-if="current" class="key-line">{{ keyLine(current.metrics) }}</div>
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
               <span v-if="offRank">正規 {{ offRank.rank }} 位</span>
               <span v-if="mirRank">MIRROR {{ mirRank.rank }} 位</span>
@@ -172,7 +182,10 @@ function metricLine(m: { scratchCombo: number; fastSameHand: number; bigChords: 
                 <span v-if="g.others" class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">ほか同点 {{ g.others }} 通り</span>
               </span>
               <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)">この並びで再生</button>
-              <span class="cand-metrics text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(g.head.metrics) }}</span>
+              <span class="cand-metrics">
+                <span class="key-line">{{ keyLine(g.head.metrics) }}</span>
+                <span class="block text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(g.head.metrics) }}</span>
+              </span>
             </li>
           </ol>
 
@@ -187,15 +200,21 @@ function metricLine(m: { scratchCombo: number; fastSameHand: number; bigChords: 
                 <span v-if="g.others" class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">ほか同点 {{ g.others }} 通り</span>
               </span>
               <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)">この並びで再生</button>
-              <span class="cand-metrics text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(g.head.metrics) }}</span>
+              <span class="cand-metrics">
+                <span class="key-line">{{ keyLine(g.head.metrics) }}</span>
+                <span class="block text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(g.head.metrics) }}</span>
+              </span>
             </li>
           </ol>
 
           <p class="mt-3 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。ここでは手の負荷の違いを数えています:
-            皿複合＝皿の前後 0.1 秒に皿側の手へ来るノーツ、片手連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵（離れたレーンほど重い）、
+            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。当たり配置の決め手として次の 2 つを特に重く見ています:
+            皿と同時に取れる＝皿と同じタイミングの鍵盤が、皿を回さない方の手に来る割合。
+            16分の左右交互＝16 分で続く打鍵が左右の手で交互になる割合（両手の和音をはさむ組はどの並びでも交互にならないので、100% にはなりません）。
+            この 2 つはこの譜面で一番良い並びとの差を重みづけして足し、さらに次の負荷で差をつけています:
+            皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ、片手連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵（離れたレーンほど重い）、
             片手3鍵以上＝1 つの手で 3 鍵以上の同時押し、片手最大＝片手の 1 秒あたりの最大ノーツ数。
-            順位はこの 4 つを全並びの中央値で割って足したものです。運指や CN の押しっぱなしは考えていない目安です。
+            運指や CN の押しっぱなしは考えていない目安です。
           </p>
         </template>
       </div>
@@ -276,6 +295,8 @@ function metricLine(m: { scratchCombo: number; fastSameHand: number; bigChords: 
 .rank { font-weight: 700; text-align: right; color: rgb(100 116 139); }
 .cand-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
 .cand-metrics { grid-column: 2 / -1; }
+.key-line { display: block; font-size: 11px; font-weight: 600; color: rgb(4 120 87); }
+.dark .key-line { color: rgb(110 231 183); }
 .apply-btn {
   padding: 0.35rem 0.6rem;
   border-radius: 0.375rem;
