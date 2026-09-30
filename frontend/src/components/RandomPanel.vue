@@ -9,7 +9,7 @@
  */
 import { ref, computed, watch } from 'vue';
 import type { ChartTimeline } from '../utils/chartPlayback';
-import { evaluateRandom, identifyRandom, rankLayouts, layoutOf, WHITE_KEYS, type RandomEvaluation, type RandomCandidate, type RandomMetrics } from '../utils/randomEval';
+import { evaluateRandom, identifyRandom, rankLayouts, layoutOf, WHITE_KEYS, type RandomEvaluation, type RandomCandidate } from '../utils/randomEval';
 import PatternChips from './PatternChips.vue';
 
 const props = defineProps<{
@@ -92,27 +92,6 @@ const isTopTenth = (rank: number) => rank <= TOP_TENTH;
 const topTenthLabels = computed(() => baseRows.value.filter(b => isTopTenth(b.cand.rank)).map(b => b.label));
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
-/** 割合の表示（分母 0 は「—」） */
-function rate(ok: number, total: number): string {
-  return total > 0 ? `${Math.round((ok / total) * 100)}%` : '—';
-}
-/** 重く見る指標。連皿・6-7 トリルは無い譜面（並び）では出さない */
-function keyLine(m: RandomMetrics) {
-  const parts: string[] = [];
-  if (m.streamTotal > 0) parts.push(`連皿中は逆の手 ${rate(m.streamOk, m.streamTotal)}`);
-  parts.push(`16分が左右に割れる ${rate(m.split16, m.split16Total)}`);
-  parts.push(`両手にまたがる同時押し ${Math.round(m.chordStraddle * 10) / 10}`);
-  if (m.jackClash > 0) parts.push(`16分縦連の衝突 ${Math.round(m.jackClash * 10) / 10}`);
-  if (m.cleanTotal > 0) parts.push(`きれいな形 ${rate(m.cleanShape, m.cleanTotal)}`);
-  parts.push(`片手の速い連打 ${Math.round(m.fastSameHand)}`);
-  if (m.trill67 > 0) parts.push(`6・7トリル ${m.trill67}`);
-  parts.push(`皿と同時に取れる ${rate(m.scratchSimulOk, m.scratchSimulTotal)}`);
-  return parts.join(' ／ ');
-}
-/** そのほかの負荷 */
-function metricLine(m: RandomMetrics) {
-  return `皿の前後 ${Math.round(m.scratchNear * 10) / 10} ／ 片手最大 ${m.peakHandDensity}/秒`;
-}
 </script>
 
 <template>
@@ -189,7 +168,6 @@ function metricLine(m: RandomMetrics) {
               <b class="text-slate-800 dark:text-white tabular-nums">{{ current.rank }} 位</b>
               <span class="text-slate-400 dark:text-slate-500">（上位 {{ percent(current.rank) }}%）</span>
             </div>
-            <div v-if="current" class="key-line">{{ keyLine(current.metrics) }}</div>
           </div>
 
           <!-- 白黒の配置（黒鍵 3 つがどのレーンに来るか、35 通り）。プレーヤーは RANDOM をこの単位で語ることが多い -->
@@ -204,13 +182,10 @@ function metricLine(m: RandomMetrics) {
               <span class="rank tabular-nums">{{ l.rank }}</span>
               <span class="cand-pattern">
                 <span class="layout"><span v-for="(c, i) in l.layout" :key="i" class="lcell" :class="c === 'W' ? 'w' : 'b'"></span></span>
-                <span class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">最良</span>
+                <span class="best-label text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">最良</span>
                 <PatternChips :pattern="l.best.pattern" small />
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', l.best.pattern)">この並びで再生</button>
-              <span class="cand-metrics">
-                <span class="key-line">{{ keyLine(l.best.metrics) }}</span>
-              </span>
+              <button type="button" class="apply-btn" @click="emit('apply', l.best.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
             </li>
           </ol>
 
@@ -222,15 +197,11 @@ function metricLine(m: RandomMetrics) {
               <span class="rank tabular-nums">{{ b.cand.rank }}</span>
               <span class="cand-pattern">
                 <span class="base-label">{{ b.label }}</span>
-                <PatternChips :pattern="b.cand.pattern" />
+                <PatternChips :pattern="b.cand.pattern" small />
                 <span v-if="isTopTenth(b.cand.rank)" class="top-badge">上位5%</span>
                 <span v-else class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">上位 {{ percent(b.cand.rank) }}%</span>
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', b.cand.pattern)">この並びで再生</button>
-              <span class="cand-metrics">
-                <span class="key-line">{{ keyLine(b.cand.metrics) }}</span>
-                <span class="block text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(b.cand.metrics) }}</span>
-              </span>
+              <button type="button" class="apply-btn" @click="emit('apply', b.cand.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
             </li>
           </ol>
 
@@ -239,14 +210,10 @@ function metricLine(m: RandomMetrics) {
             <li v-for="g in top" :key="g.head.pattern" :class="{ current: g.head.pattern === currentPattern }">
               <span class="rank tabular-nums">{{ g.head.rank }}</span>
               <span class="cand-pattern">
-                <PatternChips :pattern="g.head.pattern" />
+                <PatternChips :pattern="g.head.pattern" small />
                 <span v-if="g.others" class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">ほか同点 {{ g.others }} 通り</span>
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)">この並びで再生</button>
-              <span class="cand-metrics">
-                <span class="key-line">{{ keyLine(g.head.metrics) }}</span>
-                <span class="block text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(g.head.metrics) }}</span>
-              </span>
+              <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
             </li>
           </ol>
 
@@ -257,18 +224,16 @@ function metricLine(m: RandomMetrics) {
             <li v-for="g in worst" :key="g.head.pattern" :class="{ current: g.head.pattern === currentPattern }">
               <span class="rank tabular-nums">{{ g.head.rank }}</span>
               <span class="cand-pattern">
-                <PatternChips :pattern="g.head.pattern" />
+                <PatternChips :pattern="g.head.pattern" small />
                 <span v-if="g.others" class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">ほか同点 {{ g.others }} 通り</span>
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)">この並びで再生</button>
-              <span class="cand-metrics">
-                <span class="key-line">{{ keyLine(g.head.metrics) }}</span>
-                <span class="block text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(g.head.metrics) }}</span>
-              </span>
+              <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
             </li>
           </ol>
 
-          <p class="mt-3 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
+          <details class="criteria mt-3">
+            <summary>評価基準を見る</summary>
+          <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
             RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。白黒の配置の順位は、その配置の中で一番良い並びで比べています。
             密度の高いところほど配置を優先します: どの指標も、打鍵ごとに周り 1 秒のノーツ数（皿を含む）が多いほど重く数えます。
             16 分より速い音符ほど少しずつ重く数えます（24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍。割合・回数は重みつきの値です）。当たり配置の決め手として次の 5 つを特に重く見ています:
@@ -288,6 +253,7 @@ function metricLine(m: RandomMetrics) {
             片手で自分のレーンの鍵盤をまとめて押す和音（白黒分けの 246 など）は普通の押し方なので負荷に数えていません。
             運指や CN の押しっぱなしは考えていない目安です。
           </p>
+          </details>
         </template>
       </div>
     </details>
@@ -329,10 +295,12 @@ function metricLine(m: RandomMetrics) {
 .dark .cell.b { background: rgb(30 58 138 / 0.5); }
 .dark .cell.w.on { background: rgb(241 245 249); box-shadow: none; }
 .dark .cell.b.on { background: rgb(59 130 246); }
-/* スマホ幅では並び（7 マス）とボタンが横に並ばないので、ボタンを指標の下の行へ */
+/* スマホ幅では 1 行に収めるため、ボタンを「再生」に縮め、配置の「最良」の文字を省く */
+.btn-short { display: none; }
 @media (max-width: 479px) {
-  .cand-list li { grid-template-columns: 2rem minmax(0, 1fr); }
-  .cand-list .apply-btn { grid-column: 2; grid-row: 3; justify-self: start; }
+  .cand-list li { grid-template-columns: 1.6rem minmax(0, 1fr) auto; column-gap: 0.4rem; }
+  .btn-long, .best-label { display: none; }
+  .btn-short { display: inline; }
 }
 @media (max-width: 419px) {
   .cell { width: 0.62rem; }
@@ -351,14 +319,15 @@ function metricLine(m: RandomMetrics) {
 .eval-btn { padding: 0.4rem 0.8rem; border-radius: 0.375rem; font-weight: 700; color: white; background: rgb(37 99 235); white-space: nowrap; }
 .eval-btn:disabled { opacity: 0.6; }
 
-.cand-list { margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.cand-list { margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.criteria > summary { cursor: pointer; font-size: 11px; font-weight: 600; color: rgb(100 116 139); }
 .cand-list li {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr) auto;
   align-items: center;
   column-gap: 0.6rem;
   row-gap: 0.2rem;
-  padding: 0.4rem 0.5rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   background: rgb(248 250 252);
 }
@@ -366,7 +335,6 @@ function metricLine(m: RandomMetrics) {
 .dark .cand-list li { background: rgb(30 41 59); }
 .rank { font-weight: 700; text-align: right; color: rgb(100 116 139); }
 .cand-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
-.cand-metrics { grid-column: 2 / -1; }
 /* 正規・MIRROR・R-RANDOM が上位 5% に入ったとき */
 .cand-list li.top-tenth { background: rgb(254 243 199); box-shadow: inset 0 0 0 2px rgb(245 158 11); }
 .dark .cand-list li.top-tenth { background: rgb(120 53 15 / 0.35); box-shadow: inset 0 0 0 2px rgb(217 119 6); }
@@ -396,8 +364,6 @@ function metricLine(m: RandomMetrics) {
 .dark .lcell.b { background: rgb(59 130 246); }
 .base-label { font-weight: 700; color: rgb(51 65 85); white-space: nowrap; }
 .dark .base-label { color: rgb(226 232 240); }
-.key-line { display: block; font-size: 11px; font-weight: 600; color: rgb(4 120 87); }
-.dark .key-line { color: rgb(110 231 183); }
 .apply-btn {
   padding: 0.35rem 0.6rem;
   border-radius: 0.375rem;

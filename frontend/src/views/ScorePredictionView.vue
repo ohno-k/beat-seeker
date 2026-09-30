@@ -27,6 +27,7 @@ import { useAdmin } from '../composables/useAdmin';
 import { useI18n } from '../composables/useI18n';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
 import ChartPlayer from '../components/ChartPlayer.vue';
+import RandomRanking from '../components/RandomRanking.vue';
 
 // props: 他人のIDを指定された場合の閲覧モード（admin=管理者、friend=フレンド閲覧）
 const props = defineProps<{
@@ -76,6 +77,7 @@ const searchQuery = ref('');                          // 検索文字列（曲�
 const levelFilter = ref<'all' | 12 | 11 | 'low'>('all'); // レベル絞り込み（low = ☆10 以下）
 const selectedEntry = ref<SongDataEntry | null>(null); // 現在選択中の曲
 const pickerOpen = ref(false);                        // モバイルで曲を選んだ後に一覧を開き直しているか
+const pageTab = ref<'analysis' | 'ranking'>('analysis'); // ページ内のタブ（譜面分析 / 当たり配置ランキング）
 const LIST_PAGE = 150;
 const listLimit = ref(LIST_PAGE);                     // 一覧に描画する件数（「さらに表示」で増やす）
 
@@ -131,6 +133,19 @@ function selectEntry(entry: SongDataEntry) {
   if (entry.textage) {
     fetchPrediction(entry.textage);
   }
+}
+
+/** 当たり配置ランキングの行から、その譜面を譜面分析タブで開く。 */
+function openChartFromRanking(textage: string) {
+  pageTab.value = 'analysis';
+  const entry = targetEntries.value.find(s => s.textage === textage);
+  if (entry) {
+    selectEntry(entry);
+  } else {
+    const path = textageToPath(textage);
+    if (path) router.push(path);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /** 今の絞り込みの中からランダムに 1 譜面選ぶ（絞り込み結果が空なら全体から）。 */
@@ -628,6 +643,15 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
       </p>
     </header>
 
+    <!-- ページ内のタブ: 譜面ごとの分析 / 全譜面の当たり配置ランキング -->
+    <nav class="page-tabs mb-4" role="tablist">
+      <button type="button" role="tab" :aria-selected="pageTab === 'analysis'" :class="{ on: pageTab === 'analysis' }"
+        @click="pageTab = 'analysis'">譜面分析</button>
+      <button type="button" role="tab" :aria-selected="pageTab === 'ranking'" :class="{ on: pageTab === 'ranking' }"
+        @click="pageTab = 'ranking'">当たり配置ランキング</button>
+    </nav>
+
+    <template v-if="pageTab === 'analysis'">
     <!-- 管理者が他ユーザーを閲覧中の注意バナー -->
     <div v-if="isAdminViewing"
       class="mb-5 flex items-center gap-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 px-4 py-2.5 text-xs text-indigo-700 dark:text-indigo-300 font-medium"
@@ -982,6 +1006,10 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
         </div>
       </div>
     </div>
+    </template>
+
+    <!-- 当たり配置ランキング: 正規・MIRROR・R-RANDOM・自由入力の並びが各譜面で何位か（1P 基準・事前計算） -->
+    <RandomRanking v-else @open="openChartFromRanking" />
 
     <!-- 類似度デバッグモーダル（管理者機能）: 計算過程を4グループに分けて表示 -->
     <Teleport to="body">
@@ -1110,6 +1138,24 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
 <style scoped>
 /* レスポンシブは Tailwind の sm:/lg: ではなくここで書く（src/output.css が後勝ちで潰すため） */
+.page-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid rgb(226 232 240);
+}
+.page-tabs button {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgb(100 116 139);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.page-tabs button.on { color: rgb(37 99 235); border-bottom-color: rgb(37 99 235); }
+.dark .page-tabs { border-bottom-color: rgb(51 65 85); }
+.dark .page-tabs button { color: rgb(148 163 184); }
+.dark .page-tabs button.on { color: rgb(96 165 250); border-bottom-color: rgb(96 165 250); }
 .chart-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
