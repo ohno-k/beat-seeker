@@ -403,6 +403,8 @@ export const ja = {
   'table.judgeScatterTier': '単曲ティア',
   'table.judgeScatterZoomSelf': '自分の周辺をズーム',
   'table.judgeScatterZoomReset': '全体を表示',
+  'table.judgeScatterZoomHintPc': 'ドラッグで範囲を囲んで拡大 / Ctrl+ホイールで拡大縮小 / Shift+ドラッグで移動 / ダブルクリックで元に戻す',
+  'table.judgeScatterZoomHintTouch': 'ピンチで拡大縮小 / 拡大中は指でなぞって移動',
   'table.songRankDistNote': '{n}人のスコアを集計（非公開ユーザー含む・匿名）',
   'table.milestone': '大台',
   'table.milestonePlayers': '集計人数',

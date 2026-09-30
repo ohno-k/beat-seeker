@@ -9,16 +9,19 @@
  * - 点: 呼び出し側が可視範囲に絞った実ユーザー（自分 / フレンド / その他）
  * - 回帰線: 呼び出し側が全ユーザー（非公開含む・匿名）で求めた最小二乗直線
  * - 「自分の周辺」ボタン: 自分の点の前後 2 ティアずつに X 軸を絞る。Y 軸は下限 = 回帰線の左端、上限 = その範囲の点に合わせる。
+ * - 手動ズーム（chartjs-plugin-zoom）: PC はドラッグで範囲選択・Ctrl+ホイール（トラックパッドのピンチ含む）・Shift+ドラッグで移動、
+ *   スマホはピンチ。拡大していないときは 1 本指の縦スクロールをページに渡す（touch-action: pan-y）。
  */
 import { computed, ref } from 'vue';
 import {
   Chart as ChartJS, LinearScale, PointElement, LineElement, Tooltip, Legend,
 } from 'chart.js';
+import zoomPlugin from 'chartjs-plugin-zoom';
 import { Scatter } from 'vue-chartjs';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useI18n } from '../composables/useI18n';
 
-ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
+ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend, zoomPlugin);
 
 export interface JudgeScatterPoint {
   key: string;
@@ -138,6 +141,43 @@ const zoomXRange = computed<[number, number] | null>(() => {
 
 /** ズーム表示中か（自分の点が無ければ常に全体表示）。 */
 const isZoomed = computed(() => zoomSelf.value && !!zoomXRange.value);
+
+const chartRef = ref<any>(null);
+
+/** ピンチ・ホイール・ドラッグで手動ズーム / パン中か（「元に戻す」ボタンの表示用）。 */
+const userZoomed = ref(false);
+
+/** タッチ主体の端末か（操作ヒントの出し分け用）。 */
+const isTouchDevice = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
+
+function syncUserZoomed(chart: any) {
+  userZoomed.value = !!chart?.isZoomedOrPanned?.();
+}
+
+/** 手動ズームを解除する（「自分の周辺」の範囲 or 全体表示に戻る）。 */
+function resetUserZoom() {
+  const c = chartRef.value?.chart;
+  if (c && typeof c.resetZoom === 'function') c.resetZoom('none');
+  userZoomed.value = false;
+}
+
+/** 「自分の周辺」の切替。手動ズームの元範囲が切替前のまま残らないよう先に解除する。 */
+function toggleZoomSelf() {
+  resetUserZoom();
+  zoomSelf.value = !zoomSelf.value;
+}
+
+// プラグイン: 拡大していないときは 1 本指の縦ドラッグでページをスクロールできるようにする。
+// Hammer.js（chartjs-plugin-zoom のピンチ / パン）は canvas に touch-action: none を付けるので、update のたびに上書きする。
+// pan-y でも 2 本指のピンチは Hammer に届く。拡大中は none のままにして 1 本指のパンをグラフに渡す。
+// ダークモード切替などで options が差し替わると手動ズームも外れるので、ここで userZoomed も合わせる。
+const touchActionPlugin = {
+  id: 'judgeTouchAction',
+  afterUpdate(chart: any) {
+    syncUserZoomed(chart);
+    chart.canvas.style.touchAction = userZoomed.value ? 'none' : 'pan-y';
+  },
+};
 
 const xRange = computed<[number, number]>(() =>
   (isZoomed.value ? zoomXRange.value! : [fullXMin.value, fullXMax.value]));
@@ -353,6 +393,28 @@ const chartOptions = computed(() => {
       },
       // 自前プラグインへ帯とダーク/ライトを伝える。
       judgeTierBands: { bands: props.tierBands, dark },
+      zoom: {
+        // 全体表示より外には出さない（「自分の周辺」表示中でも全体までは縮小できる）。
+        limits: {
+          x: { min: fullXMin.value, max: fullXMax.value, minRange: 10 },
+          y: { min: 0, max: 100, minRange: 0.5 },
+        },
+        // Shift はマウスのときだけ効く（タッチの 1 本指パンには不要）。
+        pan: { enabled: true, mode: 'xy' as const, modifierKey: 'shift' as const, onPanComplete: ({ chart }: any) => syncUserZoomed(chart) },
+        zoom: {
+          wheel: { enabled: true, speed: 0.1, modifierKey: 'ctrl' as const },
+          pinch: { enabled: true },
+          drag: {
+            enabled: true,
+            threshold: 5,
+            backgroundColor: dark ? 'rgba(96,165,250,0.15)' : 'rgba(59,130,246,0.12)',
+            borderColor: dark ? 'rgba(96,165,250,0.8)' : 'rgba(59,130,246,0.8)',
+            borderWidth: 1,
+          },
+          mode: 'xy' as const,
+          onZoomComplete: ({ chart }: any) => syncUserZoomed(chart),
+        },
+      },
       tooltip: {
         backgroundColor: dark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.97)',
         titleColor: dark ? '#f1f5f9' : '#0f172a',
@@ -384,10 +446,23 @@ const chartOptions = computed(() => {
 
 <template>
   <div>
-    <div v-if="selfPoint" class="flex justify-end mb-1">
+    <div class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 mb-1">
+      <p class="mr-auto text-[10px] text-slate-400 dark:text-slate-500">{{ isTouchDevice ? t('table.judgeScatterZoomHintTouch') : t('table.judgeScatterZoomHintPc') }}</p>
       <button
+        v-if="userZoomed"
         type="button"
-        @click="zoomSelf = !zoomSelf"
+        @click="resetUserZoom"
+        class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-md border transition-colors bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 4l-7 7M4 20l7-7" />
+        </svg>
+        {{ t('table.resetZoom') }}
+      </button>
+      <button
+        v-if="selfPoint"
+        type="button"
+        @click="toggleZoomSelf"
         class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-md border transition-colors"
         :class="zoomSelf
           ? 'bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700'
@@ -400,8 +475,8 @@ const chartOptions = computed(() => {
         {{ zoomSelf ? t('table.judgeScatterZoomReset') : t('table.judgeScatterZoomSelf') }}
       </button>
     </div>
-    <div class="h-64 sm:h-72">
-      <Scatter :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin]" />
+    <div class="h-96 sm:h-[32rem]" @dblclick="resetUserZoom">
+      <Scatter ref="chartRef" :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin, touchActionPlugin]" />
     </div>
   </div>
 </template>

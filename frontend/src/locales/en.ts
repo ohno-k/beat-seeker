@@ -420,6 +420,8 @@ export const en = {
   'table.judgeScatterTier': 'Song tier',
   'table.judgeScatterZoomSelf': 'Zoom to me',
   'table.judgeScatterZoomReset': 'Show all',
+  'table.judgeScatterZoomHintPc': 'Drag a box to zoom in / Ctrl+wheel to zoom / Shift+drag to pan / double-click to reset',
+  'table.judgeScatterZoomHintTouch': 'Pinch to zoom / drag with one finger to pan while zoomed',
   'table.noUnofficialData': 'No unofficial difficulty data found. Please check if level ☆11/☆12 scores are included.',
 
   'beatTierInfo.title': 'Beat-Tier Stats System',

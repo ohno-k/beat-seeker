@@ -419,6 +419,8 @@ export const ko = {
   'table.judgeScatterTier': '단일 곡 티어',
   'table.judgeScatterZoomSelf': '내 주변 확대',
   'table.judgeScatterZoomReset': '전체 보기',
+  'table.judgeScatterZoomHintPc': '드래그로 범위를 지정해 확대 / Ctrl+휠로 확대·축소 / Shift+드래그로 이동 / 더블클릭으로 원래대로',
+  'table.judgeScatterZoomHintTouch': '핀치로 확대·축소 / 확대 중에는 한 손가락으로 끌어서 이동',
   'table.noUnofficialData': '비공식 난이도 데이터를 찾을 수 없습니다. 대상 레벨(☆11, ☆12)이 포함되어 있는지 확인해 주세요.',
 
   'beatTierInfo.title': 'Beat-Tier 통계 시스템',
