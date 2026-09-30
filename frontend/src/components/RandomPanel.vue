@@ -75,15 +75,26 @@ const bestRRandom = computed(() => {
   for (const base of ['1234567', '7654321']) for (let s = 1; s <= 6; s++) rots.push(base.slice(s) + base.slice(0, s));
   return rots.map(p => ev.byPattern.get(p)!).sort((a, b) => a.rank - b.rank)[0];
 });
+/** 正規・MIRROR・R-RANDOM の最良（評価の前は空） */
+const baseRows = computed(() => {
+  const rows: { label: string; cand: RandomCandidate }[] = [];
+  if (offRank.value) rows.push({ label: '正規', cand: offRank.value });
+  if (mirRank.value) rows.push({ label: 'MIRROR', cand: mirRank.value });
+  if (bestRRandom.value) rows.push({ label: 'R-RAN 最良', cand: bestRRandom.value });
+  return rows;
+});
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
 /** 割合の表示（分母 0 は「—」） */
 function rate(ok: number, total: number): string {
   return total > 0 ? `${Math.round((ok / total) * 100)}%` : '—';
 }
-/** 重く見る 2 つ（皿同時・16 分交互） */
+/** 重く見る 3 つ（皿同時・連皿中は逆の手・16 分交互）。連皿の無い譜面では連皿を出さない */
 function keyLine(m: RandomMetrics) {
-  return `皿と同時に取れる ${rate(m.scratchSimulOk, m.scratchSimulTotal)} ／ 16分の左右交互 ${rate(m.alt16, m.sixteenthPairs)}`;
+  const parts = [`皿と同時に取れる ${rate(m.scratchSimulOk, m.scratchSimulTotal)}`];
+  if (m.streamTotal > 0) parts.push(`連皿中は逆の手 ${rate(m.streamOk, m.streamTotal)}`);
+  parts.push(`16分の左右交互 ${rate(m.alt16, m.sixteenthPairs)}`);
+  return parts.join(' ／ ');
 }
 /** そのほかの負荷 */
 function metricLine(m: RandomMetrics) {
@@ -166,12 +177,25 @@ function metricLine(m: RandomMetrics) {
               <span class="text-slate-400 dark:text-slate-500">（上位 {{ percent(current.rank) }}%）</span>
             </div>
             <div v-if="current" class="key-line">{{ keyLine(current.metrics) }}</div>
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-              <span v-if="offRank">正規 {{ offRank.rank }} 位</span>
-              <span v-if="mirRank">MIRROR {{ mirRank.rank }} 位</span>
-              <span v-if="bestRRandom" class="inline-flex items-center gap-1">R-RANDOM の最良 <PatternChips :pattern="bestRRandom.pattern" small /> {{ bestRRandom.rank }} 位</span>
-            </div>
           </div>
+
+          <!-- 正規・MIRROR・R-RANDOM の最良がどこに来るか（RANDOM を使うか決める目安） -->
+          <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">正規・MIRROR の順位</div>
+          <ol class="cand-list">
+            <li v-for="b in baseRows" :key="b.label" :class="{ current: b.cand.pattern === currentPattern }">
+              <span class="rank tabular-nums">{{ b.cand.rank }}</span>
+              <span class="cand-pattern">
+                <span class="base-label">{{ b.label }}</span>
+                <PatternChips :pattern="b.cand.pattern" />
+                <span class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">上位 {{ percent(b.cand.rank) }}%</span>
+              </span>
+              <button type="button" class="apply-btn" @click="emit('apply', b.cand.pattern)">この並びで再生</button>
+              <span class="cand-metrics">
+                <span class="key-line">{{ keyLine(b.cand.metrics) }}</span>
+                <span class="block text-[10px] text-slate-400 dark:text-slate-500">{{ metricLine(b.cand.metrics) }}</span>
+              </span>
+            </li>
+          </ol>
 
           <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">押しやすい並び</div>
           <ol class="cand-list">
@@ -208,11 +232,12 @@ function metricLine(m: RandomMetrics) {
           </ol>
 
           <p class="mt-3 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。当たり配置の決め手として次の 2 つを特に重く見ています:
-            皿と同時に取れる＝皿と同じタイミングの鍵盤が、皿を回さない方の手に来る割合。
+            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。当たり配置の決め手として次の 3 つを特に重く見ています:
+            皿と同時に取れる＝単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる）。
+            連皿中は逆の手＝連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿を回さない方の手に来る割合（連皿の無い譜面では出しません）。
             16分の左右交互＝16 分で続く打鍵が左右の手で交互になる割合（両手の和音をはさむ組はどの並びでも交互にならないので、100% にはなりません）。
-            この 2 つはこの譜面で一番良い並びとの差を重みづけして足し、さらに次の負荷で差をつけています:
-            皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ、片手連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵（離れたレーンほど重い）、
+            この 3 つはこの譜面で一番良い並びとの差を重みづけして足し、さらに次の負荷で差をつけています:
+            皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ（連皿の最中は除く）、片手連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵（離れたレーンほど重い）、
             片手3鍵以上＝1 つの手で 3 鍵以上の同時押し、片手最大＝片手の 1 秒あたりの最大ノーツ数。
             運指や CN の押しっぱなしは考えていない目安です。
           </p>
@@ -295,6 +320,8 @@ function metricLine(m: RandomMetrics) {
 .rank { font-weight: 700; text-align: right; color: rgb(100 116 139); }
 .cand-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
 .cand-metrics { grid-column: 2 / -1; }
+.base-label { font-weight: 700; color: rgb(51 65 85); white-space: nowrap; }
+.dark .base-label { color: rgb(226 232 240); }
 .key-line { display: block; font-size: 11px; font-weight: 600; color: rgb(4 120 87); }
 .dark .key-line { color: rgb(110 231 183); }
 .apply-btn {

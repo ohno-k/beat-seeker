@@ -7,12 +7,14 @@
  * RANDOM は鍵盤をレーンごと入れ替えるだけなので、同じ鍵盤の縦連打や総ノーツ数はどの並びでも変わらない。
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
- * 当たり配置の決め手として特に重く見る 2 つ（譜面内の最良の並びとの差を 0〜1 にして × {@link KEY_WEIGHT}）:
- * - 皿と同時に取れる: 皿と同じタイミングの鍵盤が、皿を回さない方の手に来る割合（皿側の手に来ると同時に取れない）
+ * 当たり配置の決め手として特に重く見る 3 つ（譜面内の最良の並びとの差を 0〜1 にして × {@link KEY_WEIGHT}）:
+ * - 皿と同時に取れる: 単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる。1P の皿＋1 など）
+ * - 連皿中は逆の手: 連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、
+ *   皿を回さない方の手に来る割合（連皿中は皿側の手が塞がるので、同じ手に来ない方が良い）
  * - 16 分の左右交互: 16 分間隔で続く打鍵が、左右の手で交互になる割合（1 つの手だけの打鍵どうしが別の手なら交互）
  *
  * ほかの負荷（全 5,040 通りの中央値で割ってそろえ、そのまま足す。同じくらいの並びの差をつける）:
- * - 皿の前後: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に、皿側の手へ来るノーツの数
+ * - 皿の前後: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に、皿側の手へ来るノーツの数（連皿の最中は除く）
  * - 片手の速い連打: 同じ手で {@link FAST_GAP} 秒未満に続く、別レーンへの打鍵（離れたレーンほど重く数える）
  * - 片手の多鍵同時押し: 1 つの手が 3 鍵以上を同時に押す回数
  * - 片手の最大密度: どちらかの手の 1 秒あたりのノーツ数の最大
@@ -30,15 +32,21 @@ export const FAST_GAP = 0.105;
 /** 16 分とみなす打鍵の間隔（tick。4 分 = 96、16 分 = 24。わずかに詰まった配置も含める） */
 const SIXTEENTH_MIN = 20;
 const SIXTEENTH_MAX = 24;
-/** 「皿と同時に取れる」「16 分の左右交互」の重み（それぞれ譜面内の最良〜最悪を 0〜1 にした不足分にかける。ほかの負荷は中央値で 1 前後にそろえてある） */
+/** 連続スクラッチとみなす皿どうしの間隔（秒。BPM 140 の 16 分 = 60 / 140 / 4）と、続く回数 */
+const STREAM_GAP = 60 / 140 / 4 + 1e-6;
+const STREAM_MIN_NOTES = 3;
+/** 「皿と同時に取れる」「連皿中は逆の手」「16 分の左右交互」の重み（それぞれ譜面内の最良〜最悪を 0〜1 にした不足分にかける。ほかの負荷は中央値で 1 前後にそろえてある） */
 export const KEY_WEIGHT = 4;
 /** 片手の最大密度を数える窓（秒）。 */
 const DENSITY_WINDOW = 1.0;
 
 export interface RandomMetrics {
-  /** 皿と同時の鍵盤のうち、皿を回さない方の手に来る数 / 皿と同時の鍵盤の総数 */
+  /** 単発の皿と同時の鍵盤のうち、皿側の手に来る数 / 単発の皿と同時の鍵盤の総数 */
   scratchSimulOk: number;
   scratchSimulTotal: number;
+  /** 連皿の最中の鍵盤のうち、皿を回さない方の手に来る数 / 連皿の最中の鍵盤の総数 */
+  streamOk: number;
+  streamTotal: number;
   /** 16 分で続く打鍵のうち、左右の手で交互になる組の数 / 16 分で続く組の総数 */
   alt16: number;
   sixteenthPairs: number;
@@ -97,9 +105,11 @@ interface Prepared {
   events: KeyEvent[];
   /** 和音ごとの events の範囲 [開始, 終了) */
   chords: [number, number][];
-  /** 皿と同じ tick の打鍵か */
+  /** 単発の皿と同じ tick の打鍵か（連皿の最中は含めない） */
   simulScratch: boolean[];
-  /** 皿と同時ではないが前後 SCRATCH_WINDOW 秒に皿がある打鍵か */
+  /** 連皿の最中（連皿の最初の皿から最後の皿まで）の打鍵か */
+  inStream: boolean[];
+  /** 皿と同時ではないが前後 SCRATCH_WINDOW 秒に皿がある打鍵か（連皿の最中は含めない） */
   nearScratch: boolean[];
   /** 16 分間隔で続く和音の組（chords の添字 i と i + 1） */
   pairs16: number[];
@@ -118,8 +128,18 @@ function prepare(tl: ChartTimeline): Prepared {
   events.sort((a, b) => a.tick - b.tick || a.key - b.key);
   scratchTimes.sort((a, b) => a - b);
 
-  const simulScratch = events.map(e => scratchTicks.has(Math.round(e.tick)));
-  const nearScratch = events.map((e, k) => !simulScratch[k] && hasNear(scratchTimes, e.time, SCRATCH_WINDOW));
+  // 連皿: STREAM_GAP 以内の間隔で STREAM_MIN_NOTES 回以上続く皿。最初の皿〜最後の皿の区間
+  const streams: [number, number][] = [];
+  for (let i = 0; i < scratchTimes.length;) {
+    let j = i;
+    while (j + 1 < scratchTimes.length && scratchTimes[j + 1] - scratchTimes[j] <= STREAM_GAP) j++;
+    if (j - i + 1 >= STREAM_MIN_NOTES) streams.push([scratchTimes[i], scratchTimes[j]]);
+    i = j + 1;
+  }
+  const inStream = events.map(e => streams.some(([a, b]) => e.time >= a - 1e-6 && e.time <= b + 1e-6));
+  const simulScratch = events.map((e, k) => !inStream[k] && scratchTicks.has(Math.round(e.tick)));
+  const nearScratch = events.map((e, k) => !inStream[k] && !scratchTicks.has(Math.round(e.tick))
+    && hasNear(scratchTimes, e.time, SCRATCH_WINDOW));
 
   const chords: [number, number][] = [];
   for (let i = 0; i < events.length;) {
@@ -133,7 +153,7 @@ function prepare(tl: ChartTimeline): Prepared {
     const gap = events[chords[c + 1][0]].tick - events[chords[c][0]].tick;
     if (gap >= SIXTEENTH_MIN && gap <= SIXTEENTH_MAX) pairs16.push(c);
   }
-  return { events, chords, simulScratch, nearScratch, pairs16 };
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16 };
 }
 
 /**
@@ -152,17 +172,18 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2, scratchKeys: numb
   const norm = (v: number, med: number) => (med > 0 ? v / med : v > 0 ? 1 + v : 0);
   // 皿同時・16 分交互は、譜面ごとに並びで動かせる幅が違う（両手の和音はどの並びでも交互にならない等）ので、
   // この譜面で一番良い並びを 0、一番悪い並びを 1 に引き伸ばしてから重みをかける
-  const simulOk = raw.map(m => m.scratchSimulOk);
-  const alt = raw.map(m => m.alt16);
   const shortfall = (v: number, best: number, worst: number) => (best > worst ? (best - v) / (best - worst) : 0);
-  const [simulBest, simulWorst] = [Math.max(...simulOk), Math.min(...simulOk)];
-  const [altBest, altWorst] = [Math.max(...alt), Math.min(...alt)];
+  const range = (vals: number[]) => [Math.max(...vals), Math.min(...vals)];
+  const [simulBest, simulWorst] = range(raw.map(m => m.scratchSimulOk));
+  const [streamBest, streamWorst] = range(raw.map(m => m.streamOk));
+  const [altBest, altWorst] = range(raw.map(m => m.alt16));
 
   const candidates: RandomCandidate[] = patterns.map((pattern, i) => {
     const m = raw[i];
     let score = 0;
     for (const k of LOAD_KEYS) score += norm(m[k], medians[k]);
     score += KEY_WEIGHT * shortfall(m.scratchSimulOk, simulBest, simulWorst);
+    score += KEY_WEIGHT * shortfall(m.streamOk, streamBest, streamWorst);
     score += KEY_WEIGHT * shortfall(m.alt16, altBest, altWorst);
     return { pattern, metrics: m, score, rank: 0 };
   });
@@ -176,7 +197,7 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2, scratchKeys: numb
 
 /** 1 つの並びの指標。 */
 function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: number): RandomMetrics {
-  const { events, chords, simulScratch, nearScratch, pairs16 } = prep;
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16 } = prep;
   // 元の鍵盤 → 手（0 = 皿側の手、1 = もう一方の手）とレーン（1〜7、左から）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = lane;
@@ -188,6 +209,8 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
 
   let scratchSimulOk = 0;
   let scratchSimulTotal = 0;
+  let streamOk = 0;
+  let streamTotal = 0;
   let scratchNear = 0;
   let fastSameHand = 0;
   let bigChords = 0;
@@ -208,7 +231,11 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
       handTimes[hand].push(events[k].time);
       if (simulScratch[k]) {
         scratchSimulTotal++;
-        if (hand === 1) scratchSimulOk++;
+        if (hand === 0) scratchSimulOk++;
+      }
+      if (inStream[k]) {
+        streamTotal++;
+        if (hand === 1) streamOk++;
       }
       if (hand === 0 && nearScratch[k]) scratchNear++;
       const gap = events[k].time - lastTime[hand];
@@ -237,6 +264,8 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2, scratchKeys: numb
   return {
     scratchSimulOk,
     scratchSimulTotal,
+    streamOk,
+    streamTotal,
     alt16,
     sixteenthPairs: pairs16.length,
     scratchNear,
