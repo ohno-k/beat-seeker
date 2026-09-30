@@ -1,0 +1,674 @@
+<script setup lang="ts">
+/**
+ * ChartPlayer.vue
+ *
+ * 【コンポーネントの役割】
+ * 譜面分析ページの「譜面再生」。textage の譜面をゲーム画面のように上から降らせて再生する（音源は無し、打鍵音のみ）。
+ *
+ * 【データ】
+ * GET /api/analysis/chart-playback?textage=... が返す tick 単位（4/4 の 1 小節 = 384）のノーツ・CN・BPM 変化・小節線。
+ * 秒への換算は 1 tick = 5 / (8 × BPM) 秒（textage の bms2jsh.js と同じ）。
+ * textage への負荷を抑えるため、データは「再生する」を押したときに初めて取りに行く。
+ *
+ * 【表示】
+ * - スクロールは「ソフラン再現」（拍基準。BPM が上がると速く流れる＝実機と同じ）と「一定速度」（時間基準）の切り替え
+ * - 表示時間（主 BPM でノーツが画面上端から判定ラインまで落ちる秒数。緑数字の目安も併記）・再生速度・1P/2P・打鍵音
+ * - 描画は canvas。requestAnimationFrame の間だけ動き、タブが隠れたら一時停止する
+ * - モバイル: 幅は親に合わせ、高さは画面の約 6 割。canvas のタップで再生/一時停止（縦スクロールは妨げない）。
+ *   マウスは canvas の上下ドラッグで前後に送れる
+ */
+import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { API_BASE } from '../composables/useAuth';
+import { formatBpmLabel, buildChartTimeline, type ChartPlaybackData, type ChartTimeline } from '../utils/chartPlayback';
+
+const props = defineProps<{
+  textage: string;
+}>();
+
+// ── 読み込み ──────────────────────────────────────────────
+const opened = ref(false);
+const loading = ref(false);
+const error = ref('');
+const timeline = shallowRef<ChartTimeline | null>(null);
+
+async function open() {
+  opened.value = true;
+  if (timeline.value || loading.value) return;
+  loading.value = true;
+  error.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/analysis/chart-playback?textage=${encodeURIComponent(props.textage)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) {
+      error.value = data.error ?? `譜面データを読み込めませんでした（${res.status}）`;
+      return;
+    }
+    timeline.value = buildChartTimeline(data as ChartPlaybackData);
+    loading.value = false; // canvas を表示してから大きさを測る
+    await nextTick();
+    setupCanvas();
+    seek(LEAD_IN);
+  } catch {
+    error.value = '通信エラーで譜面データを読み込めませんでした';
+  } finally {
+    loading.value = false;
+  }
+}
+
+// ── 設定 ──────────────────────────────────────────────────
+const SETTINGS_KEY = 'chartPlayer.settings';
+interface Settings { visibleSec: number; rate: number; mode: 'beat' | 'time'; side: 1 | 2; sound: boolean; }
+const DEFAULTS: Settings = { visibleSec: 1.2, rate: 1, mode: 'beat', side: 1, sound: false };
+function loadSettings(): Settings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
+  } catch { /* 読めなければ既定値 */ }
+  return { ...DEFAULTS };
+}
+const settings = ref<Settings>(loadSettings());
+watch(settings, (s) => {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch { /* 保存できなくても動作は続ける */ }
+  draw();
+}, { deep: true });
+
+const RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5];
+// 緑数字 ≒ 表示時間(ms) × 0.6（60fps 基準の目安）
+const greenNumber = computed(() => Math.round(settings.value.visibleSec * 600));
+
+// ── 再生状態 ──────────────────────────────────────────────
+/** 曲頭の前に空ける秒数（最初のノーツが上から落ちてくるように）。 */
+const LEAD_IN = -1.5;
+let curTime = LEAD_IN;       // 譜面上の現在時刻（秒）。描画の毎フレームで使うのでリアクティブにしない
+let lastFrame = 0;
+let rafId = 0;
+let hitIdx = 0;               // 次に判定ラインへ届く打鍵イベント
+const laneHit = new Float64Array(8).fill(-99);
+const playing = ref(false);
+const uiTime = ref(LEAD_IN);  // シークバーと時刻表示用（間引いて更新）
+let uiUpdatedAt = 0;
+
+const totalTime = computed(() => timeline.value?.totalTime ?? 0);
+
+function play() {
+  const tl = timeline.value;
+  if (!tl) return;
+  if (curTime >= tl.totalTime) seek(LEAD_IN);
+  ensureAudio();
+  playing.value = true;
+  lastFrame = performance.now();
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(frame);
+}
+
+function pause() {
+  playing.value = false;
+  cancelAnimationFrame(rafId);
+  uiTime.value = curTime;
+  draw();
+}
+
+function togglePlay() {
+  if (playing.value) pause();
+  else play();
+}
+
+function seek(t: number) {
+  const tl = timeline.value;
+  if (!tl) return;
+  curTime = Math.min(Math.max(t, LEAD_IN), tl.totalTime);
+  hitIdx = lowerBound(tl.hitTimes, curTime);
+  laneHit.fill(-99);
+  uiTime.value = curTime;
+  draw();
+}
+
+/** 小節単位で前後に送る（dir = -1 / +1）。再生中の「前へ」は今の小節の頭が近ければ 1 つ前へ。 */
+function stepMeasure(dir: -1 | 1) {
+  const tl = timeline.value;
+  if (!tl) return;
+  const i = upperBound(tl.measureTimes, curTime + 1e-6) - 1;
+  if (dir > 0) {
+    seek(tl.measureTimes[Math.min(i + 1, tl.measureTimes.length - 1)] ?? tl.totalTime);
+  } else {
+    const head = tl.measureTimes[Math.max(i, 0)] ?? 0;
+    const target = curTime - head < 0.3 ? tl.measureTimes[Math.max(i - 1, 0)] : head;
+    seek(target ?? 0);
+  }
+}
+
+function frame(now: number) {
+  const tl = timeline.value;
+  if (!tl || !playing.value) return;
+  // タブ復帰直後などの大きな飛びは詰める
+  const dt = Math.min((now - lastFrame) / 1000, 0.1);
+  lastFrame = now;
+  curTime += dt * settings.value.rate;
+  processHits(tl);
+  if (curTime >= tl.totalTime) {
+    curTime = tl.totalTime;
+    draw();
+    pause();
+    return;
+  }
+  if (now - uiUpdatedAt > 100) {
+    uiTime.value = curTime;
+    uiUpdatedAt = now;
+  }
+  draw();
+  rafId = requestAnimationFrame(frame);
+}
+
+/** 判定ラインを越えた打鍵イベントを処理（レーンを光らせ、打鍵音を鳴らす）。 */
+function processHits(tl: ChartTimeline) {
+  let clicks = 0;
+  let scratch = false;
+  while (hitIdx < tl.hitTimes.length && tl.hitTimes[hitIdx] <= curTime) {
+    const key = tl.hitKeys[hitIdx];
+    laneHit[key] = tl.hitTimes[hitIdx];
+    if (curTime - tl.hitTimes[hitIdx] < 0.08) {
+      clicks++;
+      if (key === 0) scratch = true;
+    }
+    hitIdx++;
+  }
+  if (clicks > 0 && settings.value.sound) playClick(clicks, scratch);
+}
+
+// ── 打鍵音（WebAudio） ──────────────────────────────────────
+let audio: AudioContext | null = null;
+function ensureAudio() {
+  if (!settings.value.sound) return;
+  try {
+    if (!audio) audio = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (audio.state === 'suspended') audio.resume();
+  } catch { audio = null; }
+}
+watch(() => settings.value.sound, (on) => { if (on) ensureAudio(); });
+
+function playClick(count: number, scratch: boolean) {
+  if (!audio) return;
+  const t = audio.currentTime;
+  const osc = audio.createOscillator();
+  const gain = audio.createGain();
+  osc.type = scratch ? 'triangle' : 'square';
+  osc.frequency.value = scratch ? 420 : 1800;
+  const vol = Math.min(0.05 + 0.02 * (count - 1), 0.12);
+  gain.gain.setValueAtTime(vol, t);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+  osc.connect(gain).connect(audio.destination);
+  osc.start(t);
+  osc.stop(t + 0.05);
+}
+
+// ── canvas ────────────────────────────────────────────────
+const wrapRef = ref<HTMLDivElement | null>(null);
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+let ctx2d: CanvasRenderingContext2D | null = null;
+let cssW = 0;
+let cssH = 0;
+let resizeObs: ResizeObserver | null = null;
+
+function setupCanvas() {
+  const canvas = canvasRef.value;
+  const wrap = wrapRef.value;
+  if (!canvas || !wrap) return;
+  ctx2d = canvas.getContext('2d');
+  resizeObs?.disconnect();
+  resizeObs = new ResizeObserver(() => resize());
+  resizeObs.observe(wrap);
+  resize();
+}
+
+function resize() {
+  const canvas = canvasRef.value;
+  const wrap = wrapRef.value;
+  if (!canvas || !wrap) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cssW = wrap.clientWidth;
+  cssH = Math.round(Math.max(340, Math.min(window.innerHeight * 0.62, 620)));
+  canvas.style.height = `${cssH}px`;
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  ctx2d?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+
+// レーン: 0 = 皿、1〜7 = 鍵盤。幅の比は皿 1.7 / 白鍵 1.0 / 黒鍵 0.8
+const LANE_WEIGHT = [1.7, 1, 0.8, 1, 0.8, 1, 0.8, 1];
+const NOTE_COLOR = ['#f43f5e', '#e5e7eb', '#60a5fa', '#e5e7eb', '#60a5fa', '#e5e7eb', '#60a5fa', '#e5e7eb'];
+const CN_BODY = ['rgba(244,63,94,0.45)', 'rgba(229,231,235,0.4)', 'rgba(96,165,250,0.45)', 'rgba(229,231,235,0.4)',
+  'rgba(96,165,250,0.45)', 'rgba(229,231,235,0.4)', 'rgba(96,165,250,0.45)', 'rgba(229,231,235,0.4)'];
+
+/** レーンの左端 x と幅（side: 1P は皿が左、2P は皿が右）。 */
+function laneLayout(width: number, side: 1 | 2) {
+  const laneW = Math.min(width - 16, 380);
+  const left = (width - laneW) / 2;
+  const total = LANE_WEIGHT.reduce((a, b) => a + b, 0);
+  const order = side === 1 ? [0, 1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5, 6, 7, 0];
+  const xs = new Array<number>(8);
+  const ws = new Array<number>(8);
+  let x = left;
+  for (const lane of order) {
+    const w = (LANE_WEIGHT[lane] / total) * laneW;
+    xs[lane] = x;
+    ws[lane] = w;
+    x += w;
+  }
+  return { xs, ws, left, laneW };
+}
+
+function draw() {
+  const g = ctx2d;
+  const tl = timeline.value;
+  if (!g || !tl || cssW === 0) return;
+  const s = settings.value;
+  const W = cssW;
+  const H = cssH;
+  const judgeY = H - 56;
+  const { xs, ws, left, laneW } = laneLayout(W, s.side);
+
+  // 位置の座標系: ソフラン再現 = tick、一定速度 = 秒
+  const beat = s.mode === 'beat';
+  const nowTick = tl.timeToTick(curTime);
+  const posNow = beat ? nowTick : curTime;
+  const unitPx = beat
+    ? judgeY / (s.visibleSec / (5 / (8 * tl.mainBpm)))   // 主 BPM で visibleSec 秒かけて落ちる
+    : judgeY / s.visibleSec;
+  const posTop = posNow + judgeY / unitPx;
+  const yOf = (pos: number) => judgeY - (pos - posNow) * unitPx;
+
+  // 背景
+  g.fillStyle = '#05070d';
+  g.fillRect(0, 0, W, H);
+  for (let lane = 0; lane < 8; lane++) {
+    g.fillStyle = lane === 0 ? '#0d1220' : (lane % 2 === 0 ? '#0a0e1a' : '#111827');
+    g.fillRect(xs[lane], 0, ws[lane], H);
+  }
+  // レーンの光（判定ラインを越えた直後）
+  for (let lane = 0; lane < 8; lane++) {
+    const age = curTime - laneHit[lane];
+    if (age < 0 || age > 0.15) continue;
+    const alpha = 0.35 * (1 - age / 0.15);
+    const grad = g.createLinearGradient(0, judgeY, 0, judgeY - 160);
+    grad.addColorStop(0, lane === 0 ? `rgba(244,63,94,${alpha})` : `rgba(147,197,253,${alpha})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.fillRect(xs[lane], judgeY - 160, ws[lane], 160);
+  }
+  g.fillStyle = '#1f2937';
+  for (let lane = 0; lane < 8; lane++) g.fillRect(xs[lane], 0, 1, judgeY);
+  g.fillRect(left + laneW - 1, 0, 1, judgeY);
+
+  // 小節線
+  const mPos = beat ? tl.measureTicks : tl.measureTimes;
+  g.fillStyle = '#4b5563';
+  for (let i = lowerBound(mPos, posNow); i < mPos.length && mPos[i] <= posTop; i++) {
+    g.fillRect(left, Math.round(yOf(mPos[i])), laneW, 1);
+  }
+  // BPM 変化
+  const bPos = beat ? tl.bpmTicks : tl.bpmTimes;
+  g.font = '600 10px ui-sans-serif, system-ui, sans-serif';
+  g.textBaseline = 'bottom';
+  for (let i = Math.max(lowerBound(bPos, posNow), 1); i < bPos.length && bPos[i] <= posTop; i++) {
+    const y = Math.round(yOf(bPos[i]));
+    g.fillStyle = '#22c55e';
+    g.fillRect(left, y, laneW, 2);
+    // レーンの右に余白があればその外、無ければ右端の鍵盤の上に書く（左端は皿のノーツと重なるので避ける）
+    const label = formatBpmLabel(tl.bpmValues[i]);
+    const outside = left + laneW + 3 + g.measureText(label).width <= W - 2;
+    g.textAlign = outside ? 'left' : 'right';
+    g.fillText(label, outside ? left + laneW + 3 : left + laneW - 3, y - 1);
+    g.textAlign = 'left';
+  }
+
+  const noteH = 7;
+  // CN（本体 → 先頭・終端）
+  const cStart = beat ? tl.cnStartTicks : tl.cnStartTimes;
+  const cEnd = beat ? tl.cnEndTicks : tl.cnEndTimes;
+  const maxLen = beat ? tl.cnMaxLenTicks : tl.cnMaxLenTimes;
+  for (let i = lowerBound(cStart, posNow - maxLen); i < cStart.length && cStart[i] <= posTop; i++) {
+    if (cEnd[i] < posNow) continue;
+    const lane = tl.cnKeys[i];
+    const flags = tl.cnFlags[i];
+    const yTop = yOf(Math.min(cEnd[i], posTop + 1));
+    const yBottom = yOf(Math.max(cStart[i], posNow));
+    const inset = ws[lane] * 0.18;
+    g.fillStyle = CN_BODY[lane];
+    g.fillRect(xs[lane] + inset, yTop, ws[lane] - inset * 2, yBottom - yTop);
+    g.fillStyle = NOTE_COLOR[lane];
+    if (flags & 1 && cStart[i] >= posNow) g.fillRect(xs[lane] + 1, yOf(cStart[i]) - noteH, ws[lane] - 2, noteH);
+    if (flags & 2 && cEnd[i] <= posTop) g.fillRect(xs[lane] + 1, yOf(cEnd[i]) - noteH, ws[lane] - 2, noteH);
+    // 押している最中の CN はレーンを光らせ続ける
+    if (cStart[i] < posNow && cEnd[i] >= posNow) laneHit[lane] = curTime;
+  }
+
+  // 通常ノーツ
+  const nPos = beat ? tl.noteTicks : tl.noteTimes;
+  for (let i = lowerBound(nPos, posNow); i < nPos.length && nPos[i] <= posTop; i++) {
+    const lane = tl.noteKeys[i];
+    g.fillStyle = NOTE_COLOR[lane];
+    g.fillRect(xs[lane] + 1, Math.round(yOf(nPos[i])) - noteH, ws[lane] - 2, noteH);
+  }
+
+  // 判定ライン・鍵盤
+  g.fillStyle = '#f43f5e';
+  g.fillRect(left, judgeY, laneW, 3);
+  for (let lane = 0; lane < 8; lane++) {
+    const lit = curTime - laneHit[lane] >= 0 && curTime - laneHit[lane] < 0.1;
+    g.fillStyle = lane === 0
+      ? (lit ? '#fb7185' : '#3f1d27')
+      : lane % 2 === 0 ? (lit ? '#93c5fd' : '#1e293b') : (lit ? '#f8fafc' : '#334155');
+    if (lane === 0) {
+      const cx = xs[0] + ws[0] / 2;
+      const r = Math.min(ws[0] * 0.42, 22);
+      g.beginPath();
+      g.arc(cx, judgeY + 28, r, 0, Math.PI * 2);
+      g.fill();
+    } else {
+      const top = lane % 2 === 0 ? judgeY + 8 : judgeY + 20;
+      g.fillRect(xs[lane] + 2, top, ws[lane] - 4, 26);
+    }
+  }
+}
+
+// 譜面の上に出す現在の BPM・小節・ノーツ数（uiTime と同じ間引きで更新。canvas に書くとレーンの上端を隠すため）
+const hud = computed(() => {
+  const tl = timeline.value;
+  if (!tl) return null;
+  const tick = tl.timeToTick(uiTime.value);
+  return {
+    bpm: formatBpmLabel(tl.bpmAt(tick)),
+    measure: tl.firstMeasure + Math.max(upperBound(tl.measureTicks, tick) - 1, 0),
+    lastMeasure: tl.firstMeasure + tl.measureTicks.length - 1,
+    passed: upperBound(tl.judgeTimes, uiTime.value),
+    total: tl.judgeTimes.length,
+  };
+});
+
+// ── 入力 ─────────────────────────────────────────────────
+// タップ/クリック = 再生・一時停止。マウスの上下ドラッグ = 前後に送る（タッチは縦スクロールを優先するので送らない）
+let drag: { y: number; t: number; moved: boolean; mouse: boolean; wasPlaying: boolean } | null = null;
+function onPointerDown(e: PointerEvent) {
+  drag = { y: e.clientY, t: curTime, moved: false, mouse: e.pointerType === 'mouse', wasPlaying: playing.value };
+}
+function onPointerMove(e: PointerEvent) {
+  const tl = timeline.value;
+  if (!drag || !drag.mouse || !tl || (e.buttons & 1) === 0) return;
+  const dy = e.clientY - drag.y;
+  if (!drag.moved && Math.abs(dy) < 6) return;
+  if (!drag.moved) {
+    drag.moved = true;
+    if (playing.value) pause();
+  }
+  // 下へドラッグ = 先へ（ノーツを引き下ろす感覚）。画面の高さで表示時間ぶん動く
+  seek(drag.t + (dy / Math.max(cssH - 56, 1)) * settings.value.visibleSec);
+}
+function onPointerUp() {
+  if (drag && !drag.moved) togglePlay();
+  else if (drag?.wasPlaying) play();
+  drag = null;
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (!timeline.value) return;
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); stepMeasure(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); stepMeasure(1); }
+}
+
+function onSeekInput(e: Event) {
+  seek(Number((e.target as HTMLInputElement).value));
+}
+
+function onVisibility() {
+  if (document.hidden && playing.value) pause();
+}
+
+onMounted(() => document.addEventListener('visibilitychange', onVisibility));
+onBeforeUnmount(() => {
+  cancelAnimationFrame(rafId);
+  resizeObs?.disconnect();
+  document.removeEventListener('visibilitychange', onVisibility);
+  audio?.close().catch(() => {});
+});
+
+// ── 表示ヘルパー ───────────────────────────────────────────
+function fmtTime(sec: number): string {
+  const s = Math.max(0, Math.floor(sec));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+function lowerBound(arr: ArrayLike<number>, x: number): number {
+  let lo = 0;
+  let hi = arr.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (arr[mid] < x) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function upperBound(arr: ArrayLike<number>, x: number): number {
+  let lo = 0;
+  let hi = arr.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (arr[mid] <= x) lo = mid + 1;
+    else hi = mid;
+  }
+  return lo;
+}
+</script>
+
+<template>
+  <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div class="player-head">
+      <div class="text-xs font-medium text-slate-400 dark:text-slate-500">譜面再生</div>
+      <button v-if="!opened"
+        type="button"
+        class="play-open inline-flex items-center gap-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2"
+        @click="open">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+        譜面を再生する
+      </button>
+    </div>
+
+    <template v-if="opened">
+      <div v-if="loading" class="mt-3 flex items-center justify-center py-10 text-xs text-slate-400 dark:text-slate-500">
+        <div class="w-5 h-5 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        譜面データを読み込み中…
+      </div>
+      <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+
+      <div v-show="timeline && !loading" class="mt-3">
+        <div v-if="hud" class="player-hud text-xs tabular-nums text-slate-500 dark:text-slate-400">
+          <span class="font-bold text-emerald-600 dark:text-emerald-400">BPM {{ hud.bpm }}</span>
+          <span>小節 {{ hud.measure }}/{{ hud.lastMeasure }}</span>
+          <span>{{ hud.passed }}/{{ hud.total }} notes</span>
+        </div>
+        <!-- 譜面（canvas）。タップで再生/一時停止 -->
+        <div ref="wrapRef"
+          class="player-stage rounded-md overflow-hidden bg-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+          tabindex="0"
+          @keydown="onKeydown">
+          <canvas ref="canvasRef"
+            class="block w-full select-none cursor-pointer"
+            @pointerdown="onPointerDown"
+            @pointermove="onPointerMove"
+            @pointerup="onPointerUp"
+            @pointercancel="drag = null" />
+        </div>
+
+        <!-- 再生操作 -->
+        <div class="player-controls mt-3">
+          <div class="player-buttons">
+            <button type="button" class="ctrl-btn" title="先頭へ" aria-label="先頭へ" @click="seek(LEAD_IN)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
+            </button>
+            <button type="button" class="ctrl-btn" title="前の小節 (←)" aria-label="前の小節" @click="stepMeasure(-1)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6zm.5-6 8.5 6V6z" /></svg>
+            </button>
+            <button type="button" class="ctrl-btn ctrl-main" :title="playing ? '一時停止 (Space)' : '再生 (Space)'"
+              :aria-label="playing ? '一時停止' : '再生'" @click="togglePlay">
+              <svg v-if="!playing" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+              <svg v-else viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z" /></svg>
+            </button>
+            <button type="button" class="ctrl-btn" title="次の小節 (→)" aria-label="次の小節" @click="stepMeasure(1)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 18l8.5-6L4 6zm9-12v12l8.5-6z" /></svg>
+            </button>
+            <span class="ml-auto text-xs tabular-nums text-slate-500 dark:text-slate-400">
+              {{ fmtTime(uiTime) }} / {{ fmtTime(totalTime) }}
+            </span>
+          </div>
+          <input type="range"
+            class="player-seek mt-2 w-full accent-blue-600"
+            :min="LEAD_IN" :max="totalTime" step="0.01"
+            :value="uiTime"
+            aria-label="再生位置"
+            @input="onSeekInput" />
+        </div>
+
+        <!-- 設定 -->
+        <div class="player-settings mt-3 text-xs text-slate-600 dark:text-slate-300">
+          <label class="setting">
+            <span class="setting-label">表示時間</span>
+            <input v-model.number="settings.visibleSec" type="range" min="0.4" max="3" step="0.05" class="setting-range accent-blue-600" />
+            <span class="tabular-nums whitespace-nowrap">{{ settings.visibleSec.toFixed(2) }}秒<span class="text-slate-400 dark:text-slate-500">（緑数字 約{{ greenNumber }}）</span></span>
+          </label>
+          <label class="setting">
+            <span class="setting-label">再生速度</span>
+            <select v-model.number="settings.rate"
+              class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5">
+              <option v-for="r in RATES" :key="r" :value="r">×{{ r }}</option>
+            </select>
+          </label>
+          <div class="setting">
+            <span class="setting-label">スクロール</span>
+            <div class="seg">
+              <button type="button" :class="{ on: settings.mode === 'beat' }" @click="settings.mode = 'beat'">ソフラン再現</button>
+              <button type="button" :class="{ on: settings.mode === 'time' }" @click="settings.mode = 'time'">一定速度</button>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="setting-label">サイド</span>
+            <div class="seg">
+              <button type="button" :class="{ on: settings.side === 1 }" @click="settings.side = 1">1P</button>
+              <button type="button" :class="{ on: settings.side === 2 }" @click="settings.side = 2">2P</button>
+            </div>
+          </div>
+          <div class="setting">
+            <span class="setting-label">打鍵音</span>
+            <div class="seg">
+              <button type="button" :class="{ on: settings.sound }" @click="settings.sound = true">ON</button>
+              <button type="button" :class="{ on: !settings.sound }" @click="settings.sound = false">OFF</button>
+            </div>
+          </div>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
+          楽曲の音声は再生されません。譜面をタップ（クリック）で再生／一時停止<span class="pc-only">、マウスの上下ドラッグで前後に移動、←→キーで小節送り</span>できます。
+        </p>
+      </div>
+    </template>
+  </div>
+</template>
+
+<style scoped>
+.player-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+.player-hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  max-width: 520px;
+  margin: 0 auto 0.375rem;
+}
+.player-stage {
+  /* PC の広い画面でもレーンの周りが間延びしないよう幅を抑えて中央に置く */
+  max-width: 520px;
+  margin: 0 auto;
+  /* タップ時の青いハイライトを出さない。縦スクロール（pan-y）は妨げない */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y;
+}
+.player-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  color: rgb(71 85 105);
+  background: rgb(241 245 249);
+}
+.ctrl-btn:hover { background: rgb(226 232 240); }
+.ctrl-btn svg { width: 1.1rem; height: 1.1rem; }
+.ctrl-main {
+  width: 3rem;
+  height: 3rem;
+  color: white;
+  background: rgb(37 99 235);
+}
+.ctrl-main:hover { background: rgb(59 130 246); }
+.ctrl-main svg { width: 1.4rem; height: 1.4rem; }
+.dark .ctrl-btn:not(.ctrl-main) { color: rgb(203 213 225); background: rgb(51 65 85); }
+.dark .ctrl-btn:not(.ctrl-main):hover { background: rgb(71 85 105); }
+.player-seek { height: 1.5rem; }
+
+.player-settings {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.6rem 1.25rem;
+}
+.setting {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.setting-label {
+  flex: none;
+  width: 4.5rem;
+  font-weight: 600;
+  color: rgb(100 116 139);
+}
+.setting-range { flex: 1; min-width: 0; height: 1.5rem; }
+.seg {
+  display: inline-flex;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  border: 1px solid rgb(203 213 225);
+}
+.seg button {
+  padding: 0.4rem 0.75rem;
+  font-weight: 600;
+  color: rgb(71 85 105);
+  background: white;
+}
+.seg button + button { border-left: 1px solid rgb(203 213 225); }
+.seg button.on { color: white; background: rgb(37 99 235); }
+.dark .seg { border-color: rgb(71 85 105); }
+.dark .seg button { color: rgb(203 213 225); background: rgb(51 65 85); }
+.dark .seg button + button { border-left-color: rgb(71 85 105); }
+.dark .seg button.on { color: white; background: rgb(37 99 235); }
+
+.pc-only { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .pc-only { display: inline; }
+}
+@media (min-width: 640px) {
+  .player-settings { grid-template-columns: 1fr 1fr; }
+  .setting:first-child { grid-column: 1 / -1; }
+}
+</style>

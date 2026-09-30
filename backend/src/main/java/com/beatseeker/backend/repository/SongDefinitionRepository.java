@@ -64,6 +64,12 @@ public interface SongDefinitionRepository extends JpaRepository<SongDefinition, 
     List<SongDefinition> findAllByTitleAndDifficultyAndRevision(String title, String difficulty, String revision);
 
     /**
+     * 【メソッドの役割】 textage（譜面の識別子）とリビジョンで 0..N 件取得する。
+     * 譜面分析ページの譜面再生が、指定された譜面が楽曲マスタに登録済みか・公式ノーツ数はいくつかを引くのに使う。
+     */
+    List<SongDefinition> findByTextageAndRevision(String textage, String revision);
+
+    /**
      * 【メソッドの役割】 指定リビジョンの楽曲定義件数をカウントする。
      *
      * 派生クエリメソッド: {@code SELECT COUNT(*) WHERE revision = ?}。

@@ -11,6 +11,7 @@
  * - 曲選択（Lv11/12 の ANOTHER/LEGGENDARIA、textage 有りのみ）
  * - 予測APIの呼び出しと結果表示（自分 or 閲覧中ユーザー）
  * - 傾向プロファイル取得、タグ/配置パターン/ノーツ分布可視化
+ * - 譜面再生（ChartPlayer。ノーツを上から降らせて再生）
  * - 管理者モードでは類似度計算の内訳を取得可能
  */
 import { ref, computed, watch, onMounted } from 'vue';
@@ -18,6 +19,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
+import ChartPlayer from '../components/ChartPlayer.vue';
 
 // props: 他人のIDを指定された場合の閲覧モード（admin=管理者、friend=フレンド閲覧）
 const props = defineProps<{
@@ -721,6 +723,9 @@ watch(selectedEntry, async (entry) => {
               </div>
             </div>
           </div>
+
+          <!-- 譜面再生: textage の譜面を上から降らせて再生する。データは「再生する」を押したときに取得。曲を替えたら作り直す -->
+          <ChartPlayer v-if="selectedEntry.textage" :key="selectedEntry.textage" :textage="selectedEntry.textage" />
 
           <!-- 未ログイン時のログイン促し: 予測スコア・類似譜面比較はログイン必須 -->
           <div v-if="!isLoggedIn"
