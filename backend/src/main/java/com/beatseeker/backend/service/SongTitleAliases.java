@@ -15,6 +15,8 @@ import java.util.Map;
  * 同一譜面が別の譜面として扱われ、歴代ベスト・練習メニュー・リーグの歴代参照から漏れる。
  *
  * 方針:
+ *  - 現行作の公式 CSV の表記を正とする（曲マスタ・難易度表もこれに揃える。bemaniwiki の表記揺れには追従しない。
+ *    2026-09-30 に Any％ / ft. / ♫ 無し / ZENITH の 4 曲をマスタ側で CSV 表記へ改名済み）。
  *  - 曲マスタ側（現行表記）を正とし、過去表記 → 現行表記 の片方向でしか変換しない。
  *  - ここに載せるのは「同一曲と断定できる、文字単位の表記差」だけ。発音区別符号の除去のような
  *    曖昧な畳み込みは別曲を同一視する危険があるので行わない。
@@ -33,6 +35,9 @@ public final class SongTitleAliases {
         // "VØID"（U+00D8 LATIN CAPITAL LETTER O WITH STROKE）は 31 EPOLIS 期の CSV 表記。
         // 現行作の CSV と曲マスタは "VOID"。ソースの文字コード事故を避けるため Unicode エスケープで書く。
         m.put("VØID", "VOID");
+        // "ZEИITH"（U+0418 CYRILLIC CAPITAL LETTER I）は 33 Sparkle Shower 以前の CSV 表記。34 ZINRAI の CSV は "ZENITH"。
+        // 大小文字だけ違う "Zenith"（Snail's House）は別曲なので、ここでも完全一致でしか変換しない。
+        m.put("ZEИITH", "ZENITH");
         ALIASES = Collections.unmodifiableMap(m);
     }
 

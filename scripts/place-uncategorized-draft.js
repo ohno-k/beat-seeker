@@ -133,8 +133,11 @@ async function main() {
         });
     }
     const revs = buildRevisions((await client.query(RANKS_SQL)).rows);
-    const active = revs.active, draft = revs.draft;
-    if (!active || !draft) throw new Error('active / draft のどちらかが存在しない');
+    // 「難易度表を適用」後は draft 行が消えるので、その場合は active を土台に draft を作る
+    const draftExists = !!revs.draft;
+    const active = revs.active, draft = revs.draft || revs.active;
+    if (!active) throw new Error('active が存在しない');
+    if (!draftExists) console.log('draft が無いため active を土台にする(バックアップは作らない)');
     const draftUncatRank = [...draft.ranks.keys()].find(r => !isNumericRank(r));
     if (!draftUncatRank) throw new Error('draft に Uncategorized 帯が無い');
 
@@ -256,11 +259,15 @@ async function main() {
 
     await client.query('BEGIN');
     try {
-        const currentDraft = [...draft.ranks.entries()].map(([rank, v]) => ({ rank, sort: v.sortOrder, songs: v.songs }));
-        await writeRevision(BACKUP_PROFILE, currentDraft);
+        if (draftExists) {
+            const currentDraft = [...draft.ranks.entries()].map(([rank, v]) => ({ rank, sort: v.sortOrder, songs: v.songs }));
+            await writeRevision(BACKUP_PROFILE, currentDraft);
+        }
         await writeRevision('draft', newRanks);
         await client.query('COMMIT');
-        console.log(`\n保存完了。適用前の draft は ${BACKUP_PROFILE} に保存済み(管理画面のプロファイル読込で復元可)。`);
+        console.log(draftExists
+            ? `\n保存完了。適用前の draft は ${BACKUP_PROFILE} に保存済み(管理画面のプロファイル読込で復元可)。`
+            : '\n保存完了。draft を新規作成(元は active)。');
     } catch (e) {
         await client.query('ROLLBACK');
         throw e;

@@ -187,6 +187,55 @@ class TextageChartSyncTest {
         assertThat(out.attempts()).containsKey("20/_decohel.html").doesNotContainKey("1/22dunk.html");
     }
 
+    /** 楽曲マスタの textage が失われ、旧方式プロファイルにだけページが残っている曲（2026-09-30 に本番で 173 譜面）。 */
+    private static List<SongDefinition> lostLinkMasters() {
+        List<SongDefinition> m = new ArrayList<>();
+        m.add(sd("22DUNK", "SLAKE", "TECHNO", "135", "2", 3, 265, "1/22dunk.html?1NC00"));
+        m.add(sd("22DUNK", "SLAKE", "TECHNO", "135", "3", 4, 323, "1/22dunk.html?1HC00"));
+        m.add(sd("22DUNK", "SLAKE", "TECHNO", "135", "4", 5, 329, "1/22dunk.html?1AC00"));
+        m.add(sd("yellow head joe", "S-C-U", "TEK-TRANCE", "187", "4", 10, 1152, null));
+        m.add(sd("yellow head joe", "S-C-U", "TEK-TRANCE", "187", "10", 12, 1596, null));
+        return m;
+    }
+
+    private static List<ProfileKey> lostLinkProfiles() {
+        List<ProfileKey> p = new ArrayList<>(legacyProfiles());
+        p.removeIf(k -> !k.title().equals("22DUNK"));
+        p.add(new ProfileKey("19/yheadjoe.html?1AC00", "yellow head joe", "4", null));
+        p.add(new ProfileKey("19/yheadjoe.html?1XC00", "yellow head joe", "10", null));
+        return p;
+    }
+
+    @Test
+    void execute_restoresLostLinksFromProfilePages_withoutTitleTable() {
+        Plan plan = TextageChartSync.plan(lostLinkMasters(), lostLinkProfiles(), V, true);
+        TextageChartSync.Fetcher noTable = path -> { throw new AssertionError("titletbl.js は不要"); };
+
+        Outcome out = TextageChartSync.execute(plan, PAGES, noTable, 50, Map.of(), TextageChartSync.Retry.NONE, NOW, V);
+
+        // プロファイルのページをノーツ数で照合してから楽曲マスタへ書き戻す
+        assertThat(out.textageUpdates())
+                .containsEntry("yellow head joe\u00004", "19/yheadjoe.html?1AC00")
+                .containsEntry("yellow head joe\u000010", "19/yheadjoe.html?1XC00");
+        assertThat(out.reanalyzed()).anyMatch(s -> s.startsWith("yellow head joe [LEGGENDARIA]"));
+        assertThat(out.resolutions()).anyMatch(s -> s.startsWith("yellow head joe → 19/yheadjoe.html（既存プロファイル"));
+        assertThat(out.held()).isEmpty();
+        assertThat(out.warnings()).isEmpty();
+    }
+
+    @Test
+    void execute_songsHiddenFromChartAnalysisGoBeforeOtherLegacySongs() {
+        Plan plan = TextageChartSync.plan(lostLinkMasters(), lostLinkProfiles(), V, true);
+        assertThat(plan.newCount()).isZero();
+        // 楽曲マスタ上は 22DUNK が先だが、★12 [L] が譜面分析に出ていない yellow head joe を先に回す
+        assertThat(plan.songs()).extracting(TextageChartSync.SongWork::title).containsExactly("yellow head joe", "22DUNK");
+
+        Outcome out = TextageChartSync.execute(plan, PAGES, TABLE, 1, Map.of(), TextageChartSync.Retry.NONE, NOW, V);
+
+        assertThat(out.attempts()).containsKey("19/yheadjoe.html").doesNotContainKey("1/22dunk.html");
+        assertThat(out.deferred()).containsExactly("22DUNK（3 譜面）");
+    }
+
     @Test
     void notesMatchTolerance() {
         assertThat(TextageChartSync.notesMatch(1001, 1002)).isTrue();  // 2 ノーツ差までは常に許容

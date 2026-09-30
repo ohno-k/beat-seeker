@@ -19,6 +19,9 @@
 export const SONG_TITLE_ALIASES: ReadonlyMap<string, string> = new Map<string, string>([
   // "VØID"（U+00D8 LATIN CAPITAL LETTER O WITH STROKE）は 31 EPOLIS 期の CSV 表記。
   ['VØID', 'VOID'],
+  // "ZEИITH"（U+0418 CYRILLIC CAPITAL LETTER I）は 33 Sparkle Shower 以前の CSV 表記。34 ZINRAI の CSV は "ZENITH"。
+  // 大小文字だけ違う "Zenith"（Snail's House）は別曲なので完全一致でしか変換しない。
+  ['ZEИITH', 'ZENITH'],
 ]);
 
 /**

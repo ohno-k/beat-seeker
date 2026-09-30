@@ -20,6 +20,12 @@ class SongTitleAliasesTest {
     }
 
     @Test
+    void 旧CSV表記のZEИITHはZINRAIのCSV表記ZENITHに寄せ別曲のZenithは変えない() {
+        assertThat(SongTitleAliases.canonical("ZEИITH")).isEqualTo("ZENITH");
+        assertThat(SongTitleAliases.canonical("Zenith")).isEqualTo("Zenith");
+    }
+
+    @Test
     void 現行表記はそのまま返す() {
         assertThat(SongTitleAliases.canonical("VOID")).isEqualTo("VOID");
     }

@@ -26,20 +26,27 @@ import java.util.Set;
  *
  * ページの特定（{@link #execute}）:
  *  1. 譜面自身の textage、無ければ同じ曲の他の譜面の textage のページ
- *  2. 1 で照合できなかった譜面は titletbl.js の候補ページ（{@link TextageTitleTable#candidates}）を順に試す
+ *  2. 既存プロファイル（旧方式を含む）が指しているページ。楽曲マスタの textage が失われた譜面
+ *     （2026-09-30 時点で ★11/12 A/L の 176 譜面、うち 173 はプロファイルに正しいページが残っていた）を曲名の推測なしで拾う
+ *  3. ここまでで照合できなかった譜面は titletbl.js の候補ページ（{@link TextageTitleTable#candidates}）を順に試す
  *
  * 照合: ページの JS をその難易度のフラグで実行し、ページが宣言するノーツ数（{@code notes=}）が
  * 楽曲マスタのノーツ数と一致（差が 1% 以内、最低 2 ノーツまで許容）したときだけ採用する。
  * 一致しなければ別譜面（その難易度がページに無く既定の譜面が出た・リンク誤り・譜面変更）とみなして保留する。
  * キャッシュ済み 6,033 譜面では 5,806 譜面が一致し、外れた譜面は別難易度・別ページの値だった。
  *
- * 1 回に取得するページ数には上限（budget）があり、NEW を含むページ → まだ取りに行っていないページ →
- * 最後に取りに行ったのが古いページ の順に回す。照合できなかった譜面のページは {@link Retry} の間隔を空けてから再試行する。
+ * 1 回に取得するページ数には上限（budget）があり、NEW を含む曲 → 譜面分析ページに出ていない譜面
+ * （楽曲マスタに textage が無い ★11/12 A/L）がある曲 → まだ取りに行っていないページ → 最後に取りに行ったのが古いページ の順に回す。照合できなかった譜面のページは {@link Retry} の間隔を空けてから再試行する。
  */
 final class TextageChartSync {
 
     /** SP の難易度コード。 */
     static final List<String> SP_CODES = List.of("1", "2", "3", "4", "10");
+
+    /** 曲を回す優先度: NEW を含む曲 → 譜面分析に出ていない譜面がある曲（{@link SongWork#hasHiddenChart}）→ その他。 */
+    private static final Comparator<SongWork> PRIORITY = Comparator
+            .<SongWork>comparingInt(s -> s.hasNew() ? 0 : 1)
+            .thenComparingInt(s -> s.hasHiddenChart() ? 0 : 1);
 
     /** ページ（{@code 33/showtime.html}）の本文を返す。取得に失敗したら例外。 */
     @FunctionalInterface
@@ -65,10 +72,28 @@ final class TextageChartSync {
         }
     }
 
-    /** 処理対象の 1 曲（同じ曲名の譜面をまとめたもの）。 */
-    record SongWork(String title, String artist, String genre, String bpm, Set<String> knownPages, List<ChartWork> charts) {
+    /**
+     * 処理対象の 1 曲（同じ曲名の譜面をまとめたもの）。
+     *
+     * @param knownPages   楽曲マスタに登録済みの textage のページ
+     * @param profilePages 楽曲マスタには無いが、既存プロファイル（旧方式を含む）が指しているページ。
+     *                     楽曲マスタの textage が失われた譜面の手がかりとして、titletbl.js の候補より先に試す。
+     *                     旧方式にはリンク誤りもあるので、他の曲の titletbl 候補から外す対象（knownPages）には入れない
+     */
+    record SongWork(String title, String artist, String genre, String bpm, Set<String> knownPages, Set<String> profilePages,
+                    List<ChartWork> charts) {
         boolean hasNew() {
             return charts.stream().anyMatch(c -> c.reason() == Reason.NEW);
+        }
+
+        /**
+         * 楽曲マスタに textage が無いため譜面分析ページの一覧に出ていない譜面（★11/12 の ANOTHER / LEGGENDARIA）があるか。
+         * 利用者に見えている欠けなので、旧方式の再解析だけの曲より先に回す。
+         */
+        boolean hasHiddenChart() {
+            return charts.stream().anyMatch(c -> c.ownTextage() == null
+                    && ("4".equals(c.difficulty()) || "10".equals(c.difficulty()))
+                    && c.level() != null && (c.level() == 11 || c.level() == 12));
         }
     }
 
@@ -169,11 +194,14 @@ final class TextageChartSync {
                 if (bpm == null || bpm.isBlank()) bpm = sd.getBpm();
             }
             List<ChartWork> charts = new ArrayList<>();
+            Set<String> profilePages = new LinkedHashSet<>();
             Set<String> seenDiffs = new HashSet<>();
             for (SongDefinition sd : e.getValue()) {
                 if (!seenDiffs.add(sd.getDifficulty())) continue; // (曲名, 難易度) の重複行は先の 1 行だけ見る
                 ProfileKey p = byTitleDiff.get(title + "\0" + sd.getDifficulty());
                 if (p == null && sd.getTextage() != null) p = byTextage.get(sd.getTextage());
+                String profilePage = p != null ? pageOf(p.textage()) : null;
+                if (profilePage != null && !knownPages.contains(profilePage)) profilePages.add(profilePage);
                 if (p != null && analyzerVersion.equals(p.analyzerVersion())) {
                     upToDate++;
                     continue;
@@ -186,10 +214,10 @@ final class TextageChartSync {
                 }
                 charts.add(new ChartWork(title, sd.getDifficulty(), sd.getLevel(), sd.getNotes(), blankToNull(sd.getTextage()), reason));
             }
-            if (!charts.isEmpty()) songs.add(new SongWork(title, artist, genre, bpm, knownPages, charts));
+            if (!charts.isEmpty()) songs.add(new SongWork(title, artist, genre, bpm, knownPages, profilePages, charts));
         }
-        // NEW を含む曲を先に（安定ソートなので同順位はマスタの並び）
-        songs.sort(Comparator.comparingInt(s -> s.hasNew() ? 0 : 1));
+        // NEW を含む曲 → 譜面分析に出ていない譜面がある曲 → その他（安定ソートなので同順位はマスタの並び）
+        songs.sort(PRIORITY);
         return new Plan(songs, upToDate, noNotes);
     }
 
@@ -213,9 +241,9 @@ final class TextageChartSync {
         Ctx ctx = new Ctx(fetcher, budget, analyzerVersion);
         int waiting = 0;
 
-        // 取りに行く順: NEW を含む曲 → 未取得 → 古い順
+        // 取りに行く順: NEW を含む曲 → 譜面分析に出ていない譜面がある曲 → 未取得 → 古い順
         List<SongWork> order = new ArrayList<>(plan.songs());
-        order.sort(Comparator.<SongWork>comparingInt(s -> s.hasNew() ? 0 : 1)
+        order.sort(PRIORITY
                 .thenComparing(s -> lastAttemptOf(s, lastAttempts), Comparator.nullsFirst(Comparator.naturalOrder())));
 
         // 曲ごとの既知ページは、titletbl の artist/genre 候補から除外する（他の曲のページを誤って拾わない）
@@ -246,7 +274,18 @@ final class TextageChartSync {
                 remaining = ctx.tryPage(song, page, remaining, false, null);
             }
 
-            // 2. titletbl.js の候補
+            // 2. 既存プロファイルが指しているページ（楽曲マスタの textage が失われた譜面の手がかり。照合は同じくノーツ数で行う）
+            for (String page : song.profilePages()) {
+                if (remaining.isEmpty() || ctx.budget <= 0) break;
+                if (!tried.add(page)) continue;
+                int before = remaining.size();
+                remaining = ctx.tryPage(song, page, remaining, false, null);
+                if (remaining.size() < before) {
+                    ctx.resolutions.add(song.title() + " → " + page + "（既存プロファイルのページでノーツ数が一致）");
+                }
+            }
+
+            // 3. titletbl.js の候補
             if (!remaining.isEmpty() && ctx.budget > 0) {
                 if (table == null && !tableFailed) {
                     try {
@@ -431,6 +470,7 @@ final class TextageChartSync {
     private static LocalDateTime lastAttemptOf(SongWork s, Map<String, LocalDateTime> lastAttempts) {
         LocalDateTime latest = null;
         List<String> keys = new ArrayList<>(s.knownPages());
+        keys.addAll(s.profilePages());
         if (keys.isEmpty()) keys.add(unresolvedKey(s.title()));
         for (String k : keys) {
             LocalDateTime t = lastAttempts.get(k);
