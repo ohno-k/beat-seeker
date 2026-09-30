@@ -31,6 +31,12 @@
  *   1P の皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数える（{@link SCRATCH_ALT}）。
  *   この 3 つは 16 分の割れでも、同じ手の続きでも（程度に応じて）割れたものとして数える
  *
+ * - 16 分縦連の衝突（重み {@link KEY_WEIGHT}）: 16 分で続く縦連のある鍵盤と、それと一緒に動かない（同じ和音で出ない）
+ *   別の連打鍵盤が同じ手に来る量（少ないほど良い）。冥の 55〜62 小節の 2 鍵・3 鍵の連打は左右に分けるのが当たり。
+ *   rage against usual の 25⇔36 のように一緒に動く鍵盤や、16 分縦連がほとんど無い譜面には効かないよう、
+ *   この指標だけは譜面内の最良〜最悪ではなく固定の大きさ {@link CLASH_SCALE} で割る
+ * - きれいな形（重み {@link CLEAN_WEIGHT}）: 速く続く 3 打鍵が同じずらし幅で続く（階段・二重階段が崩れない）量（多いほど良い）
+ *
  * ほかの負荷（同じく 0〜1 にそろえて重み 1 で足す）:
  * - 皿の前後: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に、皿側の手へ来るノーツの数（連皿の最中は除く）
  * - 片手の最大密度: どちらかの手の 1 秒あたりのノーツ数の最大
@@ -60,6 +66,15 @@ const STREAM_GAP = 60 / 140 / 4 + 1e-6;
 const STREAM_MIN_NOTES = 3;
 /** 「皿と同時に取れる」「連皿中は逆の手」「16 分の左右交互」「片手の速い連打」の重み（それぞれ譜面内の最良〜最悪を 0〜1 にした不足分にかける。ほかの負荷は中央値で 1 前後にそろえてある） */
 export const KEY_WEIGHT = 4;
+/** 16 分縦連の衝突を割る固定の大きさ（密度の重みつきの量。これより差の小さい譜面では重みが比例して小さくなる） */
+const CLASH_SCALE = 5;
+/** 16 分縦連とみなす同じ鍵盤の間隔（tick。16 分 = 24）と、連打とみなす間隔（4 分 = 96） */
+const JACK16_TICKS = 24;
+const REPEAT_TICKS = 96;
+/** 16 分縦連の衝突を数える窓（秒） */
+const CLASH_WINDOW = 1.0;
+/** 「きれいな形」の重み */
+export const CLEAN_WEIGHT = 2;
 /** 「皿と同時に取れる」の重み（当たりの要素ではあるが優先度は高くない） */
 export const SIMUL_WEIGHT = 1.5;
 /** 片手の最大密度を数える窓（秒）。 */
@@ -77,6 +92,11 @@ export interface RandomMetrics {
   split16Total: number;
   scratchNear: number;
   fastSameHand: number;
+  /** 16 分縦連のある鍵盤と、一緒に動かない別の連打鍵盤が同じ手に来る量（密度の重みつき。少ないほど良い） */
+  jackClash: number;
+  /** 速く続く 3 打鍵が同じずらし幅で続く量 / 対象の 3 打鍵の総量（密度の重みつき。多いほど良い） */
+  cleanShape: number;
+  cleanTotal: number;
   /** 2 鍵以上の同時押しが左右の手にまたがる回数（密度の重みつき。少ないほど良い） */
   chordStraddle: number;
   /** 1P の皿を回さない手の、6 と 7 の速い交互（トリル）の回数（fastSameHand に重く含まれている。表示用） */
@@ -100,7 +120,7 @@ export interface RandomEvaluation {
   /** 並び → 候補 */
   byPattern: Map<string, RandomCandidate>;
   /** 各指標の全並びでの最良・最悪（総合の正規化に使った値） */
-  ranges: Record<'scratchSimulOk' | 'streamOk' | 'split16' | 'chordStraddle' | 'fastSameHand' | 'scratchNear' | 'peakHandDensity', [number, number]>;
+  ranges: Record<'scratchSimulOk' | 'streamOk' | 'split16' | 'chordStraddle' | 'jackClash' | 'cleanShape' | 'fastSameHand' | 'scratchNear' | 'peakHandDensity', [number, number]>;
 }
 
 /** 鍵盤の打鍵（皿を除く）。時刻順で、同じ時刻の和音は連続して並ぶ。 */
@@ -141,6 +161,10 @@ interface Prepared {
   pairWeights: number[];
   /** 和音ごとの重み（難所重視） */
   chordWeights: number[];
+  /** 鍵盤の組 (a, b) の 16 分縦連の衝突の量（a に 16 分縦連、b に連打、一緒に動かない分）。並びによらない */
+  clashPair: number[][];
+  /** 速く続く 3 打鍵（chords の添字 c-2, c-1, c）で、鍵盤の数がそろっているものの c と重み */
+  triples: { c: number; w: number }[];
 }
 
 function prepare(tl: ChartTimeline): Prepared {
@@ -190,7 +214,52 @@ function prepare(tl: ChartTimeline): Prepared {
   const dMax = Math.max(1, ...density);
   const chordWeights = density.map(d => Math.pow(d / dMax, HARD_POWER));
   const pairWeights = pairs16.map(c => chordWeights[c + 1]);
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights };
+
+  // 16 分縦連の衝突: 窓ごとに、鍵盤ごとの 16 分縦連・連打・打鍵の量と、鍵盤の組が同じ和音で出た量を数え、
+  // 組 (a, b) ごとに min(a の 16 分縦連, b の連打) × (b が a と別に出る割合) を足す
+  type Win = { jack16: number[]; rep: number[]; hits: number[]; together: number[][] };
+  const wins = new Map<number, Win>();
+  const lastTick = new Array<number>(8).fill(-Infinity);
+  chords.forEach(([i, j], c) => {
+    const id = Math.floor(events[i].time / CLASH_WINDOW);
+    let W = wins.get(id);
+    if (!W) {
+      W = { jack16: new Array(8).fill(0), rep: new Array(8).fill(0), hits: new Array(8).fill(0),
+        together: Array.from({ length: 8 }, () => new Array(8).fill(0)) };
+      wins.set(id, W);
+    }
+    const w = chordWeights[c];
+    for (let k = i; k < j; k++) {
+      const key = events[k].key;
+      const gap = events[k].tick - lastTick[key];
+      if (gap <= JACK16_TICKS) W.jack16[key] += w;
+      if (gap <= REPEAT_TICKS) W.rep[key] += w;
+      W.hits[key] += w;
+      lastTick[key] = events[k].tick;
+      for (let k2 = i; k2 < j; k2++) if (k2 !== k) W.together[key][events[k2].key] += w;
+    }
+  });
+  const clashPair = Array.from({ length: 8 }, () => new Array<number>(8).fill(0));
+  for (const W of wins.values()) {
+    for (let a = 1; a <= 7; a++) {
+      if (W.jack16[a] <= 0) continue;
+      for (let b = 1; b <= 7; b++) {
+        if (b === a || W.rep[b] <= 0) continue;
+        const apart = 1 - Math.min(1, W.together[a][b] / Math.max(W.hits[b], 1e-9));
+        clashPair[a][b] += Math.min(W.jack16[a], W.rep[b]) * apart;
+      }
+    }
+  }
+
+  // きれいな形の対象: 速く続き（どちらの間隔も FAST_GAP 未満）、鍵盤の数がそろった 3 打鍵
+  const triples: { c: number; w: number }[] = [];
+  for (let c = 2; c < chords.length; c++) {
+    const [a, b, cc] = [chords[c - 2], chords[c - 1], chords[c]];
+    if (events[b[0]].time - events[a[0]].time >= FAST_GAP || events[cc[0]].time - events[b[0]].time >= FAST_GAP) continue;
+    if (a[1] - a[0] !== b[1] - b[0] || b[1] - b[0] !== cc[1] - cc[0]) continue;
+    triples.push({ c, w: chordWeights[c] });
+  }
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights, clashPair, triples };
 }
 
 /**
@@ -215,6 +284,8 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
     streamOk: range(raw.map(m => m.streamOk), true),
     split16: range(raw.map(m => m.split16), true),
     chordStraddle: range(raw.map(m => m.chordStraddle), false),
+    jackClash: range(raw.map(m => m.jackClash), false),
+    cleanShape: range(raw.map(m => m.cleanShape), true),
     fastSameHand: range(raw.map(m => m.fastSameHand), false),
     scratchNear: range(raw.map(m => m.scratchNear), false),
     peakHandDensity: range(raw.map(m => m.peakHandDensity), false),
@@ -225,7 +296,9 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
     const m = raw[i];
     const score = SIMUL_WEIGHT * shortfall(m.scratchSimulOk, ranges.scratchSimulOk)
       + KEY_WEIGHT * (shortfall(m.streamOk, ranges.streamOk) + shortfall(m.split16, ranges.split16) + shortfall(m.fastSameHand, ranges.fastSameHand)
-        + shortfall(m.chordStraddle, ranges.chordStraddle))
+        + shortfall(m.chordStraddle, ranges.chordStraddle)
+        + (m.jackClash - ranges.jackClash[0]) / Math.max(ranges.jackClash[1] - ranges.jackClash[0], CLASH_SCALE))
+      + CLEAN_WEIGHT * shortfall(m.cleanShape, ranges.cleanShape)
       + shortfall(m.scratchNear, ranges.scratchNear) + shortfall(m.peakHandDensity, ranges.peakHandDensity);
     return { pattern, metrics: m, score, rank: 0 };
   });
@@ -328,7 +401,7 @@ function fingerMoveCost(cur: number[], prev: number[], gap: number): { cost: num
 
 /** 1 つの並びの指標。 */
 function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
-  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights } = prep;
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairWeights, chordWeights, clashPair, triples } = prep;
   // 元の鍵盤 → 手（0 = 皿側の手、1 = もう一方の手）とレーン（1〜7、左から）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = lane;
@@ -429,8 +502,35 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     }
   });
 
+  // 16 分縦連の衝突: 同じ手に来た鍵盤の組の量を足す
+  let jackClash = 0;
+  for (let a = 1; a <= 7; a++) for (let b = 1; b <= 7; b++) if (a !== b && handOfKey[a] === handOfKey[b]) jackClash += clashPair[a][b];
+
+  // きれいな形: 3 打鍵のレーンを並べ、1→2 と 2→3 のずらし幅が同じ（0 以外）なら足す
+  const shiftOf = (x: [number, number], y: [number, number]): number | null => {
+    const lx: number[] = [], ly: number[] = [];
+    for (let k = x[0]; k < x[1]; k++) lx.push(laneOf[events[k].key]);
+    for (let k = y[0]; k < y[1]; k++) ly.push(laneOf[events[k].key]);
+    lx.sort((m, n) => m - n);
+    ly.sort((m, n) => m - n);
+    const d = ly[0] - lx[0];
+    if (d === 0) return null;
+    for (let n = 1; n < lx.length; n++) if (ly[n] - lx[n] !== d) return null;
+    return d;
+  };
+  let cleanShape = 0;
+  let cleanTotal = 0;
+  for (const t of triples) {
+    cleanTotal += t.w;
+    const d1 = shiftOf(chords[t.c - 2], chords[t.c - 1]);
+    if (d1 !== null && d1 === shiftOf(chords[t.c - 1], chords[t.c])) cleanShape += t.w;
+  }
+
   const r3 = (v: number) => Math.round(v * 1000) / 1000;
   return {
+    jackClash: r3(jackClash),
+    cleanShape: r3(cleanShape),
+    cleanTotal: r3(cleanTotal),
     scratchSimulOk: r3(scratchSimulOk),
     scratchSimulTotal: r3(scratchSimulTotal),
     streamOk: r3(streamOk),

@@ -84,6 +84,9 @@ function loadSettings(): Settings {
   return { ...DEFAULTS };
 }
 const settings = ref<Settings>(loadSettings());
+// 譜面オプションは譜面ごとに選び直すものなので、新しい譜面を開くたびに正規に戻す（ほかの設定は引き継ぐ）。
+// 親は :key="textage" で譜面ごとにこのコンポーネントを作り直すので、ここは譜面を開くたびに通る
+settings.value.option = 'off';
 watch(settings, (s) => {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch { /* 保存できなくても動作は続ける */ }
   draw();
