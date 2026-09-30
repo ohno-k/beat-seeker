@@ -87,17 +87,18 @@ watch([mode, freePattern, neededGroups], async () => {
   }
 }, { immediate: true });
 
-/** 自由入力の並びの、その譜面での順位（±10 位ほどの目安）。データ未読込なら null */
-function freeRank(r: ChartRow): number | null {
+/** 自由入力の並びの、その譜面での順位の幅（約 20 位刻み）。データ未読込なら null */
+function freeRank(r: ChartRow): { from: number; to: number } | null {
   const bin = bins.value[r.g];
   const idx = PATTERN_INDEX.get(freePattern.value);
   if (!bin || idx === undefined || !summary.value) return null;
   const bucket = bin[r.i * summary.value.total + idx];
-  return Math.floor((bucket * summary.value.total) / summary.value.bucketsPerRank) + 1;
+  const { total, bucketsPerRank } = summary.value;
+  return { from: Math.floor((bucket * total) / bucketsPerRank) + 1, to: Math.floor(((bucket + 1) * total) / bucketsPerRank) };
 }
 
 // ── 一覧 ─────────────────────────────────────────────────
-interface ViewRow { row: ChartRow; rank: number; approx: boolean; pattern: string; }
+interface ViewRow { row: ChartRow; rank: number; rankTo: number | null; pattern: string; }
 const rows = computed((): ViewRow[] => {
   const s = summary.value;
   if (!s) return [];
@@ -109,13 +110,18 @@ const rows = computed((): ViewRow[] => {
     if (level.value === 'low' && r.l > 10) continue;
     if (q && !r.t.toLowerCase().includes(q)) continue;
     let rank: number | null;
+    let rankTo: number | null = null;
     let pattern: string;
     if (mode.value === 'off') { rank = r.off; pattern = '1234567'; }
     else if (mode.value === 'mirror') { rank = r.mir; pattern = '7654321'; }
     else if (mode.value === 'rran') { rank = r.rr; pattern = r.rrp; }
-    else { if (!freePattern.value) continue; rank = freeRank(r); pattern = freePattern.value; }
+    else {
+      if (!freePattern.value) continue;
+      const fr = freeRank(r);
+      rank = fr?.from ?? null; rankTo = fr?.to ?? null; pattern = freePattern.value;
+    }
     if (rank === null) continue;
-    out.push({ row: r, rank, approx: mode.value === 'free', pattern });
+    out.push({ row: r, rank, rankTo, pattern });
   }
   out.sort((a, b) => a.rank - b.rank || b.row.l - a.row.l || a.row.t.localeCompare(b.row.t, 'ja'));
   return out;
@@ -183,7 +189,7 @@ const levelLabel = (l: number) => `☆${l}`;
           <PatternChips v-if="mode === 'rran'" :pattern="v.pattern" small class="chips" />
           <span class="rank tabular-nums">
             <span v-if="v.rank <= TOP5" class="top-badge">上位5%</span>
-            {{ v.approx ? '約' : '' }}{{ v.rank }}位
+            {{ v.rankTo ? `${v.rank}〜${v.rankTo}` : v.rank }}位
             <span class="pct">（{{ percent(v.rank) }}%）</span>
           </span>
         </li>
@@ -193,7 +199,7 @@ const levelLabel = (l: number) => `☆${l}`;
 
       <p class="mt-4 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
         {{ summary.generatedAt }} 時点の評価基準で計算した {{ summary.charts.length }} 譜面（textage の譜面データが手元にある ANOTHER / LEGGENDARIA）。
-        R乱は 12 通り（正規・MIRROR をずらしたもの）のうち一番良い並びです。自由入力の順位は ±10 位ほどの目安です。
+        R乱は 12 通り（正規・MIRROR をずらしたもの）のうち一番良い並びです。自由入力の順位は約 20 位刻みの幅で表示します。
         曲名を押すと譜面分析タブでその譜面を開きます（配置評価で細かい内訳を確認できます）。
       </p>
     </template>
