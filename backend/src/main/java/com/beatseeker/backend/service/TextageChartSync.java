@@ -43,10 +43,12 @@ final class TextageChartSync {
     /** SP の難易度コード。 */
     static final List<String> SP_CODES = List.of("1", "2", "3", "4", "10");
 
-    /** 曲を回す優先度: NEW を含む曲 → 譜面分析に出ていない譜面がある曲（{@link SongWork#hasHiddenChart}）→ その他。 */
+    /**
+     * 曲を回す優先度: NEW を含む曲 → 譜面分析に出ていない譜面がある曲（{@link SongWork#hiddenRank}。★11/12 の A/L が先）→ その他。
+     */
     private static final Comparator<SongWork> PRIORITY = Comparator
             .<SongWork>comparingInt(s -> s.hasNew() ? 0 : 1)
-            .thenComparingInt(s -> s.hasHiddenChart() ? 0 : 1);
+            .thenComparingInt(SongWork::hiddenRank);
 
     /** ページ（{@code 33/showtime.html}）の本文を返す。取得に失敗したら例外。 */
     @FunctionalInterface
@@ -87,13 +89,22 @@ final class TextageChartSync {
         }
 
         /**
-         * 楽曲マスタに textage が無いため譜面分析ページの一覧に出ていない譜面（★11/12 の ANOTHER / LEGGENDARIA）があるか。
-         * 利用者に見えている欠けなので、旧方式の再解析だけの曲より先に回す。
+         * 楽曲マスタに textage が無いため譜面分析ページの一覧に出ていない譜面があるか（利用者に見えている欠けなので、
+         * 旧方式の再解析だけの曲より先に回す）。
+         *
+         * 譜面分析ページの一覧は ANOTHER / LEGGENDARIA（全レベル）なので、N/H/B の欠けは優先しない。
+         *
+         * @return 0 = ★11/12 の A/L に欠けがある（利用者が最も多い）、1 = ☆10 以下の A/L に欠けがある、2 = A/L の欠けなし
          */
-        boolean hasHiddenChart() {
-            return charts.stream().anyMatch(c -> c.ownTextage() == null
-                    && ("4".equals(c.difficulty()) || "10".equals(c.difficulty()))
-                    && c.level() != null && (c.level() == 11 || c.level() == 12));
+        int hiddenRank() {
+            int rank = 2;
+            for (ChartWork c : charts) {
+                if (c.ownTextage() != null) continue;
+                if (!"4".equals(c.difficulty()) && !"10".equals(c.difficulty())) continue;
+                if (c.level() != null && (c.level() == 11 || c.level() == 12)) return 0;
+                rank = 1;
+            }
+            return rank;
         }
     }
 
@@ -103,8 +114,10 @@ final class TextageChartSync {
      * @param songs     処理対象の曲（NEW を含む曲が先）
      * @param upToDate  新方式で解析済みの譜面数
      * @param noNotes   ノーツ数が未登録で照合できないため対象外にした譜面数
+     * @param linkRestores 新方式で解析済みなのに楽曲マスタの textage が空の譜面 → プロファイルの textage（曲名\0難易度 → textage）。
+     *                     照合済みのページなので、取得せずにそのまま楽曲マスタへ書き戻す
      */
-    record Plan(List<SongWork> songs, int upToDate, int noNotes) {
+    record Plan(List<SongWork> songs, int upToDate, int noNotes, Map<String, String> linkRestores) {
         int newCount() {
             return (int) songs.stream().flatMap(s -> s.charts().stream()).filter(c -> c.reason() == Reason.NEW).count();
         }
@@ -178,6 +191,7 @@ final class TextageChartSync {
         }
 
         List<SongWork> songs = new ArrayList<>();
+        Map<String, String> linkRestores = new LinkedHashMap<>();
         int upToDate = 0;
         int noNotes = 0;
         for (Map.Entry<String, List<SongDefinition>> e : byTitle.entrySet()) {
@@ -204,6 +218,9 @@ final class TextageChartSync {
                 if (profilePage != null && !knownPages.contains(profilePage)) profilePages.add(profilePage);
                 if (p != null && analyzerVersion.equals(p.analyzerVersion())) {
                     upToDate++;
+                    if (blankToNull(sd.getTextage()) == null && pageOf(p.textage()) != null) {
+                        linkRestores.put(title + "\0" + sd.getDifficulty(), p.textage());
+                    }
                     continue;
                 }
                 Reason reason = p == null ? Reason.NEW : Reason.LEGACY;
@@ -218,7 +235,7 @@ final class TextageChartSync {
         }
         // NEW を含む曲 → 譜面分析に出ていない譜面がある曲 → その他（安定ソートなので同順位はマスタの並び）
         songs.sort(PRIORITY);
-        return new Plan(songs, upToDate, noNotes);
+        return new Plan(songs, upToDate, noNotes, linkRestores);
     }
 
     // ── 実行 ─────────────────────────────────────────────────

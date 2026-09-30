@@ -200,6 +200,11 @@ public class TextageChartSyncService {
                     String[] k = e.getKey().split("\0", 2);
                     songDefRepo.updateTextage(k[0], k[1], e.getValue());
                 }
+                // 新方式で照合済みなのに楽曲マスタの textage が空の譜面は、取得せずにプロファイルのリンクを書き戻す
+                for (Map.Entry<String, String> e : plan.linkRestores().entrySet()) {
+                    String[] k = e.getKey().split("\0", 2);
+                    songDefRepo.updateTextage(k[0], k[1], e.getValue());
+                }
                 LocalDateTime now = LocalDateTime.now();
                 List<TextagePageAttempt> attempts = new ArrayList<>();
                 for (Map.Entry<String, String> e : out.attempts().entrySet()) {
@@ -212,7 +217,7 @@ public class TextageChartSyncService {
                 attemptRepo.saveAll(attempts);
             }
 
-            boolean hasChanges = !out.profiles().isEmpty();
+            boolean hasChanges = !out.profiles().isEmpty() || !plan.linkRestores().isEmpty();
             String status = hasChanges ? "SUCCESS" : "NO_CHANGE";
             String message = buildMessage(dryRun, plan, out);
 
@@ -233,6 +238,7 @@ public class TextageChartSyncService {
             summary.put("pendingNew", plan.newCount());
             summary.put("pendingLegacy", plan.legacyCount());
             summary.put("upToDate", plan.upToDate());
+            summary.put("restoredLinks", plan.linkRestores().size());
             run.setSummaryJson(objectMapper.writeValueAsString(summary));
             run.setFinishedAt(LocalDateTime.now());
             run = runRepo.save(run);
@@ -297,6 +303,7 @@ public class TextageChartSyncService {
         sb.append("。今回 ").append(out.pagesFetched()).append(" ページ取得し、新規 ").append(out.added().size())
           .append(" / 再解析 ").append(out.reanalyzed().size())
           .append(" / 保留 ").append(out.held().size()).append(" 譜面");
+        if (!plan.linkRestores().isEmpty()) sb.append("、解析済みプロファイルから楽曲マスタへ戻したリンク ").append(plan.linkRestores().size()).append(" 譜面");
         if (!out.deferred().isEmpty()) sb.append("、上限で次回に回した曲 ").append(out.deferred().size());
         if (out.waiting() > 0) sb.append("、再試行待ちの曲 ").append(out.waiting());
         if (dryRun && !out.profiles().isEmpty()) sb.append("（DB は変更していません）");

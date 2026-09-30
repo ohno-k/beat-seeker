@@ -237,6 +237,39 @@ class TextageChartSyncTest {
     }
 
     @Test
+    void plan_hiddenChartsOrder_topLevelAnotherFirst_thenLowerLevels() {
+        List<SongDefinition> m = new ArrayList<>(lostLinkMasters());
+        // N だけリンクが無い曲（譜面分析の一覧は A/L だけなので優先しない）
+        m.add(sd("Normal Only", "someone", "POP", "150", "2", 5, 400, null));
+        // ☆10 の ANOTHER のリンクが無い曲（2026-09-30 時点で本番の ☆10 以下の A/L は 830 譜面中 41 譜面しかリンクが無い）
+        m.add(sd("Low Level Song", "someone", "POP", "150", "4", 10, 900, null));
+        List<ProfileKey> p = new ArrayList<>(lostLinkProfiles());
+        p.add(new ProfileKey("30/normonly.html?1NC00", "Normal Only", "2", null));
+        p.add(new ProfileKey("30/lowlevel.html?1AC00", "Low Level Song", "4", null));
+
+        Plan plan = TextageChartSync.plan(m, p, V, true);
+
+        assertThat(plan.songs()).extracting(TextageChartSync.SongWork::title)
+                .containsExactly("yellow head joe", "Low Level Song", "22DUNK", "Normal Only");
+        assertThat(plan.songs()).extracting(TextageChartSync.SongWork::hiddenRank).containsExactly(0, 1, 2, 2);
+    }
+
+    @Test
+    void plan_restoresLinksOfChartsAlreadyAnalyzedWithCurrentVersion_withoutFetching() {
+        List<SongDefinition> m = new ArrayList<>();
+        m.add(sd("22DUNK", "SLAKE", "TECHNO", "135", "2", 3, 265, null));               // リンクが消えた
+        m.add(sd("22DUNK", "SLAKE", "TECHNO", "135", "4", 5, 329, "1/22dunk.html?1AC00")); // リンクあり
+        List<ProfileKey> p = List.of(
+                new ProfileKey("1/22dunk.html?1NC00", "22DUNK", "2", V),
+                new ProfileKey("1/22dunk.html?1AC00", "22DUNK", "4", V));
+
+        Plan plan = TextageChartSync.plan(m, p, V, true);
+
+        assertThat(plan.songs()).isEmpty(); // 取得はしない
+        assertThat(plan.linkRestores()).containsExactly(Map.entry("22DUNK\u00002", "1/22dunk.html?1NC00"));
+    }
+
+    @Test
     void notesMatchTolerance() {
         assertThat(TextageChartSync.notesMatch(1001, 1002)).isTrue();  // 2 ノーツ差までは常に許容
         assertThat(TextageChartSync.notesMatch(745, 741)).isTrue();    // 1% 以内（SOLITON BEAM [N] の textage と公式の差）

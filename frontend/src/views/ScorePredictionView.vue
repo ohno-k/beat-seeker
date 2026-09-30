@@ -3,7 +3,7 @@
  * ScorePredictionView.vue
  *
  * 【Viewの役割】
- * 譜面分析ページ。Lv11/12 の ANOTHER/LEGGENDARIA 譜面を 1 つ選び、傾向プロファイル
+ * 譜面分析ページ。ANOTHER / LEGGENDARIA 譜面（全レベル）を 1 つ選び、傾向プロファイル
  * （実効BPM、皿率、同時押し率、配置パターン、同時押し構成、打鍵間隔、小節ごとノーツ密度）と
  * 譜面再生、ログイン時は類似譜面と自分のスコアを並べて表示する。
  *
@@ -14,7 +14,7 @@
  * - レスポンシブ切替は scoped CSS で書く（src/output.css が sm:/lg: 系の Tailwind クラスを後勝ちで潰すため）
  *
  * 【主な機能】
- * - 曲選択（Lv11/12 の ANOTHER/LEGGENDARIA、textage 有りのみ）。選択は /chart/... の URL に同期
+ * - 曲選択（ANOTHER/LEGGENDARIA の全レベル、textage 有りのみ。☆10 以下の絞り込みあり）。選択は /chart/... の URL に同期
  * - 傾向プロファイル取得と可視化
  * - 譜面再生（ChartPlayer。ノーツを上から降らせて再生）
  * - 類似譜面（予測 API の similarSongs）。曲名で該当譜面の分析へ移動
@@ -73,7 +73,7 @@ const isAdminViewing = computed(() =>
 
 // ── 曲選択 ──────────────────────────────────────────────────
 const searchQuery = ref('');                          // 検索文字列（曲名/アーティスト）
-const levelFilter = ref<'all' | 12 | 11>('all');      // レベル絞り込み
+const levelFilter = ref<'all' | 12 | 11 | 'low'>('all'); // レベル絞り込み（low = ☆10 以下）
 const selectedEntry = ref<SongDataEntry | null>(null); // 現在選択中の曲
 const pickerOpen = ref(false);                        // モバイルで曲を選んだ後に一覧を開き直しているか
 const LIST_PAGE = 150;
@@ -81,13 +81,14 @@ const listLimit = ref(LIST_PAGE);                     // 一覧に描画する�
 
 /**
  * 分析対象として使える曲の集合。
- * ANOTHER(difficulty=4) / LEGGENDARIA(10) で、かつレベル11-12、かつ textage（譜面コード）を持つものに限定。
- * 並びはレベルの高い順 → 曲名順。
+ * ANOTHER(difficulty=4) / LEGGENDARIA(10) の全レベルのうち、textage（譜面コード）を持つもの。
+ * 並びはレベルの高い順 → 曲名順 → 難易度順。
  */
 const targetEntries = computed((): SongDataEntry[] => {
   return songDataBody.value
-    .filter(s => (s.difficulty === '4' || s.difficulty === '10') && (s.level === 11 || s.level === 12) && !!s.textage)
-    .sort((a, b) => b.level - a.level || a.title.localeCompare(b.title, 'ja'));
+    .filter(s => !!DIFF_META[s.difficulty] && !!s.textage)
+    .sort((a, b) => b.level - a.level || a.title.localeCompare(b.title, 'ja')
+      || DIFF_META[a.difficulty].order - DIFF_META[b.difficulty].order);
 });
 
 /** 検索文字列とレベルで絞った一覧（描画は listLimit 件まで）。 */
@@ -95,7 +96,7 @@ const matchedEntries = computed((): SongDataEntry[] => {
   const q = searchQuery.value.trim().toLowerCase();
   const lv = levelFilter.value;
   return targetEntries.value.filter(s =>
-    (lv === 'all' || s.level === lv)
+    (lv === 'all' || (lv === 'low' ? s.level <= 10 : s.level === lv))
     && (!q || s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q))
   );
 });
@@ -198,21 +199,29 @@ watch(() => props.viewingUserId, () => {
   }
 });
 
-// difficulty コードから表示名 ("ANOTHER"/"LEGGENDARIA") に変換
+// 難易度コード → 表示名・1 文字表記・色（一覧・ヘッダ・類似譜面で共通）。一覧に載せる難易度もこの表で決まる
+const DIFF_META: Record<string, { order: number; label: string; short: string; cls: string; text: string; badge: string }> = {
+  '4': { order: 0, label: 'ANOTHER', short: 'A', cls: 'is-ano', text: 'text-red-600 dark:text-red-400',
+    badge: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  '10': { order: 1, label: 'LEGGENDARIA', short: 'L', cls: 'is-leg', text: 'text-purple-600 dark:text-purple-400',
+    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
+};
+const DIFF_CODE_BY_NAME: Record<string, string> = Object.fromEntries(Object.entries(DIFF_META).map(([code, m]) => [m.label, code]));
+const metaOf = (difficulty: string) => DIFF_META[difficulty] ?? DIFF_META['4'];
+
+// difficulty コードから表示名（"ANOTHER" / "LEGGENDARIA"）に変換
 function diffLabel(difficulty: string): string {
-  return difficulty === '10' ? 'LEGGENDARIA' : 'ANOTHER';
+  return metaOf(difficulty).label;
 }
 
 // 難易度の 1 文字表記（一覧用）
 function diffShort(difficulty: string): string {
-  return difficulty === '10' ? 'L' : 'A';
+  return metaOf(difficulty).short;
 }
 
-// 難易度バッジの Tailwind クラス（LEGGENDARIA=紫、ANOTHER=赤）
+// 難易度バッジの Tailwind クラス
 function diffBadgeClass(difficulty: string): string {
-  return difficulty === '10'
-    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';
+  return metaOf(difficulty).badge;
 }
 
 // ── 共有リンク ───────────────────────────────────────────────
@@ -615,7 +624,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     <header class="mb-5">
       <h2 class="text-2xl font-bold text-slate-800 dark:text-white">{{ t('nav.scorePrediction') }}</h2>
       <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        ☆11・☆12 の ANOTHER / LEGGENDARIA 譜面の傾向を、密度・配置・リズム・譜面再生で確認できます。
+        ANOTHER / LEGGENDARIA 譜面（全レベル）の傾向を、密度・配置・リズム・譜面再生で確認できます。
       </p>
     </header>
 
@@ -652,16 +661,18 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                 <button type="button" :class="{ on: levelFilter === 'all' }" @click="levelFilter = 'all'">すべて</button>
                 <button type="button" :class="{ on: levelFilter === 12 }" @click="levelFilter = 12">☆12</button>
                 <button type="button" :class="{ on: levelFilter === 11 }" @click="levelFilter = 11">☆11</button>
+                <button type="button" :class="{ on: levelFilter === 'low' }" @click="levelFilter = 'low'">☆10以下</button>
               </div>
+            </div>
+            <!-- 件数とランダム（レベルの絞り込みが 4 つあるので、ランダムはこの行に置いて一覧の幅に収める） -->
+            <div class="mt-2 flex items-center justify-between gap-2">
+              <span class="text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">{{ matchedEntries.length }} 譜面</span>
               <button type="button" class="random-btn" title="ランダムに選ぶ" @click="pickRandom">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
                 </svg>
                 ランダム
               </button>
-            </div>
-            <div class="mt-2 text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">
-              {{ matchedEntries.length }} 譜面
             </div>
           </div>
 
@@ -676,14 +687,14 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
             <li v-for="entry in shownEntries" :key="entry.textage">
               <button type="button"
                 class="song-item"
-                :class="[entry.difficulty === '10' ? 'is-leg' : 'is-ano', { active: selectedEntry?.textage === entry.textage }]"
+                :class="[metaOf(entry.difficulty).cls, { active: selectedEntry?.textage === entry.textage }]"
                 @click="selectEntry(entry)">
                 <span class="min-w-0 flex-1">
                   <span class="block truncate text-xs font-medium">{{ entry.title }}</span>
                   <span class="block truncate text-[10px] text-slate-400 dark:text-slate-500">{{ entry.artist }}</span>
                 </span>
                 <span class="shrink-0 text-[10px] font-bold tabular-nums"
-                  :class="entry.difficulty === '10' ? 'text-purple-600 dark:text-purple-400' : 'text-red-600 dark:text-red-400'">
+                  :class="metaOf(entry.difficulty).text">
                   ☆{{ entry.level }} {{ diffShort(entry.difficulty) }}
                 </span>
               </button>
@@ -735,7 +746,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
         <div v-else class="flex flex-col gap-4">
           <!-- ─── 譜面ヘッダ ─── -->
           <section class="hero rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
-            :class="selectedEntry.difficulty === '10' ? 'is-leg' : 'is-ano'">
+            :class="metaOf(selectedEntry.difficulty).cls">
             <div class="hero-top">
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
@@ -947,10 +958,8 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   </span>
                   <span class="min-w-0 flex items-center gap-1.5">
                     <span class="shrink-0 px-1 rounded text-[10px] font-bold"
-                      :class="song.difficultyName === 'LEGGENDARIA'
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'">
-                      {{ song.difficultyName === 'LEGGENDARIA' ? 'L' : 'A' }}
+                      :class="diffBadgeClass(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4')">
+                      {{ diffShort(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4') }}
                     </span>
                     <button v-if="targetTextages.has(song.textage)" type="button"
                       class="truncate text-left text-xs text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
@@ -1163,7 +1172,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
   border: 1px solid rgb(203 213 225);
   font-size: 0.75rem;
 }
-.seg button { padding: 0.3rem 0.6rem; font-weight: 600; color: rgb(71 85 105); background: white; }
+.seg button { padding: 0.3rem 0.55rem; font-weight: 600; white-space: nowrap; color: rgb(71 85 105); background: white; }
 .seg button + button { border-left: 1px solid rgb(203 213 225); }
 .seg button.on { color: white; background: rgb(37 99 235); }
 .dark .seg { border-color: rgb(71 85 105); }
@@ -1172,6 +1181,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .dark .seg button.on { color: white; background: rgb(37 99 235); }
 .random-btn {
   margin-left: auto;
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
