@@ -278,10 +278,14 @@ export function assignLanes(tl: ChartTimeline, option: ChartOption, pattern: str
  * textage の CN の長さは実際より 2 単位（6 tick）短く書かれている（128 → 126、48 → 46）。
  * 離すタイミングは終端 + 6 tick のグリッド上なので、そこまで同じレーンに他のノーツを置かない。
  */
-const CN_RELEASE_PAD = 6;
+export const CN_RELEASE_PAD = 6;
 
-function assignSRandom(tl: ChartTimeline, rand: () => number, noteLanes: Uint8Array, cnLanes: Uint8Array) {
-  // CN の区間を 1 本ずつにまとめる（同じ鍵盤で、前の区間の終わりから続き、前の区間に終端が無いもの）
+/**
+ * CN の区間（小節ごとに区切られている）を 1 本ずつにまとめる。
+ * 同じ鍵盤で、前の区間の終わりから続き、前の区間に終端が無いものをつなぐ。
+ * groupOf は区間 → まとまりの添字、groups はまとまりの開始・終了 tick と鍵盤。
+ */
+export function groupCharges(tl: ChartTimeline): { groupOf: Int32Array; groups: { start: number; end: number; key: number }[] } {
   const groupOf = new Int32Array(tl.cnKeys.length).fill(-1);
   const groups: { start: number; end: number; key: number }[] = [];
   const open = new Map<number, number>(); // 元の鍵盤 → まだ終端の来ていない CN のまとまり
@@ -298,6 +302,11 @@ function assignSRandom(tl: ChartTimeline, rand: () => number, noteLanes: Uint8Ar
     if (tl.cnFlags[i] & 2) open.delete(key);
     else open.set(key, groupOf[i]);
   }
+  return { groupOf, groups };
+}
+
+function assignSRandom(tl: ChartTimeline, rand: () => number, noteLanes: Uint8Array, cnLanes: Uint8Array) {
+  const { groupOf, groups } = groupCharges(tl);
 
   // タイミング順にレーンを決める（同じ tick では CN を先に置く）
   type Ev = { tick: number; kind: 0 | 1; idx: number };
