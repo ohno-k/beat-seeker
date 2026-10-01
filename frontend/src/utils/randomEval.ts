@@ -690,35 +690,6 @@ function upperBoundNum(a: number[], x: number): number {
   return lo;
 }
 
-// ── 白黒の配置 ────────────────────────────────────────────
-
-/** 並びの白黒の配置（左のレーンから、元の白鍵 = "W"・元の黒鍵 = "B"。例: 2461357 → "BBBWWWW"） */
-export function layoutOf(pattern: string): string {
-  return [...pattern].map(d => ('1357'.includes(d) ? 'W' : 'B')).join('');
-}
-
-export interface LayoutRow {
-  /** "BBBWWWW" など */
-  layout: string;
-  /** この配置の中で一番良い並び */
-  best: RandomCandidate;
-  /** 35 通りの配置の中の順位（一番良い並びで比べる） */
-  rank: number;
-}
-
-/**
- * 【関数の役割】 5,040 通りを白黒の配置（黒鍵 3 つがどのレーンに来るか、35 通り）でまとめ、
- * それぞれの一番良い並びで順位をつける。プレーヤーは RANDOM を白黒の配置で語ることが多い（「黒黒黒白白白白」など）。
- */
-export function rankLayouts(ev: RandomEvaluation): LayoutRow[] {
-  const best = new Map<string, RandomCandidate>();
-  for (const c of ev.candidates) { // 押しやすい順なので最初に出たものが最良
-    const l = layoutOf(c.pattern);
-    if (!best.has(l)) best.set(l, c);
-  }
-  return [...best.entries()].map(([layout, c], i) => ({ layout, best: c, rank: i + 1 }));
-}
-
 /** 昇順の times に t ± w 秒のものがあるか。 */
 function hasNear(times: number[], t: number, w: number): boolean {
   let lo = 0, hi = times.length;

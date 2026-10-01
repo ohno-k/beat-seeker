@@ -9,7 +9,7 @@
  */
 import { ref, computed, watch } from 'vue';
 import type { ChartTimeline } from '../utils/chartPlayback';
-import { evaluateRandom, identifyRandom, rankLayouts, layoutOf, WHITE_KEYS, type RandomEvaluation, type RandomCandidate } from '../utils/randomEval';
+import { evaluateRandom, identifyRandom, WHITE_KEYS, type RandomEvaluation, type RandomCandidate } from '../utils/randomEval';
 import PatternChips from './PatternChips.vue';
 
 const props = defineProps<{
@@ -73,10 +73,6 @@ const bestRRandom = computed(() => {
   for (const base of ['1234567', '7654321']) for (let s = 1; s <= 6; s++) rots.push(base.slice(s) + base.slice(0, s));
   return rots.map(p => ev.byPattern.get(p)!).sort((a, b) => a.rank - b.rank)[0];
 });
-/** 白黒の配置（35 通り）の順位。上位 5 つと、今の並びの配置 */
-const layouts = computed(() => (evaluation.value ? rankLayouts(evaluation.value) : []));
-const topLayouts = computed(() => layouts.value.slice(0, 5));
-const currentLayout = computed(() => (props.currentPattern ? layouts.value.find(l => l.layout === layoutOf(props.currentPattern)) ?? null : null));
 
 /** 正規・MIRROR・R-RANDOM の最良（評価の前は空） */
 const baseRows = computed(() => {
@@ -170,25 +166,6 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
             </div>
           </div>
 
-          <!-- 白黒の配置（黒鍵 3 つがどのレーンに来るか、35 通り）。プレーヤーは RANDOM をこの単位で語ることが多い -->
-          <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">白黒の配置の順位（35 通り）</div>
-          <div v-if="currentLayout" class="mt-1 flex flex-wrap items-center gap-1.5">
-            今の並びの配置
-            <span class="layout"><span v-for="(c, i) in currentLayout.layout" :key="i" class="lcell" :class="c === 'W' ? 'w' : 'b'"></span></span>
-            <b class="text-slate-800 dark:text-white tabular-nums">{{ currentLayout.rank }} 位</b>
-          </div>
-          <ol class="cand-list">
-            <li v-for="l in topLayouts" :key="l.layout" :class="{ current: currentLayout?.layout === l.layout }">
-              <span class="rank tabular-nums">{{ l.rank }}</span>
-              <span class="cand-pattern">
-                <span class="layout"><span v-for="(c, i) in l.layout" :key="i" class="lcell" :class="c === 'W' ? 'w' : 'b'"></span></span>
-                <span class="best-label text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">最良</span>
-                <PatternChips :pattern="l.best.pattern" small />
-              </span>
-              <button type="button" class="apply-btn" @click="emit('apply', l.best.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
-            </li>
-          </ol>
-
           <!-- 正規・MIRROR・R-RANDOM の最良がどこに来るか（RANDOM を使うか決める目安） -->
           <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">正規・MIRROR の順位</div>
           <ol class="cand-list">
@@ -234,7 +211,7 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
           <details class="criteria mt-3">
             <summary>評価基準を見る</summary>
           <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。白黒の配置の順位は、その配置の中で一番良い並びで比べています。
+            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。
             密度の高いところほど配置を優先します: どの指標も、打鍵ごとに周り 1 秒のノーツ数（皿を含む）が多いほど重く数えます。
             16 分より速い音符ほど少しずつ重く数えます（24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍。割合・回数は重みつきの値です）。当たり配置の決め手として次の 6 つを特に重く見ています:
             両手にまたがる同時押し＝2 鍵以上の同時押しが左右の手にまたがる回数（少ないほど良い。密集部の同時押しを片手ずつに収められる配置が当たり。次の打鍵まで 8 分以上空く同時押しは数えません）。
@@ -300,7 +277,7 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 .btn-short { display: none; }
 @media (max-width: 479px) {
   .cand-list li { grid-template-columns: 1.6rem minmax(0, 1fr) auto; column-gap: 0.4rem; }
-  .btn-long, .best-label { display: none; }
+  .btn-long { display: none; }
   .btn-short { display: inline; }
 }
 @media (max-width: 419px) {
@@ -357,12 +334,6 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
   background: rgb(254 243 199);
 }
 .dark .top-notice { color: rgb(253 230 138); background: rgb(120 53 15 / 0.35); }
-.layout { display: inline-flex; gap: 2px; }
-.lcell { width: 0.7rem; height: 1.2rem; border-radius: 2px; }
-.lcell.w { background: white; box-shadow: inset 0 0 0 1px rgb(148 163 184); }
-.lcell.b { background: rgb(37 99 235); }
-.dark .lcell.w { background: rgb(226 232 240); box-shadow: none; }
-.dark .lcell.b { background: rgb(59 130 246); }
 .base-label { font-weight: 700; color: rgb(51 65 85); white-space: nowrap; }
 .dark .base-label { color: rgb(226 232 240); }
 .apply-btn {
