@@ -32,6 +32,7 @@
  *   2 打鍵目までは普通の隣への移動）は 3 打鍵目から重く（{@link TRILL67_COST}）。
  *   2 鍵ずつの同時押しの交互は、やりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数える（{@link TWO_TWO}）。
  *   1P の皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数える（{@link SCRATCH_ALT}）。
+ *   皿側の手の 1・3 のトリル（3 打鍵以上続く 1⇔3 の単打の交互）は、6・7 のトリルと同じく 3 打鍵目から重く（{@link TRILL13_COST}）。
  *   この 3 つは 16 分の割れでも、同じ手の続きでも（程度に応じて）割れたものとして数える。
  *   1P では、同じ手で同じ 2 つの形を速く行き来する（トリル）ほど重く数える: 3 打鍵目から移動の重さに
  *   {@link trillGrowth}（1 打鍵ごとに {@link TRILL_GROWTH_STEP} 倍ずつ増え、{@link TRILL_GROWTH_MAX} 倍まで）をかける。
@@ -133,6 +134,8 @@ export interface RandomMetrics {
   cnHold: number;
   /** 1P の皿を回さない手の、6 と 7 の速い交互（3 打鍵以上のトリル）で重く数えた回数（fastSameHand に含まれている。表示用） */
   trill67: number;
+  /** 1P の皿側の手の、1 と 3 の速い交互（3 打鍵以上のトリル）で重く数えた回数（fastSameHand に含まれている。表示用） */
+  trill13: number;
   peakHandDensity: number;
 }
 
@@ -384,6 +387,8 @@ const THUMB_LANE = 5;
 const THUMB_ALT_COST = 0.2;
 /** 6 と 7（中指と薬指/小指）の速い交互（3 打鍵目から）の重さ。指の作り上いちばん押しにくいので、隣のレーンへの普通の移動（1.0）より大きく減点する */
 const TRILL67_COST = 4;
+/** 皿側の手の 1 と 3 の速い交互（3 打鍵目から）の重さ。6⇔7 と同じく押しにくいので、1 つ飛ばしの普通の移動（1.3）より大きく減点する */
+const TRILL13_COST = TRILL67_COST;
 
 /** 同じ手のトリルの長さによる重さの増え方（3 打鍵目から 1 打鍵ごと）と上限 */
 const TRILL_GROWTH_STEP = 0.25;
@@ -461,11 +466,18 @@ function distanceCost(cur: number[], prev: number[]): number {
   }
   return cost;
 }
-/** 1P の皿側の手の、直前の打鍵から今の打鍵への速い移動の重さ（表に当たれば軽く、ほかはレーンの距離） */
-function scratchHandMoveCost(cur: number[], prev: number[], gap: number): number {
-  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return 0;
+/**
+ * 1P の皿側の手の、直前の打鍵から今の打鍵への速い移動の重さ（表に当たれば軽く、ほかはレーンの距離）。
+ * 1 と 3 の単打どうしの速い交互は、直前の移動も 1⇔3 の交互なら（3 打鍵以上のトリル）{@link TRILL13_COST}。2 打鍵目までは普通の 1 つ飛ばしの移動。
+ */
+function scratchHandMoveCost(cur: number[], prev: number[], gap: number, afterAlt13: boolean): { cost: number; alt13: boolean; trill13: boolean } {
+  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return { cost: 0, alt13: false, trill13: false };
+  const only = (s: number[], lane: number) => s.length === 1 && s[0] === lane;
+  if ((only(cur, 1) && only(prev, 3)) || (only(cur, 3) && only(prev, 1))) {
+    return afterAlt13 ? { cost: TRILL13_COST, alt13: true, trill13: true } : { cost: distanceCost(cur, prev), alt13: true, trill13: false };
+  }
   const t = scratchAlt(cur, prev);
-  return t ? t.cost : distanceCost(cur, prev);
+  return { cost: t ? t.cost : distanceCost(cur, prev), alt13: false, trill13: false };
 }
 
 /**
@@ -509,6 +521,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   let scratchNear = 0;
   let fastSameHand = 0;
   let trill67 = 0;
+  let trill13 = 0;
   let chordStraddle = 0;
   // 和音ごとの、1P の皿側の手・皿を回さない手のレーン（交互の表での割れの判定用）
   const leftLanes: number[][] = new Array(chords.length);
@@ -524,6 +537,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   const runLeft: HandRun = { prev: [], prev2: [], len: 0 };
   const runRight: HandRun = { prev: [], prev2: [], len: 0 };
   let lastAlt67 = false; // 皿を回さない手の直前の移動が 6⇔7 の速い交互だったか
+  let lastAlt13 = false; // 皿側の手の直前の移動が 1⇔3 の速い交互だったか
 
   for (let c = 0; c < chords.length; c++) {
     const [i, j] = chords[c];
@@ -535,8 +549,10 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       leftLanes[c] = curLeft;
       if (curLeft.length > 0) {
         const gap = events[i].time - lastTime[0];
-        const moveCost = scratchHandMoveCost(curLeft, runLeft.prev, gap);
-        fastSameHand += moveCost * trillGrowth(stepRun(runLeft, curLeft, gap)) * w;
+        const move = scratchHandMoveCost(curLeft, runLeft.prev, gap, lastAlt13);
+        fastSameHand += move.cost * trillGrowth(stepRun(runLeft, curLeft, gap)) * w;
+        if (move.trill13) trill13++;
+        lastAlt13 = move.alt13;
       }
       const cur: number[] = [];
       for (let k = i; k < j; k++) if (handOfKey[events[k].key] === 1) cur.push(laneOf[events[k].key]);
@@ -647,6 +663,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     chordStraddle: r3(chordStraddle),
     cnHold: r3(cnHold),
     trill67,
+    trill13,
     peakHandDensity: Math.max(peakDensity(handTimes[0]), peakDensity(handTimes[1])),
   };
 }
