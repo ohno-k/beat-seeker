@@ -8,6 +8,7 @@
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
  * 16 分より速い音符ほど少しずつ重く数える（{@link speedFactor}。24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍）。
+ * 「16 分」「8 分」などの間隔は、BPM 150 より速い譜面では実際の速さを BPM 150 に換算して見る（{@link gapTicksOf}）。
  * 密度の高いところほど配置を優先する: どの指標も、打鍵ごとに周り ±{@link DENSITY_HALF} 秒のノーツ数（皿を含む）を
  * 譜面内の最大で割って {@link HARD_POWER} 乗した重みで数える（難所の配置ほど順位に効き、スカスカの区間はほとんど効かない）。
  *
@@ -31,6 +32,7 @@
  *   親指だけの打鍵と親指以外の打鍵の交互は軽く（{@link THUMB_ALT_COST}）、6・7 のトリル（3 打鍵以上続く 6⇔7 の単打の交互。
  *   2 打鍵目までは普通の隣への移動）は 3 打鍵目から重く（{@link TRILL67_COST}）。
  *   2 鍵ずつの同時押しの交互は、やりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数える（{@link TWO_TWO}）。
+ *   ただし 47⇔56 が 3 打鍵以上続くトリルは、6・7 のトリルと同じく 3 打鍵目から重く（{@link TRILL4756_COST}）。
  *   1P の皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数える（{@link SCRATCH_ALT}）。
  *   皿側の手の 1・3 のトリル（3 打鍵以上続く 1⇔3 の単打の交互）は、6・7 のトリルと同じく 3 打鍵目から重く（{@link TRILL13_COST}）。
  *   この 3 つは 16 分の割れでも、同じ手の続きでも（程度に応じて）割れたものとして数える。
@@ -42,7 +44,8 @@
  *   別の連打鍵盤が同じ手に来る量（少ないほど良い）。冥の 55〜62 小節の 2 鍵・3 鍵の連打は左右に分けるのが当たり。
  *   rage against usual の 25⇔36 のように一緒に動く鍵盤や、16 分縦連がほとんど無い譜面には効かないよう、
  *   この指標だけは譜面内の最良〜最悪ではなく固定の大きさ {@link CLASH_SCALE} で割る
- * - きれいな形（重み {@link CLEAN_WEIGHT}）: 速く続く 3 打鍵が同じずらし幅で続く（階段・二重階段が崩れない）量（多いほど良い）
+ * - きれいな形（重み {@link CLEAN_WEIGHT}）: 速く続く 3 打鍵が同じずらし幅で続く（階段・二重階段が崩れない）量（多いほど良い）。
+ *   速い 3 打鍵の少ない譜面で短い階段 1 か所が効きすぎないよう、最良〜最悪の幅が {@link CLEAN_SCALE} より小さければ CLEAN_SCALE で割る
  * - CN の押しっぱなし（重み {@link KEY_WEIGHT}、1P のみ）: レーン 3（皿側の手）・4・6（皿を回さない手の人差し指・中指）に来た CN を
  *   押している間に、同じ手に来る別のノーツ（レーン 3 の CN なら皿も）の量（密度の重みつき。少ないほど良い）。
  *   CN の無い譜面や、押している間に同じ手のノーツがほとんど無い譜面で効きすぎないよう、16 分縦連の衝突と同じく
@@ -82,6 +85,15 @@ const SIXTEENTH_MAX = 24;
  */
 const SPEED_BASE_TICKS = 24;
 const SPEED_MAX = 2;
+/**
+ * BPM 150 で 1 秒あたりの tick 数（1 tick = 5 / (8 × BPM) 秒）。打鍵の間隔は、音符の長さ（tick）と
+ * 実際の秒数を BPM 150 に換算した tick の短い方で見る。BPM 150 以下の譜面は音符の長さのまま、
+ * 速い BPM の譜面は実際の速さで数える（MAX 300 の 8 分は BPM 150 の 16 分と同じ速さ）
+ */
+const TICKS_PER_SEC_150 = (8 * 150) / 5;
+function gapTicksOf(a: { tick: number; time: number }, b: { tick: number; time: number }): number {
+  return Math.min(b.tick - a.tick, (b.time - a.time) * TICKS_PER_SEC_150);
+}
 function speedFactor(gapTicks: number): number {
   if (!(gapTicks > 0) || gapTicks >= SPEED_BASE_TICKS) return 1;
   return Math.min(SPEED_MAX, 1 + 0.5 * (SPEED_BASE_TICKS / gapTicks - 1));
@@ -100,6 +112,11 @@ const REPEAT_TICKS = 96;
 const CLASH_WINDOW = 1.0;
 /** 「きれいな形」の重み */
 export const CLEAN_WEIGHT = 2;
+/**
+ * きれいな形を割る最小の大きさ（密度の重みつきの量）。速い 3 打鍵の少ない譜面で、短い階段 1 か所が順位全体を
+ * 決めないようにする（BLACK.by X-Cross Fade の 33 小節の 32 分 7 連打など）。譜面の最良〜最悪の幅の中央値は 8 前後
+ */
+const CLEAN_SCALE = 5;
 /** 「皿と同時に取れる」の重み（当たりの要素ではあるが優先度は高くない） */
 export const SIMUL_WEIGHT = 1.5;
 /** 両手にまたがる同時押しでも、次の打鍵までこの間隔（tick。8 分 = 48）以上空けば数えない */
@@ -136,6 +153,8 @@ export interface RandomMetrics {
   trill67: number;
   /** 1P の皿側の手の、1 と 3 の速い交互（3 打鍵以上のトリル）で重く数えた回数（fastSameHand に含まれている。表示用） */
   trill13: number;
+  /** 1P の皿を回さない手の、47⇔56 の速い交互（3 打鍵以上のトリル）で重く数えた回数（fastSameHand に含まれている。表示用） */
+  trill4756: number;
   peakHandDensity: number;
 }
 
@@ -242,7 +261,7 @@ function prepare(tl: ChartTimeline): Prepared {
   }
   const pairs16: number[] = [];
   for (let c = 0; c + 1 < chords.length; c++) {
-    const gap = events[chords[c + 1][0]].tick - events[chords[c][0]].tick;
+    const gap = gapTicksOf(events[chords[c][0]], events[chords[c + 1][0]]);
     if (gap >= SIXTEENTH_MIN && gap <= SIXTEENTH_MAX) pairs16.push(c);
   }
   // 和音ごとの重み: 周り ±DENSITY_HALF 秒のノーツ数（鍵盤と皿）。密度の高いところほど重く
@@ -253,14 +272,14 @@ function prepare(tl: ChartTimeline): Prepared {
   });
   const dMax = Math.max(1, ...density);
   // 密度の重み × 速さの重み（直前・直後の打鍵との近い方の間隔。16 分より速いほど重い）
-  const tickOf = (c: number) => events[chords[c][0]].tick;
+  const gapOf = (c: number) => gapTicksOf(events[chords[c][0]], events[chords[c + 1][0]]);
   const chordWeights = density.map((d, c) => {
-    const gapPrev = c > 0 ? tickOf(c) - tickOf(c - 1) : Infinity;
-    const gapNext = c + 1 < chords.length ? tickOf(c + 1) - tickOf(c) : Infinity;
+    const gapPrev = c > 0 ? gapOf(c - 1) : Infinity;
+    const gapNext = c + 1 < chords.length ? gapOf(c) : Infinity;
     return Math.pow(d / dMax, HARD_POWER) * speedFactor(Math.min(gapPrev, gapNext));
   });
   const pairWeights = pairs16.map(c => chordWeights[c + 1]);
-  const restAfter = chords.map((_, c) => c + 1 >= chords.length || tickOf(c + 1) - tickOf(c) >= STRADDLE_REST_TICKS);
+  const restAfter = chords.map((_, c) => c + 1 >= chords.length || gapOf(c) >= STRADDLE_REST_TICKS);
 
   // CN の押しっぱなし: 先頭の後〜離すタイミング（終端 + CN_RELEASE_PAD）の前に来る打鍵を鍵盤ごとに足す
   // （先頭と同じ tick の打鍵は一緒に押す和音なので数えない）。皿は周りの密度だけで重みをつける
@@ -288,7 +307,7 @@ function prepare(tl: ChartTimeline): Prepared {
   // 組 (a, b) ごとに min(a の 16 分縦連, b の連打) × (b が a と別に出る割合) を足す
   type Win = { jack16: number[]; rep: number[]; hits: number[]; together: number[][] };
   const wins = new Map<number, Win>();
-  const lastTick = new Array<number>(8).fill(-Infinity);
+  const lastHit: { tick: number; time: number }[] = Array.from({ length: 8 }, () => ({ tick: -Infinity, time: -Infinity }));
   chords.forEach(([i, j], c) => {
     const id = Math.floor(events[i].time / CLASH_WINDOW);
     let W = wins.get(id);
@@ -300,11 +319,11 @@ function prepare(tl: ChartTimeline): Prepared {
     const w = chordWeights[c];
     for (let k = i; k < j; k++) {
       const key = events[k].key;
-      const gap = events[k].tick - lastTick[key];
+      const gap = gapTicksOf(lastHit[key], events[k]);
       if (gap <= JACK16_TICKS) W.jack16[key] += w;
       if (gap <= REPEAT_TICKS) W.rep[key] += w;
       W.hits[key] += w;
-      lastTick[key] = events[k].tick;
+      lastHit[key] = events[k];
       for (let k2 = i; k2 < j; k2++) if (k2 !== k) W.together[key][events[k2].key] += w;
     }
   });
@@ -369,7 +388,7 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
         + shortfall(m.chordStraddle, ranges.chordStraddle)
         + (m.jackClash - ranges.jackClash[0]) / Math.max(ranges.jackClash[1] - ranges.jackClash[0], CLASH_SCALE)
         + (m.cnHold - ranges.cnHold[0]) / Math.max(ranges.cnHold[1] - ranges.cnHold[0], CN_SCALE))
-      + CLEAN_WEIGHT * shortfall(m.cleanShape, ranges.cleanShape)
+      + CLEAN_WEIGHT * (ranges.cleanShape[0] - m.cleanShape) / Math.max(ranges.cleanShape[0] - ranges.cleanShape[1], CLEAN_SCALE)
       + shortfall(m.scratchNear, ranges.scratchNear) + shortfall(m.peakHandDensity, ranges.peakHandDensity);
     return { pattern, metrics: m, score, rank: 0 };
   });
@@ -389,10 +408,15 @@ const THUMB_ALT_COST = 0.2;
 const TRILL67_COST = 4;
 /** 皿側の手の 1 と 3 の速い交互（3 打鍵目から）の重さ。6⇔7 と同じく押しにくいので、1 つ飛ばしの普通の移動（1.3）より大きく減点する */
 const TRILL13_COST = TRILL67_COST;
+/**
+ * 皿を回さない手の 47⇔56（2 鍵ずつの交互で一番やりにくい形）が 3 打鍵以上続くトリルの重さ（3 打鍵目から）。
+ * 2 打鍵目までは {@link TWO_TWO} の軽い重さのまま。長く続くと 6⇔7 と同じく押しにくい
+ */
+const TRILL4756_COST = TRILL67_COST;
 
 /** 同じ手のトリルの長さによる重さの増え方（3 打鍵目から 1 打鍵ごと）と上限 */
-const TRILL_GROWTH_STEP = 0.25;
-const TRILL_GROWTH_MAX = 3;
+const TRILL_GROWTH_STEP = 0.1;
+const TRILL_GROWTH_MAX = 1.5;
 /** 同じ手のトリルで len 打鍵目の移動にかける倍率（2 打鍵目までは 1） */
 function trillGrowth(len: number): number {
   return len >= 3 ? Math.min(TRILL_GROWTH_MAX, 1 + TRILL_GROWTH_STEP * (len - 2)) : 1;
@@ -486,20 +510,29 @@ function scratchHandMoveCost(cur: number[], prev: number[], gap: number, afterAl
  * 片方が親指だけ・もう片方が親指を使わない（重ならない）交互はいちばん楽なので {@link THUMB_ALT_COST}。
  * それ以外は、新しく押すレーンごとに直前の打鍵の一番近いレーンとの距離で数える（隣 1.0、1 つ飛ばし 1.3 …）。
  * 同じレーンの連打（縦連）は並びで変わらないので数えない。
+ * 47⇔56 の交互も、直前の移動が 47⇔56 なら（3 打鍵以上のトリル）{@link TRILL4756_COST}。
+ *
+ * @param afterAlt 直前の移動の種類（'67' = 6⇔7 の単打の交互、'4756' = 47⇔56 の交互、null = それ以外）
  */
-function fingerMoveCost(cur: number[], prev: number[], gap: number, afterAlt67: boolean): { cost: number; alt67: boolean; trill67: boolean } {
-  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return { cost: 0, alt67: false, trill67: false };
+function fingerMoveCost(cur: number[], prev: number[], gap: number, afterAlt: '67' | '4756' | null): { cost: number; alt: '67' | '4756' | null; trill67: boolean; trill4756: boolean } {
+  const plain = (cost: number) => ({ cost, alt: null, trill67: false, trill4756: false });
+  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return plain(0);
   const only = (s: number[], lane: number) => s.length === 1 && s[0] === lane;
   if ((only(cur, 6) && only(prev, 7)) || (only(cur, 7) && only(prev, 6))) {
-    return afterAlt67 ? { cost: TRILL67_COST, alt67: true, trill67: true } : { cost: 1, alt67: true, trill67: false };
+    const trill = afterAlt === '67';
+    return { cost: trill ? TRILL67_COST : 1, alt: '67', trill67: trill, trill4756: false };
   }
   const tt = twoTwo(cur, prev);
-  if (tt) return { cost: tt.cost, alt67: false, trill67: false };
+  if (tt === TWO_TWO[2]) {
+    const trill = afterAlt === '4756';
+    return { cost: trill ? TRILL4756_COST : tt.cost, alt: '4756', trill67: false, trill4756: trill };
+  }
+  if (tt) return plain(tt.cost);
   const disjoint = cur.every(l => !prev.includes(l));
   if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
-    return { cost: THUMB_ALT_COST, alt67: false, trill67: false };
+    return plain(THUMB_ALT_COST);
   }
-  return { cost: distanceCost(cur, prev), alt67: false, trill67: false };
+  return plain(distanceCost(cur, prev));
 }
 
 /** 1 つの並びの指標。 */
@@ -522,6 +555,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   let fastSameHand = 0;
   let trill67 = 0;
   let trill13 = 0;
+  let trill4756 = 0;
   let chordStraddle = 0;
   // 和音ごとの、1P の皿側の手・皿を回さない手のレーン（交互の表での割れの判定用）
   const leftLanes: number[][] = new Array(chords.length);
@@ -536,7 +570,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   const fingerModel = side === 1;
   const runLeft: HandRun = { prev: [], prev2: [], len: 0 };
   const runRight: HandRun = { prev: [], prev2: [], len: 0 };
-  let lastAlt67 = false; // 皿を回さない手の直前の移動が 6⇔7 の速い交互だったか
+  let lastAltRight: '67' | '4756' | null = null; // 皿を回さない手の直前の移動が 6⇔7・47⇔56 の速い交互だったか
   let lastAlt13 = false; // 皿側の手の直前の移動が 1⇔3 の速い交互だったか
 
   for (let c = 0; c < chords.length; c++) {
@@ -559,10 +593,11 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       rightLanes[c] = cur;
       if (cur.length > 0) {
         const gap = events[i].time - lastTime[1];
-        const move = fingerMoveCost(cur, runRight.prev, gap, lastAlt67);
+        const move = fingerMoveCost(cur, runRight.prev, gap, lastAltRight);
         fastSameHand += move.cost * trillGrowth(stepRun(runRight, cur, gap)) * w;
         if (move.trill67) trill67++;
-        lastAlt67 = move.alt67;
+        if (move.trill4756) trill4756++;
+        lastAltRight = move.alt;
       }
     }
     for (let k = i; k < j; k++) {
@@ -664,6 +699,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     cnHold: r3(cnHold),
     trill67,
     trill13,
+    trill4756,
     peakHandDensity: Math.max(peakDensity(handTimes[0]), peakDensity(handTimes[1])),
   };
 }

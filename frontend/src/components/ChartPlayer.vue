@@ -8,7 +8,9 @@
  * 【データ】
  * GET /api/analysis/chart-playback?textage=... が返す tick 単位（4/4 の 1 小節 = 384）のノーツ・CN・BPM 変化・小節線。
  * 秒への換算は 1 tick = 5 / (8 × BPM) 秒（textage の bms2jsh.js と同じ）。
- * textage への負荷を抑えるため、データは「再生する」を押したときに初めて取りに行く。
+ * データは表示したときに取りに行き、下の RANDOM カード（判別・配置評価）はすぐ計算した状態で出す
+ * （サーバーが textage のページを DB に保存しているので、textage へは取りに行かないことが多い）。
+ * 譜面再生のカードは「譜面を再生する」か、配置評価の「この並びで再生」を押したときに開く。後者は並びを当てて再生し、画面を譜面再生に合わせる。
  *
  * 【表示】
  * - スクロールは「ソフラン再現」（拍基準。BPM が上がると速く流れる＝実機と同じ）と「一定速度」（時間基準）の切り替え
@@ -31,36 +33,61 @@ const props = defineProps<{
 }>();
 
 // ── 読み込み ──────────────────────────────────────────────
-const opened = ref(false);
+const opened = ref(false);    // 譜面再生のカードを開いたか（RANDOM の評価はデータだけあれば出す）
 const loading = ref(false);
 const error = ref('');
 const timeline = shallowRef<ChartTimeline | null>(null);
+let loadPromise: Promise<void> | null = null;
 
-async function open() {
-  opened.value = true;
-  if (timeline.value || loading.value) return;
-  loading.value = true;
-  error.value = '';
-  try {
-    const res = await fetch(`${API_BASE}/api/analysis/chart-playback?textage=${encodeURIComponent(props.textage)}`);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.error) {
-      error.value = data.error ?? `譜面データを読み込めませんでした（${res.status}）`;
-      return;
+/** 再生データを取得する（RANDOM の評価のため、表示したらすぐ呼ぶ。2 回目以降は同じ取得を待つだけ） */
+function loadData(): Promise<void> {
+  loadPromise ??= (async () => {
+    loading.value = true;
+    error.value = '';
+    try {
+      const res = await fetch(`${API_BASE}/api/analysis/chart-playback?textage=${encodeURIComponent(props.textage)}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) {
+        error.value = data.error ?? `譜面データを読み込めませんでした（${res.status}）`;
+        loadPromise = null; // 開き直したときに取り直せるように
+        return;
+      }
+      timeline.value = buildChartTimeline(data as ChartPlaybackData);
+      loopA.value = 0;
+      loopB.value = Math.min(3, timeline.value.measureTicks.length - 1);
+    } catch {
+      error.value = '通信エラーで譜面データを読み込めませんでした';
+      loadPromise = null;
+    } finally {
+      loading.value = false;
     }
-    timeline.value = buildChartTimeline(data as ChartPlaybackData);
-    loopA.value = 0;
-    loopB.value = Math.min(3, timeline.value.measureTicks.length - 1);
-    loading.value = false; // canvas を表示してから大きさを測る
-    await nextTick();
-    setupCanvas();
-    seek(LEAD_IN);
-  } catch {
-    error.value = '通信エラーで譜面データを読み込めませんでした';
-  } finally {
-    loading.value = false;
-  }
+  })();
+  return loadPromise;
 }
+
+/** 譜面再生のカードを開く（初回は canvas を用意して曲頭へ）。 */
+async function open() {
+  if (opened.value && timeline.value) return;
+  opened.value = true;
+  await loadData();
+  if (!timeline.value) return;
+  await nextTick(); // canvas を表示してから大きさを測る
+  setupCanvas();
+  seek(LEAD_IN);
+}
+
+const playerCardRef = ref<HTMLDivElement | null>(null);
+
+/** RANDOM の評価から: 並びを当てて譜面再生を開き、再生して画面を譜面再生に合わせる。 */
+async function applyAndPlay(p: string) {
+  applyPattern(p);
+  await open();
+  if (!timeline.value) return;
+  playerCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  play();
+}
+
+onMounted(loadData);
 
 // ── 設定 ──────────────────────────────────────────────────
 const SETTINGS_KEY = 'chartPlayer.settings';
@@ -160,6 +187,17 @@ watch(lanes, () => {
   draw();
 });
 
+/** BSS（皿の CN）の終点の時刻。昇順。終点も皿を回すので打鍵音を鳴らす（判定ありの終端だけ） */
+const bssEndTimes = computed(() => {
+  const tl = timeline.value;
+  if (!tl) return new Float64Array(0);
+  const ends: number[] = [];
+  for (let i = 0; i < tl.cnKeys.length; i++) {
+    if (tl.cnKeys[i] === 0 && (tl.cnFlags[i] & 2)) ends.push(tl.cnEndTimes[i]);
+  }
+  return Float64Array.from(ends.sort((a, b) => a - b));
+});
+
 // ── 再生状態 ──────────────────────────────────────────────
 /** 曲頭の前に空ける秒数（最初のノーツが上から落ちてくるように）。 */
 const LEAD_IN = -1.5;
@@ -167,6 +205,7 @@ let curTime = LEAD_IN;       // 譜面上の現在時刻（秒）。描画の毎
 let lastFrame = 0;
 let rafId = 0;
 let hitIdx = 0;               // 次に判定ラインへ届く打鍵イベント
+let bssEndIdx = 0;            // 次に判定ラインへ届く BSS の終点
 const laneHit = new Float64Array(8).fill(-99);
 const playing = ref(false);
 const uiTime = ref(LEAD_IN);  // シークバーと時刻表示用（間引いて更新）
@@ -250,6 +289,7 @@ function seek(t: number) {
   if (!tl) return;
   curTime = Math.min(Math.max(t, LEAD_IN), tl.totalTime);
   hitIdx = lowerBound(tl.hitTimes, curTime);
+  bssEndIdx = lowerBound(bssEndTimes.value, curTime);
   laneHit.fill(-99);
   uiTime.value = curTime;
   draw();
@@ -292,21 +332,32 @@ function frame(now: number) {
   rafId = requestAnimationFrame(frame);
 }
 
-/** 判定ラインを越えた打鍵イベントを処理（レーンを光らせ、打鍵音を鳴らす）。 */
+/**
+ * 判定ラインを越えた打鍵イベントを処理（レーンを光らせ、打鍵音を鳴らす）。
+ * 皿と鍵盤が同時なら皿の音と鍵盤の音を両方鳴らす。BSS の終点も皿の音を鳴らす。
+ */
 function processHits(tl: ChartTimeline) {
-  let clicks = 0;
-  let scratch = false;
+  let keyClicks = 0;
+  let scratchClicks = 0;
   const la = lanes.value;
   while (hitIdx < tl.hitTimes.length && tl.hitTimes[hitIdx] <= curTime) {
     const key = la ? la.hitLanes[hitIdx] : tl.hitKeys[hitIdx];
     laneHit[key] = tl.hitTimes[hitIdx];
     if (curTime - tl.hitTimes[hitIdx] < 0.08) {
-      clicks++;
-      if (key === 0) scratch = true;
+      if (key === 0) scratchClicks++;
+      else keyClicks++;
     }
     hitIdx++;
   }
-  if (clicks > 0 && settings.value.sound) playClick(clicks, scratch);
+  const bssEnds = bssEndTimes.value;
+  while (bssEndIdx < bssEnds.length && bssEnds[bssEndIdx] <= curTime) {
+    laneHit[0] = bssEnds[bssEndIdx];
+    if (curTime - bssEnds[bssEndIdx] < 0.08) scratchClicks++;
+    bssEndIdx++;
+  }
+  if (!settings.value.sound) return;
+  if (keyClicks > 0) playClick(keyClicks, false);
+  if (scratchClicks > 0) playClick(scratchClicks, true);
 }
 
 // ── 打鍵音（WebAudio） ──────────────────────────────────────
@@ -600,7 +651,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 
 <template>
   <div class="flex flex-col gap-4">
-  <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+  <div ref="playerCardRef" class="player-card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
     <div class="player-head">
       <div class="text-xs font-medium text-slate-400 dark:text-slate-500">譜面再生</div>
       <button v-if="!opened"
@@ -771,32 +822,23 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
     </template>
   </div>
 
-  <!-- RANDOM の判別・配置評価（譜面再生とは別のカード。再生データを共有し、並びは再生に反映する） -->
+  <!-- RANDOM の判別・配置評価（譜面再生とは別のカード。データは表示時に読み込み、「この並びで再生」で譜面再生を開いて再生する） -->
   <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-    <div class="player-head">
-      <div class="text-xs font-medium text-slate-400 dark:text-slate-500">RANDOM</div>
-      <button v-if="!opened"
-        type="button"
-        class="play-open inline-flex items-center gap-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2"
-        @click="open">
-        RANDOM を調べる
-      </button>
-    </div>
-    <p v-if="!opened" class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
-      譜面データを読み込むと、RANDOM の判別（白鍵がどこに来たか）と配置評価（当たり乱探し）が使えます。
-    </p>
-    <div v-else-if="loading" class="mt-3 flex items-center justify-center py-6 text-xs text-slate-400 dark:text-slate-500">
+    <div class="text-xs font-medium text-slate-400 dark:text-slate-500">RANDOM</div>
+    <div v-if="loading" class="mt-3 flex items-center justify-center py-6 text-xs text-slate-400 dark:text-slate-500">
       <div class="w-5 h-5 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
       譜面データを読み込み中…
     </div>
     <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
     <RandomPanel v-if="timeline && !loading" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
-      @apply="applyPattern" />
+      @apply="applyAndPlay" />
   </div>
   </div>
 </template>
 
 <style scoped>
+/* 「この並びで再生」で画面を合わせたとき、上部の固定ヘッダーに隠れないように */
+.player-card { scroll-margin-top: 5rem; }
 .player-head {
   display: flex;
   align-items: center;

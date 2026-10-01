@@ -7,7 +7,7 @@
  *   曲頭の打鍵を「正規」と「今の並び」で並べて、ゲームで光ったレーンからどう読むかを見せる
  * - 配置評価: 5,040 通りの並びを手の負荷で順位付けする（evaluateRandom）。押すと計算し、並びを選ぶとその RANDOM で再生できる
  */
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import type { ChartTimeline } from '../utils/chartPlayback';
 import { evaluateRandom, identifyRandom, WHITE_KEYS, type RandomEvaluation, type RandomCandidate } from '../utils/randomEval';
 import PatternChips from './PatternChips.vue';
@@ -47,8 +47,9 @@ function evaluate() {
     computing.value = false;
   }, 30);
 }
-// 評価済みなら、サイドを変えたときに計算し直す
-watch(() => props.side, () => { if (evaluation.value) evaluate(); });
+// 表示したらすぐ計算する。サイドを変えたら計算し直す
+onMounted(evaluate);
+watch(() => props.side, evaluate);
 
 const current = computed(() => (props.currentPattern ? evaluation.value?.byPattern.get(props.currentPattern) ?? null : null));
 /** 同じ順位の並びを 1 組にまとめる（代表 = 辞書順で最初の並び、others = 同点のほかの並びの数） */
@@ -148,10 +149,7 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
           <span class="text-slate-500 dark:text-slate-400">
             皿側の手が {{ side === 1 ? '1〜3' : '5〜7' }}、もう一方の手が {{ side === 1 ? '4〜7' : '1〜4' }} レーンを押す前提で評価します。
           </span>
-          <button v-if="!evaluation" type="button" class="eval-btn" :disabled="computing" @click="evaluate">
-            {{ computing ? '計算中…' : '5,040 通りを評価する' }}
-          </button>
-          <span v-else-if="computing" class="text-slate-400">計算中…</span>
+          <span v-if="computing" class="text-slate-400">5,040 通りを計算中…</span>
         </div>
 
         <template v-if="evaluation">
@@ -213,18 +211,19 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
           <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
             RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。
             密度の高いところほど配置を優先します: どの指標も、打鍵ごとに周り 1 秒のノーツ数（皿を含む）が多いほど重く数えます。
-            16 分より速い音符ほど少しずつ重く数えます（24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍。割合・回数は重みつきの値です）。当たり配置の決め手として次の 6 つを特に重く見ています:
+            16 分より速い音符ほど少しずつ重く数えます（24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍。割合・回数は重みつきの値です）。
+            BPM 150 より速い譜面は、音符の長さではなく実際の速さを BPM 150 に換算して数えます（MAX 300 の 8 分は 16 分扱い）。当たり配置の決め手として次の 6 つを特に重く見ています:
             両手にまたがる同時押し＝2 鍵以上の同時押しが左右の手にまたがる回数（少ないほど良い。密集部の同時押しを片手ずつに収められる配置が当たり。次の打鍵まで 8 分以上空く同時押しは数えません）。
             16分縦連の衝突＝16 分で続く縦連のある鍵盤と、それと一緒に動かない別の連打鍵盤が同じ手に来る量（少ないほど良い。2 鍵・3 鍵の連打などは左右に分けるのが当たり。16 分縦連がほとんど無い譜面ではあまり効きません）。
             CN の押しっぱなし＝1P でレーン 3・4・6 に来た CN を押している間に、同じ手に来る別のノーツ（レーン 3 の CN なら皿も）の量（少ないほど良い。CN の少ない譜面ではあまり効きません）。
-            きれいな形＝速く続く 3 打鍵が同じずらし幅で続く（階段・二重階段が崩れない）割合（多いほど良い。上の 5 つより軽く見ています）。
+            きれいな形＝速く続く 3 打鍵が同じずらし幅で続く（階段・二重階段が崩れない）割合（多いほど良い。上の 5 つより軽く見ています。速く続く打鍵の少ない譜面では、短い階段 1 か所で順位が決まらないよう効きを弱めます）。
             連皿中は逆の手＝連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿を回さない方の手に来る割合（連皿の無い譜面では出しません）。
             16分が左右に割れる＝16 分以上の速さ（16 分・24 分・32 分…）で続く 2 つの打鍵で、どちらの手も片方の打鍵にしか鍵盤が無い（手が形を切り替えない）割合。
             密度の高い区間（難所）ほど重く数えます（デニム配置が割れるか、など）。どの並びでも割れない組があるので 100% にはなりません。
             片手の速い連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵の数（離れたレーンほど重く数える。少ないほど良い）。
             1P の皿を回さない手は、4 人差し指・5 親指・6 中指・7 薬指（小指）の運指で数えます: 親指だけの打鍵と親指以外の打鍵の交互（467 と 5 のトリルなど）は軽く、
-            6・7 のトリル（3 打鍵以上続く 6⇔7 の交互）は 3 打鍵目から大きく減点し、2 鍵ずつの同時押しの交互はやりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数えます（同じ手で続いても、この形なら割れたものとして扱います）。
-            皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数え、1・3 のトリル（3 打鍵以上続く 1⇔3 の交互）は 6・7 のトリルと同じく 3 打鍵目から大きく減点します。1P では、同じ手で同じ 2 つの形を速く行き来するトリルは長いほど重く数えます（3 打鍵目から 1 打鍵ごとに 0.25 倍ずつ増え、最大 3 倍）。（2P と皿側の手は運指が人によって違うので、レーンの距離だけで数えます）。
+            6・7 のトリル（3 打鍵以上続く 6⇔7 の交互）は 3 打鍵目から大きく減点し、2 鍵ずつの同時押しの交互はやりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数えます（同じ手で続いても、この形なら割れたものとして扱います。ただし 47⇔56 が 3 打鍵以上続くトリルは、6・7 のトリルと同じく 3 打鍵目から大きく減点します）。
+            皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数え、1・3 のトリル（3 打鍵以上続く 1⇔3 の交互）は 6・7 のトリルと同じく 3 打鍵目から大きく減点します。1P では、同じ手で同じ 2 つの形を速く行き来するトリルは長いほど少し重く数えます（3 打鍵目から 1 打鍵ごとに 0.1 倍ずつ増え、最大 1.5 倍）。（2P と皿側の手は運指が人によって違うので、レーンの距離だけで数えます）。
             次に、皿と同時に取れる＝単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる）を、上の 3 つより軽く見ています。
             どれもこの譜面で一番良い並びを 0、一番悪い並びを 1 にそろえて重みづけして足し、さらに次の負荷で差をつけています:
             皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ（連皿の最中は除く）、片手最大＝片手の 1 秒あたりの最大ノーツ数。
@@ -294,8 +293,6 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 .dark .seg button + button { border-left-color: rgb(71 85 105); }
 .dark .seg button.on { color: white; background: rgb(37 99 235); }
 
-.eval-btn { padding: 0.4rem 0.8rem; border-radius: 0.375rem; font-weight: 700; color: white; background: rgb(37 99 235); white-space: nowrap; }
-.eval-btn:disabled { opacity: 0.6; }
 
 .cand-list { margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .criteria > summary { cursor: pointer; font-size: 11px; font-weight: 600; color: rgb(100 116 139); }
