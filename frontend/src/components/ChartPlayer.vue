@@ -599,6 +599,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 </script>
 
 <template>
+  <div class="flex flex-col gap-4">
   <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
     <div class="player-head">
       <div class="text-xs font-medium text-slate-400 dark:text-slate-500">譜面再生</div>
@@ -766,10 +767,32 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
           楽曲の音声は再生されません。譜面をタップ（クリック）で再生／一時停止<span class="pc-only">、マウスの上下ドラッグで前後に移動、←→キーで小節送り</span>できます。
           区間リピートは B の小節の終わりまで流すと、A の 1 秒前に戻ります。
         </p>
-        <RandomPanel v-if="timeline" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
-          @apply="applyPattern" />
       </div>
     </template>
+  </div>
+
+  <!-- RANDOM の判別・配置評価（譜面再生とは別のカード。再生データを共有し、並びは再生に反映する） -->
+  <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+    <div class="player-head">
+      <div class="text-xs font-medium text-slate-400 dark:text-slate-500">RANDOM</div>
+      <button v-if="!opened"
+        type="button"
+        class="play-open inline-flex items-center gap-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2"
+        @click="open">
+        RANDOM を調べる
+      </button>
+    </div>
+    <p v-if="!opened" class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
+      譜面データを読み込むと、RANDOM の判別（白鍵がどこに来たか）と配置評価（当たり乱探し）が使えます。
+    </p>
+    <div v-else-if="loading" class="mt-3 flex items-center justify-center py-6 text-xs text-slate-400 dark:text-slate-500">
+      <div class="w-5 h-5 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+      譜面データを読み込み中…
+    </div>
+    <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+    <RandomPanel v-if="timeline && !loading" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
+      @apply="applyPattern" />
+  </div>
   </div>
 </template>
 
