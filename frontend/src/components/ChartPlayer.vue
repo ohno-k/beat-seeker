@@ -20,7 +20,10 @@
  *   マウスは canvas の上下ドラッグで前後に送れる
  */
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { API_BASE } from '../composables/useAuth';
+import { API_BASE, useAuth } from '../composables/useAuth';
+import { useAdmin } from '../composables/useAdmin';
+import { loadYouTubeApi, YT_STATE, type YTPlayer } from '../utils/youtube';
+import { tapResidual, median, MIN_TAPS } from '../utils/videoSync';
 import {
   formatBpmLabel, buildChartTimeline, assignLanes, randomPattern, rRandomPattern, isValidPattern, MIRROR_PATTERN, OFF_PATTERN,
   type ChartPlaybackData, type ChartTimeline, type ChartOption,
@@ -74,6 +77,7 @@ async function open() {
   await nextTick(); // canvas を表示してから大きさを測る
   setupCanvas();
   seek(LEAD_IN);
+  if (settings.value.video) loadVideo();
 }
 
 const playerCardRef = ref<HTMLDivElement | null>(null);
@@ -99,9 +103,12 @@ interface Settings {
   noteColor: 'lane' | 'key';
   /** 譜面オプションと、RANDOM / R-RANDOM の鍵盤の並び（左のレーンから元の鍵盤番号） */
   option: ChartOption; pattern: string;
+  /** 原曲の動画（YouTube）を一緒に流すか。ON のままなら次の譜面でも自動で動画を用意する */
+  video: boolean;
 }
 const DEFAULTS: Settings = {
   visibleSec: 1.2, rate: 1, mode: 'beat', side: 1, sound: false, noteSize: 7, noteColor: 'lane', option: 'off', pattern: OFF_PATTERN,
+  video: false,
 };
 function loadSettings(): Settings {
   try {
@@ -257,24 +264,28 @@ function setLoopOn(on: boolean) {
 }
 watch([loopA, loopB], () => { if (loopA.value > loopB.value) loopB.value = loopA.value; });
 
-function play() {
+/** @param fromVideo 動画側の再生ボタンから始まった（動画はもう流れているので動かさない） */
+function play(fromVideo = false) {
   const tl = timeline.value;
   if (!tl) return;
-  if (curTime >= tl.totalTime) seek(LEAD_IN);
+  if (curTime >= tl.totalTime) seek(LEAD_IN, false);
   if (loopOn.value) {
     const [start, end] = loopRange(tl);
-    if (curTime < start - LOOP_PREROLL || curTime >= end) seekLoopStart();
+    if (curTime < start - LOOP_PREROLL || curTime >= end) seek(loopRange(tl)[0] - LOOP_PREROLL, false);
   }
   ensureAudio();
   playing.value = true;
+  if (!fromVideo) startVideoFromChart();
   lastFrame = performance.now();
   cancelAnimationFrame(rafId);
   rafId = requestAnimationFrame(frame);
 }
 
-function pause() {
+/** @param fromVideo 動画側で止められた（動画は止まっているので動かさない） */
+function pause(fromVideo = false) {
   playing.value = false;
   cancelAnimationFrame(rafId);
+  if (!fromVideo) videoPause();
   uiTime.value = curTime;
   draw();
 }
@@ -284,7 +295,8 @@ function togglePlay() {
   else play();
 }
 
-function seek(t: number) {
+/** @param followVideo 動画も同じ位置へ動かすか */
+function seek(t: number, followVideo = true) {
   const tl = timeline.value;
   if (!tl) return;
   curTime = Math.min(Math.max(t, LEAD_IN), tl.totalTime);
@@ -292,6 +304,7 @@ function seek(t: number) {
   bssEndIdx = lowerBound(bssEndTimes.value, curTime);
   laneHit.fill(-99);
   uiTime.value = curTime;
+  if (followVideo) videoFollowSeek();
   draw();
 }
 
@@ -315,7 +328,13 @@ function frame(now: number) {
   // タブ復帰直後などの大きな飛びは詰める
   const dt = Math.min((now - lastFrame) / 1000, 0.1);
   lastFrame = now;
-  curTime += dt * settings.value.rate;
+  const prev = curTime;
+  curTime = advanceWithVideo(curTime, dt * settings.value.rate, now);
+  // 動画に合わせて後ろへ戻ったときは打鍵の位置も戻す（前へは processHits が進める）
+  if (curTime < prev) {
+    hitIdx = lowerBound(tl.hitTimes, curTime);
+    bssEndIdx = lowerBound(bssEndTimes.value, curTime);
+  }
   if (loopOn.value && curTime >= loopRange(tl)[1]) seekLoopStart();
   processHits(tl);
   if (curTime >= tl.totalTime) {
@@ -384,6 +403,321 @@ function playClick(count: number, scratch: boolean) {
   osc.connect(gain).connect(audio.destination);
   osc.start(t);
   osc.stop(t + 0.05);
+}
+
+// ── 原曲の動画（YouTube） ────────────────────────────────────
+// 動画を流している間は動画の再生位置が時計になり、譜面は「動画の位置 − ずれ」に追従する。
+// ずれ（offset）: 動画の位置（秒）= 譜面の時刻（秒、最初の小節の頭が 0）+ offset。譜面ごとにサーバーに保存し、全員で共有する。
+interface VideoInfo {
+  status: 'ok' | 'notFound' | 'disabled' | 'none';
+  videoId?: string; videoTitle?: string; channelTitle?: string; durationSec?: number;
+  candidateIndex?: number; candidateCount?: number;
+  offsetSec?: number | null;
+  /** chart = この譜面で保存されたずれ、song = 同じ曲の別譜面のずれを借りている */
+  offsetSource?: 'chart' | 'song' | null;
+}
+const { isLoggedIn, authHeaders } = useAuth();
+const { isAdmin } = useAdmin();
+const videoInfo = ref<VideoInfo | null>(null);
+const videoLoading = ref(false);
+const videoError = ref('');
+const videoReady = ref(false);
+const videoBoxRef = ref<HTMLDivElement | null>(null);
+let yt: YTPlayer | null = null;
+/** 今使っているずれ（秒） */
+const offset = ref(0);
+/** ±ボタンや合わせ操作でずれを変えたか（保存ボタンを出す） */
+const offsetTouched = ref(false);
+const offsetSaving = ref(false);
+const offsetMessage = ref('');
+/** 「リズムに合わせて叩く」の打鍵の差（秒） */
+const taps = ref<number[]>([]);
+const manualUrl = ref('');
+/** 譜面が動画の 0 秒より前（曲頭前の空き・動画より早く始まる譜面）。動画の 0 秒に届いたら流し始める */
+let videoPending = false;
+/** こちらから止めたままシークした直後に、動画が勝手に再生を始めたら止め直す（未再生の動画はシークで再生が始まる） */
+let ignoreVideoPlayUntil = 0;
+let lastVideoSeekAt = 0;
+/** 動画の読み込み待ちで譜面を止め始めた時刻（自動再生が許可されない端末で止まり続けないよう、一定時間で諦める） */
+let heldSince = 0;
+const VIDEO_HOLD_LIMIT_MS = 3000;
+
+function videoActive(): boolean {
+  return !!yt && videoReady.value;
+}
+
+/** 動画とずれを取得する（動画がまだ無ければサーバーが YouTube で探す） */
+async function loadVideo() {
+  if (videoLoading.value) return;
+  videoLoading.value = true;
+  videoError.value = '';
+  try {
+    const res = await fetch(`${API_BASE}/api/analysis/chart-video?search=true&textage=${encodeURIComponent(props.textage)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) {
+      videoError.value = data.error ?? `動画を読み込めませんでした（${res.status}）`;
+      return;
+    }
+    await applyVideoInfo(data as VideoInfo);
+  } catch {
+    videoError.value = '通信エラーで動画を読み込めませんでした';
+  } finally {
+    videoLoading.value = false;
+  }
+}
+
+async function applyVideoInfo(data: VideoInfo) {
+  const prevId = videoInfo.value?.videoId;
+  videoInfo.value = data;
+  offset.value = data.offsetSec ?? 0;
+  offsetTouched.value = false;
+  offsetMessage.value = '';
+  taps.value = [];
+  if (data.status !== 'ok' || !data.videoId) {
+    destroyVideo();
+    return;
+  }
+  if (prevId === data.videoId && yt) return;
+  await createPlayer(data.videoId);
+}
+
+async function createPlayer(videoId: string) {
+  destroyVideo();
+  videoError.value = '';
+  let api;
+  try {
+    api = await loadYouTubeApi();
+  } catch (e) {
+    videoError.value = (e as Error).message;
+    return;
+  }
+  await nextTick();
+  const box = videoBoxRef.value;
+  if (!box || !settings.value.video) return;
+  const el = document.createElement('div');
+  box.appendChild(el);
+  yt = new api.Player(el, {
+    videoId,
+    width: '100%',
+    height: '100%',
+    playerVars: { playsinline: 1, rel: 0 },
+    events: {
+      onReady: () => {
+        videoReady.value = true;
+        yt?.setPlaybackRate(settings.value.rate);
+        if (playing.value) startVideoFromChart();
+        else videoFollowSeek(true);
+      },
+      onStateChange: (e) => onVideoState(e.data),
+      onError: (e) => {
+        videoError.value = e.data === 101 || e.data === 150
+          ? 'この動画は埋め込み再生が許可されていません。「別の動画」を試してください'
+          : '動画を再生できません。「別の動画」を試してください';
+      },
+    },
+  });
+}
+
+function destroyVideo() {
+  videoReady.value = false;
+  videoPending = false;
+  try { yt?.destroy(); } catch { /* 既に壊れていても続ける */ }
+  yt = null;
+  if (videoBoxRef.value) videoBoxRef.value.innerHTML = '';
+}
+
+function setVideoOn(on: boolean) {
+  settings.value.video = on;
+  if (on) {
+    loadVideo();
+  } else {
+    destroyVideo();
+    videoInfo.value = null;
+    videoError.value = '';
+  }
+}
+
+/** 譜面の今の位置から動画を流す */
+function startVideoFromChart() {
+  if (!videoActive()) return;
+  const vt = curTime + offset.value;
+  yt!.setPlaybackRate(settings.value.rate);
+  heldSince = 0;
+  if (vt >= 0) {
+    videoPending = false;
+    yt!.seekTo(vt, true);
+    yt!.playVideo();
+  } else {
+    videoPending = true;
+    ignoreVideoPlayUntil = performance.now() + 1000;
+    yt!.seekTo(0, true);
+    yt!.pauseVideo();
+  }
+}
+
+function videoPause() {
+  videoPending = false;
+  if (videoActive()) yt!.pauseVideo();
+}
+
+/** 譜面を動かしたとき動画も同じ位置へ（ドラッグ中は間引き、離したときに force で合わせる） */
+function videoFollowSeek(force = false) {
+  if (!videoActive()) return;
+  const now = performance.now();
+  if (!force && now - lastVideoSeekAt < 200) return;
+  lastVideoSeekAt = now;
+  if (playing.value) {
+    startVideoFromChart();
+    return;
+  }
+  ignoreVideoPlayUntil = now + 1000;
+  yt!.seekTo(Math.max(0, curTime + offset.value), true);
+}
+
+/**
+ * 1 フレーム分進めた譜面の時刻。動画が流れていれば動画の位置に寄せる（0.3 秒以上ずれたら飛ぶ、それ未満は少しずつ）。
+ * 動画の読み込み中は譜面を止めて待つ。
+ */
+function advanceWithVideo(t: number, step: number, now: number): number {
+  if (!videoActive() || !playing.value) return t + step;
+  const next = t + step;
+  if (videoPending) {
+    if (next + offset.value >= 0) {
+      videoPending = false;
+      yt!.playVideo();
+    }
+    return next;
+  }
+  const state = yt!.getPlayerState();
+  if (state === YT_STATE.BUFFERING || state === YT_STATE.UNSTARTED || state === YT_STATE.CUED) {
+    heldSince ||= now;
+    if (now - heldSince < VIDEO_HOLD_LIMIT_MS) return t;
+    return next;
+  }
+  heldSince = 0;
+  if (state !== YT_STATE.PLAYING) return next;
+  const target = yt!.getCurrentTime() - offset.value;
+  const drift = target - next;
+  if (Math.abs(drift) > 0.3) return target;
+  return next + drift * 0.08;
+}
+
+/** 動画側の再生・一時停止ボタンに譜面を合わせる */
+function onVideoState(s: number) {
+  if (!yt) return;
+  if (s === YT_STATE.PLAYING && !playing.value) {
+    if (performance.now() < ignoreVideoPlayUntil) {
+      yt.pauseVideo();
+      return;
+    }
+    seek(yt.getCurrentTime() - offset.value, false);
+    play(true);
+  } else if (s === YT_STATE.PAUSED && playing.value && !videoPending) {
+    pause(true);
+  }
+}
+
+watch(() => settings.value.rate, (r) => { if (videoActive()) yt!.setPlaybackRate(r); });
+
+// ── ずれ合わせ ──
+function round3(x: number) {
+  return Math.round(x * 1000) / 1000;
+}
+
+/** 最初のノーツの音が鳴った瞬間に押す: ずれ = 動画の位置 − 最初のノーツの時刻 */
+function markFirstNote() {
+  const tl = timeline.value;
+  if (!tl || !videoActive() || tl.hitTimes.length === 0) return;
+  offset.value = round3(yt!.getCurrentTime() - tl.hitTimes[0]);
+  offsetTouched.value = true;
+  taps.value = [];
+  if (!playing.value) seek(tl.hitTimes[0], false);
+}
+
+/** 再生中に、聞こえるノーツの音に合わせて叩く。最寄りのノーツとの差を集め、中央値でずれを直す */
+function tapRhythm() {
+  const tl = timeline.value;
+  if (!tl || !playing.value || !videoActive()) return;
+  const r = tapResidual(tl.hitTimes, curTime);
+  if (r == null) return;
+  taps.value = [...taps.value.slice(-15), r];
+}
+const tapSuggestion = computed(() => (taps.value.length >= MIN_TAPS ? median(taps.value) : null));
+function applyTaps() {
+  const m = tapSuggestion.value;
+  if (m == null) return;
+  offset.value = round3(offset.value + m);
+  offsetTouched.value = true;
+  taps.value = [];
+}
+
+function nudge(d: number) {
+  offset.value = round3(offset.value + d);
+  offsetTouched.value = true;
+  taps.value = [];
+  if (!playing.value) videoFollowSeek(true);
+}
+
+const offsetStatus = computed(() => {
+  const v = videoInfo.value;
+  if (offsetTouched.value) return '調整中（未保存）';
+  if (v?.offsetSource === 'chart') return '合わせ済み';
+  if (v?.offsetSource === 'song') return '同じ曲の別譜面のずれを使用中';
+  return '未調整';
+});
+
+async function postVideo(path: string, body: object): Promise<VideoInfo | null> {
+  const res = await fetch(`${API_BASE}/api/analysis/chart-video/${path}`, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) throw new Error(data.error ?? `失敗しました（${res.status}）`);
+  return data as VideoInfo;
+}
+
+async function saveOffset() {
+  const v = videoInfo.value;
+  if (!v?.videoId) return;
+  offsetSaving.value = true;
+  offsetMessage.value = '';
+  try {
+    const data = await postVideo('offset', { textage: props.textage, videoId: v.videoId, offsetSec: offset.value });
+    if (data) videoInfo.value = data;
+    offsetTouched.value = false;
+    offsetMessage.value = '保存しました。この譜面を開く全員の再生に使われます';
+  } catch (e) {
+    offsetMessage.value = (e as Error).message;
+  } finally {
+    offsetSaving.value = false;
+  }
+}
+
+async function nextVideo() {
+  pause();
+  try {
+    const data = await postVideo('next', { textage: props.textage });
+    if (data) await applyVideoInfo(data);
+  } catch (e) {
+    videoError.value = (e as Error).message;
+  }
+}
+
+async function setManualVideo() {
+  if (!manualUrl.value.trim()) return;
+  pause();
+  try {
+    const data = await postVideo('manual', { textage: props.textage, url: manualUrl.value.trim() });
+    if (data) await applyVideoInfo(data);
+    manualUrl.value = '';
+  } catch (e) {
+    videoError.value = (e as Error).message;
+  }
+}
+
+function fmtOffset(x: number): string {
+  return `${x >= 0 ? '+' : ''}${x.toFixed(3)}`;
 }
 
 // ── canvas ────────────────────────────────────────────────
@@ -594,12 +928,14 @@ function onPointerMove(e: PointerEvent) {
 function onPointerUp() {
   if (drag && !drag.moved) togglePlay();
   else if (drag?.wasPlaying) play();
+  else if (drag?.moved) videoFollowSeek(true); // ドラッグ中は間引いていたので、離した位置に動画を合わせる
   drag = null;
 }
 
 function onKeydown(e: KeyboardEvent) {
   if (!timeline.value) return;
-  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); }
+  if (e.key === 't' || e.key === 'T') { e.preventDefault(); tapRhythm(); }
+  else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); togglePlay(); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); stepMeasure(-1); }
   else if (e.key === 'ArrowRight') { e.preventDefault(); stepMeasure(1); }
 }
@@ -618,6 +954,7 @@ onBeforeUnmount(() => {
   resizeObs?.disconnect();
   document.removeEventListener('visibilitychange', onVisibility);
   audio?.close().catch(() => {});
+  destroyVideo();
 });
 
 // ── 表示ヘルパー ───────────────────────────────────────────
@@ -671,6 +1008,78 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
       <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
 
       <div v-show="timeline && !loading" class="mt-3">
+        <!-- 原曲の動画（YouTube）。動画の再生位置に譜面が追従する -->
+        <div class="video-area">
+          <button v-if="!settings.video" type="button" class="video-open" @click="setVideoOn(true)">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15.5v-7l6 3.5zM21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8" /></svg>
+            原曲の動画（YouTube）と一緒に再生する
+          </button>
+          <template v-else>
+            <div v-if="videoLoading" class="flex items-center justify-center py-4 text-xs text-slate-400 dark:text-slate-500">
+              <div class="w-4 h-4 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+              原曲の動画を探しています…
+            </div>
+            <p v-else-if="videoInfo?.status === 'disabled'" class="video-note">動画の検索が未設定です（YouTube API キーの設定待ち）。</p>
+            <p v-else-if="videoInfo?.status === 'notFound'" class="video-note">この曲の動画が見つかりませんでした。</p>
+            <p v-if="videoError" class="video-note text-red-600 dark:text-red-400">{{ videoError }}</p>
+
+            <div v-show="videoInfo?.status === 'ok'" ref="videoBoxRef" class="video-frame"></div>
+
+            <template v-if="videoInfo?.status === 'ok'">
+              <div class="video-meta">
+                <a :href="`https://www.youtube.com/watch?v=${videoInfo.videoId}`" target="_blank" rel="noopener noreferrer"
+                  class="video-title" :title="videoInfo.videoTitle">{{ videoInfo.videoTitle || videoInfo.videoId }}</a>
+                <span v-if="videoInfo.channelTitle" class="text-slate-400 dark:text-slate-500">{{ videoInfo.channelTitle }}</span>
+                <button v-if="isLoggedIn && (videoInfo.candidateCount ?? 0) > 1" type="button" class="video-btn ml-auto"
+                  @click="nextVideo">
+                  別の動画<span v-if="(videoInfo.candidateIndex ?? -1) >= 0">（{{ (videoInfo.candidateIndex ?? 0) + 1 }}/{{ videoInfo.candidateCount }}）</span>
+                </button>
+              </div>
+
+              <!-- ずれ合わせ -->
+              <div class="sync-panel">
+                <div class="sync-row">
+                  <span class="setting-label">ずれ</span>
+                  <span class="font-bold tabular-nums">{{ fmtOffset(offset) }} 秒</span>
+                  <span class="sync-status" :class="{ warn: !offsetTouched && !videoInfo.offsetSource }">{{ offsetStatus }}</span>
+                </div>
+                <div class="sync-row">
+                  <div class="seg nudge">
+                    <button type="button" title="譜面を早める" @click="nudge(-0.1)">−0.1</button>
+                    <button type="button" title="譜面を早める" @click="nudge(-0.01)">−0.01</button>
+                    <button type="button" title="譜面を遅らせる" @click="nudge(0.01)">+0.01</button>
+                    <button type="button" title="譜面を遅らせる" @click="nudge(0.1)">+0.1</button>
+                  </div>
+                </div>
+                <div class="sync-row">
+                  <button type="button" class="video-btn" :disabled="!videoReady" @click="markFirstNote">最初のノーツの音で押す</button>
+                  <button type="button" class="video-btn" :disabled="!playing" @click="tapRhythm">リズムに合わせて叩く<span class="pc-only">（T）</span></button>
+                  <span v-if="taps.length && tapSuggestion == null" class="text-slate-400 dark:text-slate-500 tabular-nums">{{ taps.length }}/{{ MIN_TAPS }}</span>
+                  <button v-if="tapSuggestion != null" type="button" class="video-btn primary" @click="applyTaps">
+                    {{ fmtOffset(tapSuggestion) }} 秒ずらす
+                  </button>
+                </div>
+                <div v-if="offsetTouched || offsetMessage" class="sync-row">
+                  <button v-if="offsetTouched && isLoggedIn" type="button" class="video-btn primary" :disabled="offsetSaving"
+                    @click="saveOffset">このずれを保存（全員に共有）</button>
+                  <span v-else-if="offsetTouched" class="text-slate-400 dark:text-slate-500">ログインすると保存して全員に共有できます</span>
+                  <span v-if="offsetMessage" class="text-slate-500 dark:text-slate-400">{{ offsetMessage }}</span>
+                </div>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500">
+                  合わせ方: 再生して最初のノーツの音が鳴った瞬間に「最初のノーツの音で押す」。続けて再生中に聞こえるノーツの音に合わせて
+                  「リズムに合わせて叩く」を {{ MIN_TAPS }} 回以上押すと細かく直せます。±ボタンでも調整できます。
+                </p>
+              </div>
+            </template>
+
+            <div v-if="isAdmin" class="sync-row mt-2">
+              <input v-model="manualUrl" type="text" placeholder="YouTube の URL（管理者: 動画を指定）"
+                class="flex-1 min-w-0 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5" />
+              <button type="button" class="video-btn" @click="setManualVideo">指定</button>
+            </div>
+          </template>
+        </div>
+
         <div v-if="hud" class="player-hud text-xs tabular-nums text-slate-500 dark:text-slate-400">
           <span class="font-bold text-emerald-600 dark:text-emerald-400">BPM {{ hud.bpm }}</span>
           <span>小節 {{ hud.measure }}/{{ hud.lastMeasure }}</span>
@@ -807,6 +1216,13 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
             </div>
           </div>
           <div class="setting">
+            <span class="setting-label">原曲動画</span>
+            <div class="seg">
+              <button type="button" :class="{ on: settings.video }" @click="setVideoOn(true)">ON</button>
+              <button type="button" :class="{ on: !settings.video }" @click="setVideoOn(false)">OFF</button>
+            </div>
+          </div>
+          <div class="setting">
             <span class="setting-label">打鍵音</span>
             <div class="seg">
               <button type="button" :class="{ on: settings.sound }" @click="settings.sound = true">ON</button>
@@ -815,7 +1231,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
           </div>
         </div>
         <p class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
-          楽曲の音声は再生されません。譜面をタップ（クリック）で再生／一時停止<span class="pc-only">、マウスの上下ドラッグで前後に移動、←→キーで小節送り</span>できます。
+          原曲動画を ON にすると、YouTube の動画の音に合わせて譜面が流れます（動画は検索で自動的に選びます）。譜面をタップ（クリック）で再生／一時停止<span class="pc-only">、マウスの上下ドラッグで前後に移動、←→キーで小節送り</span>できます。
           区間リピートは B の小節の終わりまで流すと、A の 1 秒前に戻ります。
         </p>
       </div>
@@ -996,6 +1412,89 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   border: 1px solid rgb(147 197 253);
 }
 .dark .loop-here { color: rgb(147 197 253); border-color: rgb(30 64 175); }
+
+/* 原曲の動画 */
+.video-area {
+  max-width: 520px;
+  margin: 0 auto 0.75rem;
+  font-size: 0.75rem;
+}
+.video-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 700;
+  color: rgb(220 38 38);
+  border: 1px dashed rgb(252 165 165);
+}
+.video-open:hover { background: rgb(254 242 242); }
+.dark .video-open { color: rgb(252 165 165); border-color: rgb(127 29 29); }
+.dark .video-open:hover { background: rgb(30 41 59); }
+.video-note { padding: 0.5rem 0; color: rgb(100 116 139); }
+.video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: black;
+}
+.video-frame :deep(iframe) { position: absolute; inset: 0; width: 100%; height: 100%; }
+.video-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.6rem;
+  margin-top: 0.4rem;
+}
+.video-title {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: rgb(37 99 235);
+}
+.dark .video-title { color: rgb(147 197 253); }
+.sync-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 0.375rem;
+  background: rgb(248 250 252);
+  color: rgb(71 85 105);
+}
+.dark .sync-panel { background: rgb(15 23 42 / 0.6); color: rgb(203 213 225); }
+.sync-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+.sync-status { color: rgb(100 116 139); }
+.sync-status.warn { color: rgb(217 119 6); font-weight: 600; }
+.seg.nudge button { padding-left: 0.6rem; padding-right: 0.6rem; font-variant-numeric: tabular-nums; }
+.video-btn {
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  color: rgb(37 99 235);
+  border: 1px solid rgb(147 197 253);
+  white-space: nowrap;
+}
+.video-btn:hover:not(:disabled) { background: rgb(239 246 255); }
+.video-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.video-btn.primary { color: white; background: rgb(37 99 235); border-color: rgb(37 99 235); }
+.video-btn.primary:hover:not(:disabled) { background: rgb(59 130 246); }
+.dark .video-btn:not(.primary) { color: rgb(147 197 253); border-color: rgb(30 64 175); }
+.dark .video-btn:not(.primary):hover:not(:disabled) { background: rgb(30 41 59); }
 
 .pc-only { display: none; }
 @media (hover: hover) and (pointer: fine) {
