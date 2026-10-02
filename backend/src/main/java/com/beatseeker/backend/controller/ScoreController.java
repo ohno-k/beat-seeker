@@ -147,6 +147,9 @@ public class ScoreController {
     /** 過去作スコア。前作の曲別ランキング（song-ranking?version=）でだけ使う。 */
     private final PastScoreRepository pastScoreRepository;
 
+    /** BEAT-PT ランキングに添える対象曲数（集計が 6.5 秒かかるのでメモリに持つ。アップロードで古い扱いにする）。 */
+    private final com.beatseeker.backend.service.BeatPtSongCountService beatPtSongCountService;
+
     /**
      * upload がサーバー側で作った成長記録を、フロントの /save-history-log が
      * 「同じアップロードのもの」とみなして仕上げられる猶予（分）。
@@ -184,7 +187,9 @@ public class ScoreController {
             com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService,
             com.beatseeker.backend.service.SongScoreSpectrumCacheService songScoreSpectrumCacheService,
             com.beatseeker.backend.service.ScoreRoadmapService scoreRoadmapService,
-            PastScoreRepository pastScoreRepository) {
+            PastScoreRepository pastScoreRepository,
+            com.beatseeker.backend.service.BeatPtSongCountService beatPtSongCountService) {
+        this.beatPtSongCountService = beatPtSongCountService;
         this.previousVersionPtService = previousVersionPtService;
         this.pastScoreRepository = pastScoreRepository;
         this.songScoreSpectrumCacheService = songScoreSpectrumCacheService;
@@ -265,6 +270,17 @@ public class ScoreController {
             @RequestBody List<ScoreUploadRequest> requests) {
 
         User user = getUser(auth);
+
+        // ランキングの対象曲数（メモリの値）を、このアップロードのコミット後に古い扱いにする（コミット前に取り直すと古い値を拾う）
+        if (org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()) {
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                    new org.springframework.transaction.support.TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            beatPtSongCountService.invalidate();
+                        }
+                    });
+        }
 
         // 手順000: INFINITAS からの取り込みは終了した。1 件でも含まれていたらアーケードとして
         //   保存せず、リクエスト全体を 400 で返す（別物の記録がアーケードのベストに混ざるのを防ぐ）。
@@ -786,13 +802,9 @@ public class ScoreController {
         List<Map<String, Object>> ranking = scoreHistoryLogRepository.getGlobalRanking();
         // 前作の最終 PT を添える（ティアアイコンの外枠 = 前作ティアの色）
         List<Map<String, Object>> decorated = previousVersionPtService.decorate(ranking, "userId");
-        // BEAT-PT 対象曲（上位 100 曲枠）の埋まり数を添える（100 曲未満の行はフロントで薄く表示する）
-        Map<Long, Integer> songCounts = new HashMap<>();
-        for (Map<String, Object> row : scoreRepository.findBeatPtSongCounts()) {
-            if (row.get("userId") instanceof Number id && row.get("beatPtSongCount") instanceof Number c) {
-                songCounts.put(id.longValue(), c.intValue());
-            }
-        }
+        // BEAT-PT 対象曲（上位 100 曲枠）の埋まり数を添える（100 曲未満の行はフロントで薄く表示する）。
+        // 集計は 6.5 秒かかるのでメモリの値を使う（古ければ裏で取り直す）
+        Map<Long, Integer> songCounts = beatPtSongCountService.get();
         for (Map<String, Object> row : decorated) {
             Long userId = row.get("userId") instanceof Number id ? id.longValue() : null;
             row.put("beatPtSongCount", userId == null ? 0 : songCounts.getOrDefault(userId, 0));
