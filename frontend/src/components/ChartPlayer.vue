@@ -725,6 +725,8 @@ async function saveOffset(): Promise<boolean> {
 // ── 管理者の埋め作業（ずれ合わせの進み具合と、次の未調整の譜面へ） ──
 interface QueueInfo {
   total: number; done: number; borrowed: number; waiting: number; unsearched: number; notFound: number;
+  /** 「保存せず次へ」で飛ばした譜面（一覧に出さない。曲の動画が替わると戻る） */
+  skipped: number;
   /** 次に合わせる譜面（動画あり・ずれ無し → 動画未検索の順） */
   next: string[];
 }
@@ -754,6 +756,19 @@ function goNext() {
 
 async function saveAndNext() {
   if (await saveOffset()) goNext();
+}
+
+/** 今の譜面を飛ばしたことをサーバーに記録してから次へ（記録しないと次の一覧にまた出てくる） */
+async function skipAndNext() {
+  if (!nextTextage.value) return;
+  try {
+    await fetch(`${API_BASE}/api/analysis/chart-video/skip`, {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ textage: props.textage }),
+    });
+  } catch { /* 記録できなくても次へは進む */ }
+  goNext();
 }
 
 onMounted(async () => {
@@ -1155,15 +1170,16 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
               <div v-if="queueInfo" class="queue-bar"><div :style="{ width: `${queueProgress}%` }"></div></div>
               <div v-if="queueInfo" class="text-slate-400 dark:text-slate-500 tabular-nums">
                 合わせ済み {{ queueInfo.done }}・別譜面のずれを使用 {{ queueInfo.borrowed }}・未調整 {{ queueInfo.waiting }}・
-                動画未検索 {{ queueInfo.unsearched }}・動画なし {{ queueInfo.notFound }}
+                動画未検索 {{ queueInfo.unsearched }}・動画なし {{ queueInfo.notFound }}・飛ばした {{ queueInfo.skipped }}
               </div>
               <div class="sync-row">
                 <button v-if="videoInfo?.status === 'ok'" type="button" class="video-btn primary"
                   :disabled="offsetSaving || !canSaveOffset || !nextTextage" @click="saveAndNext">保存して次へ</button>
-                <button type="button" class="video-btn" :disabled="!nextTextage" @click="goNext">保存せず次の未調整へ</button>
+                <button type="button" class="video-btn" :disabled="!nextTextage" @click="skipAndNext">保存せず次の未調整へ</button>
               </div>
               <p class="text-[11px] text-slate-400 dark:text-slate-500">
                 次は「動画あり・ずれ未調整」の譜面から、レベルの高い順に開いて自動で再生します。それが尽きると動画未検索の譜面に進み、開くたびに検索します（1 日 90 回まで）。
+                飛ばした譜面は一覧に戻りません（「別の動画」などで曲の動画が替わると戻ります。直接開けば合わせて保存できます）。
               </p>
               <div class="sync-row">
                 <input v-model="manualUrl" type="text" placeholder="YouTube の URL（この曲の動画を指定）"

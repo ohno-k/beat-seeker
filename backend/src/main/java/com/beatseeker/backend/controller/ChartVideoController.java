@@ -23,6 +23,7 @@ import java.util.function.Supplier;
  *  - POST /api/analysis/chart-video/next {textage} … 次の候補の動画へ（ログイン必須）
  *  - POST /api/analysis/chart-video/manual {textage, url} … 動画を URL で指定（管理者）
  *  - GET  /api/analysis/chart-video/queue … ずれ合わせの進み具合と次に合わせる譜面（管理者）
+ *  - POST /api/analysis/chart-video/skip {textage} … 埋め作業で譜面を飛ばす（管理者）
  *
  * 失敗は {@code {"error": 文言}} とステータス。
  */
@@ -77,6 +78,17 @@ public class ChartVideoController {
         User user = userOf(auth);
         if (user == null || !adminAuthService.isAdmin(user)) return error(403, "管理者のみ使えます");
         return run(() -> service.queue(30));
+    }
+
+    /** 埋め作業で譜面を飛ばす（次の未調整の一覧から外す）。 */
+    @PostMapping("/api/analysis/chart-video/skip")
+    public ResponseEntity<Map<String, Object>> skip(@RequestBody TextageRequest req, Authentication auth) {
+        User user = userOf(auth);
+        if (user == null || !adminAuthService.isAdmin(user)) return error(403, "管理者のみ使えます");
+        return run(() -> {
+            service.skip(req.textage(), user.getId());
+            return Map.of("ok", true);
+        });
     }
 
     private User userOf(Authentication auth) {

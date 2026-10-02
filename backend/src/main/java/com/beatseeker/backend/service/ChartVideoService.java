@@ -1,9 +1,11 @@
 package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.ChartVideoOffset;
+import com.beatseeker.backend.entity.ChartVideoSkip;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.entity.SongVideo;
 import com.beatseeker.backend.repository.ChartVideoOffsetRepository;
+import com.beatseeker.backend.repository.ChartVideoSkipRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
 import com.beatseeker.backend.repository.SongVideoRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -86,6 +88,7 @@ public class ChartVideoService {
     private final SongDefinitionRepository songDefRepo;
     private final SongVideoRepository videoRepo;
     private final ChartVideoOffsetRepository offsetRepo;
+    private final ChartVideoSkipRepository skipRepo;
     private final ChartPlaybackService playbackService;
     private final String apiKey;
     private final int dailySearchLimit;
@@ -101,12 +104,14 @@ public class ChartVideoService {
     public ChartVideoService(SongDefinitionRepository songDefRepo,
                              SongVideoRepository videoRepo,
                              ChartVideoOffsetRepository offsetRepo,
+                             ChartVideoSkipRepository skipRepo,
                              ChartPlaybackService playbackService,
                              @Value("${app.youtube.api-key:}") String apiKey,
                              @Value("${app.youtube.daily-search-limit:90}") int dailySearchLimit) {
         this.songDefRepo = songDefRepo;
         this.videoRepo = videoRepo;
         this.offsetRepo = offsetRepo;
+        this.skipRepo = skipRepo;
         this.playbackService = playbackService;
         this.apiKey = apiKey == null ? "" : apiKey.trim();
         this.dailySearchLimit = dailySearchLimit;
@@ -266,7 +271,8 @@ public class ChartVideoService {
      * の順で、それぞれレベルの高い順・曲名順（譜面分析ページの一覧と同じ並び）に最大 {@code limit} 件。
      *
      * @return total（対象の譜面数）・done（この譜面のずれあり）・borrowed（同じ曲の別譜面のずれを使用）・
-     *         waiting（動画あり・ずれ無し）・unsearched（動画を未検索）・notFound（動画が見つからなかった）・next（textage の並び）
+     *         waiting（動画あり・ずれ無し）・unsearched（動画を未検索）・notFound（動画が見つからなかった）・
+     *         skipped（埋め作業で飛ばした）・next（textage の並び）
      */
     public Map<String, Object> queue(int limit) {
         List<SongDefinition> charts = new ArrayList<>(songDefRepo.findByRevision("active").stream()
@@ -285,7 +291,10 @@ public class ChartVideoService {
             songsWithOffset.add(o.getTitle() + "\0" + o.getVideoId());
         }
 
-        int done = 0, borrowed = 0, notFound = 0;
+        Map<String, String> skips = new HashMap<>();
+        for (ChartVideoSkip s : skipRepo.findAll()) skips.put(s.getTextage(), s.getVideoId());
+
+        int done = 0, borrowed = 0, notFound = 0, skipped = 0;
         List<String> waiting = new ArrayList<>();
         List<String> unsearched = new ArrayList<>();
         Set<String> seen = new HashSet<>();
@@ -293,16 +302,27 @@ public class ChartVideoService {
             String key = sd.getTextage().trim();
             if (!seen.add(key)) continue;
             SongVideo v = videos.get(sd.getTitle());
-            if (v == null) {
-                unsearched.add(key);
-            } else if (v.getVideoId() == null) {
+            if (v != null && v.getVideoId() == null) {
                 notFound++;
-            } else {
-                ChartVideoOffset own = offsets.get(key);
-                if (own != null && v.getVideoId().equals(own.getVideoId())) done++;
-                else if (songsWithOffset.contains(sd.getTitle() + "\0" + v.getVideoId())) borrowed++;
-                else waiting.add(key);
+                continue;
             }
+            if (v != null) {
+                ChartVideoOffset own = offsets.get(key);
+                if (own != null && v.getVideoId().equals(own.getVideoId())) {
+                    done++;
+                    continue;
+                }
+                if (songsWithOffset.contains(sd.getTitle() + "\0" + v.getVideoId())) {
+                    borrowed++;
+                    continue;
+                }
+            }
+            // 飛ばしたときと同じ動画（動画未検索のまま飛ばしたなら未検索のまま）なら一覧に出さない
+            if (skipKey(v).equals(skips.get(key))) {
+                skipped++;
+                continue;
+            }
+            (v == null ? unsearched : waiting).add(key);
         }
         List<String> next = new ArrayList<>(waiting);
         next.addAll(unsearched);
@@ -313,8 +333,25 @@ public class ChartVideoService {
         m.put("waiting", waiting.size());
         m.put("unsearched", unsearched.size());
         m.put("notFound", notFound);
+        m.put("skipped", skipped);
         m.put("next", next.subList(0, Math.min(limit, next.size())));
         return m;
+    }
+
+    /** 【メソッドの役割】 埋め作業で譜面を飛ばす（次の未調整の一覧から外す。曲の動画が替わったら戻る）。 */
+    public void skip(String textage, Long userId) {
+        SongDefinition chart = chartOf(textage);
+        ChartVideoSkip s = new ChartVideoSkip();
+        s.setTextage(textage.trim());
+        s.setVideoId(skipKey(videoRepo.findById(chart.getTitle()).orElse(null)));
+        s.setUpdatedBy(userId);
+        s.setUpdatedAt(LocalDateTime.now());
+        skipRepo.save(s);
+    }
+
+    /** 飛ばしたときの動画（動画未検索・見つからなかったときは空文字）。 */
+    private static String skipKey(SongVideo v) {
+        return v == null || v.getVideoId() == null ? "" : v.getVideoId();
     }
 
     private static void apply(SongVideo video, Candidate c, int index, Long userId) {
