@@ -426,7 +426,7 @@ final class TextageChartSync {
 
             for (ChartWork c : matched) {
                 TextagePageRunner.Difficulty d = TextagePageRunner.Difficulty.ofCode(c.difficulty());
-                String textage = c.ownTextage() != null && page.equals(pageOf(c.ownTextage()))
+                String textage = ownTextageShows(c, page, script, data.get(c))
                         ? c.ownTextage()
                         : page + "?1" + d.urlChar + "C00";
                 profiles.add(toProfile(song, c, textage, ChartTendencyAnalyzer.profile(data.get(c), song.bpm()), analyzerVersion));
@@ -444,6 +444,27 @@ final class TextageChartSync {
             }
             attempts.put(page, "解析 " + matched.size() + " / 不一致 " + rest.size() + " 譜面");
             return rest;
+        }
+
+        /**
+         * 登録済みの textage がこのページのこの譜面を指しているか（そのまま残してよいか）。
+         *
+         * URL の難易度の文字が一致すれば残す。違う文字でも、その文字で実行して同じ譜面が出るなら残す
+         * （LEGGENDARIA だけの別ページ {@code 21/_twentyl.html?1AC00}）。ANOTHER と同じページの LEGGENDARIA に
+         * ANOTHER の URL が登録されていた（GENE・THE BLACK KNIGHT など 4 譜面、2026-10-03）ような場合は残さない
+         * — プロファイルは textage が主キーなので、残すと ANOTHER のプロファイルを上書きしてしまう。
+         */
+        private boolean ownTextageShows(ChartWork c, String page, String script, TextagePageRunner.PageChart chart) {
+            if (c.ownTextage() == null || !page.equals(pageOf(c.ownTextage()))) return false;
+            TextagePageRunner.Difficulty own = TextagePageRunner.Difficulty.ofTextage(c.ownTextage());
+            if (own == null) return false;
+            if (own.code.equals(c.difficulty())) return true;
+            try {
+                TextagePageRunner.PageChart shown = runner.run(script, own);
+                return shown.notes() == chart.notes() && shown.sp().equals(chart.sp());
+            } catch (IllegalStateException e) {
+                return false;
+            }
         }
     }
 

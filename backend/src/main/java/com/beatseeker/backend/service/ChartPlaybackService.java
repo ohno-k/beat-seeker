@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -105,14 +106,21 @@ public class ChartPlaybackService {
         if (cached != null) return cached;
 
         String page = TextageChartSync.pageOf(key);
-        TextagePageRunner.Difficulty difficulty = difficultyOf(key);
-        if (page == null || difficulty == null) {
+        TextagePageRunner.Difficulty urlDifficulty = TextagePageRunner.Difficulty.ofTextage(key);
+        if (page == null || urlDifficulty == null) {
             throw new PlaybackException(404, "譜面データが見つかりません");
         }
-        SongDefinition song = songDefRepo.findByTextageAndRevision(key, "active").stream()
-                .filter(sd -> difficulty.code.equals(sd.getDifficulty()))
+        // LEGGENDARIA だけを載せた別ページ（21/_twentyl.html?1AC00）は URL の文字が A なので、
+        // URL の難易度で見つからなければ、その textage を持つ唯一の譜面の難易度で実行する
+        List<SongDefinition> rows = songDefRepo.findByTextageAndRevision(key, "active").stream()
+                .filter(sd -> TextagePageRunner.Difficulty.ofCode(sd.getDifficulty()) != null)
+                .toList();
+        SongDefinition song = rows.stream()
+                .filter(sd -> urlDifficulty.code.equals(sd.getDifficulty()))
                 .findFirst()
-                .orElseThrow(() -> new PlaybackException(404, "譜面データが見つかりません"));
+                .orElseGet(() -> rows.size() == 1 ? rows.get(0) : null);
+        if (song == null) throw new PlaybackException(404, "譜面データが見つかりません");
+        TextagePageRunner.Difficulty difficulty = TextagePageRunner.Difficulty.ofCode(song.getDifficulty());
 
         String script = loadScript(page);
         TextagePageRunner.PlaybackChart run;
@@ -144,17 +152,6 @@ public class ChartPlaybackService {
         out.put("charges", p.charges());
         memory.put(key, out);
         return out;
-    }
-
-    /** textage のクエリ（"1AC00"）の 2 文字目から SP の難易度を引く。 */
-    static TextagePageRunner.Difficulty difficultyOf(String textage) {
-        int q = textage.indexOf('?');
-        if (q < 0 || q + 2 >= textage.length()) return null;
-        char c = textage.charAt(q + 2);
-        for (TextagePageRunner.Difficulty d : TextagePageRunner.Difficulty.values()) {
-            if (d.urlChar == c) return d;
-        }
-        return null;
     }
 
     /** 保存済みのスクリプト（新しければそのまま、古ければ取り直し。取り直せなければ古いもの）。 */

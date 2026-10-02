@@ -93,6 +93,16 @@ public final class TextagePageRunner {
             for (Difficulty d : values()) if (d.code.equals(code)) return d;
             return null;
         }
+
+        /** textage のクエリ（{@code 33/showtime.html?1AC00} の "1AC00"）の 2 文字目から引く。該当なしは null。 */
+        public static Difficulty ofTextage(String textage) {
+            if (textage == null) return null;
+            int q = textage.indexOf('?');
+            if (q < 0 || q + 2 >= textage.length()) return null;
+            char c = textage.charAt(q + 2);
+            for (Difficulty d : values()) if (d.urlChar == c) return d;
+            return null;
+        }
     }
 
     /**

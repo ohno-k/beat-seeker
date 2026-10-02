@@ -269,6 +269,28 @@ class TextageChartSyncTest {
         assertThat(plan.linkRestores()).containsExactly(Map.entry("22DUNK\u00002", "1/22dunk.html?1NC00"));
     }
 
+    /**
+     * LEGGENDARIA に ANOTHER の文字（?1AC00）の textage が登録されている場合。
+     * ANOTHER と同じページなら ?1XC00 に訂正し（GENE・THE BLACK KNIGHT など、2026-10-03 に本番で 4 譜面）、
+     * LEGGENDARIA だけの別ページ（廿 21/_twentyl.html?1AC00 など 42 譜面）ならそのまま残す。
+     */
+    @Test
+    void execute_correctsLeggendariaLinkWithAnotherChar_onlyOnSharedPage() {
+        List<SongDefinition> m = new ArrayList<>();
+        m.add(sd("yellow head joe", "S-C-U", "TEK-TRANCE", "187", "4", 10, 1152, "19/yheadjoe.html?1AC00"));
+        m.add(sd("yellow head joe", "S-C-U", "TEK-TRANCE", "187", "10", 12, 1596, "19/yheadjoe.html?1AC00"));
+        m.add(sd("龍と少女とデコヒーレンス", "黒猫ダンジョン", "EPIC TECHNO", "165", "10", 12, 1713, "20/_decohel.html?1AC00"));
+
+        Plan plan = TextageChartSync.plan(m, List.of(), V, true);
+        Outcome out = TextageChartSync.execute(plan, PAGES, TABLE, 50, Map.of(), TextageChartSync.Retry.NONE, NOW, V);
+
+        assertThat(out.added()).hasSize(3);
+        assertThat(out.textageUpdates())
+                .containsExactly(Map.entry("yellow head joe\u000010", "19/yheadjoe.html?1XC00"));
+        assertThat(out.profiles()).extracting(p -> p.get("textage"))
+                .containsExactlyInAnyOrder("19/yheadjoe.html?1AC00", "19/yheadjoe.html?1XC00", "20/_decohel.html?1AC00");
+    }
+
     @Test
     void notesMatchTolerance() {
         assertThat(TextageChartSync.notesMatch(1001, 1002)).isTrue();  // 2 ノーツ差までは常に許容
