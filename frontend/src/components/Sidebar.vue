@@ -303,7 +303,7 @@ watch(() => props.activeTab, (tab) => {
             variant="text"
             size="small"
             :aria-label="t('a11y.sidebar.close')"
-            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden"
+            class="lg:hidden"
             @click="closeSidebar"
           >
             <v-icon :icon="mdiClose" />
@@ -323,20 +323,17 @@ watch(() => props.activeTab, (tab) => {
             <template v-else-if="isLoggedIn">
               <div class="flex flex-col gap-4">
                 <v-list-item
-                  rounded="md"
-                  class="p-2 min-h-0 transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
+                  rounded
+                  :title="user?.displayName || user?.iidxId"
                   @click="handleAction('editProfile')"
                 >
                   <template #prepend>
-                    <v-avatar size="40" class="bg-blue-700 text-white font-bold mr-3">
+                    <v-avatar size="40" color="primary">
                       {{ (user?.displayName || user?.iidxId || 'U').charAt(0) }}
                     </v-avatar>
                   </template>
-                  <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                    {{ user?.displayName || user?.iidxId }}
-                  </p>
                   <template #append>
-                    <v-icon :icon="mdiChevronRight" size="16" class="text-slate-400 group-hover:text-slate-600 transition-colors" />
+                    <v-icon :icon="mdiChevronRight" size="small" />
                   </template>
                 </v-list-item>
 
@@ -346,7 +343,7 @@ watch(() => props.activeTab, (tab) => {
                     v-if="isAdmin && !viewingUserId"
                     variant="outlined"
                     block
-                    class="h-auto justify-start px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-600"
+                    class="justify-start"
                     @click="handleAction('openAdmin')"
                   >
                     <template #prepend>
@@ -361,7 +358,7 @@ watch(() => props.activeTab, (tab) => {
                     v-if="isAdmin && !viewingUserId"
                     variant="outlined"
                     block
-                    class="h-auto justify-start px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-600"
+                    class="justify-start"
                     @click="goAdminUserComparison"
                   >
                     <template #prepend>
@@ -374,7 +371,7 @@ watch(() => props.activeTab, (tab) => {
                   <v-btn
                     variant="text"
                     block
-                    class="h-auto justify-start px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    class="justify-start"
                     @click="handleAction('logout')"
                   >
                     <template #prepend>
@@ -389,7 +386,7 @@ watch(() => props.activeTab, (tab) => {
             </template>
 
             <template v-else>
-              <v-btn color="primary" size="large" block class="px-6" @click="handleAction('login')">
+              <v-btn color="primary" size="large" block @click="handleAction('login')">
                 <template #prepend>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -401,7 +398,7 @@ watch(() => props.activeTab, (tab) => {
 
             <!-- Upload CSV Button in Sidebar -->
             <div v-if="!viewingUserId" class="flex flex-col gap-1 mt-2">
-              <v-btn variant="outlined" size="large" block class="px-6" @click="handleUploadClick">
+              <v-btn variant="outlined" color="primary" size="large" block @click="handleUploadClick">
                 <template #prepend>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -417,10 +414,12 @@ watch(() => props.activeTab, (tab) => {
               v-if="isLoggedIn && !viewingUserId"
               tag="button"
               type="button"
-              class="mt-2 w-full text-left px-3 py-2.5 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+              variant="outlined"
+              class="mt-2 w-full text-left"
               :title="t('rankQuiz.tooltip')"
               @click="handleRankQuizClick"
             >
+              <v-card-text>
               <div class="flex items-center gap-2 mb-1.5">
                 <svg class="h-4 w-4 text-blue-700 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.518-4.674z" />
@@ -439,19 +438,17 @@ watch(() => props.activeTab, (tab) => {
                 <span v-else class="text-slate-400 dark:text-slate-500">{{ t('rankQuiz.startHint') }}</span>
                 <span class="text-slate-400 dark:text-slate-500">▶</span>
               </div>
+              </v-card-text>
             </v-card>
           </div>
 
           <!-- Primary Navigation -->
-          <v-list tag="nav" nav density="compact" class="space-y-1 p-0 bg-transparent" :aria-label="t('a11y.nav.primary')">
+          <v-list tag="nav" nav density="compact" color="primary" class="p-0 bg-transparent" :aria-label="t('a11y.nav.primary')">
             <template v-for="item in filteredPrimary" :key="item.id">
               <v-list-item
                 :aria-current="activeTab === item.id ? 'page' : undefined"
-                rounded="md"
-                class="w-full px-4 py-3 min-h-0 text-sm font-medium transition-colors group"
-                :class="activeTab === item.id
-                  ? 'bg-blue-700 dark:bg-blue-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
+                :active="activeTab === item.id"
+                :title="item.label"
                 @click="selectTab(item.id)"
               >
                 <template #prepend>
@@ -459,9 +456,8 @@ watch(() => props.activeTab, (tab) => {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                   </svg>
                 </template>
-                {{ item.label }}
                 <template v-if="item.supporterOnly" #append>
-                  <v-chip size="x-small" label variant="outlined" class="text-[9px] font-semibold px-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700">
+                  <v-chip size="x-small" label variant="tonal" color="warning">
                     Supporter
                   </v-chip>
                 </template>
@@ -476,11 +472,8 @@ watch(() => props.activeTab, (tab) => {
                   v-for="item in filteredExtra"
                   :key="item.id"
                   :aria-current="activeTab === item.id ? 'page' : undefined"
-                  rounded="md"
-                  class="w-full px-4 py-3 min-h-0 text-sm font-medium transition-colors group"
-                  :class="activeTab === item.id
-                    ? 'bg-blue-700 dark:bg-blue-600 text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
+                  :active="activeTab === item.id"
+                  :title="item.label"
                   @click="selectTab(item.id)"
                 >
                   <template #prepend>
@@ -488,9 +481,8 @@ watch(() => props.activeTab, (tab) => {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                     </svg>
                   </template>
-                  {{ item.label }}
                   <template v-if="item.supporterOnly" #append>
-                    <v-chip size="x-small" label variant="outlined" class="text-[9px] font-semibold px-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700">
+                    <v-chip size="x-small" label variant="tonal" color="warning">
                       Supporter
                     </v-chip>
                   </template>
@@ -499,8 +491,7 @@ watch(() => props.activeTab, (tab) => {
 
               <!-- もっと見る/閉じる トグル。主要メニューより一回り小さく控えめに表示。 -->
               <v-list-item
-                rounded="md"
-                class="w-full px-4 py-2.5 min-h-0 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
+                :title="showExtra ? t('nav.less') : t('nav.more')"
                 @click="toggleExtra"
               >
                 <template #prepend>
@@ -508,7 +499,6 @@ watch(() => props.activeTab, (tab) => {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </template>
-                {{ showExtra ? t('nav.less') : t('nav.more') }}
                 <template v-if="!showExtra" #append>
                   <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500">+{{ filteredExtra.length }}</span>
                 </template>
@@ -517,22 +507,19 @@ watch(() => props.activeTab, (tab) => {
           </v-list>
 
           <!-- Divider -->
-          <v-divider class="mx-2 border-slate-100 dark:border-slate-700 opacity-100" />
+          <v-divider class="mx-2" />
 
           <!-- Secondary Navigation -->
           <div class="space-y-4">
             <h3 class="px-4 section-label">
               {{ t('app.sidebar.support') }}
             </h3>
-            <v-list tag="nav" nav density="compact" class="space-y-1 p-0 bg-transparent" :aria-label="t('a11y.nav.secondary')">
+            <v-list tag="nav" nav density="compact" color="primary" class="p-0 bg-transparent" :aria-label="t('a11y.nav.secondary')">
               <template v-for="item in secondaryItems" :key="item.id">
                 <v-list-item
                   :aria-current="activeTab === item.id ? 'page' : undefined"
-                  rounded="md"
-                  class="w-full px-4 py-2.5 min-h-0 text-sm font-medium transition-colors"
-                  :class="activeTab === item.id
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-white'"
+                  :active="activeTab === item.id"
+                  :title="item.label"
                   @click="selectTab(item.id)"
                 >
                   <template #prepend>
@@ -540,7 +527,6 @@ watch(() => props.activeTab, (tab) => {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
                     </svg>
                   </template>
-                  {{ item.label }}
                 </v-list-item>
               </template>
             </v-list>
@@ -555,9 +541,11 @@ watch(() => props.activeTab, (tab) => {
               <v-btn-toggle
                 :model-value="currentLang"
                 mandatory
-                variant="text"
-                :divided="false"
-                class="w-full h-auto flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700"
+                variant="outlined"
+                divided
+                density="compact"
+                color="primary"
+                class="w-full"
               >
                 <v-btn
                   v-for="lang in availableLanguages"
@@ -565,10 +553,7 @@ watch(() => props.activeTab, (tab) => {
                   :value="lang"
                   :aria-pressed="currentLang === lang"
                   :aria-label="t('a11y.lang.switch', { lang: t(`lang.${lang}`) })"
-                  class="flex-1 h-auto py-1 px-2 min-w-0 text-[10px] font-semibold rounded"
-                  :class="currentLang === lang
-                    ? 'bg-blue-700 dark:bg-blue-600 text-white'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-700'"
+                  class="flex-1 min-w-0"
                   @click="setLanguage(lang)"
                 >
                   {{ t(`lang.${lang}`) }}
@@ -583,10 +568,12 @@ watch(() => props.activeTab, (tab) => {
           <v-card
             tag="button"
             type="button"
-            variant="outlined"
-            class="group flex items-center gap-3 w-full px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left"
+            variant="tonal"
+            color="warning"
+            class="w-full text-left"
             @click="handleKofiClick"
           >
+            <v-card-text class="flex items-center gap-3">
             <div class="w-8 h-8 bg-amber-400 rounded flex items-center justify-center shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.5 3H6C4.9 3 4 3.9 4 5v11c0 1.1.9 2 2 2h1v3l3-3h8.5c1.38 0 2.5-1.12 2.5-2.5v-10C21 4.12 19.88 3 18.5 3zm-3 10.5c-1.93 0-3.5-1.57-3.5-3.5 0-.44.09-.86.23-1.25L11 8h-1V6h2.5l2.11 1.77c.32-.12.66-.27 1.39-.27 1.93 0 3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5z"/>
@@ -599,6 +586,7 @@ watch(() => props.activeTab, (tab) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
+            </v-card-text>
           </v-card>
           <!-- Token hint for logged-in users -->
           <div v-if="isLoggedIn && user?.supporterToken" class="px-1">
@@ -622,7 +610,8 @@ watch(() => props.activeTab, (tab) => {
             variant="outlined"
             block
             :aria-expanded="showCompetitionMenu"
-            class="h-auto justify-start px-3 py-2 text-xs font-semibold border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+            size="small"
+            class="justify-start"
             @click="toggleCompetitionMenu"
           >
             <template #prepend>
@@ -639,10 +628,10 @@ watch(() => props.activeTab, (tab) => {
           </v-btn>
 
           <!-- 展開時のみ 3 リンクを表示。大会管理は内部タブ、他の 2 つはスタンドアロン URL。 -->
-          <v-list v-if="showCompetitionMenu" density="compact" class="mt-1 space-y-1 p-0 bg-transparent">
+          <v-list v-if="showCompetitionMenu" nav density="compact" class="mt-1 p-0 bg-transparent">
             <v-list-item
-              rounded="md"
-              class="px-3 py-2 min-h-0 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              title="大会管理"
+              subtitle="5チーム×4人 総当たり編成"
               @click="handleCompetitionAdminClick"
             >
               <template #prepend>
@@ -650,13 +639,11 @@ watch(() => props.activeTab, (tab) => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </template>
-              <p>大会管理</p>
-              <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
             </v-list-item>
             <v-list-item
               href="/strategy-card"
-              rounded="md"
-              class="px-3 py-2 min-h-0 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              title="Strategy Card"
+              subtitle="課題曲ランダム抽選 (OBS用)"
               @click="closeSidebar"
             >
               <template #prepend>
@@ -664,13 +651,11 @@ watch(() => props.activeTab, (tab) => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </template>
-              <p>Strategy Card</p>
-              <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
             </v-list-item>
             <v-list-item
               href="/song-reveal"
-              rounded="md"
-              class="px-3 py-2 min-h-0 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              title="Song Reveal"
+              subtitle="選曲発表演出 (OBS用)"
               @click="closeSidebar"
             >
               <template #prepend>
@@ -678,8 +663,6 @@ watch(() => props.activeTab, (tab) => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
                 </svg>
               </template>
-              <p>Song Reveal</p>
-              <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
             </v-list-item>
           </v-list>
         </div>
@@ -695,7 +678,8 @@ watch(() => props.activeTab, (tab) => {
 
     <!-- Ko-fi Confirmation Modal -->
     <v-dialog v-model="showKofiModal" max-width="384" aria-labelledby="kofi-modal-title">
-      <v-card class="p-6 space-y-4">
+      <v-card>
+        <v-card-text class="space-y-4">
         <!-- Header -->
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
@@ -717,15 +701,17 @@ watch(() => props.activeTab, (tab) => {
           <p class="text-lg font-mono font-bold text-amber-700 dark:text-amber-300 select-all tabular-nums">{{ user?.supporterToken }}</p>
         </div>
 
+        </v-card-text>
         <!-- Buttons -->
-        <div class="flex gap-2">
-          <v-btn variant="tonal" class="flex-1 text-sm font-semibold" @click="showKofiModal = false">
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="showKofiModal = false">
             {{ t('supporter.modalCancel') }}
           </v-btn>
-          <v-btn class="flex-1 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600" @click="confirmKofiOpen">
+          <v-btn variant="flat" color="warning" @click="confirmKofiOpen">
             {{ t('supporter.modalConfirm') }}
           </v-btn>
-        </div>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>

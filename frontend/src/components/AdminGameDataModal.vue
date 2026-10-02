@@ -4,60 +4,59 @@
       max-width="768"
       @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
     >
-      <v-card class="bg-white dark:bg-slate-900 w-full shadow-xl flex flex-col overflow-hidden max-h-[90vh] border-slate-200 dark:border-slate-800">
+      <v-card class="w-full flex flex-col overflow-hidden max-h-[90vh]">
 
         <!-- Header -->
-        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-          <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <v-icon :icon="mdiMusic" size="24" class="text-indigo-500" />
+        <v-card-title class="flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <span class="flex items-center gap-2">
+            <v-icon :icon="mdiMusic" color="indigo" />
             ゲームデータ管理
-          </h2>
+          </span>
           <div class="flex items-center gap-2">
             <!-- Apply buttons (楽曲と難易度表で独立に適用) -->
             <v-btn
               color="success"
               size="small"
-              class="text-sm"
               :disabled="isApplyingSongs || isApplyingDiff || draftSongs.length === 0"
               @click="handleApplyDraftSongs"
             >
-              <v-progress-circular v-if="isApplyingSongs" size="16" width="2" color="white" class="mr-1" />
+              <v-progress-circular indeterminate v-if="isApplyingSongs" size="16" width="2" class="mr-1" />
               {{ isApplyingSongs ? '適用中...' : '楽曲を適用' }}
             </v-btn>
             <v-btn
               color="success"
               size="small"
-              class="text-sm"
               :disabled="isApplyingSongs || isApplyingDiff || savedDiffChanges.length === 0"
               @click="handleApplyDraftDiffTable"
             >
-              <v-progress-circular v-if="isApplyingDiff" size="16" width="2" color="white" class="mr-1" />
+              <v-progress-circular indeterminate v-if="isApplyingDiff" size="16" width="2" class="mr-1" />
               {{ isApplyingDiff ? '適用中...' : '難易度表を適用' }}
             </v-btn>
-            <v-btn icon variant="text" size="small" class="text-slate-400 -mr-2" aria-label="close" @click="$emit('close')">
+            <v-btn icon variant="text" size="small" aria-label="close" @click="$emit('close')">
               <v-icon :icon="mdiClose" />
             </v-btn>
           </div>
-        </div>
+        </v-card-title>
 
         <!-- Draft status -->
-        <v-alert v-if="hasDraftSongs || hasDraftDiffTable" type="warning" rounded="0" class="shrink-0 px-5 py-2 text-sm">
+        <v-alert v-if="hasDraftSongs || hasDraftDiffTable" type="warning" variant="tonal" density="compact" rounded="0" class="shrink-0">
           <div class="flex items-center gap-2 flex-wrap">
             <span>未適用のドラフトがあります</span>
-            <v-chip v-if="hasDraftSongs" label size="x-small" variant="flat" class="px-1.5 bg-amber-200 dark:bg-amber-800/50 text-amber-800 dark:text-amber-300 text-xs font-bold">楽曲 {{ draftSongs.length }}件</v-chip>
-            <v-chip v-if="hasDraftDiffTable" label size="x-small" variant="flat" class="px-1.5 bg-amber-200 dark:bg-amber-800/50 text-amber-800 dark:text-amber-300 text-xs font-bold">難易度表</v-chip>
+            <v-chip v-if="hasDraftSongs" label size="small" color="warning">楽曲 {{ draftSongs.length }}件</v-chip>
+            <v-chip v-if="hasDraftDiffTable" label size="small" color="warning">難易度表</v-chip>
           </div>
         </v-alert>
 
         <!-- Tab bar -->
-        <v-tabs v-model="activeTab" grow color="indigo" class="border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <v-tab value="songs" class="text-sm font-bold">楽曲追加</v-tab>
-          <v-tab value="difficulty" class="text-sm font-bold">難易度表</v-tab>
+        <v-tabs v-model="activeTab" grow color="indigo" class="shrink-0">
+          <v-tab value="songs">楽曲追加</v-tab>
+          <v-tab value="difficulty">難易度表</v-tab>
         </v-tabs>
+        <v-divider />
 
         <!-- Status messages -->
-        <v-alert v-if="errorMsg" type="error" class="mx-5 mt-4 text-sm shrink-0">{{ errorMsg }}</v-alert>
-        <v-alert v-if="successMsg" type="success" class="mx-5 mt-4 text-sm shrink-0">{{ successMsg }}</v-alert>
+        <v-alert v-if="errorMsg" type="error" density="compact" class="mx-5 mt-4 shrink-0">{{ errorMsg }}</v-alert>
+        <v-alert v-if="successMsg" type="success" density="compact" class="mx-5 mt-4 shrink-0">{{ successMsg }}</v-alert>
 
         <!-- Tab content -->
         <div class="flex-1 overflow-y-auto p-5">
@@ -65,17 +64,17 @@
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
             <!-- 楽曲・譜面の自動同期（bemaniwiki 新曲リスト / 旧曲リスト、textage 譜面） -->
-            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <v-card variant="outlined" class="mb-4">
+              <v-card-text>
               <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div class="flex items-center gap-2">
                   <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">楽曲・譜面の自動同期</h3>
-                  <v-btn-toggle v-model="wikiSyncSource" mandatory color="indigo" :disabled="isWikiSyncing">
+                  <v-btn-toggle v-model="wikiSyncSource" mandatory color="indigo" variant="outlined" divided density="compact" :disabled="isWikiSyncing">
                     <v-btn
                       v-for="opt in wikiSyncSourceOptions"
                       :key="opt.value"
                       :value="opt.value"
-                      size="x-small"
-                      class="px-2.5 text-xs"
+                      size="small"
                     >{{ opt.label }}</v-btn>
                   </v-btn-toggle>
                 </div>
@@ -83,18 +82,18 @@
                   <v-btn
                     variant="outlined"
                     size="small"
-                    class="text-xs whitespace-nowrap"
+                    class="whitespace-nowrap"
                     :disabled="isWikiSyncing"
                     @click="handleWikiSync(true)"
                   >差分を確認</v-btn>
                   <v-btn
                     color="indigo"
                     size="small"
-                    class="text-xs whitespace-nowrap"
+                    class="whitespace-nowrap"
                     :disabled="isWikiSyncing"
                     @click="handleWikiSync(false)"
                   >
-                    <v-progress-circular v-if="isWikiSyncing" size="14" width="2" color="white" class="mr-1" />
+                    <v-progress-circular indeterminate v-if="isWikiSyncing" size="14" width="2" class="mr-1" />
                     {{ isWikiSyncing ? '同期中...' : '今すぐ同期' }}
                   </v-btn>
                 </div>
@@ -119,9 +118,9 @@
                 <div class="font-bold" :class="wikiSyncResultShown.status === 'SUCCESS' ? 'text-emerald-700 dark:text-emerald-400' : wikiSyncResultShown.status === 'NEEDS_REVIEW' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
                   {{ wikiSyncResultShown.message }}
                 </div>
-                <v-expansion-panels v-if="wikiSyncSections.length > 0" multiple variant="accordion" class="text-slate-600 dark:text-slate-300">
+                <v-expansion-panels v-if="wikiSyncSections.length > 0" multiple variant="accordion">
                   <v-expansion-panel v-for="sec in wikiSyncSections" :key="sec.key">
-                    <v-expansion-panel-title class="text-xs min-h-0 py-1.5">{{ sec.label }} {{ sec.items.length }}件</v-expansion-panel-title>
+                    <v-expansion-panel-title>{{ sec.label }} {{ sec.items.length }}件</v-expansion-panel-title>
                     <v-expansion-panel-text>
                       <ul class="ml-4 list-disc space-y-0.5 max-h-40 overflow-y-auto text-xs">
                         <li v-for="(item, i) in sec.items" :key="i" class="break-all">{{ item }}</li>
@@ -140,74 +139,67 @@
                   <span v-else class="break-all">{{ r.errorMessage }}</span>
                 </div>
               </div>
+              </v-card-text>
             </v-card>
 
             <!-- Edit existing active song -->
-            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">既存曲を編集</h3>
+            <v-card variant="outlined" class="mb-4">
+              <v-card-title class="text-subtitle-1">既存曲を編集</v-card-title>
+              <v-card-text>
               <v-text-field
                 v-model="activeSearchQuery"
                 :disabled="isEditingExistingSong"
                 type="text"
                 placeholder="曲名で検索..."
                 color="indigo"
-                class="w-full text-sm"
+                :prepend-inner-icon="mdiMagnify"
+                hide-details
+                class="w-full"
               />
               <div v-if="filteredActiveSongs.length > 0 && !isEditingExistingSong" class="mt-2 max-h-48 overflow-y-auto space-y-1">
                 <v-card
                   v-for="g in filteredActiveSongs"
                   :key="g.title"
                   :disabled="isPreparingEdit"
-                  class="w-full text-left px-3 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                  variant="tonal"
+                  density="compact"
+                  class="w-full text-left"
+                  :title="g.title"
+                  :subtitle="`${g.artist} / ${g.genre} / ${g.difficulties.join(', ')}`"
                   @click="handleBeginEditActiveSong(g)"
-                >
-                  <div class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ g.title }}</div>
-                  <div class="text-xs text-slate-500 dark:text-slate-400">
-                    {{ g.artist }} / {{ g.genre }} / {{ g.difficulties.join(', ') }}
-                  </div>
-                </v-card>
+                />
               </div>
               <div v-else-if="activeSearchQuery && !isEditingExistingSong" class="mt-2 text-xs text-slate-400 dark:text-slate-500">
                 該当する楽曲が見つかりません
               </div>
               <div v-if="isPreparingEdit" class="mt-2 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                <v-progress-circular size="14" width="2" />
+                <v-progress-circular indeterminate size="14" width="2" />
                 編集用ドラフトを準備中...
               </div>
+              </v-card-text>
             </v-card>
 
             <!-- Add Song Form -->
-            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <v-alert v-if="isEditingExistingSong" type="info" :icon="false" color="indigo" class="mb-3 p-2">
+            <v-card variant="outlined" class="mb-4">
+              <v-card-text>
+              <v-alert v-if="isEditingExistingSong" type="info" :icon="false" color="indigo" density="compact" class="mb-3">
                 <div class="flex items-center justify-between">
-                  <div class="text-sm text-indigo-700 dark:text-indigo-400">
+                  <div class="text-sm">
                     <span class="font-bold">編集中:</span> {{ editingSongTitle }}
                   </div>
-                  <v-btn variant="outlined" size="x-small" class="text-xs" @click="cancelEditExistingSong">
+                  <v-btn variant="outlined" size="small" @click="cancelEditExistingSong">
                     キャンセル
                   </v-btn>
                 </div>
               </v-alert>
-              <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-3">{{ isEditingExistingSong ? '楽曲情報の編集' : '新曲追加' }}</h3>
+              <h3 class="text-subtitle-1 mb-3">{{ isEditingExistingSong ? '楽曲情報の編集' : '新曲追加' }}</h3>
 
               <!-- Basic info -->
               <div class="grid grid-cols-2 gap-3 mb-3">
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">曲名 *</label>
-                  <v-text-field v-model="form.title" type="text" color="indigo" class="w-full text-sm" placeholder="曲名" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">アーティスト</label>
-                  <v-text-field v-model="form.artist" type="text" color="indigo" class="w-full text-sm" placeholder="アーティスト名" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">ジャンル</label>
-                  <v-text-field v-model="form.genre" type="text" color="indigo" class="w-full text-sm" placeholder="ジャンル" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">BPM</label>
-                  <v-text-field v-model="form.bpm" type="text" color="indigo" class="w-full text-sm" placeholder="150 / 130-180" />
-                </div>
+                <v-text-field v-model="form.title" type="text" color="indigo" label="曲名 *" hide-details class="w-full" placeholder="曲名" />
+                <v-text-field v-model="form.artist" type="text" color="indigo" label="アーティスト" hide-details class="w-full" placeholder="アーティスト名" />
+                <v-text-field v-model="form.genre" type="text" color="indigo" label="ジャンル" hide-details class="w-full" placeholder="ジャンル" />
+                <v-text-field v-model="form.bpm" type="text" color="indigo" label="BPM" hide-details class="w-full" placeholder="150 / 130-180" />
               </div>
 
               <!-- Per-difficulty fields -->
@@ -216,12 +208,10 @@
                   class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700"
                   :class="diff.bgClass"
                 >
-                  <v-chip label variant="flat" class="w-20 justify-center text-xs font-bold shrink-0" :class="diff.labelClass">{{ diff.label }}</v-chip>
+                  <v-chip label variant="flat" class="w-20 justify-center shrink-0" :color="({ '1': 'green', '2': 'blue', '3': 'amber-darken-2', '4': 'red', '10': 'purple' } as Record<string, string>)[diff.code]">{{ diff.label }}</v-chip>
                   <div class="flex items-center gap-1.5 flex-1">
-                    <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">ノーツ</label>
-                    <v-text-field v-model.number="form[diff.notesKey]" type="number" min="0" density="compact" class="w-24 flex-none text-xs" placeholder="0" />
-                    <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">☆</label>
-                    <v-text-field v-model.number="form[diff.levelKey]" type="number" min="1" max="12" density="compact" class="w-20 flex-none text-xs" placeholder="0" />
+                    <v-text-field v-model.number="form[diff.notesKey]" type="number" min="0" density="compact" label="ノーツ" hide-details class="w-28 flex-none" placeholder="0" />
+                    <v-text-field v-model.number="form[diff.levelKey]" type="number" min="1" max="12" density="compact" label="☆" hide-details class="w-24 flex-none" placeholder="0" />
                   </div>
                 </div>
               </div>
@@ -229,25 +219,13 @@
               <!-- Extra fields for ANOTHER/LEGGENDARIA -->
               <v-expansion-panels variant="accordion" class="mb-3">
                 <v-expansion-panel>
-                  <v-expansion-panel-title class="text-xs font-bold text-slate-500 dark:text-slate-400 min-h-0 py-2">詳細フィールド (ANOTHER/LEGG用)</v-expansion-panel-title>
+                  <v-expansion-panel-title>詳細フィールド (ANOTHER/LEGG用)</v-expansion-panel-title>
                   <v-expansion-panel-text>
                     <div class="grid grid-cols-4 gap-2">
-                      <div>
-                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">WR</label>
-                        <v-text-field v-model.number="form.wr" type="number" class="w-full text-xs" />
-                      </div>
-                      <div>
-                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">AVG</label>
-                        <v-text-field v-model.number="form.avg" type="number" class="w-full text-xs" />
-                      </div>
-                      <div>
-                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">coef</label>
-                        <v-text-field v-model.number="form.coef" type="number" step="0.01" class="w-full text-xs" />
-                      </div>
-                      <div>
-                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">textage</label>
-                        <v-text-field v-model="form.textage" type="text" class="w-full text-xs" />
-                      </div>
+                      <v-text-field v-model.number="form.wr" type="number" label="WR" density="compact" hide-details class="w-full" />
+                      <v-text-field v-model.number="form.avg" type="number" label="AVG" density="compact" hide-details class="w-full" />
+                      <v-text-field v-model.number="form.coef" type="number" step="0.01" label="coef" density="compact" hide-details class="w-full" />
+                      <v-text-field v-model="form.textage" type="text" label="textage" density="compact" hide-details class="w-full" />
                     </div>
                   </v-expansion-panel-text>
                 </v-expansion-panel>
@@ -256,13 +234,13 @@
               <v-btn
                 color="indigo"
                 block
-                class="text-sm"
                 :disabled="isSubmitting || !form.title"
                 @click="isEditingExistingSong ? handleUpdateEditingSong() : handleAddSong()"
               >
-                <v-progress-circular v-if="isSubmitting" size="16" width="2" color="white" class="mr-2" />
+                <v-progress-circular indeterminate v-if="isSubmitting" size="16" width="2" class="mr-2" />
                 {{ isEditingExistingSong ? 'ドラフトを更新' : 'ドラフトに追加' }}
               </v-btn>
+              </v-card-text>
             </v-card>
 
             <!-- Draft songs list -->
@@ -273,26 +251,25 @@
               </h3>
               <div class="space-y-1">
                 <v-card v-for="song in groupedDraftSongs" :key="song.title"
-                  class="flex items-center justify-between p-3"
+                  variant="outlined"
+                  density="compact"
+                  :title="song.title"
+                  :subtitle="`${song.artist} / ${song.genre} / ${song.difficulties.join(', ')}`"
                 >
-                  <div class="flex-1 min-w-0">
-                    <div class="font-bold text-sm text-slate-800 dark:text-white truncate">{{ song.title }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">
-                      {{ song.artist }} / {{ song.genre }} / {{ song.difficulties.join(', ') }}
-                    </div>
-                  </div>
+                  <template #append>
                   <v-btn
                     icon
                     variant="text"
                     size="small"
                     color="error"
-                    class="ml-2 shrink-0"
+                    class="shrink-0"
                     title="削除"
                     aria-label="削除"
                     @click="handleDeleteDraftSong(song.ids)"
                   >
                     <v-icon :icon="mdiDelete" size="18" />
                   </v-btn>
+                  </template>
                 </v-card>
               </div>
             </div>
@@ -309,32 +286,33 @@
                 <v-btn
                   color="warning"
                   size="small"
-                  class="text-sm whitespace-nowrap"
+                  class="whitespace-nowrap"
                   :disabled="isGeneratingDraft"
                   @click="generateDraftFromVotes"
                 >
-                  <v-progress-circular v-if="isGeneratingDraft" size="14" width="2" color="white" class="mr-1" />
+                  <v-progress-circular indeterminate v-if="isGeneratingDraft" size="14" width="2" class="mr-1" />
                   投票から生成
                 </v-btn>
                 <v-btn
                   color="indigo"
                   size="small"
-                  class="text-sm whitespace-nowrap"
+                  class="whitespace-nowrap"
                   :disabled="isSavingDiff || pendingDiffChanges.length === 0"
                   @click="handleSaveDiffTable"
                 >
-                  <v-progress-circular v-if="isSavingDiff" size="14" width="2" color="white" class="mr-1" />
+                  <v-progress-circular indeterminate v-if="isSavingDiff" size="14" width="2" class="mr-1" />
                   下書き保存 ({{ pendingDiffChanges.length }}件)
                 </v-btn>
               </div>
             </div>
 
             <!-- Difficulty table profiles (named draft snapshots) -->
-            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <h4 class="text-xs font-bold text-slate-500 mb-2 flex items-center gap-1.5">
-                <v-icon :icon="mdiArchiveOutline" size="14" />
+            <v-card variant="outlined" class="mb-4">
+              <v-card-title class="text-subtitle-1 flex items-center gap-1.5">
+                <v-icon :icon="mdiArchiveOutline" size="small" />
                 プロファイル（下書きを名前付きで保存）
-              </h4>
+              </v-card-title>
+              <v-card-text>
               <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-snug">
                 現在の下書き（保存前の変更も含む）を名前を付けて保存します。読み込むと下書きが置き換わります。適用は従来どおり「難易度表を適用」ボタンから。
               </p>
@@ -346,12 +324,14 @@
                   maxlength="60"
                   placeholder="プロファイル名（例: 強G案）"
                   color="indigo"
-                  class="flex-1 min-w-0 text-sm"
+                  density="compact"
+                  hide-details
+                  class="flex-1 min-w-0"
                   @keyup.enter="handleSaveProfile()"
                 />
                 <v-btn
                   color="indigo"
-                  class="text-sm whitespace-nowrap"
+                  class="whitespace-nowrap"
                   :disabled="isProfileBusy || !newProfileName.trim()"
                   @click="handleSaveProfile()"
                 >
@@ -363,18 +343,18 @@
                 <v-card
                   v-for="p in diffProfiles"
                   :key="p.name"
-                  class="flex items-center justify-between p-2.5 min-w-0"
+                  variant="tonal"
+                  density="compact"
+                  class="min-w-0"
+                  :title="p.name"
+                  :subtitle="`${p.songCount} 曲`"
                 >
-                  <div class="min-w-0 flex-1 mr-2">
-                    <div class="text-sm font-bold text-slate-800 dark:text-white truncate" :title="p.name">{{ p.name }}</div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ p.songCount }} 曲</div>
-                  </div>
+                  <template #append>
                   <div class="flex items-center gap-1.5 shrink-0">
                     <v-btn
                       variant="tonal"
                       color="indigo"
-                      size="x-small"
-                      class="px-2.5 text-xs"
+                      size="small"
                       :disabled="isProfileBusy"
                       title="このプロファイルを下書きに読み込む"
                       @click="handleLoadProfile(p.name)"
@@ -383,8 +363,7 @@
                     </v-btn>
                     <v-btn
                       variant="tonal"
-                      size="x-small"
-                      class="px-2.5 text-xs"
+                      size="small"
                       :disabled="isProfileBusy"
                       title="現在の内容でこのプロファイルを上書き"
                       @click="handleSaveProfile(p.name)"
@@ -404,29 +383,24 @@
                       <v-icon :icon="mdiDelete" size="16" />
                     </v-btn>
                   </div>
+                  </template>
                 </v-card>
               </div>
               <div v-else class="text-xs text-slate-400 dark:text-slate-500 py-2 text-center">
                 保存されたプロファイルはありません
               </div>
+              </v-card-text>
             </v-card>
 
             <!-- Level filter checkboxes -->
             <div class="mb-3 flex items-center gap-4">
-              <v-checkbox v-model="showLv12" color="indigo" class="flex-none">
-                <template #label>
-                  <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆12</span>
-                </template>
-              </v-checkbox>
-              <v-checkbox v-model="showLv11" color="indigo" class="flex-none">
-                <template #label>
-                  <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆11</span>
-                </template>
-              </v-checkbox>
+              <v-checkbox v-model="showLv12" color="indigo" label="☆12" density="compact" hide-details class="flex-none" />
+              <v-checkbox v-model="showLv11" color="indigo" label="☆11" density="compact" hide-details class="flex-none" />
             </div>
 
-            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <h4 class="text-xs font-bold text-slate-500 mb-2">楽曲のランク移動</h4>
+            <v-card variant="outlined" class="mb-4">
+              <v-card-title class="text-subtitle-1">楽曲のランク移動</v-card-title>
+              <v-card-text>
               <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <v-select
                   v-model="diffEditSongTitle"
@@ -440,7 +414,8 @@
                   item-title="title"
                   item-value="value"
                   color="indigo"
-                  class="flex-1 min-w-0 text-sm"
+                  hide-details
+                  class="flex-1 min-w-0"
                 />
                 <v-select
                   v-model="diffEditNewRank"
@@ -448,12 +423,14 @@
                   item-title="title"
                   item-value="value"
                   color="indigo"
-                  class="sm:w-40 sm:flex-none text-sm"
+                  hide-details
+                  class="sm:w-40 sm:flex-none"
                 />
-                <v-btn variant="tonal" color="indigo" class="text-sm whitespace-nowrap" :disabled="!diffEditSongTitle || !diffEditNewRank" @click="handleAddDiffChange">
+                <v-btn variant="tonal" color="indigo" class="whitespace-nowrap" :disabled="!diffEditSongTitle || !diffEditNewRank" @click="handleAddDiffChange">
                   追加
                 </v-btn>
               </div>
+              </v-card-text>
             </v-card>
 
             <!-- Saved draft changes (applied to draft, not yet published) -->
@@ -463,7 +440,6 @@
                   variant="outlined"
                   color="warning"
                   size="small"
-                  class="text-xs"
                   :disabled="isSavingDiff"
                   title="新規配置（Uncategorized との相互移動）はそのまま残し、昇格・降格のみを取り消します"
                   @click="handleRevertAllPromotionsDemotions"
@@ -586,7 +562,7 @@ import { useGameData } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 import { jstParts } from '../utils/jstTime';
-import { mdiArchiveOutline, mdiClose, mdiDelete, mdiMusic } from '@mdi/js';
+import { mdiArchiveOutline, mdiClose, mdiDelete, mdiMagnify, mdiMusic } from '@mdi/js';
 
 const props = defineProps<{
   isOpen: boolean;

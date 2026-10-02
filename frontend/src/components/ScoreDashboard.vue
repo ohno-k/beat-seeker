@@ -1,7 +1,7 @@
 <template>
   <div class="w-full space-y-6 animate-fade-in">
     <!-- Email Registration Prompt (未登録の場合のみ表示) -->
-    <v-alert v-if="user && !user.email" color="warning" :icon="false" class="w-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 p-4">
+    <v-alert v-if="user && !user.email" color="warning" variant="tonal" :icon="false" class="w-full">
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div class="flex items-center gap-3 flex-1">
         <div class="w-9 h-9 bg-amber-100 dark:bg-amber-900/50 rounded-md flex items-center justify-center shrink-0">
@@ -14,7 +14,7 @@
           <p class="text-xs text-amber-600 dark:text-amber-400">{{ t('dashboard.emailHint') }}</p>
         </div>
       </div>
-      <v-btn color="warning" class="shrink-0 text-sm text-white" @click="$emit('open-profile-edit')">
+      <v-btn color="warning" class="shrink-0" @click="$emit('open-profile-edit')">
         {{ t('dashboard.registerNow') }}
       </v-btn>
       </div>
@@ -26,6 +26,7 @@
         <v-switch
           :model-value="showAllTime"
           color="warning"
+          hide-details
           class="flex-none"
           @update:model-value="toggleAllTime"
         >
@@ -36,7 +37,7 @@
             >{{ t('past.toggle') }}</span>
           </template>
         </v-switch>
-        <v-progress-circular v-if="isLoadingPast" size="12" width="2" color="warning" />
+        <v-progress-circular v-if="isLoadingPast" indeterminate size="12" width="2" color="warning" />
       </div>
       <span v-if="showAllTime" class="text-xs text-amber-600 dark:text-amber-400">{{ t('past.tierNote') }}</span>
     </div>
@@ -44,19 +45,21 @@
     <!-- Tier Cards Row -->
     <div class="grid grid-cols-1 gap-6" :class="{ 'sm:grid-cols-2': showRateTier }">
       <!-- Beat-Tier (Lv11/12) -->
-      <v-card class="bg-white dark:bg-slate-800 p-6 border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+      <v-card class="flex flex-col relative overflow-hidden">
+        <v-card-text class="flex-1 w-full flex flex-col items-center justify-center">
         <div class="absolute top-4 right-4 z-20">
           <v-btn
             variant="text"
             size="small"
-            class="group px-1 text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            color="primary"
+            class="group"
             @click="showInfoModal = true"
           >
             <span class="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity mr-1.5">{{ t('dashboard.whatIsBeatTier') }}</span>
             <v-icon :icon="mdiInformationOutline" size="20" />
           </v-btn>
         </div>
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Beat-Tier<v-chip v-if="showAllTime" label size="x-small" variant="flat" class="ml-1.5 px-1.5 text-[9px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</v-chip></p>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Beat-Tier<v-chip v-if="showAllTime" label size="x-small" variant="tonal" color="warning" class="ml-1.5">{{ t('past.tierBadge') }}</v-chip></p>
         <div class="flex flex-col items-center z-10 text-center">
           <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="lg" class="mb-2" :is-supporter="iconGloss" v-bind="beatFrame" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rankInfo.color">
@@ -90,22 +93,25 @@
             </li>
           </ul>
         </div>
+        </v-card-text>
       </v-card>
 
       <!-- Rate-Tier (全難度 ANOTHER/LEGGENDARIA) -->
-      <v-card v-if="showRateTier" class="bg-white dark:bg-slate-800 p-6 border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+      <v-card v-if="showRateTier" class="flex flex-col relative overflow-hidden">
+        <v-card-text class="flex-1 w-full flex flex-col items-center justify-center">
         <div class="absolute top-4 right-4 z-20">
           <v-btn
             variant="text"
             size="small"
-            class="group px-1 text-emerald-500 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+            color="success"
+            class="group"
             @click="showRateInfoModal = true"
           >
             <span class="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity mr-1.5">{{ t('dashboard.whatIsRateTier') }}</span>
             <v-icon :icon="mdiInformationOutline" size="20" />
           </v-btn>
         </div>
-        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Rate-Tier<v-chip v-if="showAllTime" label size="x-small" variant="flat" class="ml-1.5 px-1.5 text-[9px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</v-chip></p>
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1 z-10 font-bold">Rate-Tier<v-chip v-if="showAllTime" label size="x-small" variant="tonal" color="warning" class="ml-1.5">{{ t('past.tierBadge') }}</v-chip></p>
         <div class="flex flex-col items-center z-10 text-center">
           <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="lg" class="mb-2" :is-supporter="iconGloss" v-bind="rateFrame" />
           <h3 class="text-2xl sm:text-3xl font-bold mb-1 line-clamp-1" :class="rateTierRankInfo.color">
@@ -139,13 +145,15 @@
             </li>
           </ul>
         </div>
+        </v-card-text>
       </v-card>
     </div>
 
     <!-- 現在の DIVISION は App.vue のダッシュボード最上部（LeagueDivisionPanel）で表示する -->
 
     <!-- Ranking + Lv12 Stats Row -->
-    <v-card v-if="!isTopRankerView && !isPrivateView" class="bg-white dark:bg-slate-800 p-4 sm:p-6 border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
+    <v-card v-if="!isTopRankerView && !isPrivateView">
+      <v-card-text class="flex flex-col justify-between">
         <!-- Ranking Position -->
         <div v-if="!isTopRankerView && !isPrivateView" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
           <!-- 順位とロードマップレベルを横並び（狭い画面では折り返す。flex-col/sm: は output.css に負けるので使わない） -->
@@ -200,33 +208,42 @@
 
         <!-- Lv12 Quick Stats (fixed, no settings needed) -->
         <div v-if="!isTopRankerView && !isPrivateView" class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-auto">
-          <v-card class="flex flex-col items-center justify-center p-3 rounded-md bg-slate-50/50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700">
+          <v-card variant="tonal">
+            <v-card-text class="flex flex-col items-center justify-center">
             <p class="text-[9px] font-bold text-slate-400 mb-1">{{ t('dashboard.lv12Total') }}</p>
             <h3 class="text-2xl sm:text-3xl font-bold tabular-nums text-slate-700 dark:text-slate-200">{{ lv12Total }}</h3>
+            </v-card-text>
           </v-card>
-          <v-card class="flex flex-col items-center justify-center p-3 rounded-md bg-blue-50/30 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/50 border-t-2 border-t-blue-400 dark:border-t-blue-500">
+          <v-card variant="tonal" color="blue">
+            <v-card-text class="flex flex-col items-center justify-center">
             <p class="text-[9px] font-bold text-blue-400 dark:text-blue-500 mb-1">{{ t('dashboard.lv12ClearRate') }}</p>
             <h3 class="text-2xl sm:text-3xl font-bold tabular-nums text-blue-600 dark:text-blue-400 flex items-baseline gap-0.5">
               {{ lv12ClearRate }}<span class="text-sm font-bold opacity-70">%</span>
             </h3>
+            </v-card-text>
           </v-card>
-          <v-card class="flex flex-col items-center justify-center p-3 rounded-md bg-amber-50/30 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-800/50 border-t-2 border-t-amber-400 dark:border-t-amber-500">
+          <v-card variant="tonal" color="amber-darken-2">
+            <v-card-text class="flex flex-col items-center justify-center">
             <p class="text-[9px] font-bold text-amber-500 mb-1">{{ t('dashboard.lv12AaaRate') }}</p>
             <h3 class="text-2xl sm:text-3xl font-bold tabular-nums text-amber-500 flex items-baseline gap-0.5">
               {{ lv12AaaRate }}<span class="text-sm font-bold opacity-70">%</span>
             </h3>
+            </v-card-text>
           </v-card>
-          <v-card class="flex flex-col items-center justify-center p-3 rounded-md bg-purple-50/30 dark:bg-purple-900/10 border border-purple-100/50 dark:border-purple-800/50 border-t-2 border-t-purple-400 dark:border-t-purple-500">
+          <v-card variant="tonal" color="purple">
+            <v-card-text class="flex flex-col items-center justify-center">
             <p class="text-[9px] font-bold text-purple-400 dark:text-purple-500 mb-1" :title="t('dashboard.maxMinusHint')">{{ t('dashboard.lv12MaxMinusRate') }}</p>
             <h3 class="text-2xl sm:text-3xl font-bold tabular-nums text-purple-600 dark:text-purple-400 flex items-baseline gap-0.5">
               {{ lv12MaxMinusRate }}<span class="text-sm font-bold opacity-70">%</span>
             </h3>
+            </v-card-text>
           </v-card>
         </div>
+      </v-card-text>
     </v-card>
 
     <!-- Private user notice: hide per-song breakdowns since scores are unavailable -->
-    <v-alert v-if="isPrivateView" color="warning" :icon="false" class="bg-amber-50 dark:bg-amber-900/20 p-5 border border-amber-200 dark:border-amber-800 text-center">
+    <v-alert v-if="isPrivateView" color="warning" variant="tonal" :icon="false" class="text-center">
       <div class="flex items-center justify-center gap-2 text-amber-700 dark:text-amber-300 font-bold">
         <span>🔒</span>
         <span>{{ t('dashboard.privateUserNotice') }}</span>

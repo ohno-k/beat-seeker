@@ -81,8 +81,9 @@ const handleSendRequest = async () => {
     <!-- フレンド申請バナー: 他ユーザーの公開ダッシュボード閲覧時のみ表示。adminモード時は隠す -->
     <v-card
       v-if="viewingUserId && isLoggedIn && !isAdminMode"
-      class="w-full px-5 py-3 flex items-center justify-between gap-4"
+      class="w-full"
     >
+      <v-card-text class="flex items-center justify-between gap-4">
       <div class="flex items-center gap-3 min-w-0">
         <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -115,8 +116,7 @@ const handleSendRequest = async () => {
         <span class="text-xs font-bold text-red-500 max-w-[160px] truncate">{{ requestError }}</span>
         <v-btn
           variant="text"
-          size="x-small"
-          class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline px-1 min-w-0"
+          size="small"
           @click="requestState = 'idle'"
         >再試行</v-btn>
       </div>
@@ -126,16 +126,19 @@ const handleSendRequest = async () => {
         v-else
         color="primary"
         size="small"
-        class="px-4 text-xs font-bold flex-shrink-0"
+        class="flex-shrink-0"
         :disabled="requestState === 'loading'"
         @click="handleSendRequest"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-        </svg>
+        <template #prepend>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+        </template>
         <span v-if="requestState === 'loading'">送信中...</span>
         <span v-else>フレンド申請</span>
       </v-btn>
+      </v-card-text>
     </v-card>
 
     <!-- メインコンテンツ: BEAT-Tier / Rate-Tier / 最近のアクティビティを描画 -->

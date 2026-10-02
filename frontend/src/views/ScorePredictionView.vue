@@ -218,11 +218,9 @@ watch(() => props.viewingUserId, () => {
 });
 
 // 難易度コード → 表示名・1 文字表記・色（一覧・ヘッダ・類似譜面で共通）。一覧に載せる難易度もこの表で決まる
-const DIFF_META: Record<string, { order: number; label: string; short: string; cls: string; text: string; badge: string }> = {
-  '4': { order: 0, label: 'ANOTHER', short: 'A', cls: 'is-ano', text: 'text-red-600 dark:text-red-400',
-    badge: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
-  '10': { order: 1, label: 'LEGGENDARIA', short: 'L', cls: 'is-leg', text: 'text-purple-600 dark:text-purple-400',
-    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
+const DIFF_META: Record<string, { order: number; label: string; short: string; cls: string; text: string; color: string }> = {
+  '4': { order: 0, label: 'ANOTHER', short: 'A', cls: 'is-ano', text: 'text-red-600 dark:text-red-400', color: 'red' },
+  '10': { order: 1, label: 'LEGGENDARIA', short: 'L', cls: 'is-leg', text: 'text-purple-600 dark:text-purple-400', color: 'purple' },
 };
 const DIFF_CODE_BY_NAME: Record<string, string> = Object.fromEntries(Object.entries(DIFF_META).map(([code, m]) => [m.label, code]));
 const metaOf = (difficulty: string) => DIFF_META[difficulty] ?? DIFF_META['4'];
@@ -237,9 +235,9 @@ function diffShort(difficulty: string): string {
   return metaOf(difficulty).short;
 }
 
-// 難易度バッジの Tailwind クラス
-function diffBadgeClass(difficulty: string): string {
-  return metaOf(difficulty).badge;
+// 難易度バッジの色（Vuetify の color）
+function diffColor(difficulty: string): string {
+  return metaOf(difficulty).color;
 }
 
 // ── 共有リンク ───────────────────────────────────────────────
@@ -434,21 +432,21 @@ watch(selectedEntry, async (entry) => {
 });
 
 // ── タグバッジ（譜面属性: 皿多い/同時押し寄り/32分あり/高速 など） ─────
-interface TagBadge { tag: string; label: string; colorClass: string; }
+interface TagBadge { tag: string; label: string; color: string; }
 
-// サーバから返ってくるタグ文字列 → 表示ラベル + 色 の対応表
-const TAG_DISPLAY: Record<string, { label: string; colorClass: string }> = {
-  high_effective_bpm: { label: '高速',            colorClass: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
-  mid_effective_bpm:  { label: '中速',            colorClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' },
-  low_effective_bpm:  { label: '低速',            colorClass: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300' },
-  soflan:             { label: 'ソフラン',        colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
-  scratch_very_heavy: { label: '皿: 非常に多い', colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
-  scratch_heavy:      { label: '皿: 多い',       colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
-  scratch_low:        { label: '皿: 少ない',     colorClass: 'bg-slate-100 text-slate-600 dark:bg-slate-700/60 dark:text-slate-300' },
-  chord_heavy:        { label: '同時押し寄り',   colorClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
-  single_heavy:       { label: '単鍵寄り',       colorClass: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' },
-  has_32nd:           { label: '32分あり',        colorClass: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300' },
-  has_triplet:        { label: '3連あり',         colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+// サーバから返ってくるタグ文字列 → 表示ラベル + 色（Vuetify の color） の対応表
+const TAG_DISPLAY: Record<string, { label: string; color: string }> = {
+  high_effective_bpm: { label: '高速',            color: 'red' },
+  mid_effective_bpm:  { label: '中速',            color: 'yellow-darken-3' },
+  low_effective_bpm:  { label: '低速',            color: 'cyan' },
+  soflan:             { label: 'ソフラン',        color: 'amber-darken-2' },
+  scratch_very_heavy: { label: '皿: 非常に多い', color: 'orange' },
+  scratch_heavy:      { label: '皿: 多い',       color: 'orange' },
+  scratch_low:        { label: '皿: 少ない',     color: 'grey' },
+  chord_heavy:        { label: '同時押し寄り',   color: 'blue' },
+  single_heavy:       { label: '単鍵寄り',       color: 'teal' },
+  has_32nd:           { label: '32分あり',        color: 'pink' },
+  has_triplet:        { label: '3連あり',         color: 'amber-darken-2' },
 };
 const TAG_ORDER = Object.keys(TAG_DISPLAY);
 
@@ -647,48 +645,50 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     </header>
 
     <!-- ページ内のタブ: 譜面ごとの分析 / 全譜面の当たり配置ランキング -->
-    <v-tabs v-model="pageTab" class="mb-4 border-b border-slate-200 dark:border-slate-700">
-      <v-tab value="analysis" class="text-[0.8rem] font-semibold">譜面分析</v-tab>
-      <v-tab value="ranking" class="text-[0.8rem] font-semibold">当たり配置ランキング</v-tab>
+    <v-tabs v-model="pageTab" color="primary" class="mb-4">
+      <v-tab value="analysis">譜面分析</v-tab>
+      <v-tab value="ranking">当たり配置ランキング</v-tab>
     </v-tabs>
 
     <template v-if="pageTab === 'analysis'">
     <!-- 管理者が他ユーザーを閲覧中の注意バナー -->
-    <v-alert v-if="isAdminViewing" type="info" :icon="mdiAccountCircleOutline" class="mb-5 text-xs font-medium">
+    <v-alert v-if="isAdminViewing" type="info" density="compact" :icon="mdiAccountCircleOutline" class="mb-5">
       閲覧中ユーザーのスコアで類似譜面を表示しています
     </v-alert>
 
     <div class="chart-layout">
       <!-- ═══ 曲選択 ═══ -->
       <aside class="picker">
-        <v-card class="picker-inner bg-white dark:bg-slate-800">
-          <div class="p-3 border-b border-slate-100 dark:border-slate-700">
+        <v-card class="picker-inner">
+          <v-card-text>
             <v-text-field
               v-model="searchQuery"
               type="search"
               :placeholder="t('scorePrediction.searchPlaceholder')"
               :prepend-inner-icon="mdiMagnify"
-              class="search-input w-full text-xs"
+              hide-details
+              class="search-input w-full"
             />
             <div class="mt-2.5 flex items-center gap-2">
-              <v-btn-toggle v-model="levelFilter" mandatory>
-                <v-btn type="button" value="all" size="small" class="text-xs">すべて</v-btn>
-                <v-btn type="button" :value="12" size="small" class="text-xs">☆12</v-btn>
-                <v-btn type="button" :value="11" size="small" class="text-xs">☆11</v-btn>
-                <v-btn type="button" value="low" size="small" class="text-xs">☆10以下</v-btn>
+              <v-btn-toggle v-model="levelFilter" mandatory color="primary" density="compact" variant="outlined" divided>
+                <v-btn type="button" value="all" size="small">すべて</v-btn>
+                <v-btn type="button" :value="12" size="small">☆12</v-btn>
+                <v-btn type="button" :value="11" size="small">☆11</v-btn>
+                <v-btn type="button" value="low" size="small">☆10以下</v-btn>
               </v-btn-toggle>
             </div>
             <!-- 件数とランダム（レベルの絞り込みが 4 つあるので、ランダムはこの行に置いて一覧の幅に収める） -->
             <div class="mt-2 flex items-center justify-between gap-2">
               <span class="text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">{{ matchedEntries.length }} 譜面</span>
-              <v-btn type="button" variant="outlined" size="small" class="ml-auto text-xs" :prepend-icon="mdiShuffleVariant" title="ランダムに選ぶ" @click="pickRandom">
+              <v-btn type="button" variant="tonal" size="small" class="ml-auto" :prepend-icon="mdiShuffleVariant" title="ランダムに選ぶ" @click="pickRandom">
                 ランダム
               </v-btn>
             </div>
-          </div>
+          </v-card-text>
+          <v-divider />
 
           <!-- モバイルで曲を選んだ後は畳む -->
-          <v-btn v-if="listCollapsed" type="button" variant="text" color="primary" block class="reopen-btn text-xs"
+          <v-btn v-if="listCollapsed" type="button" variant="text" color="primary" block class="reopen-btn"
             :append-icon="mdiChevronDown"
             @click="pickerOpen = true">
             一覧から選ぶ
@@ -696,9 +696,8 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
           <v-list class="picker-list" :class="{ collapsed: listCollapsed }" density="compact">
             <v-list-item v-for="entry in shownEntries" :key="entry.textage"
-              min-height="0"
-              class="song-item"
-              :class="[metaOf(entry.difficulty).cls, { active: selectedEntry?.textage === entry.textage }]"
+              :active="selectedEntry?.textage === entry.textage"
+              :color="diffColor(entry.difficulty)"
               @click="selectEntry(entry)">
               <div class="flex items-center gap-2">
                 <span class="min-w-0 flex-1">
@@ -711,7 +710,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                 </span>
               </div>
             </v-list-item>
-            <v-btn v-if="matchedEntries.length > listLimit" type="button" variant="text" color="primary" block class="text-xs" @click="listLimit += LIST_PAGE">
+            <v-btn v-if="matchedEntries.length > listLimit" type="button" variant="text" color="primary" block @click="listLimit += LIST_PAGE">
               さらに表示（残り {{ matchedEntries.length - listLimit }}）
             </v-btn>
             <div v-if="!matchedEntries.length" class="px-3 py-6 text-center text-xs text-slate-400 dark:text-slate-500">
@@ -724,9 +723,9 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
       <!-- ═══ 分析結果 ═══ -->
       <div class="min-w-0">
         <!-- URL で指定された textage が songData に見つからなかった場合 -->
-        <v-alert v-if="unknownTextageFromUrl" type="warning" :icon="false" class="p-6 text-center">
-          <p class="text-amber-700 dark:text-amber-300 font-medium mb-1">{{ t('chartAnalysis.notFound') }}</p>
-          <p class="text-xs text-amber-600/80 dark:text-amber-400/80 break-all">{{ unknownTextageFromUrl }}</p>
+        <v-alert v-if="unknownTextageFromUrl" type="warning" variant="tonal" :icon="false" class="text-center">
+          <p class="font-medium mb-1">{{ t('chartAnalysis.notFound') }}</p>
+          <p class="text-xs break-all">{{ unknownTextageFromUrl }}</p>
         </v-alert>
 
         <!-- 未選択 -->
@@ -739,7 +738,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
           <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
             曲名・アーティストで検索するか、一覧から選びます。
           </p>
-          <v-btn type="button" color="primary" size="small" class="mt-4 text-xs" @click="pickRandom">
+          <v-btn type="button" color="primary" class="mt-4" @click="pickRandom">
             ランダムに 1 譜面見る
           </v-btn>
           <ul class="feature-list mt-6 text-left text-xs text-slate-500 dark:text-slate-400">
@@ -752,15 +751,16 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
         <div v-else class="flex flex-col gap-4">
           <!-- ─── 譜面ヘッダ ─── -->
-          <v-card tag="section" class="hero bg-white dark:bg-slate-800"
+          <v-card tag="section" class="hero"
             :class="metaOf(selectedEntry.difficulty).cls">
+            <v-card-text>
             <div class="hero-top">
               <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
-                  <v-chip label size="x-small" variant="flat" class="px-1.5 py-0.5 h-auto rounded text-[11px] font-bold" :class="diffBadgeClass(selectedEntry.difficulty)">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <v-chip label size="small" :color="diffColor(selectedEntry.difficulty)">
                     {{ diffLabel(selectedEntry.difficulty) }}
                   </v-chip>
-                  <v-chip label size="x-small" variant="flat" class="px-1.5 py-0.5 h-auto rounded text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">☆{{ selectedEntry.level }}</v-chip>
+                  <v-chip label size="small">☆{{ selectedEntry.level }}</v-chip>
                 </div>
                 <h3 class="hero-title mt-2 font-bold text-slate-800 dark:text-white break-words">{{ selectedEntry.title }}</h3>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400 break-words">
@@ -768,10 +768,10 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                 </p>
               </div>
               <div class="hero-actions">
-                <v-btn type="button" variant="outlined" size="small" class="text-[0.7rem] text-slate-600 dark:text-slate-300" :prepend-icon="mdiLinkVariant" @click="copyLink">
+                <v-btn type="button" variant="outlined" size="small" :prepend-icon="mdiLinkVariant" @click="copyLink">
                   {{ linkCopied ? 'コピーしました' : 'リンクをコピー' }}
                 </v-btn>
-                <v-btn v-if="selectedEntry.textage" variant="outlined" size="small" class="text-[0.7rem] text-slate-600 dark:text-slate-300"
+                <v-btn v-if="selectedEntry.textage" variant="outlined" size="small"
                   :append-icon="mdiOpenInNew"
                   :href="`https://textage.cc/score/${selectedEntry.textage}`" target="_blank" rel="noopener noreferrer">
                   TexTage
@@ -794,10 +794,9 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
             <div v-if="tagBadges.length" class="mt-3 flex flex-wrap gap-1.5">
               <v-chip v-for="tb in tagBadges" :key="tb.tag"
-                size="x-small" variant="flat"
-                class="px-2 py-0.5 h-auto rounded-full text-[11px] font-bold"
-                :class="tb.colorClass">{{ tb.label }}</v-chip>
+                size="small" :color="tb.color">{{ tb.label }}</v-chip>
             </div>
+            </v-card-text>
           </v-card>
 
           <!-- ─── プロファイル読み込み中／なし ─── -->
@@ -805,40 +804,50 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
             <div v-for="i in 4" :key="i" class="h-20 rounded-md bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
             <div class="skeleton-wide h-40 rounded-md bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
           </div>
-          <v-card v-else-if="profileState === 'missing'"
-            class="bg-white dark:bg-slate-800 p-5 text-center text-xs text-slate-400 dark:text-slate-500">
-            この譜面の傾向データはまだありません。譜面再生は下から利用できます。
+          <v-card v-else-if="profileState === 'missing'">
+            <v-card-text class="text-center text-medium-emphasis">
+              この譜面の傾向データはまだありません。譜面再生は下から利用できます。
+            </v-card-text>
           </v-card>
 
           <template v-else-if="tendencyProfile">
             <!-- ─── 主要な数値 ─── -->
             <div class="stat-grid">
-              <v-card class="stat bg-white dark:bg-slate-800">
-                <div class="stat-label">実効BPM</div>
-                <div class="stat-value text-slate-800 dark:text-white">{{ tendencyProfile.dominantEff16.toFixed(0) }}</div>
-                <div class="stat-sub">加重平均 {{ tendencyProfile.weightedEff16.toFixed(0) }}</div>
+              <v-card>
+                <v-card-text>
+                  <div class="stat-label">実効BPM</div>
+                  <div class="stat-value text-slate-800 dark:text-white">{{ tendencyProfile.dominantEff16.toFixed(0) }}</div>
+                  <div class="stat-sub">加重平均 {{ tendencyProfile.weightedEff16.toFixed(0) }}</div>
+                </v-card-text>
               </v-card>
-              <v-card class="stat bg-white dark:bg-slate-800">
-                <div class="stat-label">皿の割合</div>
-                <div class="stat-value text-rose-600 dark:text-rose-400">{{ tendencyProfile.scratchPct.toFixed(1) }}<small>%</small></div>
-                <div class="stat-sub">約 {{ Math.round(tendencyProfile.notes * tendencyProfile.scratchPct / 100) }} ノーツ</div>
+              <v-card>
+                <v-card-text>
+                  <div class="stat-label">皿の割合</div>
+                  <div class="stat-value text-rose-600 dark:text-rose-400">{{ tendencyProfile.scratchPct.toFixed(1) }}<small>%</small></div>
+                  <div class="stat-sub">約 {{ Math.round(tendencyProfile.notes * tendencyProfile.scratchPct / 100) }} ノーツ</div>
+                </v-card-text>
               </v-card>
-              <v-card class="stat bg-white dark:bg-slate-800">
-                <div class="stat-label">同時押し率</div>
-                <div class="stat-value text-blue-600 dark:text-blue-400">{{ tendencyProfile.chordPct.toFixed(1) }}<small>%</small></div>
-                <div class="stat-sub">単押し {{ tendencyProfile.singlePct.toFixed(1) }}%</div>
+              <v-card>
+                <v-card-text>
+                  <div class="stat-label">同時押し率</div>
+                  <div class="stat-value text-blue-600 dark:text-blue-400">{{ tendencyProfile.chordPct.toFixed(1) }}<small>%</small></div>
+                  <div class="stat-sub">単押し {{ tendencyProfile.singlePct.toFixed(1) }}%</div>
+                </v-card-text>
               </v-card>
-              <v-card class="stat bg-white dark:bg-slate-800">
-                <div class="stat-label">最大密度</div>
-                <div class="stat-value text-amber-600 dark:text-amber-400">{{ density?.peak ?? '-' }}<small>/小節</small></div>
-                <div class="stat-sub">
-                  <template v-if="density">{{ density.peakMeasure }}小節目 ・ 平均 {{ density.avg.toFixed(1) }}</template>
-                </div>
+              <v-card>
+                <v-card-text>
+                  <div class="stat-label">最大密度</div>
+                  <div class="stat-value text-amber-600 dark:text-amber-400">{{ density?.peak ?? '-' }}<small>/小節</small></div>
+                  <div class="stat-sub">
+                    <template v-if="density">{{ density.peakMeasure }}小節目 ・ 平均 {{ density.avg.toFixed(1) }}</template>
+                  </div>
+                </v-card-text>
               </v-card>
             </div>
 
             <!-- ─── ノーツ密度 ─── -->
-            <v-card v-if="density" tag="section" class="card bg-white dark:bg-slate-800">
+            <v-card v-if="density" tag="section">
+              <v-card-text>
               <div class="card-head">
                 <h4 class="card-title">ノーツ密度</h4>
                 <div class="legend">
@@ -863,11 +872,13 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   <span v-for="tk in density.ticks" :key="tk.label" :style="{ left: `${tk.left}%` }">{{ tk.label }}</span>
                 </div>
               </div>
+              </v-card-text>
             </v-card>
 
             <!-- ─── 配置パターン / 同時押し構成 ─── -->
             <div class="two-col">
-              <v-card v-if="patternRows.length" tag="section" class="card bg-white dark:bg-slate-800">
+              <v-card v-if="patternRows.length" tag="section">
+                <v-card-text>
                 <div class="card-head">
                   <h4 class="card-title">配置パターン</h4>
                   <span class="card-note">全ノーツに占める割合</span>
@@ -883,9 +894,11 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     </span>
                   </li>
                 </ul>
+                </v-card-text>
               </v-card>
 
-              <v-card v-if="chordRows.length" tag="section" class="card bg-white dark:bg-slate-800">
+              <v-card v-if="chordRows.length" tag="section">
+                <v-card-text>
                 <div class="card-head">
                   <h4 class="card-title">同時押し構成</h4>
                   <span class="card-note">打鍵タイミングごとの個数</span>
@@ -897,11 +910,13 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <span class="bar-value tabular-nums">{{ r.pct.toFixed(1) }}%</span>
                   </li>
                 </ul>
+                </v-card-text>
               </v-card>
             </div>
 
             <!-- ─── 打鍵間隔 ─── -->
-            <v-card v-if="noteDistribution.length" tag="section" class="card bg-white dark:bg-slate-800">
+            <v-card v-if="noteDistribution.length" tag="section">
+              <v-card-text>
               <div class="card-head">
                 <h4 class="card-title">打鍵間隔</h4>
                 <span v-if="mainInterval" class="card-note">主なリズム: <b class="text-slate-600 dark:text-slate-300">{{ mainInterval.label }}</b></span>
@@ -919,6 +934,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   <span class="tabular-nums text-slate-400 dark:text-slate-500">{{ nd.pct }}%</span>
                 </div>
               </div>
+              </v-card-text>
             </v-card>
           </template>
 
@@ -926,7 +942,8 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
           <ChartPlayer v-if="selectedEntry.textage" :key="selectedEntry.textage" :textage="selectedEntry.textage" />
 
           <!-- ─── 類似譜面 ─── -->
-          <v-card tag="section" class="card bg-white dark:bg-slate-800">
+          <v-card tag="section">
+            <v-card-text>
             <div class="card-head">
               <h4 class="card-title">{{ t('scorePrediction.similarSongs') }}</h4>
               <span v-if="similarSongs.length" class="card-note tabular-nums">
@@ -934,14 +951,14 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
               </span>
             </div>
 
-            <v-alert v-if="!isLoggedIn" type="warning" :icon="false" class="text-center text-xs">
+            <v-alert v-if="!isLoggedIn" type="warning" variant="tonal" density="compact" :icon="false" class="text-center">
               {{ t('chartAnalysis.loginToSeeMore') }}
             </v-alert>
             <div v-else-if="isLoading" class="py-6 flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">
-              <v-progress-circular size="16" width="2" class="mr-2" />
+              <v-progress-circular indeterminate size="16" width="2" class="mr-2" />
               {{ t('scorePrediction.calculating') }}
             </div>
-            <v-alert v-else-if="predictionError" type="error" class="text-xs">{{ predictionError }}</v-alert>
+            <v-alert v-else-if="predictionError" type="error" density="compact">{{ predictionError }}</v-alert>
             <p v-else-if="predictionResult && !similarSongs.length" class="py-3 text-center text-xs text-slate-400 dark:text-slate-500">
               類似譜面が見つかりませんでした
             </p>
@@ -961,12 +978,12 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <span class="sim-track"><span class="sim-fill" :style="{ width: `${Math.max(0, Math.min(1, song.similarity)) * 100}%` }"></span></span>
                   </span>
                   <span class="min-w-0 flex items-center gap-1.5">
-                    <v-chip label size="x-small" variant="flat" class="shrink-0 px-1 h-auto rounded text-[10px] font-bold"
-                      :class="diffBadgeClass(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4')">
+                    <v-chip label size="x-small" class="shrink-0"
+                      :color="diffColor(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4')">
                       {{ diffShort(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4') }}
                     </v-chip>
-                    <v-btn v-if="targetTextages.has(song.textage)" type="button" variant="text" size="small" density="compact"
-                      class="sim-title text-xs text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                    <v-btn v-if="targetTextages.has(song.textage)" type="button" variant="text" color="primary" size="small" density="compact"
+                      class="sim-title"
                       @click="goToChart(song.textage)"><span class="truncate">{{ song.title }}</span></v-btn>
                     <span v-else class="truncate text-xs text-slate-700 dark:text-slate-200">{{ song.title }}</span>
                   </span>
@@ -977,11 +994,12 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     </template>
                     <span v-else class="text-slate-400 dark:text-slate-500">未プレー</span>
                   </span>
-                  <v-btn v-if="isAdmin" type="button" variant="outlined" color="indigo" size="x-small" class="debug-btn text-[0.65rem]" title="類似度の内訳（管理者）"
+                  <v-btn v-if="isAdmin" type="button" variant="outlined" color="indigo" size="x-small" class="debug-btn" title="類似度の内訳（管理者）"
                     @click="fetchSimilarityDebug(song.textage)">内訳</v-btn>
                 </li>
               </ul>
             </template>
+            </v-card-text>
           </v-card>
         </div>
       </div>
@@ -995,36 +1013,42 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     <v-dialog
       :model-value="!!(debugResult || isDebugLoading)"
       max-width="672"
+      scrollable
       @update:model-value="(v: boolean) => { if (!v) debugResult = null }"
     >
-        <v-card variant="flat" class="bg-white dark:bg-slate-800 w-full max-h-[90vh] overflow-y-auto p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">類似度計算過程</h3>
+        <v-card>
+          <v-card-title class="flex justify-between items-center">
+            <span>類似度計算過程</span>
             <v-btn icon variant="text" size="small" aria-label="閉じる" @click="debugResult = null">
               <v-icon :icon="mdiClose" />
             </v-btn>
-          </div>
+          </v-card-title>
+          <v-card-text>
           <div v-if="isDebugLoading" class="flex justify-center py-10">
-            <v-progress-circular size="32" width="4" />
+            <v-progress-circular indeterminate size="32" width="4" />
           </div>
           <div v-else-if="debugResult">
             <!-- 上部: 比較対象2曲(A,B)の情報カード -->
             <div class="flex gap-3 mb-4 text-sm">
-              <v-card variant="flat" class="flex-1 bg-slate-50 dark:bg-slate-900 p-3">
-                <div class="text-xs text-slate-400 mb-1">対象曲 (A)</div>
-                <div class="font-bold text-slate-800 dark:text-slate-100">{{ debugResult.songA?.title }}</div>
-                <div class="text-xs text-slate-500">難易度 {{ debugResult.songA?.informalRank }}</div>
+              <v-card variant="tonal" class="flex-1">
+                <v-card-text>
+                  <div class="text-xs text-medium-emphasis mb-1">対象曲 (A)</div>
+                  <div class="font-bold">{{ debugResult.songA?.title }}</div>
+                  <div class="text-xs text-medium-emphasis">難易度 {{ debugResult.songA?.informalRank }}</div>
+                </v-card-text>
               </v-card>
-              <v-card variant="flat" class="flex-1 bg-slate-50 dark:bg-slate-900 p-3">
-                <div class="text-xs text-slate-400 mb-1">参照曲 (B)</div>
-                <div class="font-bold text-slate-800 dark:text-slate-100">{{ debugResult.songB?.title }}</div>
-                <div class="text-xs text-slate-500">難易度 {{ debugResult.songB?.informalRank }}</div>
+              <v-card variant="tonal" class="flex-1">
+                <v-card-text>
+                  <div class="text-xs text-medium-emphasis mb-1">参照曲 (B)</div>
+                  <div class="font-bold">{{ debugResult.songB?.title }}</div>
+                  <div class="text-xs text-medium-emphasis">難易度 {{ debugResult.songB?.informalRank }}</div>
+                </v-card-text>
               </v-card>
             </div>
             <!-- 生データ比較テーブル: ノーツ密度・BPM・スクラッチ割合などを並べて表示 -->
             <div class="mb-4">
               <div class="text-xs font-bold text-slate-500 mb-2">生データ比較</div>
-              <v-table class="w-full text-xs bg-transparent">
+              <v-table density="compact" class="w-full">
                 <thead><tr class="text-slate-400"><th class="text-left pb-1">指標</th><th class="text-right pb-1">A</th><th class="text-right pb-1">B</th></tr></thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
                   <tr v-for="[key, label] in [
@@ -1080,7 +1104,8 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   'weight(cnW)': '重み (平均CN割合)',
                   contribution: 'グループ寄与度',
                 }],
-              ] as any[])" :key="key" class="p-3">
+              ] as any[])" :key="key" variant="outlined">
+                <v-card-text>
                 <div class="flex justify-between items-center mb-2">
                   <span class="text-xs font-bold text-slate-600 dark:text-slate-300">{{ label }}</span>
                   <span class="text-sm font-bold tabular-nums"
@@ -1094,17 +1119,21 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <span class="text-right tabular-nums text-slate-700 dark:text-slate-300">{{ val }}</span>
                   </template>
                 </div>
+                </v-card-text>
               </v-card>
             </div>
             <!-- 最終類似度: 各グループ寄与度を掛け合わせた最終値 -->
-            <v-card variant="flat" class="mt-4 bg-slate-900 dark:bg-slate-950 p-4 text-center">
-              <div class="text-xs text-slate-400 mb-1">最終類似度</div>
-              <div class="text-3xl font-bold text-white">{{ debugResult.result?.finalSimilarityPct }}</div>
-              <div class="text-xs text-slate-500 mt-1">
-                統合値 (G1×G2^scrW×G3^kbdW×G4^cnW): {{ debugResult.result?.combined }}
-              </div>
+            <v-card variant="tonal" color="primary" class="mt-4">
+              <v-card-text class="text-center">
+                <div class="text-xs mb-1">最終類似度</div>
+                <div class="text-3xl font-bold">{{ debugResult.result?.finalSimilarityPct }}</div>
+                <div class="text-xs mt-1">
+                  統合値 (G1×G2^scrW×G3^kbdW×G4^cnW): {{ debugResult.result?.combined }}
+                </div>
+              </v-card-text>
             </v-card>
           </div>
+          </v-card-text>
         </v-card>
     </v-dialog>
 
@@ -1136,7 +1165,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .picker-list {
   max-height: 16rem;
   overflow-y: auto;
-  padding: 0.25rem;
 }
 @media (min-width: 1024px) {
   .picker-list { max-height: calc(100vh - 13rem); }
@@ -1148,22 +1176,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 @media (max-width: 1023px) {
   .reopen-btn { display: flex; }
 }
-.song-item {
-  width: 100%;
-  padding: 0.4rem 0.6rem 0.4rem 0.7rem;
-  border-radius: 0.375rem;
-  text-align: left;
-  color: rgb(51 65 85);
-  border-left: 3px solid transparent;
-}
-.song-item:hover { background: rgb(248 250 252); }
-.song-item.active.is-ano { background: rgb(254 242 242); border-left-color: rgb(239 68 68); }
-.song-item.active.is-leg { background: rgb(250 245 255); border-left-color: rgb(168 85 247); }
-.dark .song-item { color: rgb(226 232 240); }
-.dark .song-item:hover { background: rgb(51 65 85 / 0.5); }
-.dark .song-item.active.is-ano { background: rgb(127 29 29 / 0.3); }
-.dark .song-item.active.is-leg { background: rgb(88 28 135 / 0.3); }
-
 /* ── 未選択 ── */
 .empty-state { padding: 2.5rem 1.25rem; }
 .feature-list { display: grid; gap: 0.5rem; max-width: 20rem; margin-left: auto; margin-right: auto; }
@@ -1174,7 +1186,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .hero {
   position: relative;
   overflow: hidden;
-  padding: 1.1rem 1.25rem 1.1rem 1.5rem;
 }
 .hero::before {
   content: '';
@@ -1214,7 +1225,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
   .stat-grid, .skeleton-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 .skeleton-wide { grid-column: 1 / -1; }
-.stat { padding: 0.75rem 0.9rem; }
 .stat-label { font-size: 0.7rem; font-weight: 600; color: rgb(100 116 139); }
 .stat-value { margin-top: 0.15rem; font-size: 1.6rem; line-height: 1.1; font-weight: 800; font-variant-numeric: tabular-nums; }
 .stat-value small { margin-left: 0.1rem; font-size: 0.75rem; font-weight: 700; opacity: 0.75; }
@@ -1223,7 +1233,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .dark .stat-sub { color: rgb(100 116 139); }
 
 /* ── カード共通 ── */
-.card { padding: 1rem 1.1rem; }
 .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
 .card-title { font-size: 0.8rem; font-weight: 700; color: rgb(51 65 85); }
 .card-note { font-size: 0.68rem; color: rgb(148 163 184); }
@@ -1299,7 +1308,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .dark .sim-track { background: rgb(51 65 85); }
 .sim-fill { display: block; height: 100%; background: rgb(59 130 246); border-radius: 9999px; }
 /* 類似譜面の曲名（v-btn text）。行の幅に合わせて省略記号で切る */
-.sim-title { min-width: 0; height: auto; padding: 0; justify-content: flex-start; text-align: left; font-weight: 400; }
+.sim-title { min-width: 0; justify-content: flex-start; }
 .sim-title :deep(.v-btn__content) { min-width: 0; max-width: 100%; }
 @media (max-width: 639px) {
   .similar-row { grid-template-columns: 3rem minmax(0, 1fr) auto; }

@@ -222,23 +222,23 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
     max-width="672"
   >
       <!-- 本体パネル -->
-      <v-card class="max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl overflow-hidden transition-colors duration-200">
+      <v-card class="max-h-[85vh] flex flex-col overflow-hidden">
         <!-- ヘッダー -->
-        <v-card-title class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('league.infoModal.title') }}</h3>
+        <v-card-title class="flex justify-between items-center">
+          <span>{{ t('league.infoModal.title') }}</span>
           <v-btn
             icon
             variant="text"
             size="small"
-            class="text-slate-400 dark:text-slate-500"
             @click="$emit('close')"
           >
             <v-icon :icon="mdiClose" />
           </v-btn>
         </v-card-title>
+        <v-divider />
 
         <!-- 本文（スクロール領域） -->
-        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar space-y-8">
 
           <!-- 1. 概要 + 流れ図 -->
           <section>
@@ -625,9 +625,10 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
         </v-card-text>
 
         <!-- フッター（参加導線 + 参加締切の注記） -->
-        <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700/50 space-y-3">
+        <v-divider />
+        <div class="px-6 py-4 space-y-3">
           <!-- いつから参戦できるか（毎週 月曜 0:00 締切 → 12:00 開始）の注記 -->
-          <v-alert type="warning" class="text-xs leading-relaxed text-amber-800 dark:text-amber-300 rounded-lg px-3 py-2">
+          <v-alert type="warning" variant="tonal" density="compact">
             {{ t('league.infoModal.signupNote') }}
           </v-alert>
 
@@ -638,8 +639,7 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
             <span v-else-if="!joined && joinBlockedText" class="text-xs text-red-500 mr-auto">{{ joinBlockedText }}</span>
 
             <v-btn
-              variant="tonal"
-              class="text-sm font-semibold"
+              variant="text"
               @click="$emit('close')"
             >{{ t('league.infoModal.close') }}</v-btn>
 
@@ -651,7 +651,6 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
               color="success"
               variant="tonal"
               :prepend-icon="mdiCheck"
-              class="text-sm font-bold"
             >
               {{ t('league.infoModal.joined') }}
             </v-chip>
@@ -659,10 +658,9 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
             <!-- 未参加: 参加ボタン -->
             <v-btn
               v-else
-              color="indigo"
+              color="primary"
               :disabled="!isLoggedIn || joining || !!joinBlockedText"
               :prepend-icon="joining ? undefined : mdiArrowRight"
-              class="px-5 text-sm font-bold"
               @click="doJoin"
             >
               {{ joining ? t('league.infoModal.joining') : t('league.infoModal.join') }}

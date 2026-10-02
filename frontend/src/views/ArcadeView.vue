@@ -674,12 +674,12 @@ const selectedFriend = computed(() =>
 
         <!-- レベル絞り込みチェックボックス -->
         <div class="flex items-center gap-3">
-          <v-checkbox v-model="showLv11" color="deep-purple-accent-2" class="flex-none select-none">
+          <v-checkbox v-model="showLv11" color="deep-purple-accent-2" density="compact" hide-details class="flex-none select-none">
             <template #label>
               <span class="text-xs font-bold" :class="showLv11 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'">Lv.11</span>
             </template>
           </v-checkbox>
-          <v-checkbox v-model="showLv12" color="deep-purple-accent-2" class="flex-none select-none">
+          <v-checkbox v-model="showLv12" color="deep-purple-accent-2" density="compact" hide-details class="flex-none select-none">
             <template #label>
               <span class="text-xs font-bold" :class="showLv12 ? 'text-violet-600 dark:text-violet-400' : 'text-slate-400'">Lv.12</span>
             </template>
@@ -692,7 +692,7 @@ const selectedFriend = computed(() =>
 
       <!-- 初期ロード中のスピナー -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20 gap-4">
-        <v-progress-circular size="40" width="4" color="deep-purple-darken-1" />
+        <v-progress-circular indeterminate size="40" width="4" color="deep-purple-darken-1" />
         <p class="text-slate-500 font-bold text-sm">{{ t('arcade.loading') }}</p>
       </div>
 
@@ -707,103 +707,110 @@ const selectedFriend = computed(() =>
             <v-card
               tag="button"
               @click="mode = mode === 'beat-pt' ? null : 'beat-pt'"
-              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
-              :class="mode === 'beat-pt'
-                ? 'bg-violet-600 border-violet-600 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+              class="text-left"
+              :variant="mode === 'beat-pt' ? 'flat' : 'elevated'"
+              :color="mode === 'beat-pt' ? 'deep-purple' : undefined"
             >
+             <v-card-text class="flex flex-col items-start">
               <span class="text-2xl mb-1">⭐</span>
               <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.beatPtBtn') }}</span>
+             </v-card-text>
             </v-card>
 
             <!-- RATE-PT ボタン（藍） -->
             <v-card
               tag="button"
               @click="mode = mode === 'rate-pt' ? null : 'rate-pt'"
-              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
-              :class="mode === 'rate-pt'
-                ? 'bg-indigo-600 border-indigo-600 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+              class="text-left"
+              :variant="mode === 'rate-pt' ? 'flat' : 'elevated'"
+              :color="mode === 'rate-pt' ? 'indigo' : undefined"
             >
+             <v-card-text class="flex flex-col items-start">
               <span class="text-2xl mb-1">📈</span>
               <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.ratePtBtn') }}</span>
+             </v-card-text>
             </v-card>
 
             <!-- Rival ボタン（赤） -->
             <v-card
               tag="button"
               @click="mode = mode === 'rival' ? null : 'rival'"
-              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
-              :class="mode === 'rival'
-                ? 'bg-rose-600 border-rose-600 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+              class="text-left"
+              :variant="mode === 'rival' ? 'flat' : 'elevated'"
+              :color="mode === 'rival' ? 'red' : undefined"
             >
+             <v-card-text class="flex flex-col items-start">
               <span class="text-2xl mb-1">🔥</span>
               <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.rivalBtn') }}</span>
+             </v-card-text>
             </v-card>
 
             <!-- Border ボタン（琥珀） -->
             <v-card
               tag="button"
               @click="mode = mode === 'border' ? null : 'border'"
-              class="flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
-              :class="mode === 'border'
-                ? 'bg-amber-500 border-amber-500 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+              class="text-left"
+              :variant="mode === 'border' ? 'flat' : 'elevated'"
+              :color="mode === 'border' ? 'amber-darken-1' : undefined"
             >
+             <v-card-text class="flex flex-col items-start">
               <span class="text-2xl mb-1">🎵</span>
               <span class="text-sm font-bold leading-tight whitespace-pre-line">{{ t('arcade.borderBtn') }}</span>
+             </v-card-text>
             </v-card>
 
             <!-- 伸びしろ ボタン（青緑、全幅）。新機能アピールのため col-span-2 -->
             <v-card
               tag="button"
               @click="mode = mode === 'potential' ? null : 'potential'"
-              class="col-span-2 flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
-              :class="mode === 'potential'
-                ? 'bg-cyan-600 border-cyan-600 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+              class="col-span-2 text-left"
+              :variant="mode === 'potential' ? 'flat' : 'elevated'"
+              :color="mode === 'potential' ? 'cyan-darken-1' : undefined"
             >
+             <v-card-text class="flex flex-col items-start">
               <div class="flex items-center gap-2 w-full">
                 <span class="text-2xl">🌱</span>
                 <div class="flex-1">
                   <div class="text-sm font-bold">{{ t('arcade.potentialBtn') }}</div>
                   <div class="text-[10px] font-bold opacity-70 mt-0.5">{{ t('arcade.potentialBtnDesc') }}</div>
                 </div>
-                <v-chip size="x-small" label variant="flat" class="text-[9px] font-bold px-1.5"
-                  :class="mode === 'potential' ? 'bg-white/20 text-white' : 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300'">
+                <v-chip size="x-small" label variant="tonal"
+                  :color="mode === 'potential' ? undefined : 'cyan-darken-1'">
                   NEW
                 </v-chip>
               </div>
+             </v-card-text>
             </v-card>
 
             <!-- 得意曲 ボタン（緑、全幅）。伸びしろの対になる新機能 -->
             <v-card
               tag="button"
               @click="mode = mode === 'strength' ? null : 'strength'"
-              class="col-span-2 flex flex-col items-start p-4 rounded-md border-2 transition-all text-left active:scale-95"
-              :class="mode === 'strength'
-                ? 'bg-emerald-600 border-emerald-600 text-white'
-                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'"
+              class="col-span-2 text-left"
+              :variant="mode === 'strength' ? 'flat' : 'elevated'"
+              :color="mode === 'strength' ? 'green' : undefined"
             >
+             <v-card-text class="flex flex-col items-start">
               <div class="flex items-center gap-2 w-full">
                 <span class="text-2xl">💪</span>
                 <div class="flex-1">
                   <div class="text-sm font-bold">{{ t('arcade.strengthBtn') }}</div>
                   <div class="text-[10px] font-bold opacity-70 mt-0.5">{{ t('arcade.strengthBtnDesc') }}</div>
                 </div>
-                <v-chip size="x-small" label variant="flat" class="text-[9px] font-bold px-1.5"
-                  :class="mode === 'strength' ? 'bg-white/20 text-white' : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'">
+                <v-chip size="x-small" label variant="tonal"
+                  :color="mode === 'strength' ? undefined : 'green'">
                   NEW
                 </v-chip>
               </div>
+             </v-card-text>
             </v-card>
 
           </div>
         </div>
 
         <!-- 伸びしろ／得意曲モード（管理者限定）: 検証用ユーザー切替ドロップダウン -->
-        <v-card v-if="(mode === 'potential' || mode === 'strength') && isAdmin" class="bg-white dark:bg-slate-800 rounded-md p-4 space-y-2">
+        <v-card v-if="(mode === 'potential' || mode === 'strength') && isAdmin">
+         <v-card-text class="space-y-2">
           <div class="flex items-baseline justify-between gap-2">
             <p class="text-xs font-bold text-cyan-600 dark:text-cyan-400">{{ t('arcade.adminViewLabel') }}</p>
             <span class="text-[10px] font-bold text-slate-400">{{ t('arcade.adminOnly') }}</span>
@@ -818,41 +825,38 @@ const selectedFriend = computed(() =>
             :placeholder="t('arcade.viewSelf')"
             persistent-placeholder
             color="cyan-darken-1"
-            class="w-full text-sm font-bold"
+            hide-details
+            class="w-full"
           />
           <p v-if="isLoadingViewedScores" class="text-[10px] text-slate-400">{{ t('arcade.loadingViewedScores') }}</p>
           <p v-else-if="potentialViewUserId != null" class="text-[10px] text-slate-500 dark:text-slate-400">
             {{ t('arcade.adminViewHint') }}
           </p>
+         </v-card-text>
         </v-card>
 
         <!-- 伸びしろ／得意曲モード: 並び替え基準（スコア / レート）の切替 -->
-        <v-card v-if="mode === 'potential' || mode === 'strength'" class="bg-white dark:bg-slate-800 rounded-md p-4">
+        <v-card v-if="mode === 'potential' || mode === 'strength'">
+         <v-card-text>
           <div class="flex items-center justify-between gap-3">
             <span class="text-xs font-bold text-slate-500">{{ t('arcade.potentialSortLabel') }}</span>
-            <v-btn-toggle v-model="potentialSortMode" mandatory class="rounded-lg text-xs font-bold">
+            <v-btn-toggle v-model="potentialSortMode" mandatory variant="outlined" divided density="compact" :color="mode === 'strength' ? 'green' : 'cyan-darken-1'">
               <v-btn
                 value="score"
                 size="small"
-                class="px-3 text-xs"
-                :class="potentialSortMode === 'score'
-                  ? (mode === 'strength' ? 'bg-emerald-600 text-white' : 'bg-cyan-600 text-white')
-                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
               >{{ t('arcade.potentialSortScore') }}</v-btn>
               <v-btn
                 value="rate"
                 size="small"
-                class="px-3 text-xs"
-                :class="potentialSortMode === 'rate'
-                  ? (mode === 'strength' ? 'bg-emerald-600 text-white' : 'bg-cyan-600 text-white')
-                  : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
               >{{ t('arcade.potentialSortRate') }}</v-btn>
             </v-btn-toggle>
           </div>
+         </v-card-text>
         </v-card>
 
         <!-- Rival モード: フレンド選択＋並び替え切替 -->
-        <v-card v-if="mode === 'rival'" class="bg-white dark:bg-slate-800 rounded-md p-4 space-y-3">
+        <v-card v-if="mode === 'rival'">
+         <v-card-text class="space-y-3">
           <p class="text-xs font-bold text-slate-500">{{ t('arcade.selectRival') }}</p>
           <v-select
             v-model="selectedFriendId"
@@ -863,37 +867,36 @@ const selectedFriend = computed(() =>
             :placeholder="t('arcade.selectFriendPlaceholder')"
             persistent-placeholder
             color="red-darken-1"
-            class="w-full text-sm font-bold"
+            hide-details
+            class="w-full"
           />
 
           <!-- 並び替えトグル: 接戦順 / 差が大きい順 -->
           <div v-if="selectedFriendId" class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-500">{{ t('arcade.sort') }}</span>
-            <v-btn-toggle v-model="rivalSortClosest" mandatory class="rounded-lg text-xs font-bold">
+            <v-btn-toggle v-model="rivalSortClosest" mandatory variant="outlined" divided density="compact" color="red">
               <v-btn
                 :value="true"
                 size="small"
-                class="px-3 text-xs"
-                :class="rivalSortClosest ? 'bg-rose-600 text-white' : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
               >{{ t('arcade.sortClosest') }}</v-btn>
               <v-btn
                 :value="false"
                 size="small"
-                class="px-3 text-xs"
-                :class="!rivalSortClosest ? 'bg-rose-600 text-white' : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300'"
               >{{ t('arcade.sortWidest') }}</v-btn>
             </v-btn-toggle>
           </div>
 
           <!-- フレンドスコア取得中のインジケータ -->
           <div v-if="isFriendLoading" class="flex items-center gap-2 text-xs text-slate-500 font-bold">
-            <v-progress-circular size="16" width="2" color="red-lighten-1" />
+            <v-progress-circular indeterminate size="16" width="2" color="red-lighten-1" />
             {{ t('arcade.loadingScores') }}
           </div>
+         </v-card-text>
         </v-card>
 
         <!-- Border モード: 目標グレード選択（AA/AAA/MAX-） -->
-        <v-card v-if="mode === 'border'" class="bg-white dark:bg-slate-800 rounded-md p-4 space-y-3">
+        <v-card v-if="mode === 'border'">
+         <v-card-text class="space-y-3">
           <p class="text-xs font-bold text-slate-500">{{ t('arcade.borderTarget') }}</p>
           <v-select
             v-model="borderTarget"
@@ -903,12 +906,15 @@ const selectedFriend = computed(() =>
               { title: t('arcade.borderMaxMinusOption'), value: 'max-minus' },
             ]"
             color="amber-darken-2"
-            class="w-full text-sm font-bold"
+            hide-details
+            class="w-full"
           />
+         </v-card-text>
         </v-card>
 
         <!-- BEAT-PT モード: 単曲目標 Pt 入力（未入力なら次の閾値狙いに自動切替） -->
-        <v-card v-if="mode === 'beat-pt'" class="bg-white dark:bg-slate-800 rounded-md p-4 space-y-3">
+        <v-card v-if="mode === 'beat-pt'">
+         <v-card-text class="space-y-3">
           <p class="text-xs font-bold text-slate-500">{{ t('arcade.beatPtTargetLabel') }}</p>
           <v-text-field
             type="number"
@@ -917,15 +923,18 @@ const selectedFriend = computed(() =>
             step="any"
             :placeholder="t('arcade.beatPtTargetPlaceholder')"
             color="deep-purple-accent-2"
-            class="w-full text-sm font-bold"
+            hide-details
+            class="w-full"
           />
           <p v-if="beatPtAchievedCount" class="text-xs font-bold text-slate-500">
             {{ t('arcade.achievedCount', { achieved: beatPtAchievedCount.achieved, total: beatPtAchievedCount.total }) }}
           </p>
+         </v-card-text>
         </v-card>
 
         <!-- RATE-PT モード: 単曲目標 Pt 入力 -->
-        <v-card v-if="mode === 'rate-pt'" class="bg-white dark:bg-slate-800 rounded-md p-4 space-y-3">
+        <v-card v-if="mode === 'rate-pt'">
+         <v-card-text class="space-y-3">
           <p class="text-xs font-bold text-slate-500">{{ t('arcade.ratePtTargetLabel') }}</p>
           <v-text-field
             type="number"
@@ -934,11 +943,13 @@ const selectedFriend = computed(() =>
             step="1"
             :placeholder="t('arcade.ratePtTargetPlaceholder')"
             color="indigo-accent-2"
-            class="w-full text-sm font-bold"
+            hide-details
+            class="w-full"
           />
           <p v-if="ratePtAchievedCount" class="text-xs font-bold text-slate-500">
             {{ t('arcade.achievedCount', { achieved: ratePtAchievedCount.achieved, total: ratePtAchievedCount.total }) }}
           </p>
+         </v-card-text>
         </v-card>
 
         <!-- 結果表示: ヘッダ＋空状態メッセージ＋カードリスト -->
@@ -949,7 +960,7 @@ const selectedFriend = computed(() =>
               <p class="font-bold text-slate-800 dark:text-white text-sm">{{ modeLabel }}</p>
               <p class="text-[10px] text-slate-400 font-bold mt-0.5">{{ modeSortNote }}</p>
             </div>
-            <v-chip label variant="flat" class="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2">
+            <v-chip label variant="tonal" size="small">
               {{ t('arcade.count', { n: suggestions.length }) }}
             </v-chip>
           </div>
@@ -967,7 +978,7 @@ const selectedFriend = computed(() =>
 
           <!-- 伸びしろ／得意曲モード: ローディング / エラー -->
           <div v-else-if="(mode === 'potential' || mode === 'strength') && (isPotentialLoading || isLoadingViewedScores)" class="text-center py-12">
-            <v-progress-circular
+            <v-progress-circular indeterminate
               size="40"
               width="4"
               class="mx-auto mb-3"
@@ -992,8 +1003,8 @@ const selectedFriend = computed(() =>
             <v-card
               v-for="(s, i) in suggestions"
               :key="s.key"
-              class="bg-white dark:bg-slate-800 rounded-md border-slate-100 dark:border-slate-700 p-3.5 flex items-start gap-3"
             >
+             <v-card-text class="flex items-start gap-3">
               <!-- 順位番号: ソート順に 1 から振る -->
               <div class="shrink-0 w-6 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500 pt-0.5">
                 {{ i + 1 }}
@@ -1006,13 +1017,13 @@ const selectedFriend = computed(() =>
 
                 <!-- バッジ列: 難易度・非公式ランク・DJ LEVEL -->
                 <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-                  <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="s.difficultyColor">
+                  <v-chip size="x-small" label variant="flat" :class="s.difficultyColor">
                     {{ s.difficultyName.slice(0, 3) }} {{ s.difficultyLevel }}
                   </v-chip>
-                  <v-chip v-if="s.informalRank" size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                  <v-chip v-if="s.informalRank" size="x-small" label variant="tonal">
                     ☆{{ s.informalRank.match(/(\d+\.\d+)/)?.[1] ?? s.informalRank }}
                   </v-chip>
-                  <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-slate-50 dark:bg-slate-700/50 text-slate-500">
+                  <v-chip size="x-small" label variant="outlined">
                     {{ s.djLevel }}
                   </v-chip>
                 </div>
@@ -1058,13 +1069,10 @@ const selectedFriend = computed(() =>
                   type="button"
                   variant="text"
                   size="x-small"
-                  height="auto"
                   :append-icon="mdiChevronRight"
                   @click="openDetails(s)"
-                  class="mt-0.5 px-0 min-w-0 text-[10px] font-bold underline decoration-dotted underline-offset-2"
-                  :class="mode === 'strength'
-                    ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'
-                    : 'text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300'"
+                  class="mt-0.5"
+                  :color="mode === 'strength' ? 'green' : 'cyan-darken-1'"
                   :aria-label="t('potentialDetails.openButtonAria')"
                 >
                   {{ s.subLabel }}
@@ -1076,20 +1084,19 @@ const selectedFriend = computed(() =>
               <div class="shrink-0 text-right">
                 <v-chip
                   label
-                  variant="flat"
-                  class="px-2.5 text-xs font-bold whitespace-nowrap"
-                  :class="{
-                    'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300': mode === 'rival',
-                    'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300': mode === 'border',
-                    'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300': mode === 'beat-pt',
-                    'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300': mode === 'rate-pt',
-                    'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300': mode === 'potential',
-                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300': mode === 'strength',
-                  }"
+                  variant="tonal"
+                  class="whitespace-nowrap"
+                  :color="mode === 'rival' ? 'red'
+                    : mode === 'border' ? 'amber-darken-1'
+                    : mode === 'beat-pt' ? 'deep-purple'
+                    : mode === 'rate-pt' ? 'indigo'
+                    : mode === 'potential' ? 'cyan-darken-1'
+                    : 'green'"
                 >
                   {{ s.gapLabel }}
                 </v-chip>
               </div>
+             </v-card-text>
             </v-card>
           </div>
         </template>

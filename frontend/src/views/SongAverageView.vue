@@ -446,7 +446,8 @@ onMounted(loadData);
 
 <template>
   <div class="w-full max-w-full space-y-6 animate-fade-in">
-    <v-card class="bg-white dark:bg-slate-800 p-6 sm:p-8 transition-colors">
+    <v-card>
+      <v-card-text>
 
       <!-- ページヘッダ: タイトルアイコン + 見出し + サブタイトル -->
       <div class="flex items-center gap-4 mb-6">
@@ -468,10 +469,12 @@ onMounted(loadData);
           v-model="searchQuery"
           type="text"
           :placeholder="t('songAvg.searchPlaceholder')"
-          class="w-64 flex-none text-sm"
+          density="compact"
+          hide-details
+          class="w-64 flex-none"
         />
-        <v-checkbox v-model="showLv11" label="☆11" class="flex-none text-sm font-bold text-slate-600 dark:text-slate-300 select-none" />
-        <v-checkbox v-model="showLv12" label="☆12" class="flex-none text-sm font-bold text-slate-600 dark:text-slate-300 select-none" />
+        <v-checkbox v-model="showLv11" label="☆11" density="compact" hide-details class="flex-none select-none" />
+        <v-checkbox v-model="showLv12" label="☆12" density="compact" hide-details class="flex-none select-none" />
 
         <!-- 勝敗比較フィルタ（ログイン時のみ表示。未ログインだと自分のベストが無いので意味が無い） -->
         <template v-if="user">
@@ -480,15 +483,16 @@ onMounted(loadData);
               v-model="filterTier"
               :items="[{ title: 'ティアを選択', value: '' }, ...activeTiers.map((tier) => ({ title: tier, value: tier }))]"
               aria-label="ティアを選択"
-              class="w-44 flex-none text-sm"
+              density="compact"
+              hide-details
+              class="w-44 flex-none"
             />
-            <v-checkbox v-model="filterWinning" label="勝っている" color="success" class="flex-none text-sm font-bold text-emerald-600 dark:text-emerald-400 select-none" />
-            <v-checkbox v-model="filterLosing" label="負けている" color="error" class="flex-none text-sm font-bold text-red-500 dark:text-red-400 select-none" />
-            <v-btn color="primary" class="text-sm" @click="applyFilter">適用</v-btn>
+            <v-checkbox v-model="filterWinning" label="勝っている" color="success" density="compact" hide-details class="flex-none select-none" />
+            <v-checkbox v-model="filterLosing" label="負けている" color="error" density="compact" hide-details class="flex-none select-none" />
+            <v-btn color="primary" @click="applyFilter">適用</v-btn>
             <v-btn
               v-if="appliedFilterTier"
               variant="outlined"
-              class="text-sm text-slate-500 dark:text-slate-400"
               @click="filterTier = ''; filterWinning = false; filterLosing = false; applyFilter()"
             >クリア</v-btn>
           </div>
@@ -503,10 +507,10 @@ onMounted(loadData);
 
       <!-- ローディング / エラー 表示分岐 -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-        <v-progress-circular size="48" width="4" class="mb-4" />
+        <v-progress-circular indeterminate size="48" width="4" class="mb-4" />
         <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('songAvg.loading') }}</p>
       </div>
-      <v-alert v-else-if="error" type="error" class="p-6 text-center font-bold">
+      <v-alert v-else-if="error" type="error">
         {{ error }}
       </v-alert>
 
@@ -522,7 +526,6 @@ onMounted(loadData);
               variant="tonal"
               size="small"
               :prepend-icon="mdiArrowLeft"
-              class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm"
               @click="detailTier = null"
             >
               {{ t('common.back') || '戻る' }}
@@ -533,7 +536,7 @@ onMounted(loadData);
           </div>
         </div>
 
-        <v-table class="text-sm bg-transparent [&_table]:border-collapse" style="min-width: max-content">
+        <v-table density="compact" style="min-width: max-content">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700/50">
               <th
@@ -559,10 +562,10 @@ onMounted(loadData);
                   <v-btn
                     v-if="col.tier !== 'Legend' && col.tier !== 'Beginner'"
                     icon
-                    variant="outlined"
+                    variant="elevated"
                     size="x-small"
-                    density="comfortable"
-                    class="absolute top-0 right-0 w-5 h-5 rounded-full bg-white dark:bg-slate-700 opacity-0 group-hover/header:opacity-100 transition-opacity hover:text-indigo-500"
+                    density="compact"
+                    class="absolute top-0 right-0 opacity-0 group-hover/header:opacity-100"
                     title="1〜5ごとの平均スコアを見る"
                     aria-label="1〜5ごとの平均スコアを見る"
                     @click.stop="detailTier = col.tier"
@@ -594,11 +597,7 @@ onMounted(loadData);
                   <v-chip
                     label
                     size="x-small"
-                    variant="flat"
-                    class="text-[9px] font-bold px-1 py-0.5 h-auto rounded leading-none"
-                    :class="row.difficultyName === 'LEGGENDARIA'
-                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"
+                    :color="row.difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
                   >{{ row.difficultyName === 'LEGGENDARIA' ? 'L' : 'A' }}</v-chip>
                   <span
                     v-if="getRowRank(row) >= 0"
@@ -644,60 +643,12 @@ onMounted(loadData);
           </tbody>
         </v-table>
         <!-- ページネーション: 最初/前/ページ番号/次/最後 -->
-        <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-6">
-          <v-btn
-            variant="text"
-            size="small"
-            min-width="0"
-            class="px-2 text-xs text-slate-500 dark:text-slate-400"
-            :disabled="currentPage === 1"
-            @click="currentPage = 1"
-          >«</v-btn>
-          <v-btn
-            variant="text"
-            size="small"
-            min-width="0"
-            class="px-3 text-xs text-slate-500 dark:text-slate-400"
-            :disabled="currentPage === 1"
-            @click="currentPage--"
-          >‹</v-btn>
-
-          <template v-for="p in totalPages" :key="p">
-            <v-btn
-              v-if="p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2"
-              :variant="p === currentPage ? 'flat' : 'text'"
-              :color="p === currentPage ? 'primary' : undefined"
-              size="small"
-              min-width="0"
-              class="w-8 h-8 text-xs"
-              :class="p === currentPage ? '' : 'text-slate-500 dark:text-slate-400'"
-              @click="currentPage = p"
-            >{{ p }}</v-btn>
-            <span
-              v-else-if="p === currentPage - 3 || p === currentPage + 3"
-              class="text-slate-300 dark:text-slate-600 text-xs"
-            >…</span>
-          </template>
-
-          <v-btn
-            variant="text"
-            size="small"
-            min-width="0"
-            class="px-3 text-xs text-slate-500 dark:text-slate-400"
-            :disabled="currentPage === totalPages"
-            @click="currentPage++"
-          >›</v-btn>
-          <v-btn
-            variant="text"
-            size="small"
-            min-width="0"
-            class="px-2 text-xs text-slate-500 dark:text-slate-400"
-            :disabled="currentPage === totalPages"
-            @click="currentPage = totalPages"
-          >»</v-btn>
+        <div v-if="totalPages > 1" class="mt-6">
+          <v-pagination v-model="currentPage" :length="totalPages" :total-visible="7" density="comfortable" show-first-last-page />
         </div>
       </div>
 
+      </v-card-text>
     </v-card>
   </div>
 </template>

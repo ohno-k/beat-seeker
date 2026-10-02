@@ -18,7 +18,6 @@ import type { ScoreData } from '../types/ScoreData';
 import {
   CURRENT_VERSION,
   SUPPORTED_VERSIONS,
-  versionBadgeClass,
   versionChartColor,
   versionName,
 } from '../utils/iidxVersions';
@@ -198,29 +197,30 @@ onMounted(load);
 </script>
 
 <template>
-  <v-card class="p-4">
-    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('past.manager.title') }}</h3>
-    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">{{ t('past.manager.hint') }}</p>
+  <v-card>
+    <v-card-title>{{ t('past.manager.title') }}</v-card-title>
+    <v-card-subtitle class="whitespace-normal">{{ t('past.manager.hint') }}</v-card-subtitle>
 
-    <v-alert v-if="errorMsg" type="error" class="text-xs mb-2">{{ errorMsg }}</v-alert>
+    <v-card-text>
+    <v-alert v-if="errorMsg" type="error" density="compact" class="mb-2">{{ errorMsg }}</v-alert>
 
     <div v-if="isLoading" class="text-xs text-slate-500 dark:text-slate-400 py-4 flex items-center justify-center gap-2">
-      <v-progress-circular size="20" width="2" />
+      <v-progress-circular indeterminate size="20" width="2" />
       {{ t('common.loading') }}
     </div>
 
-    <v-table v-else class="text-left text-[11px] sm:text-sm bg-transparent">
+    <v-table v-else density="compact">
       <thead>
-        <tr class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
-          <th class="py-1.5 pl-0 pr-2 font-medium">{{ t('past.manager.colVersion') }}</th>
-          <th class="py-1.5 px-2 font-medium text-right">{{ t('past.manager.colCount') }}</th>
-          <th class="py-1.5 px-2 font-medium max-sm:hidden">{{ t('past.manager.colImported') }}</th>
-          <th class="py-1.5 pl-2 pr-0"></th>
+        <tr>
+          <th>{{ t('past.manager.colVersion') }}</th>
+          <th class="text-right">{{ t('past.manager.colCount') }}</th>
+          <th class="max-sm:hidden">{{ t('past.manager.colImported') }}</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="row.num">
-          <td class="py-2 pl-0 pr-2">
+          <td>
             <!-- 取り込み済みの作品ラベルは、その作品のスコア一覧ページへの導線を兼ねる -->
             <component
               :is="row.canOpen ? 'button' : 'div'"
@@ -231,10 +231,9 @@ onMounted(load);
             >
               <v-chip
                 label
-                variant="outlined"
+                variant="tonal"
                 size="x-small"
-                class="px-1.5 text-[10px] font-bold border"
-                :class="versionBadgeClass(row.num)"
+                :color="versionChartColor(row.num)"
               >{{ row.num }}</v-chip>
               <span
                 class="text-slate-800 dark:text-slate-100"
@@ -244,8 +243,7 @@ onMounted(load);
                 v-if="row.current"
                 label
                 size="x-small"
-                variant="flat"
-                class="px-1.5 text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                variant="tonal"
               >{{ t('past.manager.current') }}</v-chip>
               <!-- クリックできる行であることの手がかり（ホバーで青くなる） -->
               <svg
@@ -258,21 +256,20 @@ onMounted(load);
               </svg>
             </component>
           </td>
-          <td class="py-2 px-2 text-right tabular-nums text-slate-800 dark:text-slate-100">
+          <td class="text-right tabular-nums">
             <span v-if="row.chartCount !== null">{{ row.chartCount.toLocaleString() }}</span>
             <span v-else class="text-slate-400 dark:text-slate-500">{{ t('past.manager.notImported') }}</span>
           </td>
-          <td class="py-2 px-2 max-sm:hidden tabular-nums text-slate-600 dark:text-slate-300">
+          <td class="max-sm:hidden tabular-nums">
             <span v-if="row.current" class="text-slate-400 dark:text-slate-500">{{ t('past.manager.currentNote') }}</span>
             <span v-else>{{ formatDate(row.importedAt) || '—' }}</span>
           </td>
-          <td class="py-2 pl-2 pr-0 text-right">
+          <td class="text-right">
             <v-btn
               v-if="row.canDelete"
               variant="text"
               size="small"
               color="error"
-              class="text-xs"
               :disabled="deletingVersion === row.num"
               @click="handleDelete(row.num, row.name)"
             >
@@ -289,7 +286,7 @@ onMounted(load);
       <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{{ t('past.manager.pieHint') }}</p>
 
       <div v-if="isPieLoading" class="text-xs text-slate-500 dark:text-slate-400 py-6 flex items-center justify-center gap-2">
-        <v-progress-circular size="20" width="2" />
+        <v-progress-circular indeterminate size="20" width="2" />
         {{ t('common.loading') }}
       </div>
 
@@ -347,5 +344,6 @@ onMounted(load);
     </div>
 
     <p class="text-xs text-slate-500 dark:text-slate-400 mt-3">{{ t('past.notRanked') }}</p>
+    </v-card-text>
   </v-card>
 </template>

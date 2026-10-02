@@ -57,10 +57,10 @@ const fmtPts = (p: number | null | undefined) => {
 /** 総合 BEAT-PT から Beat-Tier ランク情報（名前・ティア）を得る。 */
 const beatTier = (pt: number | null | undefined) => getRankInfo(pt ?? 0);
 
-/** 立場バッジの短い記号とクラス（チャレンジ=挑 / ディフェンス=防）。normal は null。 */
+/** 立場バッジの短い記号と色（チャレンジ=挑 / ディフェンス=防）。normal は null。 */
 const roleBadge = (role: string | null | undefined) => {
-  if (role === 'challenge') return { label: t('league.roleChallenge'), cls: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' };
-  if (role === 'defense') return { label: t('league.roleDefense'), cls: 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300' };
+  if (role === 'challenge') return { label: t('league.roleChallenge'), color: 'orange' };
+  if (role === 'defense') return { label: t('league.roleDefense'), color: 'light-blue' };
   return null;
 };
 
@@ -83,15 +83,15 @@ const zoneClass = (row: LeagueStandingRow) => {
 </script>
 
 <template>
-  <v-table class="text-sm bg-transparent">
+  <v-table density="compact">
       <thead>
-        <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
-          <th class="py-2 pr-2 w-10">{{ t('league.rank') }}</th>
-          <th class="py-2 pr-2">{{ t('league.player') }}</th>
-          <th class="py-2 pr-2 text-center">{{ t('league.validSongs') }}</th>
-          <th class="py-2 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
-          <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
-          <th class="py-2 pr-1 text-center whitespace-nowrap" v-for="s in songs" :key="s.id"
+        <tr>
+          <th class="w-10">{{ t('league.rank') }}</th>
+          <th>{{ t('league.player') }}</th>
+          <th class="text-center">{{ t('league.validSongs') }}</th>
+          <th class="text-right">{{ t('league.leaguePoints') }}</th>
+          <th class="text-center">{{ t('league.points') }}</th>
+          <th class="text-center whitespace-nowrap" v-for="s in songs" :key="s.id"
               :title="s.disabled ? `${s.slot}. ${s.title}（${t('league.songDisabled')}）` : `${s.slot}. ${s.title}`">
             <!-- 列見出しは課題曲の順番（1曲目/2曲目/3曲目）。中身は EX と着順ポイント。 -->
             <span :class="s.disabled ? 'line-through' : ''">{{ t('league.songNth', { n: s.slot }) }}</span>
@@ -103,27 +103,26 @@ const zoneClass = (row: LeagueStandingRow) => {
         <tr
           v-for="row in standings"
           :key="row.userId"
-          class="border-b border-slate-100 dark:border-slate-700/50"
           :class="[zoneClass(row), row.userId === myUserId ? 'font-semibold' : '']"
         >
-          <td class="py-2 pr-2">{{ row.rank }}</td>
-          <td class="py-2 pr-2 break-words">
+          <td>{{ row.rank }}</td>
+          <td class="break-words">
             <span class="inline-flex items-center gap-1.5 align-middle">
               <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(row.previousBeatPt, 'beat')" />
               <span>{{ row.displayName }}</span>
               <v-chip v-if="roleBadge(row.role)"
                     size="x-small"
                     label
-                    variant="flat"
-                    class="gap-0.5 px-1.5 text-[10px] font-bold leading-none"
-                    :class="roleBadge(row.role)!.cls"
+                    variant="tonal"
+                    class="gap-0.5"
+                    :color="roleBadge(row.role)!.color"
                     :title="roleBadge(row.role)!.label + (row.homeTier != null ? ' / ' + divisionName(row.homeTier) : '')">{{ roleBadge(row.role)!.label }}<span v-if="row.homeTier != null" class="font-semibold opacity-80">{{ divisionShort(row.homeTier) }}</span></v-chip>
               <span v-if="row.userId === myUserId" class="text-[10px] text-indigo-500 dark:text-indigo-400">YOU</span>
             </span>
           </td>
-          <td class="py-2 pr-2 text-center">{{ row.validSongs }}/{{ scoredSongCount }}</td>
-          <td class="py-2 pr-2 text-right tabular-nums">{{ fmtPts(row.resultValue) }}</td>
-          <td class="py-2 pr-2 text-center tabular-nums whitespace-nowrap">
+          <td class="text-center">{{ row.validSongs }}/{{ scoredSongCount }}</td>
+          <td class="text-right tabular-nums">{{ fmtPts(row.resultValue) }}</td>
+          <td class="text-center tabular-nums whitespace-nowrap">
             <template v-if="row.points != null">
               {{ fmtPt(row.points) }}
               <span class="text-xs text-slate-400 dark:text-slate-500">({{ fmtPt(row.pointDelta) }})</span>
@@ -132,7 +131,7 @@ const zoneClass = (row: LeagueStandingRow) => {
             <template v-else>{{ fmtPt(row.pointDelta) }}</template>
           </td>
           <!-- 曲別セル: 有効になったリザルトの EX ＋ 着順とその曲の着順ポイント。 -->
-          <td v-for="ps in row.perSong" :key="ps.slot" class="py-2 px-1 text-center text-xs tabular-nums whitespace-nowrap">
+          <td v-for="ps in row.perSong" :key="ps.slot" class="text-center text-xs tabular-nums whitespace-nowrap">
             <!-- 無効化された課題曲は集計対象外なので、記録も着順も出さない。 -->
             <template v-if="ps.disabled">
               <div class="text-slate-300 dark:text-slate-600">–</div>

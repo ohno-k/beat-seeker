@@ -4,49 +4,49 @@
     max-width="768"
     @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
   >
-    <v-card class="bg-white dark:bg-slate-900 w-full flex flex-col overflow-hidden max-h-[85vh] shadow-xl border-slate-200 dark:border-slate-800">
+    <v-card class="w-full flex flex-col overflow-hidden max-h-[85vh]">
 
-        <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 shrink-0">
-          <!-- タイトル行: タイトル + お問い合わせ + 閉じる -->
-          <div class="flex items-center justify-between gap-2">
-            <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <v-icon :icon="mdiAccountGroupOutline" size="24" class="text-blue-600 dark:text-blue-400" />
-              プレイヤー一覧 (管理者用)
-            </h2>
-            <div class="flex items-center gap-2">
-              <!-- お問い合わせ (チャットへ移動): わかりやすく目立たせる -->
-              <v-badge
-                :model-value="supportUnread > 0"
-                :content="supportUnread > 99 ? '99+' : supportUnread"
-                color="error"
+        <!-- タイトル行: タイトル + お問い合わせ + 閉じる -->
+        <v-card-title class="flex items-center justify-between gap-2 shrink-0">
+          <span class="flex items-center gap-2">
+            <v-icon :icon="mdiAccountGroupOutline" color="primary" />
+            プレイヤー一覧 (管理者用)
+          </span>
+          <div class="flex items-center gap-2">
+            <!-- お問い合わせ (チャットへ移動): わかりやすく目立たせる -->
+            <v-badge
+              :model-value="supportUnread > 0"
+              :content="supportUnread > 99 ? '99+' : supportUnread"
+              color="error"
+            >
+              <v-btn
+                color="primary"
+                @click="showSupportModal = true"
               >
-                <v-btn
-                  color="primary"
-                  class="text-sm"
-                  @click="showSupportModal = true"
-                >
-                  <v-icon :icon="mdiMessageProcessingOutline" size="16" />
-                  <span class="hidden sm:inline ml-1.5">お問い合わせ</span>
-                </v-btn>
-              </v-badge>
-
-              <v-btn icon variant="text" size="small" class="text-slate-400 -mr-1" aria-label="close" @click="$emit('close')">
-                <v-icon :icon="mdiClose" />
+                <v-icon :icon="mdiMessageProcessingOutline" />
+                <span class="hidden sm:inline ml-1.5">お問い合わせ</span>
               </v-btn>
-            </div>
-          </div>
+            </v-badge>
 
-          <!-- 管理ツール: 6 ボタンを均一サイズ + アイコン付きで折り返し配置 -->
-          <v-card variant="flat" class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-2.5">
-            <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-0.5">データ管理ツール</p>
-            <div class="flex flex-wrap gap-2">
+            <v-btn icon variant="text" size="small" aria-label="close" @click="$emit('close')">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
+          </div>
+        </v-card-title>
+
+        <!-- 管理ツール: 6 ボタンを均一サイズ + アイコン付きで折り返し配置 -->
+        <div class="shrink-0 px-4 pb-4">
+          <v-card variant="tonal">
+            <v-card-subtitle class="pt-2">データ管理ツール</v-card-subtitle>
+            <v-card-text class="flex flex-wrap gap-2 pt-2">
               <!-- データ管理 -->
               <div>
                 <v-btn
-                  class="admin-tool-btn bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300"
+                  color="teal"
+                  variant="tonal"
                   @click="showGameDataModal = true"
                 >
-                  <span aria-hidden="true">🗂️</span>
+                  <span aria-hidden="true" class="mr-1.5">🗂️</span>
                   データ管理
                 </v-btn>
                 <v-tooltip activator="parent" location="bottom" max-width="220">楽曲・難易度表のドラフト追加や公開を行います</v-tooltip>
@@ -55,12 +55,13 @@
               <!-- 全ユーザー再集計 -->
               <div>
                 <v-btn
+                  color="indigo"
+                  variant="tonal"
                   :disabled="isRecalculating"
-                  class="admin-tool-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300"
                   @click="handleRecalculateAll"
                 >
-                  <v-progress-circular v-if="isRecalculating" size="16" width="2" color="indigo" />
-                  <span v-else aria-hidden="true">🔄</span>
+                  <v-progress-circular indeterminate v-if="isRecalculating" size="16" width="2" class="mr-1.5" />
+                  <span v-else aria-hidden="true" class="mr-1.5">🔄</span>
                   {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
                 </v-btn>
                 <v-tooltip activator="parent" location="bottom" max-width="220">全ユーザーのBEAT-PTとRate-PTを現在の難易度表で再計算します。難易度表更新後に実行してください</v-tooltip>
@@ -69,12 +70,13 @@
               <!-- 曲別ランクキャッシュ再構築 (AVERAGE-RANKING 用) -->
               <div>
                 <v-btn
+                  color="purple"
+                  variant="tonal"
                   :disabled="isRecalculatingSongRanks"
-                  class="admin-tool-btn bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800/80 dark:text-purple-300"
                   @click="handleRecalculateSongRanks"
                 >
-                  <v-progress-circular v-if="isRecalculatingSongRanks" size="16" width="2" color="purple" />
-                  <span v-else aria-hidden="true">📊</span>
+                  <v-progress-circular indeterminate v-if="isRecalculatingSongRanks" size="16" width="2" class="mr-1.5" />
+                  <span v-else aria-hidden="true" class="mr-1.5">📊</span>
                   {{ isRecalculatingSongRanks ? '再構築中...' : '曲別ランク再構築' }}
                 </v-btn>
                 <v-tooltip activator="parent" location="bottom" max-width="220">user_song_ranks キャッシュ（曲別の全ユーザー順位）を再構築します。AVERAGE ランキングが空になっている場合に実行してください</v-tooltip>
@@ -84,12 +86,13 @@
               <div>
                 <input ref="profileFileInput" type="file" accept=".json" class="hidden" @change="onProfileFileSelected" />
                 <v-btn
+                  color="cyan"
+                  variant="tonal"
                   :disabled="isImportingProfiles"
-                  class="admin-tool-btn bg-cyan-100 hover:bg-cyan-200 text-cyan-700 dark:bg-cyan-900/50 dark:hover:bg-cyan-800/80 dark:text-cyan-300"
                   @click="handleImportChartProfiles"
                 >
-                  <v-progress-circular v-if="isImportingProfiles" size="16" width="2" color="cyan" />
-                  <span v-else aria-hidden="true">📁</span>
+                  <v-progress-circular indeterminate v-if="isImportingProfiles" size="16" width="2" class="mr-1.5" />
+                  <span v-else aria-hidden="true" class="mr-1.5">📁</span>
                   {{ isImportingProfiles ? 'インポート中...' : '譜面プロファイルDB投入' }}
                 </v-btn>
                 <v-tooltip activator="parent" location="bottom" max-width="220">JSONファイルを選択して譜面プロファイルをDBに登録します。export_profiles.pyで生成したファイルを使用してください</v-tooltip>
@@ -98,24 +101,26 @@
               <!-- Push通知リセット -->
               <div>
                 <v-btn
+                  color="pink"
+                  variant="tonal"
                   :disabled="isClearingPush"
-                  class="admin-tool-btn bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300"
                   @click="handleClearPushAll"
                 >
-                  <v-progress-circular v-if="isClearingPush" size="16" width="2" color="pink" />
-                  <span v-else aria-hidden="true">🔔</span>
+                  <v-progress-circular indeterminate v-if="isClearingPush" size="16" width="2" class="mr-1.5" />
+                  <span v-else aria-hidden="true" class="mr-1.5">🔔</span>
                   {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
                 </v-btn>
                 <v-tooltip activator="parent" location="bottom" max-width="220">全ユーザーのプッシュ通知設定を削除します。VAPIDキーを変更した際に実行してください</v-tooltip>
               </div>
-            </div>
+            </v-card-text>
           </v-card>
         </div>
+        <v-divider />
 
-        <div class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900/50">
+        <v-card-text class="flex-1 overflow-y-auto">
           <div v-if="loading" class="flex flex-col items-center justify-center p-12">
-            <v-progress-circular size="32" width="4" class="mb-4" />
-            <p class="text-slate-500 font-medium tracking-wide">ユーザー一覧を取得中...</p>
+            <v-progress-circular indeterminate size="32" width="4" class="mb-4" />
+            <p class="text-slate-500">ユーザー一覧を取得中...</p>
           </div>
           <v-alert v-else-if="error" type="error" class="mb-4">
             {{ error }}
@@ -132,25 +137,25 @@
             <v-card
               v-for="u in users"
               :key="u.id"
-              class="p-4 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group"
+              variant="outlined"
               @click="selectUser(u)"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold shrink-0">
-                  {{ u.displayName ? u.displayName.charAt(0).toUpperCase() : 'U' }}
+              <v-card-item>
+                <template #prepend>
+                  <v-avatar color="indigo">
+                    {{ u.displayName ? u.displayName.charAt(0).toUpperCase() : 'U' }}
+                  </v-avatar>
+                </template>
+                <v-card-title>{{ u.displayName || '名無し' }}</v-card-title>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ u.iidxId }}</span>
+                  <v-chip v-if="u.danRank" label size="x-small" color="amber-darken-3">{{ u.danRank }}</v-chip>
+                  <v-chip v-if="u.arenaRank" label size="x-small" color="blue">{{ u.arenaRank }}</v-chip>
                 </div>
-                <div class="flex flex-col overflow-hidden">
-                  <span class="font-bold text-slate-800 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ u.displayName || '名無し' }}</span>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ u.iidxId }}</span>
-                    <v-chip v-if="u.danRank" label size="x-small" variant="flat" class="px-1.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold">{{ u.danRank }}</v-chip>
-                    <v-chip v-if="u.arenaRank" label size="x-small" variant="flat" class="px-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold">{{ u.arenaRank }}</v-chip>
-                  </div>
-                </div>
-              </div>
+              </v-card-item>
             </v-card>
           </div>
-        </div>
+        </v-card-text>
 
     </v-card>
   </v-dialog>
@@ -435,22 +440,5 @@ const handleClearPushAll = async () => {
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
-}
-
-/* 管理ツールボタン: 全ボタン共通の均一サイズ・アイコン付きレイアウト */
-.admin-tool-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.2;
-  transition: background-color 0.15s ease;
-}
-.admin-tool-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 </style>

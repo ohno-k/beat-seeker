@@ -653,14 +653,15 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 
 <template>
   <div class="flex flex-col gap-4">
-  <div ref="playerCardRef" class="player-card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+  <v-card>
+  <div ref="playerCardRef" class="player-card p-4">
     <div class="player-head">
       <div class="text-xs font-medium text-slate-400 dark:text-slate-500">譜面再生</div>
       <v-btn v-if="!opened"
         type="button"
         color="primary"
         size="small"
-        class="play-open text-xs"
+        class="play-open"
         :prepend-icon="mdiPlay"
         @click="open">
         譜面を再生する
@@ -669,10 +670,10 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 
     <template v-if="opened">
       <div v-if="loading" class="mt-3 flex items-center justify-center py-10 text-xs text-slate-400 dark:text-slate-500">
-        <v-progress-circular size="20" width="2" class="mr-2" />
+        <v-progress-circular indeterminate size="20" width="2" class="mr-2" />
         譜面データを読み込み中…
       </div>
-      <v-alert v-else-if="error" type="error" class="mt-3 text-xs">{{ error }}</v-alert>
+      <v-alert v-else-if="error" type="error" density="compact" class="mt-3">{{ error }}</v-alert>
 
       <div v-show="timeline && !loading" class="mt-3">
         <div v-if="hud" class="player-hud text-xs tabular-nums text-slate-500 dark:text-slate-400">
@@ -696,17 +697,17 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
         <!-- 再生操作 -->
         <div class="player-controls mt-3">
           <div class="player-buttons">
-            <v-btn type="button" icon variant="tonal" size="small" class="ctrl-btn" title="先頭へ" aria-label="先頭へ" @click="seek(LEAD_IN)">
+            <v-btn type="button" icon variant="tonal" size="small" title="先頭へ" aria-label="先頭へ" @click="seek(LEAD_IN)">
               <v-icon :icon="mdiSkipPrevious" />
             </v-btn>
-            <v-btn type="button" icon variant="tonal" size="small" class="ctrl-btn" title="前の小節 (←)" aria-label="前の小節" @click="stepMeasure(-1)">
+            <v-btn type="button" icon variant="tonal" size="small" title="前の小節 (←)" aria-label="前の小節" @click="stepMeasure(-1)">
               <v-icon :icon="mdiRewind" />
             </v-btn>
-            <v-btn type="button" icon color="primary" class="ctrl-btn ctrl-main" :title="playing ? '一時停止 (Space)' : '再生 (Space)'"
+            <v-btn type="button" icon color="primary" :title="playing ? '一時停止 (Space)' : '再生 (Space)'"
               :aria-label="playing ? '一時停止' : '再生'" @click="togglePlay">
               <v-icon :icon="playing ? mdiPause : mdiPlay" />
             </v-btn>
-            <v-btn type="button" icon variant="tonal" size="small" class="ctrl-btn" title="次の小節 (→)" aria-label="次の小節" @click="stepMeasure(1)">
+            <v-btn type="button" icon variant="tonal" size="small" title="次の小節 (→)" aria-label="次の小節" @click="stepMeasure(1)">
               <v-icon :icon="mdiFastForward" />
             </v-btn>
             <span class="ml-auto text-xs tabular-nums text-slate-500 dark:text-slate-400">
@@ -715,6 +716,8 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
           </div>
           <v-slider
             class="player-seek mt-2 w-full"
+            color="primary"
+            hide-details
             :min="LEAD_IN" :max="totalTime" :step="0.01"
             :model-value="uiTime"
             aria-label="再生位置"
@@ -725,12 +728,12 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
         <div class="player-settings mt-3 text-xs text-slate-600 dark:text-slate-300">
           <div class="setting setting-slider setting-wide">
             <span class="setting-label">表示時間</span>
-            <v-slider v-model="settings.visibleSec" :min="0.4" :max="3" :step="0.05" aria-label="表示時間" class="setting-range" />
+            <v-slider v-model="settings.visibleSec" :min="0.4" :max="3" :step="0.05" aria-label="表示時間" color="primary" hide-details class="setting-range" />
             <span class="slider-value tabular-nums whitespace-nowrap">{{ settings.visibleSec.toFixed(2) }}秒<span class="text-slate-400 dark:text-slate-500">（緑数字 約{{ greenNumber }}）</span></span>
           </div>
           <div class="setting setting-slider setting-wide">
             <span class="setting-label">ノーツの太さ</span>
-            <v-slider v-model="settings.noteSize" :min="3" :max="16" :step="1" aria-label="ノーツの太さ" class="setting-range" />
+            <v-slider v-model="settings.noteSize" :min="3" :max="16" :step="1" aria-label="ノーツの太さ" color="primary" hide-details class="setting-range" />
             <span class="slider-value tabular-nums whitespace-nowrap">{{ settings.noteSize }}px</span>
           </div>
           <div class="setting">
@@ -738,25 +741,29 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
             <v-select v-model="settings.rate"
               :items="RATES.map((r) => ({ title: `×${r}`, value: r }))"
               aria-label="再生速度"
+              density="compact"
+              hide-details
               class="w-28 flex-none" />
           </div>
           <div class="setting">
             <span class="setting-label">スクロール</span>
-            <v-btn-toggle v-model="settings.mode" mandatory>
-              <v-btn type="button" value="beat" size="small" class="text-xs">ソフラン再現</v-btn>
-              <v-btn type="button" value="time" size="small" class="text-xs">一定速度</v-btn>
+            <v-btn-toggle v-model="settings.mode" mandatory color="primary" variant="outlined" divided density="compact">
+              <v-btn type="button" value="beat" size="small">ソフラン再現</v-btn>
+              <v-btn type="button" value="time" size="small">一定速度</v-btn>
             </v-btn-toggle>
           </div>
           <div class="setting setting-wide setting-option">
             <span class="setting-label">譜面</span>
             <div class="option-body">
-              <v-btn-toggle :model-value="settings.option" mandatory class="option-toggle">
-                <v-btn v-for="o in OPTIONS" :key="o.value" :value="o.value" type="button" size="small" class="text-xs" :title="o.title"
+              <v-btn-toggle :model-value="settings.option" mandatory color="primary" variant="outlined" divided density="compact" class="option-toggle">
+                <v-btn v-for="o in OPTIONS" :key="o.value" :value="o.value" type="button" size="small" :title="o.title"
                   @click="setOption(o.value)">{{ o.label }}</v-btn>
               </v-btn-toggle>
               <div v-if="settings.option !== 'off'" class="option-detail">
                 <template v-if="settings.option === 'random'">
                   <v-text-field :model-value="patternInput" type="text" inputmode="numeric" maxlength="7" aria-label="鍵盤の並び"
+                    density="compact"
+                    hide-details
                     class="pattern-input flex-none tabular-nums"
                     :error="patternInvalid"
                     @input="onPatternInput" />
@@ -764,16 +771,16 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                 </template>
                 <PatternChips v-else-if="shownPattern" :pattern="shownPattern" />
                 <span v-else class="text-slate-400 dark:text-slate-500">ノーツごとにランダム</span>
-                <v-btn v-if="settings.option !== 'mirror'" type="button" variant="outlined" color="primary" size="small" class="text-xs" @click="reroll">引き直す</v-btn>
+                <v-btn v-if="settings.option !== 'mirror'" type="button" variant="outlined" color="primary" size="small" @click="reroll">引き直す</v-btn>
                 <span v-if="patternInvalid" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
               </div>
             </div>
           </div>
           <div class="setting">
             <span class="setting-label">ノーツの色</span>
-            <v-btn-toggle v-model="settings.noteColor" mandatory>
-              <v-btn type="button" value="lane" size="small" class="text-xs">レーン</v-btn>
-              <v-btn type="button" value="key" size="small" class="text-xs" title="元の白鍵を白、元の黒鍵を青で塗る">元の鍵盤</v-btn>
+            <v-btn-toggle v-model="settings.noteColor" mandatory color="primary" variant="outlined" divided density="compact">
+              <v-btn type="button" value="lane" size="small">レーン</v-btn>
+              <v-btn type="button" value="key" size="small" title="元の白鍵を白、元の黒鍵を青で塗る">元の鍵盤</v-btn>
             </v-btn-toggle>
           </div>
           <div class="setting setting-wide setting-loop">
@@ -783,34 +790,34 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                 <span class="loop-tag">A</span>
                 <v-select v-model="loopA" aria-label="区間の開始小節"
                   :items="measureOptions.map((m) => ({ title: `小節 ${m.label}`, value: m.index }))"
-                  class="loop-select flex-none" />
-                <v-btn type="button" variant="outlined" color="primary" size="small" min-width="0" class="text-xs px-2" title="今の小節を A にする" @click="setLoopPoint('a')">今</v-btn>
+                  density="compact" hide-details class="loop-select flex-none" />
+                <v-btn type="button" variant="outlined" color="primary" size="small" min-width="0" title="今の小節を A にする" @click="setLoopPoint('a')">今</v-btn>
               </div>
               <div class="loop-point">
                 <span class="loop-tag">B</span>
                 <v-select v-model="loopB" aria-label="区間の終了小節"
                   :items="measureOptions.map((m) => ({ title: `小節 ${m.label}`, value: m.index, props: { disabled: m.index < loopA } }))"
-                  class="loop-select flex-none" />
-                <v-btn type="button" variant="outlined" color="primary" size="small" min-width="0" class="text-xs px-2" title="今の小節を B にする" @click="setLoopPoint('b')">今</v-btn>
+                  density="compact" hide-details class="loop-select flex-none" />
+                <v-btn type="button" variant="outlined" color="primary" size="small" min-width="0" title="今の小節を B にする" @click="setLoopPoint('b')">今</v-btn>
               </div>
-              <v-btn-toggle :model-value="loopOn ? 'on' : 'off'" mandatory>
-                <v-btn type="button" value="on" size="small" class="text-xs" @click="setLoopOn(true)">ON</v-btn>
-                <v-btn type="button" value="off" size="small" class="text-xs" @click="setLoopOn(false)">OFF</v-btn>
+              <v-btn-toggle :model-value="loopOn ? 'on' : 'off'" mandatory color="primary" variant="outlined" divided density="compact">
+                <v-btn type="button" value="on" size="small" @click="setLoopOn(true)">ON</v-btn>
+                <v-btn type="button" value="off" size="small" @click="setLoopOn(false)">OFF</v-btn>
               </v-btn-toggle>
             </div>
           </div>
           <div class="setting">
             <span class="setting-label">サイド</span>
-            <v-btn-toggle v-model="settings.side" mandatory>
-              <v-btn type="button" :value="1" size="small" class="text-xs">1P</v-btn>
-              <v-btn type="button" :value="2" size="small" class="text-xs">2P</v-btn>
+            <v-btn-toggle v-model="settings.side" mandatory color="primary" variant="outlined" divided density="compact">
+              <v-btn type="button" :value="1" size="small">1P</v-btn>
+              <v-btn type="button" :value="2" size="small">2P</v-btn>
             </v-btn-toggle>
           </div>
           <div class="setting">
             <span class="setting-label">打鍵音</span>
-            <v-btn-toggle :model-value="settings.sound ? 'on' : 'off'" mandatory>
-              <v-btn type="button" value="on" size="small" class="text-xs" @click="settings.sound = true">ON</v-btn>
-              <v-btn type="button" value="off" size="small" class="text-xs" @click="settings.sound = false">OFF</v-btn>
+            <v-btn-toggle :model-value="settings.sound ? 'on' : 'off'" mandatory color="primary" variant="outlined" divided density="compact">
+              <v-btn type="button" value="on" size="small" @click="settings.sound = true">ON</v-btn>
+              <v-btn type="button" value="off" size="small" @click="settings.sound = false">OFF</v-btn>
             </v-btn-toggle>
           </div>
         </div>
@@ -821,17 +828,20 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
       </div>
     </template>
   </div>
+  </v-card>
 
   <!-- RANDOM の判別・配置評価（譜面再生とは別のカード。データは表示時に読み込み、「この並びで再生」で譜面再生を開いて再生する） -->
-  <v-card class="bg-white dark:bg-slate-800 p-4">
+  <v-card>
+    <v-card-text>
     <div class="text-xs font-medium text-slate-400 dark:text-slate-500">RANDOM</div>
     <div v-if="loading" class="mt-3 flex items-center justify-center py-6 text-xs text-slate-400 dark:text-slate-500">
-      <v-progress-circular size="20" width="2" class="mr-2" />
+      <v-progress-circular indeterminate size="20" width="2" class="mr-2" />
       譜面データを読み込み中…
     </div>
-    <v-alert v-else-if="error" type="error" class="mt-3 text-xs">{{ error }}</v-alert>
+    <v-alert v-else-if="error" type="error" density="compact" class="mt-3">{{ error }}</v-alert>
     <RandomPanel v-if="timeline && !loading" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
       @apply="applyAndPlay" />
+    </v-card-text>
   </v-card>
   </div>
 </template>
@@ -866,9 +876,6 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   align-items: center;
   gap: 0.5rem;
 }
-/* 再生操作のボタン（v-btn icon）。大きさは従来の 2.5rem / 3rem に合わせる */
-.ctrl-btn { width: 2.5rem; height: 2.5rem; border-radius: 9999px; }
-.ctrl-main { width: 3rem; height: 3rem; }
 
 .player-settings {
   display: grid;
@@ -917,9 +924,9 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   align-items: center;
   gap: 0.5rem;
 }
-.pattern-input { width: 6.5rem; }
+.pattern-input { width: 7.5rem; }
 .pattern-input :deep(input) { letter-spacing: 0.12em; font-weight: 700; }
-.loop-select { width: 7.5rem; }
+.loop-select { width: 8.5rem; }
 
 .loop-body {
   display: flex;

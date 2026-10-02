@@ -242,24 +242,24 @@ const badgeLabel = (e: TimelineEntry): string => {
   return r === 'OVERTAKEN_BY_OTHER' ? 'BEAT-PT で抜かれた' : 'BEAT-PT で抜いた';
 };
 
-/** イベントバッジの背景色クラスを返す。 */
-const badgeClass = (e: TimelineEntry): string => {
-  if (e.type === 'SCORE_UPDATE') return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300';
+/** イベントバッジの色（Vuetify の color）を返す。 */
+const badgeColor = (e: TimelineEntry): string | undefined => {
+  if (e.type === 'SCORE_UPDATE') return 'success';
   const r = viewerRelation(e);
-  if (r === 'OVERTAKEN_BY_OTHER') return 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300';
-  if (r === 'OVERTAKE_BY_ME') return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300';
-  return 'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300';
+  if (r === 'OVERTAKEN_BY_OTHER') return 'error';
+  if (r === 'OVERTAKE_BY_ME') return 'warning';
+  return undefined;
 };
 </script>
 
 <template>
   <div class="space-y-6">
     <!-- ヘッダ + 再読込ボタン -->
-    <v-card class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <div>
-        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">タイムライン</h2>
-        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">自分とフレンドの活動を新しい順に表示します</p>
-      </div>
+    <v-card>
+     <v-card-item>
+      <v-card-title>タイムライン</v-card-title>
+      <v-card-subtitle>自分とフレンドの活動を新しい順に表示します</v-card-subtitle>
+      <template #append>
       <div class="flex items-center gap-2">
         <v-btn
           v-if="isAdmin"
@@ -267,8 +267,7 @@ const badgeClass = (e: TimelineEntry): string => {
           :disabled="isBackfilling || isLoading"
           variant="tonal"
           color="error"
-          size="large"
-          class="text-sm whitespace-nowrap"
+          class="whitespace-nowrap"
           title="【管理者専用】全ユーザの CSV アップロード履歴から SCORE_UPDATE を再生成します"
         >
           <template #prepend>
@@ -280,9 +279,8 @@ const badgeClass = (e: TimelineEntry): string => {
           @click="handleBackfill(false)"
           :disabled="isBackfilling || isLoading"
           variant="tonal"
-          color="indigo"
-          size="large"
-          class="text-sm whitespace-nowrap"
+          color="primary"
+          class="whitespace-nowrap"
           title="自分の過去の CSV アップロード履歴から SCORE_UPDATE イベントを再生成します"
         >
           <template #prepend>
@@ -294,8 +292,6 @@ const badgeClass = (e: TimelineEntry): string => {
           @click="fetchTimeline()"
           :disabled="isLoading"
           variant="tonal"
-          size="large"
-          class="text-sm"
         >
           <template #prepend>
             <v-icon :icon="mdiRefresh" size="20" :class="{ 'animate-spin': isLoading }" />
@@ -303,10 +299,12 @@ const badgeClass = (e: TimelineEntry): string => {
           更新
         </v-btn>
       </div>
+      </template>
+     </v-card-item>
     </v-card>
 
     <!-- バックフィル結果メッセージ -->
-    <v-alert v-if="backfillMsg" type="info" color="indigo" class="text-sm">
+    <v-alert v-if="backfillMsg" type="info">
       <div class="space-y-2">
         <div>{{ backfillMsg }}</div>
         <!-- バックフィル走行中のみ進捗バーを表示 -->
@@ -317,7 +315,6 @@ const badgeClass = (e: TimelineEntry): string => {
           </div>
           <v-progress-linear
             :model-value="backfillProgressPct"
-            color="indigo"
             height="8"
             rounded
           />
@@ -326,18 +323,21 @@ const badgeClass = (e: TimelineEntry): string => {
     </v-alert>
 
     <!-- ローディング -->
-    <v-card v-if="isLoading && entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800">
-      <v-progress-circular size="40" width="4" class="mb-4" />
+    <v-card v-if="isLoading && entries.length === 0">
+     <v-card-text class="flex flex-col items-center justify-center py-12">
+      <v-progress-circular indeterminate size="40" width="4" class="mb-4" />
       <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
+     </v-card-text>
     </v-card>
 
     <!-- エラー -->
-    <v-alert v-else-if="error" type="error" class="text-sm">
+    <v-alert v-else-if="error" type="error">
       {{ error }}
     </v-alert>
 
     <!-- 空状態 -->
-    <v-card v-else-if="entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 border-dashed">
+    <v-card v-else-if="entries.length === 0">
+     <v-card-text class="flex flex-col items-center justify-center py-12">
       <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -349,8 +349,7 @@ const badgeClass = (e: TimelineEntry): string => {
         <v-btn
           @click="handleBackfill(false)"
           :disabled="isBackfilling"
-          color="indigo"
-          class="text-sm"
+          color="primary"
         >
           <template #prepend>
             <v-icon :icon="mdiRefresh" size="16" :class="{ 'animate-spin': isBackfilling }" />
@@ -361,6 +360,7 @@ const badgeClass = (e: TimelineEntry): string => {
           スコア履歴ログから SCORE_UPDATE イベントを生成します（過去の「抜き」情報は復元できません）。
         </p>
       </div>
+     </v-card-text>
     </v-card>
 
     <!-- イベント本体 -->
@@ -368,7 +368,7 @@ const badgeClass = (e: TimelineEntry): string => {
       <div v-for="group in threadedEntries" :key="group.date" class="space-y-3">
         <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2">{{ group.date }}</h3>
 
-        <v-card class="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+        <v-card class="divide-y divide-slate-100 dark:divide-slate-700/60">
           <article
             v-for="thread in group.threads"
             :key="thread.key"
@@ -385,14 +385,12 @@ const badgeClass = (e: TimelineEntry): string => {
               <span class="font-bold text-slate-900 dark:text-white text-sm">
                 {{ thread.user.displayName }}
               </span>
-              <v-chip v-if="thread.user.isMe" size="x-small" label color="primary" class="text-[10px]">自分</v-chip>
+              <v-chip v-if="thread.user.isMe" size="x-small" label color="primary">自分</v-chip>
               <!-- 親イベント (最新) のバッジ + 時刻 -->
               <v-chip
                 size="x-small"
                 label
-                variant="flat"
-                class="text-[10px] font-bold"
-                :class="badgeClass(thread.items[0])"
+                :color="badgeColor(thread.items[0])"
               >{{ badgeLabel(thread.items[0]) }}</v-chip>
               <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ formatRelative(thread.items[0].createdAt) }}</span>
               <span v-if="thread.items.length > 1" class="text-[11px] font-bold text-slate-400 dark:text-slate-500">
@@ -421,9 +419,7 @@ const badgeClass = (e: TimelineEntry): string => {
                   <v-chip
                     size="x-small"
                     label
-                    variant="flat"
-                    class="text-[10px] font-bold"
-                    :class="badgeClass(child)"
+                    :color="badgeColor(child)"
                   >{{ badgeLabel(child) }}</v-chip>
                   <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ formatRelative(child.createdAt) }}</span>
                 </div>
@@ -446,7 +442,7 @@ const badgeClass = (e: TimelineEntry): string => {
               color="primary"
               size="x-small"
               @click="toggleThread(thread.key)"
-              class="mt-2 ml-13 sm:ml-[3.25rem] px-1 text-[11px] font-bold"
+              class="mt-2 ml-13 sm:ml-[3.25rem]"
             >
               <template v-if="isThreadExpanded(thread.key)">スレッドを折りたたむ</template>
               <template v-else>ほか {{ thread.items.length - 1 }} 件のイベントを表示</template>
@@ -457,7 +453,7 @@ const badgeClass = (e: TimelineEntry): string => {
 
       <!-- 無限スクロール: 末尾のセンチネルがビューポート手前に来たら過去分を追加取得 -->
       <div v-if="isLoadingMore" class="flex items-center justify-center py-6">
-        <v-progress-circular size="24" width="3" />
+        <v-progress-circular indeterminate size="24" width="3" />
       </div>
       <p v-else-if="!hasMore" class="text-center text-xs text-slate-400 dark:text-slate-500 py-6">
         これ以上の活動はありません

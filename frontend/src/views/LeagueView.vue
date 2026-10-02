@@ -219,8 +219,8 @@ const beatTier = (pt: number | null | undefined) => getRankInfo(pt ?? 0);
 
 /** 立場バッジの短い記号とクラス（チャレンジ=挑 / ディフェンス=防）。normal は null。 */
 const roleBadge = (role: string | null | undefined) => {
-  if (role === 'challenge') return { label: t('league.roleChallenge'), cls: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300' };
-  if (role === 'defense') return { label: t('league.roleDefense'), cls: 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300' };
+  if (role === 'challenge') return { label: t('league.roleChallenge'), color: 'orange' };
+  if (role === 'defense') return { label: t('league.roleDefense'), color: 'light-blue' };
   return null;
 };
 
@@ -472,10 +472,10 @@ const openAdminGroupStandings = async (weekId: number, tier: number, groupIndex:
 };
 
 /** 週のステータスに応じたバッジのクラス（開催中 = 緑 / 編成前 = 灰 / 締め済み = 青）。 */
-const weekStatusClass = (status: string) => {
-  if (status === 'active') return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300';
-  if (status === 'draft') return 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
-  return 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300';
+const weekStatusColor = (status: string) => {
+  if (status === 'active') return 'success';
+  if (status === 'draft') return undefined;
+  return 'info';
 };
 
 // -------------------------------------------------------------------
@@ -851,10 +851,8 @@ onUnmounted(() => {
         <v-btn
           variant="outlined"
           size="small"
-          rounded="pill"
-          color="indigo"
+          color="primary"
           :prepend-icon="mdiInformationOutline"
-          class="text-xs px-2.5"
           @click="showInfo = true"
         >
           {{ t('league.info') }}
@@ -864,10 +862,8 @@ onUnmounted(() => {
           v-if="isLoggedIn"
           variant="outlined"
           size="small"
-          rounded="pill"
           color="amber-darken-2"
           :prepend-icon="mdiPodium"
-          class="text-xs px-2.5"
           @click="showRanking = true"
         >
           {{ t('league.rankingModal.open') }}
@@ -878,36 +874,38 @@ onUnmounted(() => {
     </div>
 
     <!-- 未ログイン -->
-    <v-card v-if="!isLoggedIn" class="bg-white dark:bg-slate-800 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400">
-      {{ t('league.loginRequired') }}
+    <v-card v-if="!isLoggedIn">
+      <v-card-text class="text-center">
+        {{ t('league.loginRequired') }}
+      </v-card-text>
     </v-card>
 
     <template v-else>
       <!-- エラー / 通知 -->
-      <v-alert v-if="error" type="error" class="rounded-lg text-sm">
+      <v-alert v-if="error" type="error" variant="tonal" density="compact">
         {{ error }}
       </v-alert>
-      <v-alert v-if="notice" type="success" class="rounded-lg text-sm">
+      <v-alert v-if="notice" type="success" variant="tonal" density="compact">
         {{ notice }}
       </v-alert>
 
       <!-- 参加/離脱カード -->
-      <v-card class="bg-white dark:bg-slate-800 rounded-xl p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
+      <v-card>
+        <v-card-text class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div class="flex items-center gap-2">
               <span class="font-semibold text-slate-800 dark:text-slate-100">
                 {{ isJoined ? t('league.joined') : t('league.notJoined') }}
               </span>
               <v-chip v-if="isJoined && myEntry?.currentTier != null"
-                    rounded="pill"
-                    class="text-xs px-2 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-semibold">
+                    size="small"
+                    color="primary">
                 {{ divisionName(myEntry.currentTier) }}
               </v-chip>
               <!-- 参加登録済みだが今週の編成には入っていない（次週から参戦）。 -->
               <v-chip v-if="isPendingNextWeek"
-                    rounded="pill"
-                    class="text-xs px-2 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold">
+                    size="small"
+                    color="warning">
                 {{ t('league.pendingPlacement') }}
               </v-chip>
             </div>
@@ -925,35 +923,36 @@ onUnmounted(() => {
           </div>
           <v-btn
             v-if="!isJoined"
-            color="indigo"
-            class="px-5 rounded-lg text-sm font-semibold"
+            color="primary"
             :disabled="busy || !!joinBlockedText"
             @click="handleJoin"
           >{{ t('league.join') }}</v-btn>
           <v-btn
             v-else
             variant="outlined"
-            class="px-4 rounded-lg border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-normal"
             :disabled="busy"
             @click="handleLeave"
           >{{ t('league.leave') }}</v-btn>
-        </div>
+        </v-card-text>
       </v-card>
 
       <!-- 開催中の週が無い（締め後〜次回開始の間・休止週）。次回の開催回が準備済みなら開始予定を出す。 -->
-      <v-card v-if="!current?.week" class="bg-white dark:bg-slate-800 rounded-xl p-6 text-center text-slate-500 dark:text-slate-400 text-sm">
+      <v-card v-if="!current?.week">
+        <v-card-text class="text-center">
         <p>{{ t('league.noWeek') }}</p>
         <p v-if="current?.nextWeek" class="mt-2 font-semibold text-indigo-600 dark:text-indigo-400">
           {{ t('league.nextWeekNotice', { label: weekLabel(current.nextWeek.weekNo), start: shortDateTime(current.nextWeek.startsAt) }) }}
         </p>
         <p v-else class="mt-2">{{ t('league.noWeekHint') }}</p>
+        </v-card-text>
       </v-card>
       <template v-else>
         <!-- 週ヘッダー + 課題曲 -->
-        <v-card class="bg-white dark:bg-slate-800 rounded-xl p-5">
+        <v-card>
+          <v-card-text>
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="font-bold text-slate-800 dark:text-slate-100">
-              <v-chip rounded="pill" variant="flat" class="mr-2 align-middle text-xs font-bold px-2 bg-indigo-600 text-white dark:bg-indigo-500">
+              <v-chip variant="flat" color="primary" size="small" class="mr-2 align-middle">
                 {{ weekLabel(current.week.weekNo) }}
               </v-chip>
               {{ t('league.weekOf', { start: shortDateTime(current.week.startsAt), end: shortDateTime(current.week.endsAt) }) }}
@@ -961,8 +960,9 @@ onUnmounted(() => {
                 {{ divisionName(current.member.tier) }} / {{ t('league.groupN', { n: current.member.groupIndex + 1 }) }}
               </span>
               <v-chip v-else-if="isPendingNextWeek"
-                    rounded="pill"
-                    class="ml-2 text-xs font-semibold px-2 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">
+                    size="small"
+                    color="warning"
+                    class="ml-2">
                 {{ t('league.notInThisWeek') }}
               </v-chip>
             </h2>
@@ -972,11 +972,10 @@ onUnmounted(() => {
           </div>
           <!-- チャレンジ/ディフェンス（他卓に着席中）の説明 -->
           <v-alert v-if="current.member && current.member.role && current.member.role !== 'normal'"
-               variant="flat"
-               class="mt-2 text-xs rounded-lg px-3 py-2"
-               :class="current.member.role === 'challenge'
-                 ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
-                 : 'bg-sky-50 dark:bg-sky-900/20 text-sky-700 dark:text-sky-300'">
+               variant="tonal"
+               density="compact"
+               class="mt-2"
+               :color="current.member.role === 'challenge' ? 'orange' : 'light-blue'">
             {{ current.member.role === 'challenge'
               ? t('league.challengeNote', { home: divisionName(current.member.homeTier), table: divisionName(current.member.tier) })
               : t('league.defenseNote', { home: divisionName(current.member.homeTier), table: divisionName(current.member.tier) }) }}
@@ -985,10 +984,10 @@ onUnmounted(() => {
           <!-- 次週から参戦: 今週の課題曲は自分の対象ではないので出さない（参加中との誤解を防ぐ）。 -->
           <v-alert v-if="isPendingNextWeek"
                type="warning"
-               :icon="false"
-               class="mt-4 rounded-lg px-4 py-3">
-            <p class="text-sm font-semibold text-amber-700 dark:text-amber-300">{{ t('league.pendingTitle') }}</p>
-            <p class="mt-1 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/90">{{ t('league.pendingNote') }}</p>
+               variant="tonal"
+               class="mt-4"
+               :title="t('league.pendingTitle')">
+            {{ t('league.pendingNote') }}
           </v-alert>
 
           <template v-else>
@@ -1003,9 +1002,9 @@ onUnmounted(() => {
             <v-card
               v-for="song in current.songs"
               :key="song.id"
-              class="rounded-lg p-3"
-              :class="song.disabled ? 'bg-slate-50 dark:bg-slate-900/40' : 'bg-transparent'"
+              :variant="song.disabled ? 'tonal' : 'outlined'"
             >
+             <v-card-text>
               <div class="text-xs text-slate-400 dark:text-slate-500">
                 {{ song.difficultyName }} <span v-if="song.level">☆{{ song.level }}</span>
               </div>
@@ -1013,7 +1012,7 @@ onUnmounted(() => {
                    :class="song.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'">{{ song.title }}</div>
               <!-- 無効化された曲（解禁不可能な選曲など）は集計対象外。ラインや達成状況は出さない。 -->
               <div v-if="song.disabled" class="mt-2 text-xs">
-                <v-chip label variant="flat" size="x-small" class="px-1.5 text-xs font-semibold bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300">
+                <v-chip label variant="tonal" size="x-small" color="error">
                   {{ t('league.songDisabled') }}
                 </v-chip>
                 <p class="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{{ t('league.songDisabledNote') }}</p>
@@ -1024,12 +1023,9 @@ onUnmounted(() => {
                   <div>
                     <v-chip
                       label
-                      variant="flat"
+                      variant="tonal"
                       size="x-small"
-                      class="px-1.5 text-xs font-semibold"
-                      :class="ps.valid
-                        ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'"
+                      :color="ps.valid ? 'success' : undefined"
                     >{{ ps.valid ? t('league.played') : t('league.notPlayed') }}</v-chip>
                     <span class="ml-2 text-slate-600 dark:text-slate-300">
                       {{ ps.rate != null ? `${ps.rate.toFixed(2)}% (${ps.bestEx})` : '-' }}
@@ -1038,16 +1034,18 @@ onUnmounted(() => {
                   </div>
                 </div>
               </template>
+             </v-card-text>
             </v-card>
           </div>
           <p v-if="current.member" class="mt-3 text-xs text-slate-400 dark:text-slate-500">{{ t('league.playRequired') }}</p>
           </template>
+          </v-card-text>
         </v-card>
 
         <!-- 自分のグループの順位表 -->
-        <v-card v-if="current.standings" class="bg-white dark:bg-slate-800 rounded-xl p-5">
-          <div class="flex items-center justify-between">
-            <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ t('league.standings') }}</h3>
+        <v-card v-if="current.standings">
+          <v-card-title class="flex flex-wrap items-center justify-between gap-2">
+            <span>{{ t('league.standings') }}</span>
             <div class="flex gap-3 text-xs">
               <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                 <span class="w-2.5 h-2.5 rounded-sm bg-emerald-200 dark:bg-emerald-900/60 inline-block"></span>{{ t('league.promoteZone') }}
@@ -1056,17 +1054,20 @@ onUnmounted(() => {
                 <span class="w-2.5 h-2.5 rounded-sm bg-rose-200 dark:bg-rose-900/60 inline-block"></span>{{ t('league.relegateZone') }}
               </span>
             </div>
-          </div>
-          <div class="mt-3">
+          </v-card-title>
+          <v-card-text>
+          <div>
             <LeagueStandingsTable :songs="current.songs" :standings="current.standings" :my-user-id="user?.id" />
           </div>
           <p class="mt-2 text-[11px] leading-relaxed text-slate-400 dark:text-slate-500">{{ t('league.songPointsHint') }}</p>
+          </v-card-text>
         </v-card>
 
         <!-- 他グループ（観戦） -->
-        <v-card v-if="overviewTiers.length" class="bg-white dark:bg-slate-800 rounded-xl p-5">
-          <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ t('league.otherGroups') }}</h3>
-          <div class="mt-3 space-y-2">
+        <v-card v-if="overviewTiers.length">
+          <v-card-title>{{ t('league.otherGroups') }}</v-card-title>
+          <v-card-text>
+          <div class="space-y-2">
             <div v-for="tierInfo in overviewTiers" :key="tierInfo.tier" class="flex flex-wrap items-center gap-2">
               <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 w-32">{{ divisionName(tierInfo.tier) }}</span>
               <v-btn
@@ -1074,7 +1075,6 @@ onUnmounted(() => {
                 :key="g.groupIndex"
                 variant="outlined"
                 size="small"
-                class="text-xs px-3 rounded-lg font-normal text-slate-600 dark:text-slate-300"
                 @click="openGroup(tierInfo.tier, g.groupIndex)"
               >
                 {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.memberCount }})
@@ -1090,7 +1090,8 @@ onUnmounted(() => {
             <!-- 他グループの課題曲 + 有効ライン -->
             <div v-if="otherStandings.songs.length" class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
               <v-card v-for="song in otherStandings.songs" :key="song.slot"
-                   class="rounded-lg bg-transparent p-2">
+                   variant="outlined">
+               <v-card-text>
                 <div class="text-[10px] text-slate-400 dark:text-slate-500">
                   {{ song.difficultyName }} <span v-if="song.level">☆{{ song.level }}</span>
                 </div>
@@ -1098,38 +1099,38 @@ onUnmounted(() => {
                      :class="song.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'">{{ song.title }}</div>
                 <div v-if="song.disabled" class="mt-0.5 text-[11px] font-semibold text-rose-600 dark:text-rose-400">{{ t('league.songDisabled') }}</div>
                 <div v-else class="mt-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">{{ songLineLabel(song) }}</div>
+               </v-card-text>
               </v-card>
             </div>
-            <v-table class="text-sm bg-transparent">
+            <v-table density="compact">
                 <thead>
-                  <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
-                    <th class="py-1.5 pr-2 w-10">{{ t('league.rank') }}</th>
-                    <th class="py-1.5 pr-2">{{ t('league.player') }}</th>
-                    <th class="py-1.5 pr-2 text-center">{{ t('league.validSongs') }}</th>
-                    <th class="py-1.5 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
-                    <th class="py-1.5 pr-2 text-center">{{ t('league.points') }}</th>
+                  <tr>
+                    <th class="w-10">{{ t('league.rank') }}</th>
+                    <th>{{ t('league.player') }}</th>
+                    <th class="text-center">{{ t('league.validSongs') }}</th>
+                    <th class="text-right">{{ t('league.leaguePoints') }}</th>
+                    <th class="text-center">{{ t('league.points') }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in otherStandings.standings" :key="row.userId"
-                      class="border-b border-slate-100 dark:border-slate-700/50" :class="zoneClass(row)">
-                    <td class="py-1.5 pr-2">{{ row.rank }}</td>
-                    <td class="py-1.5 pr-2 break-words">
+                  <tr v-for="row in otherStandings.standings" :key="row.userId" :class="zoneClass(row)">
+                    <td>{{ row.rank }}</td>
+                    <td class="break-words">
                       <span class="inline-flex items-center gap-1.5 align-middle">
                         <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(row.previousBeatPt, 'beat')" />
                         <span>{{ row.displayName }}</span>
                         <v-chip v-if="roleBadge(row.role)"
                               size="x-small"
                               label
-                              variant="flat"
-                              class="gap-0.5 px-1.5 text-[10px] font-bold leading-none"
-                              :class="roleBadge(row.role)!.cls"
+                              variant="tonal"
+                              class="gap-0.5"
+                              :color="roleBadge(row.role)!.color"
                               :title="roleBadge(row.role)!.label + (row.homeTier != null ? ' / ' + divisionName(row.homeTier) : '')">{{ roleBadge(row.role)!.label }}<span v-if="row.homeTier != null" class="font-semibold opacity-80">{{ divisionShort(row.homeTier) }}</span></v-chip>
                       </span>
                     </td>
-                    <td class="py-1.5 pr-2 text-center">{{ row.validSongs }}/{{ scoredSongCount(otherStandings.songs) }}</td>
-                    <td class="py-1.5 pr-2 text-right tabular-nums">{{ formatResult(row.resultValue) }}</td>
-                    <td class="py-1.5 pr-2 text-center tabular-nums whitespace-nowrap">
+                    <td class="text-center">{{ row.validSongs }}/{{ scoredSongCount(otherStandings.songs) }}</td>
+                    <td class="text-right tabular-nums">{{ formatResult(row.resultValue) }}</td>
+                    <td class="text-center tabular-nums whitespace-nowrap">
                       {{ fmtPt(row.points) }}
                       <span class="text-xs text-slate-400 dark:text-slate-500">({{ fmtPt(row.pointDelta) }})</span>
                     </td>
@@ -1137,58 +1138,55 @@ onUnmounted(() => {
                 </tbody>
             </v-table>
           </div>
+          </v-card-text>
         </v-card>
       </template>
 
       <!-- 過去の成績 -->
-      <v-card class="bg-white dark:bg-slate-800 rounded-xl p-5">
+      <v-card>
+       <v-card-text>
         <button class="w-full flex items-center justify-between text-left" @click="showHistory = !showHistory">
           <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ t('league.history') }}</h3>
           <span class="text-slate-400">{{ showHistory ? '▲' : '▼' }}</span>
         </button>
         <div v-if="showHistory" class="mt-3">
           <p v-if="!history.length" class="text-sm text-slate-400 dark:text-slate-500">{{ t('league.noHistory') }}</p>
-          <v-table v-else class="text-sm bg-transparent">
+          <v-table v-else density="compact">
             <thead>
-              <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
-                <th class="py-2 pr-2">{{ t('league.roundLabel') }}</th>
-                <th class="py-2 pr-2">{{ t('league.week') }}</th>
-                <th class="py-2 pr-2">{{ t('league.tier') }}</th>
-                <th class="py-2 pr-2 text-center">{{ t('league.rank') }}</th>
-                <th class="py-2 pr-2 text-right">{{ t('league.leaguePoints') }}</th>
-                <th class="py-2 pr-2 text-center">{{ t('league.points') }}</th>
-                <th class="py-2 pr-2 text-center">{{ t('league.movementLabel') }}</th>
-                <th class="py-2 pr-2 w-8"></th>
+              <tr>
+                <th>{{ t('league.roundLabel') }}</th>
+                <th>{{ t('league.week') }}</th>
+                <th>{{ t('league.tier') }}</th>
+                <th class="text-center">{{ t('league.rank') }}</th>
+                <th class="text-right">{{ t('league.leaguePoints') }}</th>
+                <th class="text-center">{{ t('league.points') }}</th>
+                <th class="text-center">{{ t('league.movementLabel') }}</th>
+                <th class="w-8"></th>
               </tr>
             </thead>
             <tbody>
               <template v-for="h in history" :key="h.weekId">
-              <tr class="border-b border-slate-100 dark:border-slate-700/50 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30"
+              <tr class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30"
                   @click="toggleHistoryDetail(h)">
-                <td class="py-2 pr-2 font-semibold whitespace-nowrap">{{ weekLabel(h.weekNo) }}</td>
-                <td class="py-2 pr-2">{{ shortDate(h.startsAt) }}〜{{ shortDate(h.endsAt) }}</td>
-                <td class="py-2 pr-2">{{ divisionName(h.tier) }}</td>
-                <td class="py-2 pr-2 text-center">{{ h.finalRank ?? '-' }}</td>
-                <td class="py-2 pr-2 text-right tabular-nums">{{ formatResult(h.resultValue) }}</td>
-                <td class="py-2 pr-2 text-center tabular-nums">{{ fmtPt(h.pointDelta) }}</td>
-                <td class="py-2 pr-2 text-center">
+                <td class="font-semibold whitespace-nowrap">{{ weekLabel(h.weekNo) }}</td>
+                <td>{{ shortDate(h.startsAt) }}〜{{ shortDate(h.endsAt) }}</td>
+                <td>{{ divisionName(h.tier) }}</td>
+                <td class="text-center">{{ h.finalRank ?? '-' }}</td>
+                <td class="text-right tabular-nums">{{ formatResult(h.resultValue) }}</td>
+                <td class="text-center tabular-nums">{{ fmtPt(h.pointDelta) }}</td>
+                <td class="text-center">
                   <v-chip
                     v-if="h.movement"
-                    rounded="pill"
-                    variant="flat"
-                    class="text-xs px-2 font-semibold"
-                    :class="h.movement === 'promote'
-                      ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
-                      : h.movement === 'relegate'
-                        ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'"
+                    size="small"
+                    variant="tonal"
+                    :color="h.movement === 'promote' ? 'success' : h.movement === 'relegate' ? 'error' : undefined"
                   >{{ t(`league.movement.${h.movement}`) }}</v-chip>
                   <span v-else>-</span>
                 </td>
-                <td class="py-2 pr-2 text-center text-slate-400">{{ openHistoryWeekId === h.weekId ? '▲' : '▼' }}</td>
+                <td class="text-center text-slate-400">{{ openHistoryWeekId === h.weekId ? '▲' : '▼' }}</td>
               </tr>
               <!-- 折り畳み: その週の自分のグループの順位表（開催中の週と同じ表）。 -->
-              <tr v-if="openHistoryWeekId === h.weekId" class="border-b border-slate-100 dark:border-slate-700/50">
+              <tr v-if="openHistoryWeekId === h.weekId">
                 <td colspan="8" class="py-3 px-1 bg-slate-50 dark:bg-slate-900/30">
                   <p v-if="historyDetailError" class="text-sm text-rose-500">{{ historyDetailError }}</p>
                   <p v-else-if="historyDetailLoading" class="text-sm text-slate-400 dark:text-slate-500">{{ t('common.loading') }}</p>
@@ -1214,10 +1212,12 @@ onUnmounted(() => {
             </tbody>
           </v-table>
         </div>
+       </v-card-text>
       </v-card>
 
       <!-- 昇降格ニュース（全ユーザー。締め済みの週だけが対象なので、開催中の週はまだ出ない） -->
-      <v-card class="bg-white dark:bg-slate-800 rounded-xl p-5">
+      <v-card>
+       <v-card-text>
         <button class="w-full flex items-center justify-between text-left" @click="showNews = !showNews">
           <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ t('league.news.title') }}</h3>
           <span class="text-slate-400">{{ showNews ? '▲' : '▼' }}</span>
@@ -1237,16 +1237,14 @@ onUnmounted(() => {
                 <span class="text-xs text-slate-400 dark:text-slate-500">{{ shortDate(w.startsAt) }}〜{{ shortDate(w.endsAt) }}</span>
                 <v-chip v-if="newsCounts(w).promote"
                       size="x-small"
-                      rounded="pill"
-                      variant="flat"
-                      class="text-[11px] px-1.5 font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                      variant="tonal"
+                      color="success">
                   {{ t('league.news.promoted', { n: newsCounts(w).promote }) }}
                 </v-chip>
                 <v-chip v-if="newsCounts(w).relegate"
                       size="x-small"
-                      rounded="pill"
-                      variant="flat"
-                      class="text-[11px] px-1.5 font-semibold bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300">
+                      variant="tonal"
+                      color="error">
                   {{ t('league.news.relegated', { n: newsCounts(w).relegate }) }}
                 </v-chip>
                 <span class="ml-auto text-xs text-slate-400 dark:text-slate-500">{{ isNewsWeekOpen(w.weekId) ? '▲' : '▼' }}</span>
@@ -1264,12 +1262,10 @@ onUnmounted(() => {
                   ]"
                 >
                   <v-chip
-                    rounded="pill"
-                    variant="flat"
-                    class="text-xs px-2 font-semibold shrink-0"
-                    :class="item.movement === 'promote'
-                      ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
-                      : 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'"
+                    size="small"
+                    variant="tonal"
+                    class="shrink-0"
+                    :color="item.movement === 'promote' ? 'success' : 'error'"
                   >{{ t(`league.movement.${item.movement}`) }}</v-chip>
                   <RankIcon :rank-name="beatTier(item.totalBeatPt).name" :tier="beatTier(item.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(item.previousBeatPt, 'beat')" />
                   <span class="truncate text-slate-700 dark:text-slate-200">{{ item.displayName }}</span>
@@ -1286,17 +1282,18 @@ onUnmounted(() => {
             </div>
           </div>
         </div>
+       </v-card-text>
       </v-card>
 
       <!-- 管理者セクション -->
-      <v-card v-if="isAdmin" class="bg-white dark:bg-slate-800 rounded-xl p-5 border-2 border-amber-300 dark:border-amber-700">
-        <h3 class="font-bold text-amber-700 dark:text-amber-400">{{ t('league.admin.title') }}</h3>
+      <v-card v-if="isAdmin" border="warning md opacity-100">
+        <v-card-title>{{ t('league.admin.title') }}</v-card-title>
+       <v-card-text>
         <!-- overview が取れないと編成ブロックが丸ごと消えるので、原因（サーバのエラー文）を出す。 -->
-        <v-alert v-if="adminError" type="error" :icon="false"
-             class="mt-2 rounded-lg px-3 py-2">
-          <p class="text-xs font-semibold text-rose-700 dark:text-rose-300">{{ t('league.admin.overviewError') }}</p>
-          <p class="mt-1 text-[11px] break-words text-rose-600 dark:text-rose-400">{{ adminError }}</p>
-          <v-btn variant="outlined" size="x-small" color="error" class="mt-1.5 text-[11px] px-2 font-normal"
+        <v-alert v-if="adminError" type="error" variant="tonal" density="compact"
+             class="mt-2" :title="t('league.admin.overviewError')">
+          <p class="text-xs break-words">{{ adminError }}</p>
+          <v-btn variant="outlined" size="x-small" color="error" class="mt-1.5"
                   :disabled="busy" @click="loadAdmin()">{{ t('league.admin.retry') }}</v-btn>
         </v-alert>
 
@@ -1309,45 +1306,44 @@ onUnmounted(() => {
           <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{{ t('league.admin.history.desc') }}</p>
 
           <div v-if="showAdminHistory" class="mt-3">
-            <v-alert v-if="adminHistoryError" type="error" :icon="false"
-                 class="rounded-lg px-3 py-2">
-              <p class="text-[11px] break-words text-rose-600 dark:text-rose-400">{{ adminHistoryError }}</p>
-              <v-btn variant="outlined" size="x-small" color="error" class="mt-1.5 text-[11px] px-2 font-normal"
+            <v-alert v-if="adminHistoryError" type="error" variant="tonal" density="compact">
+              <p class="text-xs break-words">{{ adminHistoryError }}</p>
+              <v-btn variant="outlined" size="x-small" color="error" class="mt-1.5"
                       @click="loadAdminHistory()">{{ t('league.admin.retry') }}</v-btn>
             </v-alert>
             <p v-else-if="adminHistoryLoading" class="text-sm text-slate-400 dark:text-slate-500">{{ t('common.loading') }}</p>
             <p v-else-if="!adminHistory.length" class="text-sm text-slate-400 dark:text-slate-500">{{ t('league.admin.history.empty') }}</p>
 
-            <v-table v-else class="text-sm bg-transparent">
+            <v-table v-else density="compact">
                 <thead>
-                  <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
-                    <th class="py-2 pr-2">{{ t('league.roundLabel') }}</th>
-                    <th class="py-2 pr-2">{{ t('league.week') }}</th>
-                    <th class="py-2 pr-2">{{ t('league.admin.history.status') }}</th>
-                    <th class="py-2 pr-2 text-center">{{ t('league.admin.history.members') }}</th>
-                    <th class="py-2 pr-2 text-center" :title="t('league.admin.history.scorersHint')">
+                  <tr>
+                    <th>{{ t('league.roundLabel') }}</th>
+                    <th>{{ t('league.week') }}</th>
+                    <th>{{ t('league.admin.history.status') }}</th>
+                    <th class="text-center">{{ t('league.admin.history.members') }}</th>
+                    <th class="text-center" :title="t('league.admin.history.scorersHint')">
                       {{ t('league.admin.history.scorers') }}
                     </th>
-                    <th class="py-2 pr-2 text-center" :title="t('league.admin.history.playersHint')">
+                    <th class="text-center" :title="t('league.admin.history.playersHint')">
                       {{ t('league.admin.history.players') }}
                     </th>
-                    <th class="py-2 pr-2 text-center">{{ t('league.admin.history.divisions') }}</th>
-                    <th class="py-2 pr-2 w-8"></th>
+                    <th class="text-center">{{ t('league.admin.history.divisions') }}</th>
+                    <th class="w-8"></th>
                   </tr>
                 </thead>
                 <tbody>
                   <template v-for="w in adminHistory" :key="w.id">
-                    <tr class="border-b border-slate-100 dark:border-slate-700/50 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                    <tr class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30"
                         @click="toggleAdminWeek(w.id)">
-                      <td class="py-2 pr-2 font-semibold whitespace-nowrap">{{ weekLabel(w.weekNo) }}</td>
-                      <td class="py-2 pr-2 whitespace-nowrap">{{ shortDate(w.startsAt) }}〜{{ shortDate(w.endsAt) }}</td>
-                      <td class="py-2 pr-2">
-                        <v-chip rounded="pill" variant="flat" class="text-xs px-2 font-semibold" :class="weekStatusClass(w.status)">
+                      <td class="font-semibold whitespace-nowrap">{{ weekLabel(w.weekNo) }}</td>
+                      <td class="whitespace-nowrap">{{ shortDate(w.startsAt) }}〜{{ shortDate(w.endsAt) }}</td>
+                      <td>
+                        <v-chip size="small" variant="tonal" :color="weekStatusColor(w.status)">
                           {{ t(`league.admin.history.status_${w.status}`) }}
                         </v-chip>
                       </td>
-                      <td class="py-2 pr-2 text-center tabular-nums">{{ w.memberCount }}</td>
-                      <td class="py-2 pr-2 text-center tabular-nums">
+                      <td class="text-center tabular-nums">{{ w.memberCount }}</td>
+                      <td class="text-center tabular-nums">
                         <template v-if="w.validMemberCount != null">
                           {{ w.validMemberCount }}
                           <span v-if="w.memberCount > 0" class="ml-1 text-xs text-slate-400 dark:text-slate-500">
@@ -1357,7 +1353,7 @@ onUnmounted(() => {
                         <span v-else class="text-slate-400 dark:text-slate-500">-</span>
                       </td>
                       <!-- プレーあり: ラインに届かなくても課題曲を遊んだ人数（有効ありを含む）。 -->
-                      <td class="py-2 pr-2 text-center tabular-nums">
+                      <td class="text-center tabular-nums">
                         <template v-if="w.playedMemberCount != null">
                           {{ w.playedMemberCount }}
                           <span v-if="w.memberCount > 0" class="ml-1 text-xs text-slate-400 dark:text-slate-500">
@@ -1366,12 +1362,12 @@ onUnmounted(() => {
                         </template>
                         <span v-else class="text-slate-400 dark:text-slate-500">-</span>
                       </td>
-                      <td class="py-2 pr-2 text-center tabular-nums">{{ w.tiers.length }}</td>
-                      <td class="py-2 pr-2 text-center text-slate-400">{{ openAdminWeekId === w.id ? '▲' : '▼' }}</td>
+                      <td class="text-center tabular-nums">{{ w.tiers.length }}</td>
+                      <td class="text-center text-slate-400">{{ openAdminWeekId === w.id ? '▲' : '▼' }}</td>
                     </tr>
 
                     <!-- 折り畳み: その週の DIVISION / グループ一覧と、選んだグループの順位表 -->
-                    <tr v-if="openAdminWeekId === w.id" class="border-b border-slate-100 dark:border-slate-700/50">
+                    <tr v-if="openAdminWeekId === w.id">
                       <td colspan="8" class="py-3 px-1 bg-slate-50 dark:bg-slate-900/30">
                         <p v-if="!w.tiers.length" class="text-sm text-slate-400 dark:text-slate-500">
                           {{ t('league.admin.notFormed') }}
@@ -1383,12 +1379,8 @@ onUnmounted(() => {
                             </span>
                             <v-btn v-for="g in tr.groups" :key="g.groupIndex"
                                     size="small"
-                                    rounded="sm"
                                     :variant="openAdminGroup?.tier === tr.tier && openAdminGroup?.groupIndex === g.groupIndex ? 'flat' : 'outlined'"
-                                    class="text-xs px-2 font-normal"
-                                    :class="openAdminGroup?.tier === tr.tier && openAdminGroup?.groupIndex === g.groupIndex
-                                      ? 'bg-amber-500 border-amber-500 text-white'
-                                      : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300'"
+                                    :color="openAdminGroup?.tier === tr.tier && openAdminGroup?.groupIndex === g.groupIndex ? 'amber' : undefined"
                                     @click="openAdminGroupStandings(w.id, tr.tier, g.groupIndex)">
                               {{ t('league.groupN', { n: g.groupIndex + 1 }) }}
                               <span class="opacity-70 ml-1">({{ g.memberCount }})</span>
@@ -1438,13 +1430,13 @@ onUnmounted(() => {
               <span class="ml-2 text-xs text-slate-400">{{ t('league.admin.entryCount') }}: {{ al.activeEntryCount }}</span>
             </div>
             <div class="flex flex-wrap gap-2">
-              <v-btn size="small" color="blue-grey-darken-1" class="text-xs px-3 rounded-lg font-normal"
+              <v-btn size="small" color="blue-grey-darken-1"
                       :disabled="busy" @click="handleCreateDraft(al.ladder)">{{ t('league.admin.createDraft') }}</v-btn>
-              <v-btn size="small" color="teal-darken-1" class="text-xs px-3 rounded-lg font-normal"
+              <v-btn size="small" color="teal-darken-1"
                       :disabled="busy" @click="handleForm(al.ladder)">{{ t('league.admin.form') }}</v-btn>
-              <v-btn size="small" color="amber-darken-3" class="text-xs px-3 rounded-lg font-normal"
+              <v-btn size="small" color="amber-darken-3"
                       :disabled="busy" @click="handleRunWeekly(al.ladder)">{{ t('league.admin.runWeekly') }}</v-btn>
-              <v-btn v-if="al.activeWeek" size="small" color="error" class="text-xs px-3 rounded-lg font-normal"
+              <v-btn v-if="al.activeWeek" size="small" color="error"
                       :disabled="busy" @click="handleAbort(al.ladder)">{{ t('league.admin.abort') }}</v-btn>
             </div>
           </div>
@@ -1474,22 +1466,23 @@ onUnmounted(() => {
                 <span class="text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">
                   {{ t('league.admin.swapSelected', { name: swapPick.name }) }}
                 </span>
-                <v-btn variant="outlined" size="x-small" color="indigo" class="text-[11px] px-2 font-normal"
+                <v-btn variant="outlined" size="x-small" color="primary"
                         @click="swapPick = null">{{ t('league.admin.swapCancel') }}</v-btn>
               </div>
             </template>
-            <v-card v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" class="mt-3 rounded-lg bg-transparent p-3">
+            <v-card v-for="tierInfo in al.draftWeek.tiers" :key="tierInfo.tier" variant="outlined" class="mt-3">
+             <v-card-text>
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
                   {{ divisionName(tierInfo.tier) }}
                   <span class="text-xs font-normal text-slate-400">({{ tierMemberCount(tierInfo) }})</span>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                  <v-btn variant="outlined" size="small" rounded="sm" class="text-xs px-2 font-normal text-slate-500 dark:text-slate-400"
+                  <v-btn variant="outlined" size="small"
                           @click="toggleSongEdit(al.draftWeek!.id, tierInfo.tier, songGroupIndexes(tierInfo))">
                     {{ isSongEditOpen(al.draftWeek!.id, tierInfo.tier) ? t('league.admin.editSongsClose') : t('league.admin.editSongs') }}
                   </v-btn>
-                  <v-btn variant="outlined" size="small" rounded="sm" class="text-xs px-2 font-normal text-slate-500 dark:text-slate-400"
+                  <v-btn variant="outlined" size="small"
                           :disabled="busy" @click="handleRedraw(al.draftWeek!.id, tierInfo.tier)">{{ t('league.admin.redraw') }}</v-btn>
                 </div>
               </div>
@@ -1514,15 +1507,16 @@ onUnmounted(() => {
                   <v-chip v-if="song.groupIndex != null"
                         size="x-small"
                         label
-                        variant="flat"
-                        class="text-[10px] px-1.5 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                        variant="tonal"
+                        class="whitespace-nowrap">
                     {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
                   </v-chip>
                   <span class="text-slate-400 w-4">{{ song.slot }}.</span>
                   <!-- handlePickSong は select の change イベントを受ける作りなので、選んだ値を target.value に包んで渡す。 -->
                   <v-select
-                    class="flex-1 min-w-40 text-xs"
-                    :class="song.disabled ? 'opacity-60' : ''"
+                    class="flex-1 min-w-40"
+                    density="compact"
+                    hide-details
                     :disabled="busy || !poolFor(al.draftWeek.id, tierInfo.tier, song)"
                     :items="songOptions(al.draftWeek.id, tierInfo.tier, song).map((opt, i) => ({ title: `${opt.title} [${opt.difficultyName}${opt.level ? ` ☆${opt.level}` : ''}]`, value: String(i) }))"
                     :model-value="String(currentOptionIndex(al.draftWeek.id, tierInfo.tier, song))"
@@ -1531,21 +1525,23 @@ onUnmounted(() => {
                   <v-chip v-if="song.fallback"
                         size="x-small"
                         label
-                        variant="flat"
-                        class="text-[10px] px-1.5 bg-violet-200 dark:bg-violet-900/60 text-violet-800 dark:text-violet-200 font-semibold whitespace-nowrap"
+                        variant="tonal"
+                        color="deep-purple"
+                        class="whitespace-nowrap"
                         :title="t('league.admin.songFallbackHint')">
                     {{ t('league.admin.songFallback') }}
                   </v-chip>
                   <v-chip v-if="song.disabled"
                         size="x-small"
                         label
-                        variant="flat"
-                        class="text-[10px] px-1.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-semibold whitespace-nowrap">
+                        variant="tonal"
+                        color="error"
+                        class="whitespace-nowrap">
                     {{ t('league.songDisabled') }}
                   </v-chip>
-                  <v-btn variant="outlined" size="x-small" rounded="sm"
+                  <v-btn variant="outlined" size="x-small"
                           :color="song.disabled ? 'success' : 'error'"
-                          class="text-[11px] px-2 font-normal whitespace-nowrap"
+                          class="whitespace-nowrap"
                           :disabled="busy"
                           @click="handleToggleSongDisabled(al.draftWeek!.id, song)">
                     {{ song.disabled ? t('league.admin.enableSong') : t('league.admin.disableSong') }}
@@ -1558,14 +1554,14 @@ onUnmounted(() => {
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                   {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.members.length }})
                 </div>
-                <v-table class="text-xs bg-transparent">
+                <v-table density="compact">
                     <thead>
                       <tr class="align-bottom">
-                        <th class="text-left font-semibold py-1 pr-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                        <th class="text-left font-semibold whitespace-nowrap text-slate-500 dark:text-slate-400">
                           {{ t('league.admin.preview.player') }}
                         </th>
                         <th v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
-                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]"
+                            class="text-left font-semibold align-bottom min-w-[9rem]"
                             :class="s.fallback ? 'bg-violet-100 dark:bg-violet-900/30' : ''">
                           <div class="break-words leading-tight"
                                :class="s.disabled ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200'">{{ s.title }}</div>
@@ -1587,18 +1583,14 @@ onUnmounted(() => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="mem in g.members" :key="mem.userId"
-                          class="border-t border-slate-100 dark:border-slate-700/60">
-                        <td class="py-1 pr-3 whitespace-nowrap">
+                      <tr v-for="mem in g.members" :key="mem.userId">
+                        <td class="whitespace-nowrap">
                           <!-- 押すと入れ替えの選択。2 人目を押した時点でその 2 人の座席が入れ替わる。 -->
                           <v-btn
                             size="x-small"
-                            rounded="sm"
-                            :variant="isSwapPicked(al.draftWeek!.id, mem) ? 'outlined' : 'text'"
-                            class="gap-1 -mx-1 px-1.5 text-xs"
-                            :class="isSwapPicked(al.draftWeek!.id, mem)
-                              ? 'border-indigo-500 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-200 font-semibold'
-                              : 'text-slate-700 dark:text-slate-200 font-normal'"
+                            :variant="isSwapPicked(al.draftWeek!.id, mem) ? 'tonal' : 'text'"
+                            :color="isSwapPicked(al.draftWeek!.id, mem) ? 'primary' : undefined"
+                            class="gap-1"
                             :disabled="busy"
                             :title="t('league.admin.swapHint')"
                             @click="handlePickMemberForSwap(al.draftWeek!.id, tierInfo.tier, g.groupIndex, mem)"
@@ -1607,15 +1599,15 @@ onUnmounted(() => {
                             <v-chip v-if="roleBadge(mem.role)"
                                   size="x-small"
                                   label
-                                  variant="flat"
-                                  class="ml-1 gap-0.5 px-1 text-[10px]"
-                                  :class="roleBadge(mem.role)!.cls">
+                                  variant="tonal"
+                                  class="ml-1 gap-0.5"
+                                  :color="roleBadge(mem.role)!.color">
                               {{ roleBadge(mem.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(mem.homeTier) }}</span>
                             </v-chip>
                           </v-btn>
                         </td>
                         <td v-for="s in groupSongs(tierInfo, g.groupIndex)" :key="s.id"
-                            class="py-1 px-2 whitespace-nowrap tabular-nums"
+                            class="whitespace-nowrap tabular-nums"
                             :class="memberCell(mem, s.slot)?.isLine
                               ? 'bg-amber-100 dark:bg-amber-900/40 font-bold text-amber-800 dark:text-amber-200'
                               : 'text-slate-600 dark:text-slate-300'">
@@ -1631,6 +1623,7 @@ onUnmounted(() => {
                     </tbody>
                 </v-table>
               </div>
+             </v-card-text>
             </v-card>
           </div>
           <div v-else class="mt-2 text-xs text-slate-400">{{ t('league.admin.draftWeek') }}: {{ t('league.admin.none') }}</div>
@@ -1650,7 +1643,7 @@ onUnmounted(() => {
                開始後はラインが凍結済みで差し替えができないため、解禁不可能な曲はここで集計から外す。 -->
           <div v-if="al.activeWeek && al.activeWeek.tiers.length" class="mt-2">
             <!-- 全 DIVISION × 全課題曲を並べると縦に長いので、既定は畳んでおく。 -->
-            <v-btn variant="outlined" size="small" rounded="sm" class="text-xs px-2 font-normal text-slate-500 dark:text-slate-400"
+            <v-btn variant="outlined" size="small"
                     @click="toggleDisablePanel(al.activeWeek.id)">
               {{ isDisablePanelOpen(al.activeWeek.id)
                 ? t('league.admin.closeDisablePanel')
@@ -1666,7 +1659,8 @@ onUnmounted(() => {
               {{ t('league.admin.songFallbackHint') }}
             </p>
             <v-card v-for="tierInfo in al.activeWeek.tiers" :key="tierInfo.tier"
-                 class="mt-2 rounded-lg bg-transparent p-2">
+                 variant="outlined" class="mt-2">
+             <v-card-text>
               <div class="text-xs font-bold text-slate-700 dark:text-slate-200">{{ divisionName(tierInfo.tier) }}</div>
               <div v-if="!tierInfo.songs.length" class="mt-1 text-[11px] text-slate-400">{{ t('league.admin.none') }}</div>
               <div v-for="song in orderedSongs(tierInfo.songs)" :key="song.id"
@@ -1675,8 +1669,8 @@ onUnmounted(() => {
                 <v-chip v-if="song.groupIndex != null"
                       size="x-small"
                       label
-                      variant="flat"
-                      class="text-[10px] px-1.5 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      variant="tonal"
+                      class="whitespace-nowrap">
                   {{ t('league.groupN', { n: song.groupIndex + 1 }) }}
                 </v-chip>
                 <span class="text-slate-400 w-4">{{ song.slot }}.</span>
@@ -1688,26 +1682,29 @@ onUnmounted(() => {
                 <v-chip v-if="song.fallback"
                       size="x-small"
                       label
-                      variant="flat"
-                      class="text-[10px] px-1.5 bg-violet-200 dark:bg-violet-900/60 text-violet-800 dark:text-violet-200 font-semibold whitespace-nowrap"
+                      variant="tonal"
+                      color="deep-purple"
+                      class="whitespace-nowrap"
                       :title="t('league.admin.songFallbackHint')">
                   {{ t('league.admin.songFallback') }}
                 </v-chip>
                 <v-chip v-if="song.disabled"
                       size="x-small"
                       label
-                      variant="flat"
-                      class="text-[10px] px-1.5 bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 font-semibold whitespace-nowrap">
+                      variant="tonal"
+                      color="error"
+                      class="whitespace-nowrap">
                   {{ t('league.songDisabled') }}
                 </v-chip>
-                <v-btn variant="outlined" size="x-small" rounded="sm"
+                <v-btn variant="outlined" size="x-small"
                         :color="song.disabled ? 'success' : 'error'"
-                        class="text-[11px] px-2 font-normal whitespace-nowrap"
+                        class="whitespace-nowrap"
                         :disabled="busy"
                         @click="handleToggleSongDisabled(al.activeWeek!.id, song)">
                   {{ song.disabled ? t('league.admin.enableSong') : t('league.admin.disableSong') }}
                 </v-btn>
               </div>
+             </v-card-text>
             </v-card>
             </template>
           </div>
@@ -1721,11 +1718,11 @@ onUnmounted(() => {
               <p class="text-xs text-slate-400 mt-0.5 max-w-lg">{{ t('league.admin.preview.desc') }}</p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <v-btn size="small" color="teal-darken-1" class="text-xs px-3 rounded-lg font-normal whitespace-nowrap"
+              <v-btn size="small" color="teal-darken-1" class="whitespace-nowrap"
                       :disabled="busy" @click="handlePreview(ladder)">{{ t('league.admin.preview.generate') }}</v-btn>
               <v-btn v-if="preview && preview.tiers.length"
                       size="small" color="error"
-                      class="text-xs px-3 rounded-lg font-normal whitespace-nowrap"
+                      class="whitespace-nowrap"
                       :disabled="busy" @click="handleApplyPreview(ladder)">{{ t('league.admin.preview.apply') }}</v-btn>
             </div>
           </div>
@@ -1743,7 +1740,8 @@ onUnmounted(() => {
 
             <!-- 卓（host DIVISION）ごと -->
             <v-card v-for="tp in preview.tiers" :key="tp.host"
-                 class="mt-3 rounded-lg bg-transparent p-3">
+                 variant="outlined" class="mt-3">
+             <v-card-text>
               <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
                 {{ divisionName(tp.host) }}
                 <span class="text-xs font-normal text-slate-400">({{ tp.memberCount }})</span>
@@ -1754,14 +1752,14 @@ onUnmounted(() => {
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
                   {{ t('league.groupN', { n: g.groupIndex + 1 }) }} ({{ g.memberCount }})
                 </div>
-                <v-table class="text-xs bg-transparent">
+                <v-table density="compact">
                     <thead>
                       <tr class="align-bottom">
-                        <th class="text-left font-semibold py-1 pr-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                        <th class="text-left font-semibold whitespace-nowrap text-slate-500 dark:text-slate-400">
                           {{ t('league.admin.preview.player') }}
                         </th>
                         <th v-for="s in g.songs" :key="s.slot"
-                            class="text-left font-semibold py-1 px-2 align-bottom min-w-[9rem]"
+                            class="text-left font-semibold align-bottom min-w-[9rem]"
                             :class="s.fallback ? 'bg-violet-100 dark:bg-violet-900/30' : ''">
                           <div class="text-slate-700 dark:text-slate-200 break-words leading-tight">{{ s.title }}</div>
                           <div v-if="s.fallback" class="text-[10px] font-semibold text-violet-600 dark:text-violet-400">{{ t('league.admin.songFallbackFull') }}</div>
@@ -1781,21 +1779,20 @@ onUnmounted(() => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(p, pi) in g.players" :key="pi"
-                          class="border-t border-slate-100 dark:border-slate-700/60">
-                        <td class="py-1 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-200">
+                      <tr v-for="(p, pi) in g.players" :key="pi">
+                        <td class="whitespace-nowrap text-slate-700 dark:text-slate-200">
                           {{ p.displayName || '—' }}
                           <v-chip v-if="roleBadge(p.role)"
                                 size="x-small"
                                 label
-                                variant="flat"
-                                class="ml-1 gap-0.5 px-1 text-[10px]"
-                                :class="roleBadge(p.role)!.cls">
+                                variant="tonal"
+                                class="ml-1 gap-0.5"
+                                :color="roleBadge(p.role)!.color">
                             {{ roleBadge(p.role)!.label }}<span class="font-semibold opacity-80">{{ divisionShort(p.homeTier) }}</span>
                           </v-chip>
                         </td>
                         <td v-for="cell in p.bests" :key="cell.slot"
-                            class="py-1 px-2 whitespace-nowrap tabular-nums"
+                            class="whitespace-nowrap tabular-nums"
                             :class="cell.isLine
                               ? 'bg-amber-100 dark:bg-amber-900/40 font-bold text-amber-800 dark:text-amber-200'
                               : 'text-slate-600 dark:text-slate-300'">
@@ -1810,9 +1807,11 @@ onUnmounted(() => {
                     </tbody>
                 </v-table>
               </div>
+             </v-card-text>
             </v-card>
           </div>
         </div>
+       </v-card-text>
       </v-card>
     </template>
 

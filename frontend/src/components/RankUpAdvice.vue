@@ -2,16 +2,14 @@
   <!-- Rank up suggestion panel -->
   <v-card
     v-if="nextRankGap > 0"
-    class="bg-white dark:bg-slate-800 p-4 sm:p-6 border-slate-200 dark:border-slate-700 transition-colors duration-200"
   >
-    <div class="flex items-center justify-between mb-1">
-      <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-        {{ t('advice.title') }}
-      </h3>
-    </div>
+    <v-card-title class="flex items-center gap-2">
+      <svg class="w-5 h-5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+      </svg>
+      {{ t('advice.title') }}
+    </v-card-title>
+    <v-card-text>
     <p class="text-xs text-slate-400 dark:text-slate-500 mb-1">
       {{ t('advice.remaining', { n: nextRankGap.toFixed(1) }) }}
     </p>
@@ -24,10 +22,10 @@
     </p>
 
     <div v-if="isLoading" class="flex items-center justify-center gap-2 py-6 text-slate-400 dark:text-slate-500 text-sm">
-      <v-progress-circular size="20" width="2" />
+      <v-progress-circular indeterminate size="20" width="2" />
       {{ t('advice.computingPotential') }}
     </div>
-    <v-alert v-else-if="loadError" type="error" class="my-2 text-xs">
+    <v-alert v-else-if="loadError" type="error" density="compact" class="my-2">
       {{ t('advice.potentialError', { msg: loadError }) }}
     </v-alert>
     <div v-else-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
@@ -52,16 +50,17 @@
               v-if="sug.unplayed"
               size="x-small"
               label
+              color="primary"
               variant="flat"
-              class="shrink-0 h-auto text-[9px] font-bold px-1 py-px bg-blue-500 text-white"
+              class="shrink-0"
             >{{ t('advice.unplayedTag') }}</v-chip>
             <!-- ペア回帰の参照が無く、加法モデルで概算した候補。σ が大きいので達成率も控えめに出ている -->
             <v-chip
               v-if="isRough(sug.accuracy)"
               size="x-small"
               label
-              variant="flat"
-              class="shrink-0 h-auto text-[9px] font-bold px-1 py-px bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
+              variant="tonal"
+              class="shrink-0"
               :title="accuracyLabel(sug.accuracy)"
             >{{ t('advice.roughTag') }}</v-chip>
           </div>
@@ -90,11 +89,11 @@
           variant="text"
           size="x-small"
           @click="openReason(sug)"
-          class="shrink-0 -mr-0.5 text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+          class="shrink-0"
           :aria-label="t('adviceReason.openButtonAria')"
           :title="t('adviceReason.openButtonAria')"
         >
-          <v-icon :icon="mdiInformationOutline" size="16" />
+          <v-icon :icon="mdiInformationOutline" />
         </v-btn>
       </div>
 
@@ -104,7 +103,6 @@
         variant="outlined"
         block
         @click="showMore"
-        class="w-full py-2 text-xs font-semibold border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
       >
         {{ t('advice.showMore', { n: hiddenCount }) }}
       </v-btn>
@@ -140,7 +138,6 @@
         variant="outlined"
         block
         @click="showAttempted = !showAttempted"
-        class="w-full py-2 text-xs font-semibold border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
       >
         {{ showAttempted ? t('advice.attemptedHide') : t('advice.attemptedShow', { n: attemptedItems.length }) }}
       </v-btn>
@@ -157,7 +154,7 @@
             <div class="flex items-center gap-1 min-w-0">
               <p class="font-bold text-slate-700 dark:text-slate-300 text-xs truncate">{{ sug.title }}</p>
               <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
-              <v-chip size="x-small" label variant="flat" class="shrink-0 h-auto text-[9px] font-bold px-1 py-px bg-amber-500 text-white">{{ t('advice.attemptedTag') }}</v-chip>
+              <v-chip size="x-small" label color="amber-darken-2" variant="flat" class="shrink-0">{{ t('advice.attemptedTag') }}</v-chip>
             </div>
             <p class="text-[10px] leading-tight text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-x-1.5">
               <span>{{ diffShort(sug.difficultyName) }}</span>
@@ -184,11 +181,11 @@
             variant="text"
             size="x-small"
             @click="openReason(sug)"
-            class="shrink-0 -mr-0.5 text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            class="shrink-0"
             :aria-label="t('adviceReason.openButtonAria')"
             :title="t('adviceReason.openButtonAria')"
           >
-            <v-icon :icon="mdiInformationOutline" size="16" />
+            <v-icon :icon="mdiInformationOutline" />
           </v-btn>
         </div>
       </div>
@@ -201,6 +198,7 @@
       :view-user-id="viewingUserId ?? null"
       @close="reasonItem = null"
     />
+    </v-card-text>
   </v-card>
 </template>
 

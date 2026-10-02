@@ -256,7 +256,7 @@ onMounted(async () => {
 
     <!-- 権限なし時の警告 -->
     <v-alert v-if="!isAdmin" type="warning">
-      <p class="font-bold">
+      <p>
         この画面は管理者のみアクセス可能です。
       </p>
     </v-alert>
@@ -264,97 +264,86 @@ onMounted(async () => {
     <template v-else>
       <!-- ロードエラー -->
       <v-alert v-if="loadError" type="error">
-        <p class="font-bold">{{ loadError }}</p>
+        {{ loadError }}
       </v-alert>
 
       <!-- 選択カード -->
-      <v-card tag="section" class="p-6 space-y-5">
-        <div v-if="isLoadingUsers && users.length === 0" class="flex items-center gap-3 text-slate-500 font-bold">
-          <v-progress-circular size="20" width="2" />
+      <v-card tag="section">
+        <v-card-text class="space-y-4">
+        <div v-if="isLoadingUsers && users.length === 0" class="flex items-center gap-3">
+          <v-progress-circular indeterminate size="20" width="2" />
           ユーザー一覧を取得中...
         </div>
 
-        <label v-else class="block space-y-2">
-          <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
-            比較するユーザー
-          </span>
-          <v-select
-            v-model="selectedId"
-            :items="users"
-            :item-title="(u: AdminUserSummary) => `${u.displayName} (${u.iidxId})`"
-            item-value="id"
-            placeholder="-- 選択してください --"
-            clearable
-            density="comfortable"
-            class="w-full font-bold"
-          />
-        </label>
+        <v-select
+          v-else
+          v-model="selectedId"
+          :items="users"
+          :item-title="(u: AdminUserSummary) => `${u.displayName} (${u.iidxId})`"
+          item-value="id"
+          label="比較するユーザー"
+          placeholder="-- 選択してください --"
+          clearable
+          hide-details
+          class="w-full"
+        />
 
         <!-- レベル帯トグル -->
         <div class="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-4">
-          <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
-          <v-checkbox v-model="showLv10Minus" color="indigo" class="flex-none">
-            <template #label>
-              <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
-            </template>
-          </v-checkbox>
-          <v-checkbox v-model="showLv11" color="indigo" class="flex-none">
-            <template #label>
-              <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
-            </template>
-          </v-checkbox>
-          <v-checkbox v-model="showLv12" color="indigo" class="flex-none">
-            <template #label>
-              <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
-            </template>
-          </v-checkbox>
+          <span class="text-sm font-bold">公式レベル</span>
+          <v-checkbox v-model="showLv10Minus" color="primary" label="Lv.10以下" density="compact" hide-details class="flex-none" />
+          <v-checkbox v-model="showLv11" color="primary" label="Lv.11" density="compact" hide-details class="flex-none" />
+          <v-checkbox v-model="showLv12" color="primary" label="Lv.12" density="compact" hide-details class="flex-none" />
         </div>
+        </v-card-text>
 
         <!-- 集計日時と再集計 -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-slate-100 dark:border-slate-700">
-          <p class="text-[11px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 pt-3">
+        <v-divider />
+        <v-card-actions class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs text-slate-500 dark:text-slate-400 ml-2">
             集計日時: {{ formatComputedAt(computedAt) }}
             <span class="hidden sm:inline">（1 日 1 回のバッチで更新されます）</span>
           </p>
           <v-btn
+            color="primary"
+            variant="tonal"
             :disabled="isRecalculating"
-            class="px-5 text-xs sm:text-sm"
-            :class="isRecalculating ? '' : 'bg-slate-900 hover:bg-black text-white'"
             @click="recalculate"
           >
             {{ isRecalculating ? '再集計中...' : '今すぐ再集計' }}
           </v-btn>
-        </div>
-        <p v-if="recalcMessage" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+        </v-card-actions>
+        <v-card-text v-if="recalcMessage" class="pt-0 text-success">
           {{ recalcMessage }}
-        </p>
+        </v-card-text>
       </v-card>
 
       <!-- 未選択時の案内 -->
-      <v-card v-if="selectedId == null" variant="flat" class="bg-slate-50 dark:bg-slate-900/40 p-6 border border-slate-200 dark:border-slate-700 text-center">
-        <p class="text-slate-500 dark:text-slate-400 font-bold">
+      <v-card v-if="selectedId == null" variant="tonal" class="text-center"><v-card-text>
+        <p>
           ユーザーを選択すると、全ユーザーとの勝敗が表示されます。
         </p>
-      </v-card>
+      </v-card-text></v-card>
 
       <template v-else>
         <!-- 集計エラー -->
         <v-alert v-if="statsError" type="error">
-          <p class="font-bold">{{ statsError }}</p>
+          {{ statsError }}
         </v-alert>
 
         <!-- ローディング -->
         <div v-if="isLoadingStats" class="flex flex-col items-center justify-center py-16">
-          <v-progress-circular size="48" width="4" class="mb-4" />
+          <v-progress-circular indeterminate size="48" width="4" class="mb-4" />
           <p class="text-slate-500 font-bold">勝敗を集計中...</p>
         </div>
 
         <template v-else>
           <!-- 総合サマリー -->
-          <v-card tag="section" class="p-5 sm:p-6">
-            <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3">
+          <v-card tag="section">
+            <v-card-subtitle class="pt-3">
               {{ selectedUser?.displayName }} の全ユーザー通算
-            </h2>
+            </v-card-subtitle>
+            <v-card-text>
             <div class="grid grid-cols-4 gap-2 text-center font-bold">
               <div class="flex flex-col">
                 <span class="text-xl sm:text-3xl text-blue-600 dark:text-blue-400">{{ totals.win }}</span>
@@ -373,6 +362,7 @@ onMounted(async () => {
                 <span class="text-[10px] text-slate-400 dark:text-slate-500">勝率</span>
               </div>
             </div>
+            </v-card-text>
           </v-card>
 
           <!-- 対戦相手ランキング -->
@@ -383,36 +373,36 @@ onMounted(async () => {
               <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
             </h2>
 
-            <v-card v-if="rows.length === 0" variant="flat" class="bg-slate-50 dark:bg-slate-900/40 p-6 border border-slate-200 dark:border-slate-700 text-center">
-              <p class="text-slate-500 dark:text-slate-400 font-bold">
+            <v-card v-if="rows.length === 0" variant="tonal" class="text-center"><v-card-text>
+              <p>
                 比較できる相手がいません。レベルのトグルを確認してください。
               </p>
-            </v-card>
+            </v-card-text></v-card>
 
-            <v-table v-else class="opponent-table text-left bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700">
-                <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
+            <v-table v-else hover class="opponent-table">
+                <thead>
                   <tr>
-                    <th class="p-2 sm:p-4 w-10 sm:w-16 text-center">#</th>
-                    <th class="p-2 sm:p-4">相手</th>
-                    <th class="p-2 sm:p-4 text-center w-16 sm:w-24">勝率</th>
-                    <th class="p-2 sm:p-4 text-center">WIN</th>
-                    <th class="p-2 sm:p-4 text-center">DRAW</th>
-                    <th class="p-2 sm:p-4 text-center">LOSS</th>
-                    <th class="p-2 sm:p-4 text-center bg-blue-50/50 dark:bg-blue-900/10">自分のみ</th>
-                    <th class="p-2 sm:p-4 text-center bg-red-50/50 dark:bg-red-900/10">相手のみ</th>
+                    <th class="w-10 sm:w-16 text-center">#</th>
+                    <th>相手</th>
+                    <th class="text-center w-16 sm:w-24">勝率</th>
+                    <th class="text-center">WIN</th>
+                    <th class="text-center">DRAW</th>
+                    <th class="text-center">LOSS</th>
+                    <th class="text-center">自分のみ</th>
+                    <th class="text-center">相手のみ</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm sm:text-base">
+                <tbody>
                   <tr
                     v-for="(row, idx) in rows"
                     :key="row.userId"
                     @click="openDetail(row)"
-                    class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer select-none"
+                    class="cursor-pointer select-none"
                   >
-                    <td class="p-2 sm:p-4 text-center font-bold text-slate-400">{{ idx + 1 }}</td>
+                    <td class="text-center font-bold text-slate-400">{{ idx + 1 }}</td>
                     <!-- 列幅を変えないため、アイコンは shrink-0・名前側は min-w-0 で
                          はみ出したときに列を押し広げずに省略されるようにする。 -->
-                    <td class="p-2 sm:p-4 font-bold">
+                    <td class="font-bold">
                       <div class="flex items-center gap-2">
                         <RankIcon
                           :rank-name="beatTier(row.totalBeatPt).name"
@@ -428,7 +418,7 @@ onMounted(async () => {
                         </div>
                       </div>
                     </td>
-                    <td class="p-2 sm:p-4 text-center font-bold">
+                    <td class="text-center font-bold">
                       <span class="text-emerald-600 dark:text-emerald-400">{{ formatRate(row.winRate) }}</span>
                       <!-- 勝率バー: 母数 0 のときは描かない -->
                       <div v-if="row.winRate != null" class="mt-1 h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -436,11 +426,11 @@ onMounted(async () => {
                       </div>
                       <div class="text-[10px] text-slate-400 mt-0.5">{{ row.decided }} 曲</div>
                     </td>
-                    <td class="p-2 sm:p-4 text-center font-bold text-blue-600 dark:text-blue-400">{{ row.win }}</td>
-                    <td class="p-2 sm:p-4 text-center font-bold text-slate-400">{{ row.draw }}</td>
-                    <td class="p-2 sm:p-4 text-center font-bold text-red-500 dark:text-red-400">{{ row.loss }}</td>
-                    <td class="p-2 sm:p-4 text-center font-bold text-blue-500/80 bg-blue-50/30 dark:bg-blue-900/5">{{ row.onlySelf }}</td>
-                    <td class="p-2 sm:p-4 text-center font-bold text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ row.onlyOpponent }}</td>
+                    <td class="text-center font-bold text-blue-600 dark:text-blue-400">{{ row.win }}</td>
+                    <td class="text-center font-bold text-slate-400">{{ row.draw }}</td>
+                    <td class="text-center font-bold text-red-500 dark:text-red-400">{{ row.loss }}</td>
+                    <td class="text-center font-bold text-blue-500/80">{{ row.onlySelf }}</td>
+                    <td class="text-center font-bold text-red-500/80">{{ row.onlyOpponent }}</td>
                   </tr>
                 </tbody>
             </v-table>
@@ -448,7 +438,7 @@ onMounted(async () => {
 
           <!-- 注意書き -->
           <v-alert type="info">
-            <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
+            <div class="text-sm min-w-0">
               <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
               <p>・勝率 = WIN ÷ (WIN + DRAW + LOSS)。両者プレイ済みの楽曲だけが母数です。</p>
               <p>・自分のみ / 相手のみ: 片方だけがプレイ済みの楽曲数。勝率には含みません。</p>

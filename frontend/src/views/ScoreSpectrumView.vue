@@ -328,7 +328,8 @@ const thresholdLabel = computed(() => {
 
 <template>
   <div class="space-y-6">
-    <v-card class="bg-white dark:bg-slate-800 p-6">
+    <v-card>
+      <v-card-text>
       <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
         <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコア分布</h2>
         <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
@@ -337,7 +338,6 @@ const thresholdLabel = computed(() => {
           <v-btn
             variant="outlined"
             size="small"
-            class="text-xs"
             :disabled="serverRefreshing"
             @click="load(true)"
           >再計算</v-btn>
@@ -349,23 +349,24 @@ const thresholdLabel = computed(() => {
       </p>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <v-progress-circular size="32" width="3" />
+        <v-progress-circular indeterminate size="32" width="3" />
         <span class="ml-3 text-sm text-slate-500">{{ serverRefreshing ? 'サーバーで集計中です（1 分前後かかります）…' : '読み込み中...' }}</span>
       </div>
-      <v-alert v-else-if="errorMsg && charts.length === 0" type="error" class="text-sm my-4">{{ errorMsg }}</v-alert>
+      <v-alert v-else-if="errorMsg && charts.length === 0" type="error" class="my-4">{{ errorMsg }}</v-alert>
 
       <template v-else>
-        <v-alert v-if="errorMsg" type="warning" class="text-xs mb-2">{{ errorMsg }}（前回の集計を表示中）</v-alert>
+        <v-alert v-if="errorMsg" type="warning" density="compact" class="mb-2">{{ errorMsg }}（前回の集計を表示中）</v-alert>
 
         <!-- 比較チャート -->
-        <v-card class="p-4 mb-6">
+        <v-card variant="outlined" class="mb-6">
+          <v-card-text>
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
               {{ chartMode === 'survival' ? '到達率カーブ（そのスコアレート以上を取った人の割合）' : '分布密度（そのスコアレート帯にいる人の割合）' }}
             </div>
-            <v-btn-toggle v-model="chartMode" mandatory class="text-xs">
-              <v-btn value="survival" size="small" class="text-xs">到達率</v-btn>
-              <v-btn value="density" size="small" class="text-xs">密度</v-btn>
+            <v-btn-toggle v-model="chartMode" mandatory color="primary" variant="outlined" divided density="compact">
+              <v-btn value="survival" size="small">到達率</v-btn>
+              <v-btn value="density" size="small">密度</v-btn>
             </v-btn-toggle>
           </div>
 
@@ -375,7 +376,7 @@ const thresholdLabel = computed(() => {
               <span class="inline-block w-3 h-0.5 rounded" :style="{ background: s.color }"></span>
               {{ s.row.title }}<span v-if="s.row.difficultyName === 'LEGGENDARIA'" class="text-orange-500">[L]</span>
               <span class="text-slate-400">({{ s.row.rank }})</span>
-              <v-btn icon variant="text" size="x-small" density="comfortable" class="text-slate-400 hover:text-red-500" aria-label="外す" @click="toggleSelect(s.row)"><v-icon :icon="mdiClose" size="14" /></v-btn>
+              <v-btn icon variant="text" size="x-small" density="comfortable" aria-label="外す" @click="toggleSelect(s.row)"><v-icon :icon="mdiClose" size="14" /></v-btn>
             </span>
             <span v-if="selectedSeries.length === 0" class="text-slate-400">下の表のチェックで譜面を選ぶと重ねて比較できます（最大 {{ MAX_COMPARE }} 譜面）</span>
           </div>
@@ -417,25 +418,28 @@ const thresholdLabel = computed(() => {
               </div>
             </div>
           </div>
+          </v-card-text>
         </v-card>
 
         <!-- フィルタ・到達ライン -->
         <div class="flex flex-wrap items-center gap-3 mb-4 text-sm">
-          <v-text-field v-model="search" type="text" placeholder="曲名で検索..." class="w-48 flex-none" />
+          <v-text-field v-model="search" type="text" placeholder="曲名で検索..." density="compact" hide-details class="w-48 flex-none" />
           <v-select
             v-model="levelFilter"
             :items="[{ title: '☆12', value: '12' }, { title: '☆11', value: '11' }, { title: '☆11+12', value: 'all' }]"
             aria-label="レベル"
+            density="compact"
+            hide-details
             class="w-32 flex-none"
           />
           <div class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
             <span>人数</span>
-            <v-text-field v-model.number="minPlayers" type="number" min="1" aria-label="人数" class="w-20 flex-none" />
+            <v-text-field v-model.number="minPlayers" type="number" min="1" aria-label="人数" density="compact" hide-details class="w-24 flex-none" />
             <span>人以上</span>
           </div>
           <div class="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300 grow min-w-[16rem]">
             <span>到達ライン</span>
-            <v-slider v-model="threshold" :min="X_MIN" :max="X_MAX" :step="1" aria-label="到達ライン" class="grow" />
+            <v-slider v-model="threshold" :min="X_MIN" :max="X_MAX" :step="1" aria-label="到達ライン" color="primary" hide-details class="grow" />
             <span class="font-mono font-bold text-slate-800 dark:text-slate-100 w-32">{{ thresholdLabel }}</span>
           </div>
         </div>
@@ -443,7 +447,7 @@ const thresholdLabel = computed(() => {
         <p class="text-sm text-slate-500 mb-2">{{ filtered.length }}譜面</p>
 
         <v-card class="overflow-x-auto">
-          <v-table class="w-full text-sm">
+          <v-table density="compact" class="w-full">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                 <th class="px-2 py-2.5 w-8"></th>
@@ -482,7 +486,7 @@ const thresholdLabel = computed(() => {
                 </td>
                 <td class="px-2 py-1.5">
                   <span class="font-medium text-slate-800 dark:text-slate-200">{{ r.title }}</span>
-                  <v-chip v-if="r.difficultyName === 'LEGGENDARIA'" label size="x-small" variant="flat" class="ml-1 h-auto text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1 rounded">[L]</v-chip>
+                  <v-chip v-if="r.difficultyName === 'LEGGENDARIA'" label size="x-small" color="orange" class="ml-1">[L]</v-chip>
                 </td>
                 <td class="px-2 py-1.5 text-center font-mono text-slate-700 dark:text-slate-300">{{ r.rank }}</td>
                 <td class="px-2 py-1.5 text-center text-slate-500 dark:text-slate-400">{{ r.playerCount }}</td>
@@ -520,11 +524,12 @@ const thresholdLabel = computed(() => {
           </v-table>
         </v-card>
         <div v-if="visibleCount < filtered.length" class="text-center mt-3">
-          <v-btn variant="outlined" class="text-sm text-slate-600 dark:text-slate-300" @click="visibleCount += 200">
+          <v-btn variant="outlined" @click="visibleCount += 200">
             さらに表示（残り {{ filtered.length - visibleCount }}）
           </v-btn>
         </div>
       </template>
+      </v-card-text>
     </v-card>
   </div>
 </template>

@@ -31,13 +31,3 @@
     @apply text-[11px] font-semibold text-slate-500 dark:text-slate-400;
   }
 }
-
-/*
- * Vuetify との共存。v-app は文字の種類・背景を既存（body の Tailwind）から引き継ぐ。
- * OBS 用の透過ページでも背景が塗られないように透明にする（背景は body が持つ）。
- */
-.v-application {
-  font-family: inherit;
-  background: transparent !important;
-  color: inherit;
-}

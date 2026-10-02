@@ -403,27 +403,27 @@ onBeforeUnmount(() => {
     max-width="512"
     @update:model-value="(v: boolean) => { if (!v) closeModal() }"
   >
-    <v-card class="w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <v-card class="w-full flex flex-col max-h-[90vh]">
       <!-- ヘッダ: タイトル + 閉じるボタン -->
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
-        <div>
-          <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('ocrSearch.title') }}</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('ocrSearch.subtitle') }}</p>
-        </div>
-        <v-btn
-          icon
-          variant="text"
-          size="small"
-          class="shrink-0 text-slate-400"
-          aria-label="close"
-          @click="closeModal"
-        >
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+      <v-card-item class="shrink-0">
+        <v-card-title>{{ t('ocrSearch.title') }}</v-card-title>
+        <v-card-subtitle>{{ t('ocrSearch.subtitle') }}</v-card-subtitle>
+        <template #append>
+          <v-btn
+            icon
+            variant="text"
+            size="small"
+            aria-label="close"
+            @click="closeModal"
+          >
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
+      <v-divider />
 
       <!-- 本体 -->
-      <div class="p-6 space-y-4 overflow-y-auto">
+      <v-card-text class="space-y-4 overflow-y-auto">
         <!-- 初期状態: カメラ起動ボタン -->
         <div v-if="status === 'idle'" class="flex flex-col items-center py-4 space-y-4">
           <div class="w-20 h-20 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
@@ -469,8 +469,10 @@ onBeforeUnmount(() => {
             <!-- 状態バッジ -->
             <v-chip
               label
+              size="small"
               variant="flat"
-              class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold"
+              color="grey-darken-4"
+              class="absolute top-2 left-2"
             >
               {{ status === 'initializing' ? t('ocrSearch.initializing') : (status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.ready')) }}
             </v-chip>
@@ -485,7 +487,7 @@ onBeforeUnmount(() => {
             @click="captureAndRecognize"
           >
             <template #prepend>
-              <v-progress-circular v-if="status === 'capturing'" size="20" width="2" color="white" />
+              <v-progress-circular v-if="status === 'capturing'" size="20" width="2" indeterminate />
               <v-icon v-else :icon="mdiCameraOutline" />
             </template>
             {{ status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.capture') }}
@@ -495,7 +497,7 @@ onBeforeUnmount(() => {
           <v-alert
             v-if="noMatchMessage"
             type="warning"
-            class="text-sm font-medium"
+            density="compact"
           >
             {{ noMatchMessage }}
           </v-alert>
@@ -520,27 +522,27 @@ onBeforeUnmount(() => {
             <v-card
               v-for="(c, i) in matchCandidates"
               :key="`${c.song.title}|${c.song.artist}|${i}`"
-              class="w-full text-left p-3 transition-all"
-              :class="i === 0
-                ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
-                : 'bg-white dark:bg-slate-700/40 border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-700'"
+              class="w-full"
+              :variant="i === 0 ? 'tonal' : 'outlined'"
+              :color="i === 0 ? 'success' : undefined"
               @click="pickCandidate(c)"
             >
-              <div class="flex items-start gap-3">
-                <div
-                  class="shrink-0 min-w-[3rem] h-8 flex items-center justify-center rounded-lg text-xs font-bold tabular-nums"
-                  :class="i === 0
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+              <v-card-text class="flex items-start gap-3">
+                <v-chip
+                  label
+                  size="small"
+                  :variant="i === 0 ? 'flat' : 'tonal'"
+                  :color="i === 0 ? 'success' : undefined"
+                  class="shrink-0 tabular-nums"
                 >
                   {{ c.score }}%
-                </div>
+                </v-chip>
                 <div class="flex-1 min-w-0">
-                  <h4 class="text-sm font-bold text-slate-900 dark:text-white break-words leading-tight">{{ c.song.title }}</h4>
-                  <p class="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">{{ c.song.artist }}</p>
-                  <p v-if="c.song.genre" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ c.song.genre }}</p>
+                  <h4 class="text-sm font-bold break-words leading-tight">{{ c.song.title }}</h4>
+                  <p class="text-xs opacity-80 truncate mt-0.5">{{ c.song.artist }}</p>
+                  <p v-if="c.song.genre" class="text-[11px] opacity-70 truncate">{{ c.song.genre }}</p>
                 </div>
-              </div>
+              </v-card-text>
             </v-card>
           </div>
 
@@ -551,7 +553,7 @@ onBeforeUnmount(() => {
 
         <!-- エラー -->
         <div v-else-if="status === 'error'" class="space-y-3">
-          <v-alert type="error" class="text-sm font-medium">
+          <v-alert type="error" density="compact">
             {{ errorMessage || t('ocrSearch.cameraError') }}
           </v-alert>
           <v-btn color="primary" block size="large" @click="retry">
@@ -561,7 +563,7 @@ onBeforeUnmount(() => {
 
         <!-- 非表示の作業用キャンバス -->
         <canvas ref="canvasRef" class="hidden"></canvas>
-      </div>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>

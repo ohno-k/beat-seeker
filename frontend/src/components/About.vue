@@ -17,9 +17,10 @@ const { t } = useI18n();
 <template>
   <div class="space-y-16 pb-20 animate-fade-in text-slate-900 dark:text-white">
     <!-- ヒーロー（キャッチコピー）セクション -->
-    <v-card tag="section" class="relative overflow-hidden p-8 md:p-16 transition-colors duration-200">
+    <v-card tag="section" class="relative overflow-hidden">
+      <v-card-text class="pa-8 pa-md-16">
       <div class="relative z-10 max-w-3xl">
-        <v-chip label variant="outlined" class="h-auto px-4 py-1.5 text-sm font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-6 border-blue-100 dark:border-blue-800/50">
+        <v-chip label variant="tonal" color="primary" class="mb-6">
           <span class="relative flex h-2 w-2 mr-2">
             <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
           </span>
@@ -35,6 +36,7 @@ const { t } = useI18n();
           {{ t('about.heroP2') }}
         </p>
       </div>
+    </v-card-text>
     </v-card>
 
     <!-- 使い方を 3 ステップで示すセクション -->
@@ -45,28 +47,34 @@ const { t } = useI18n();
       </h3>
       
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <v-card class="group p-8 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300">
+        <v-card>
+          <v-card-text class="pa-6">
           <div class="w-14 h-14 bg-slate-100 dark:bg-slate-700/50 rounded-md flex items-center justify-center text-2xl font-bold text-slate-400 dark:text-slate-500 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">1</div>
           <h4 class="text-xl font-bold mb-3">{{ t('about.step1Title') }}</h4>
           <p class="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
             {{ t('about.step1Desc') }}
           </p>
+        </v-card-text>
         </v-card>
 
-        <v-card class="group p-8 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300">
+        <v-card>
+          <v-card-text class="pa-6">
           <div class="w-14 h-14 bg-slate-100 dark:bg-slate-700/50 rounded-md flex items-center justify-center text-2xl font-bold text-slate-400 dark:text-slate-500 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">2</div>
           <h4 class="text-xl font-bold mb-3">{{ t('about.step2Title') }}</h4>
           <p class="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
             {{ t('about.step2Desc') }}
           </p>
+        </v-card-text>
         </v-card>
 
-        <v-card class="group p-8 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300">
+        <v-card>
+          <v-card-text class="pa-6">
           <div class="w-14 h-14 bg-slate-100 dark:bg-slate-700/50 rounded-md flex items-center justify-center text-2xl font-bold text-slate-400 dark:text-slate-500 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">3</div>
           <h4 class="text-xl font-bold mb-3">{{ t('about.step3Title') }}</h4>
           <p class="text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
             {{ t('about.step3Desc') }}
           </p>
+        </v-card-text>
         </v-card>
       </div>
     </section>
@@ -80,7 +88,8 @@ const { t } = useI18n();
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Dashboard -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -90,10 +99,12 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.featDashboardDesc') }}
           </p>
+        </v-card-text>
         </v-card>
 
         <!-- Beat-Tier -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -103,10 +114,12 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.featBeatTierDesc') }}
           </p>
+        </v-card-text>
         </v-card>
 
         <!-- Table -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
@@ -116,10 +129,12 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.featTableDesc') }}
           </p>
+        </v-card-text>
         </v-card>
 
         <!-- Report -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
@@ -129,10 +144,12 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.featReportDesc') }}
           </p>
+        </v-card-text>
         </v-card>
 
         <!-- History -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -142,10 +159,12 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.featHistoryDesc') }}
           </p>
+        </v-card-text>
         </v-card>
 
         <!-- Cloud -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg text-rose-600 dark:text-rose-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /></svg>
@@ -155,10 +174,12 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.featCloudDesc') }}
           </p>
+        </v-card-text>
         </v-card>
 
         <!-- Dark Mode -->
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="flex items-center gap-3 text-lg font-bold mb-4">
             <span class="p-2 bg-slate-100 dark:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
@@ -168,6 +189,7 @@ const { t } = useI18n();
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.darkModeDesc') }}
           </p>
+        </v-card-text>
         </v-card>
       </div>
     </section>
@@ -180,32 +202,40 @@ const { t } = useI18n();
       </h3>
       
       <div class="space-y-4">
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="text-lg font-bold mb-3">{{ t('about.faqQ1') }}</h4>
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.faqA1') }}
           </p>
+        </v-card-text>
         </v-card>
 
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="text-lg font-bold mb-3">{{ t('about.faqQ2') }}</h4>
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.faqA2') }}
           </p>
+        </v-card-text>
         </v-card>
 
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="text-lg font-bold mb-3">{{ t('about.faqQ3') }}</h4>
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.faqA3') }}
           </p>
+        </v-card-text>
         </v-card>
 
-        <v-card class="p-8">
+        <v-card>
+          <v-card-text class="pa-6">
           <h4 class="text-lg font-bold mb-3">{{ t('about.faqQ4') }}</h4>
           <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
             {{ t('about.faqA4') }}
           </p>
+        </v-card-text>
         </v-card>
       </div>
     </section>

@@ -66,7 +66,8 @@ const confirmKofiOpen = () => {
 
 <template>
   <div class="w-full max-w-2xl mx-auto animate-fade-in">
-    <v-card class="p-8 sm:p-12 text-center">
+    <v-card>
+      <v-card-text class="pa-8 pa-sm-12 text-center">
       <!-- 鍵アイコン -->
       <div class="w-20 h-20 mx-auto mb-6 bg-amber-50 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-10 w-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,12 +82,15 @@ const confirmKofiOpen = () => {
       <v-btn
         type="button"
         size="large"
-        class="px-6 bg-amber-500 hover:bg-amber-600 text-white font-semibold"
+        color="warning"
+        variant="flat"
         @click="handleKofiClick"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
+        <template #prepend>
+          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </template>
         {{ t('supporter.kofiButton') }}
       </v-btn>
 
@@ -98,11 +102,13 @@ const confirmKofiOpen = () => {
       <p v-if="kofiCopied" class="mt-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
         {{ t('supporter.tokenCopied') }}
       </p>
+      </v-card-text>
     </v-card>
 
     <!-- Ko-fi 確認モーダル: トークンを見せてからコピー + 外部遷移する -->
     <v-dialog v-model="showKofiModal" max-width="384" aria-labelledby="supporter-lock-kofi-title">
-      <v-card class="p-6 space-y-4">
+      <v-card>
+        <v-card-text class="space-y-4">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,14 +125,16 @@ const confirmKofiOpen = () => {
           <p class="text-lg font-mono font-bold text-amber-700 dark:text-amber-300 select-all tabular-nums">{{ user?.supporterToken }}</p>
         </div>
 
-        <div class="flex gap-2">
-          <v-btn variant="tonal" class="flex-1 text-sm font-semibold" @click="showKofiModal = false">
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="showKofiModal = false">
             {{ t('supporter.modalCancel') }}
           </v-btn>
-          <v-btn class="flex-1 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600" @click="confirmKofiOpen">
+          <v-btn variant="flat" color="warning" @click="confirmKofiOpen">
             {{ t('supporter.modalConfirm') }}
           </v-btn>
-        </div>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>

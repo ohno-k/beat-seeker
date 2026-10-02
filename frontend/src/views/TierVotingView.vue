@@ -332,7 +332,8 @@ const totalVotedCount = computed(() => myVotes.value.size);
     </div>
 
     <!-- 投票基準の案内文 -->
-    <v-card class="mb-5 p-4 bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700">
+    <v-card class="mb-5" variant="tonal">
+      <v-card-text>
       <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">{{ t('tierVoting.criteriaTitle') }}</p>
       <ul class="space-y-1 text-sm text-slate-700 dark:text-slate-300">
         <li class="flex items-start gap-2">
@@ -344,28 +345,29 @@ const totalVotedCount = computed(() => myVotes.value.size);
           {{ t('tierVoting.criteria2') }}
         </li>
       </ul>
+      </v-card-text>
     </v-card>
 
     <!-- 凡例: ランク付き譜面で使う ↑ → ↓ の意味説明 -->
-    <div class="mb-4 flex flex-wrap gap-2 text-xs font-bold">
-      <v-chip label variant="flat" class="flex items-center gap-1 px-2.5 py-1 h-auto text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg">
+    <div class="mb-4 flex flex-wrap gap-2">
+      <v-chip label variant="tonal" color="success" size="small">
         ↑ {{ t('tierVoting.promote') }}
       </v-chip>
-      <v-chip label variant="flat" class="flex items-center gap-1 px-2.5 py-1 h-auto text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg">
+      <v-chip label variant="tonal" color="primary" size="small">
         → {{ t('tierVoting.stay') }}
       </v-chip>
-      <v-chip label variant="flat" class="flex items-center gap-1 px-2.5 py-1 h-auto text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg">
+      <v-chip label variant="tonal" color="error" size="small">
         ↓ {{ t('tierVoting.demote') }}
       </v-chip>
     </div>
 
     <!-- 未ログイン警告: ログインしないと投票できない旨を表示 -->
-    <v-alert v-if="!isLoggedIn" type="warning" class="mb-5 text-sm">
+    <v-alert v-if="!isLoggedIn" type="warning" class="mb-5">
       {{ t('tierVoting.loginHint') }}
     </v-alert>
 
     <!-- 投票済み曲数: ログイン済かつ1件以上投票があるときのみ表示 -->
-    <v-alert v-if="isLoggedIn && totalVotedCount > 0" type="info" class="mb-5 text-sm">
+    <v-alert v-if="isLoggedIn && totalVotedCount > 0" type="info" class="mb-5">
       {{ t('tierVoting.votedCount', { n: totalVotedCount }) }}
     </v-alert>
 
@@ -377,13 +379,14 @@ const totalVotedCount = computed(() => myVotes.value.size);
         :placeholder="t('tierVoting.searchPlaceholder')"
         :prepend-inner-icon="mdiMagnify"
         clearable
-        class="w-full max-w-sm text-sm"
+        hide-details
+        class="w-full max-w-sm"
       />
     </div>
 
     <!-- ロード中スピナー -->
     <div v-if="isLoadingVotes" class="flex justify-center py-16">
-      <v-progress-circular size="32" width="4" />
+      <v-progress-circular indeterminate color="primary" />
     </div>
 
     <!-- ランクごとのリスト: ランクヘッダ＋曲行を縦に並べる -->
@@ -391,29 +394,18 @@ const totalVotedCount = computed(() => myVotes.value.size);
       <v-card
         v-for="rank in filteredRanks"
         :key="rank.rank"
-        class="overflow-hidden"
-        :class="isUncategorized(rank.rank)
-          ? 'bg-amber-50/60 dark:bg-amber-900/10 border-amber-300 dark:border-amber-700 ring-1 ring-amber-300/60 dark:ring-amber-600/40'
-          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'"
+        :color="isUncategorized(rank.rank) ? 'amber' : undefined"
+        :variant="isUncategorized(rank.rank) ? 'outlined' : 'elevated'"
       >
         <!-- ランクヘッダ: ランク名・曲数・未カテゴリならTier選択ヒント -->
-        <div
-          class="px-5 py-3 border-b flex items-center gap-3"
-          :class="isUncategorized(rank.rank)
-            ? 'bg-amber-100/70 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/60'
-            : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600'"
-        >
-          <span
-            class="text-base font-bold tracking-tight"
-            :class="isUncategorized(rank.rank)
-              ? 'text-amber-900 dark:text-amber-100'
-              : 'text-slate-800 dark:text-white'"
-          >{{ rank.rank }}</span>
-          <span class="text-xs text-slate-400 dark:text-slate-500">{{ rank.songs.length }}{{ t('tierVoting.songs') }}</span>
-          <v-chip v-if="isUncategorized(rank.rank)" size="x-small" label variant="flat" class="text-[10px] px-2 py-0.5 h-auto bg-amber-200 dark:bg-amber-700/60 text-amber-800 dark:text-amber-100 font-bold">
+        <v-card-title class="flex items-center gap-3">
+          <span>{{ rank.rank }}</span>
+          <span class="text-xs font-normal text-slate-400 dark:text-slate-500">{{ rank.songs.length }}{{ t('tierVoting.songs') }}</span>
+          <v-chip v-if="isUncategorized(rank.rank)" size="x-small" label color="amber-darken-2" variant="flat">
             {{ t('tierVoting.selectTierHint') }}
           </v-chip>
-        </div>
+        </v-card-title>
+        <v-divider />
 
         <!-- 曲の行: 行クリックでコメントモーダル。投票ボタンは stop で行のクリックを阻止 -->
         <div class="divide-y divide-slate-100 dark:divide-slate-700/60">
@@ -428,11 +420,9 @@ const totalVotedCount = computed(() => myVotes.value.size);
               <v-chip
                 size="x-small"
                 label
-                variant="flat"
-                class="shrink-0 text-[10px] px-1.5 py-0.5 h-auto font-bold"
-                :class="parseSong(songEntry).difficultyName === 'LEGGENDARIA'
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                  : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'"
+                variant="tonal"
+                :color="parseSong(songEntry).difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
+                class="shrink-0"
               >
                 {{ parseSong(songEntry).difficultyName === 'LEGGENDARIA' ? 'LEG' : 'ANO' }}
               </v-chip>
@@ -443,13 +433,12 @@ const totalVotedCount = computed(() => myVotes.value.size);
               <!-- コメントバッジ／ボタン: コメント数があれば青、無ければグレー -->
               <v-btn
                 size="x-small"
+                :variant="commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`) ? 'tonal' : 'text'"
+                :color="commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`) ? 'primary' : undefined"
+                :prepend-icon="mdiMessageOutline"
                 @click.stop="openCommentModal(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
-                class="inline-flex items-center gap-1 shrink-0 px-2 py-1 h-auto rounded-lg text-[10px] font-bold transition-all ml-1"
-                :class="commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`)
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/60'
-                  : 'bg-slate-100 text-slate-500 dark:bg-slate-700/50 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600'"
+                class="shrink-0 ml-1"
               >
-                <v-icon :icon="mdiMessageOutline" size="12" class="mr-1" />
                 <template v-if="commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`)">
                   {{ commentStats.get(`${parseSong(songEntry).title}|${parseSong(songEntry).difficultyName}`)!.count }} 件のスレッド
                 </template>
@@ -470,11 +459,11 @@ const totalVotedCount = computed(() => myVotes.value.size);
                   item-value="value"
                   :disabled="!isLoggedIn"
                   @update:model-value="(v: string) => castTierVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, v ?? '')"
-                  class="w-28 flex-none rounded-lg text-xs font-bold transition-all"
-                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName)
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
+                  :color="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) ? 'primary' : undefined"
+                  :base-color="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) ? 'primary' : undefined"
+                  density="compact"
+                  hide-details
+                  class="w-32 flex-none"
                 />
 
                 <!-- Tier 票分布: 自分が投票済みのときだけ表示。未投票なら伏字プレースホルダ -->
@@ -487,14 +476,12 @@ const totalVotedCount = computed(() => myVotes.value.size);
                     v-for="entry in getTierBreakdown(parseSong(songEntry).title, parseSong(songEntry).difficultyName)"
                     :key="entry.tier"
                     label
-                    variant="flat"
-                    class="inline-flex items-baseline gap-1 px-2 py-0.5 h-auto rounded-md text-[11px] font-bold border whitespace-nowrap transition-colors"
-                    :class="entry.isTop
-                      ? 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700'
-                      : 'bg-white text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-600'"
+                    size="small"
+                    :variant="entry.isTop ? 'tonal' : 'outlined'"
+                    :color="entry.isTop ? 'primary' : undefined"
                   >
-                    <span class="font-bold tracking-tight">{{ entry.tier }}</span>
-                    <span class="text-[10px] opacity-75 ml-1">×{{ entry.count }}</span>
+                    <span>{{ entry.tier }}</span>
+                    <span class="ml-1">×{{ entry.count }}</span>
                   </v-chip>
                   <span class="text-[10px] text-slate-400 dark:text-slate-500 ml-1 whitespace-nowrap">
                     計{{ getTotalTierVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName) }}票
@@ -515,54 +502,42 @@ const totalVotedCount = computed(() => myVotes.value.size);
               <div class="flex items-center gap-1.5 shrink-0" @click.stop>
                 <!-- 昇格（PROMOTE）ボタン: 票数も表示 -->
                 <v-btn
-                  variant="outlined"
                   size="small"
                   @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'PROMOTE')"
                   :disabled="!isLoggedIn"
                   :title="t('tierVoting.promote')"
-                  class="flex items-center gap-1 px-2.5 py-1.5 h-auto min-w-0 rounded-lg text-xs font-bold transition-all border"
-                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'PROMOTE'
-                    ? 'bg-green-500 text-white border-green-500'
-                    : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-green-400 hover:text-green-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
+                  color="success"
+                  :variant="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'PROMOTE' ? 'flat' : 'outlined'"
                 >
                   <span>↑</span>
-                  <span class="font-bold" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
-                  <span class="font-bold opacity-50" v-else>?</span>
+                  <span class="ml-1" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['PROMOTE'] ?? 0 }}</span>
+                  <span class="ml-1 opacity-50" v-else>?</span>
                 </v-btn>
                 <!-- 据え置き（STAY）ボタン -->
                 <v-btn
-                  variant="outlined"
                   size="small"
                   @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'STAY')"
                   :disabled="!isLoggedIn"
                   :title="t('tierVoting.stay')"
-                  class="flex items-center gap-1 px-2.5 py-1.5 h-auto min-w-0 rounded-lg text-xs font-bold transition-all border"
-                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'STAY'
-                    ? 'bg-blue-500 text-white border-blue-500'
-                    : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-blue-400 hover:text-blue-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
+                  color="primary"
+                  :variant="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'STAY' ? 'flat' : 'outlined'"
                 >
                   <span>→</span>
-                  <span class="font-bold" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
-                  <span class="font-bold opacity-50" v-else>?</span>
+                  <span class="ml-1" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['STAY'] ?? 0 }}</span>
+                  <span class="ml-1 opacity-50" v-else>?</span>
                 </v-btn>
                 <!-- 降格（DEMOTE）ボタン -->
                 <v-btn
-                  variant="outlined"
                   size="small"
                   @click.stop="castVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName, 'DEMOTE')"
                   :disabled="!isLoggedIn"
                   :title="t('tierVoting.demote')"
-                  class="flex items-center gap-1 px-2.5 py-1.5 h-auto min-w-0 rounded-lg text-xs font-bold transition-all border"
-                  :class="[getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'DEMOTE'
-                    ? 'bg-red-500 text-white border-red-500'
-                    : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-red-400 hover:text-red-600',
-                    !isLoggedIn ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer']"
+                  color="error"
+                  :variant="getMyVote(parseSong(songEntry).title, parseSong(songEntry).difficultyName) === 'DEMOTE' ? 'flat' : 'outlined'"
                 >
                   <span>↓</span>
-                  <span class="font-bold" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
-                  <span class="font-bold opacity-50" v-else>?</span>
+                  <span class="ml-1" v-if="hasVoted(parseSong(songEntry).title, parseSong(songEntry).difficultyName)">{{ getVotes(parseSong(songEntry).title, parseSong(songEntry).difficultyName)['DEMOTE'] ?? 0 }}</span>
+                  <span class="ml-1 opacity-50" v-else>?</span>
                 </v-btn>
               </div>
             </template>

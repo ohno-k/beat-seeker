@@ -29,7 +29,7 @@ import {
   type SummaryOutcome,
   type SummaryResult,
 } from '../composables/useCompetitionAdmin';
-import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
+import { teamColorClass, genreChipColor } from '../composables/competitionColors';
 
 const props = defineProps<{ competitionId: number }>();
 
@@ -195,24 +195,24 @@ const handlePrint = () => window.print();
 <template>
   <div class="competition-summary-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
     <div v-if="isLoading && !summary" class="text-center py-20 text-slate-400 text-sm">
-      <v-progress-circular size="20" width="2" class="mr-2" />読み込み中…
+      <v-progress-circular indeterminate size="20" width="2" class="mr-2" />読み込み中…
     </div>
 
     <v-alert
       v-else-if="errorMessage"
       type="error"
       :icon="false"
-      class="max-w-2xl mx-auto p-6 text-center"
+      class="max-w-2xl mx-auto text-center"
     >
-      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">サマリーを表示できません</p>
-      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ errorMessage }}</p>
-      <p class="text-[11px] text-rose-500 dark:text-rose-400 mt-3">
+      <p class="text-lg font-bold">サマリーを表示できません</p>
+      <p class="text-sm mt-2">{{ errorMessage }}</p>
+      <p class="text-[11px] mt-3">
         URL の大会 ID が間違っているか、団体戦以外の大会の可能性があります。
       </p>
       <v-btn
-        color="error"
+        variant="outlined"
         @click="load"
-        class="mt-4 text-xs"
+        class="mt-4"
       >再読込</v-btn>
     </v-alert>
 
@@ -223,7 +223,7 @@ const handlePrint = () => window.print();
           <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">SUMMARY</p>
           <div class="flex items-baseline gap-2 mt-1 flex-wrap">
             <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">{{ summary.competition.name }}</h1>
-            <v-chip size="small" label class="text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">団体戦</v-chip>
+            <v-chip size="small" label color="indigo">団体戦</v-chip>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
             記録済 {{ recordedMatchCount }} / {{ totalMatchCount }} 戦
@@ -244,27 +244,26 @@ const handlePrint = () => window.print();
             v-model="showUnrecorded"
             color="indigo"
             label="未記録も表示"
-            class="text-[11px] text-slate-500 dark:text-slate-400"
+            density="compact"
+            hide-details
           />
           <v-btn
             variant="tonal"
             size="small"
             @click="load"
-            class="text-[10px]"
           >🔄 再読込</v-btn>
           <v-btn
             variant="tonal"
             size="small"
             @click="handlePrint"
-            class="text-[10px]"
           >🖨️ 印刷</v-btn>
         </div>
       </div>
 
       <!-- タブ切替 -->
-      <v-tabs v-model="activeTab" color="indigo" class="border-b border-slate-200 dark:border-slate-700 print:hidden">
-        <v-tab value="match" class="text-xs font-bold">🎯 試合別</v-tab>
-        <v-tab value="player" class="text-xs font-bold">👤 選手別</v-tab>
+      <v-tabs v-model="activeTab" color="indigo" class="print:hidden">
+        <v-tab value="match">🎯 試合別</v-tab>
+        <v-tab value="player">👤 選手別</v-tab>
       </v-tabs>
 
       <!-- ══════════ 試合別 ══════════ -->
@@ -278,8 +277,8 @@ const handlePrint = () => window.print();
           v-for="mu in visibleMatchups"
           :key="mu.matchupId"
           tag="section"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
+          <v-card-text class="space-y-3">
           <!-- matchup ヘッダ: チーム名 + 戦pt 合計 + 勝敗 -->
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 class="text-sm font-bold flex items-center gap-2 flex-wrap">
@@ -289,8 +288,8 @@ const handlePrint = () => window.print();
               <span :class="teamColorClass(mu.teamAName)">{{ mu.teamAName ?? '?' }}</span>
               <span class="text-slate-400 text-xs">vs</span>
               <span :class="teamColorClass(mu.teamBName)">{{ mu.teamBName ?? '?' }}</span>
-              <v-chip v-if="mu.isFinals" size="x-small" label class="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 font-bold">🏆 決勝</v-chip>
-              <v-chip v-else-if="!mu.configured" size="x-small" label class="text-[10px] bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400">未設定</v-chip>
+              <v-chip v-if="mu.isFinals" size="x-small" label color="amber">🏆 決勝</v-chip>
+              <v-chip v-else-if="!mu.configured" size="x-small" label>未設定</v-chip>
             </h2>
             <div class="text-xs font-mono tabular-nums flex items-center gap-2">
               <span :class="resultColor(mu.result, 'A')" class="font-bold">{{ mu.aPoints }}</span>
@@ -305,7 +304,7 @@ const handlePrint = () => window.print();
           </div>
 
           <!-- 試合一覧 -->
-          <v-table class="text-xs bg-transparent [&_table]:min-w-[860px] [&_td]:h-auto [&_th]:h-auto">
+          <v-table density="compact" class="[&_table]:min-w-[860px]">
               <thead>
                 <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                   <th class="text-left py-1 px-2">戦</th>
@@ -334,8 +333,7 @@ const handlePrint = () => window.print();
                         v-if="m.requiredGenre"
                         size="x-small"
                         label
-                        class="text-[10px] font-bold"
-                        :class="genreBadgeClass(m.requiredGenre)"
+                        :color="genreChipColor(m.requiredGenre)"
                       >{{ m.requiredGenre }}</v-chip>
                       <span v-else class="text-slate-400">-</span>
                     </td>
@@ -397,7 +395,8 @@ const handlePrint = () => window.print();
                           v-if="song.replacedByStrategy"
                           size="x-small"
                           label
-                          class="text-[9px] font-bold px-1 mr-1 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                          color="amber"
+                          class="mr-1"
                           title="相手のストラテジーで差し替えられた曲"
                         >⚡</v-chip>
                         {{ song.title ?? '(未公開)' }}
@@ -418,6 +417,7 @@ const handlePrint = () => window.print();
                 </tr>
               </tbody>
           </v-table>
+          </v-card-text>
         </v-card>
       </div>
 
@@ -436,12 +436,13 @@ const handlePrint = () => window.print();
             :class="teamColorClass(p.teamName)"
           >{{ p.teamName ?? '所属なし' }}</h2>
 
-          <v-card tag="section" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+          <v-card tag="section">
+            <v-card-text class="space-y-3">
             <!-- 選手ヘッダ: 名前 + 通算成績 -->
             <div class="flex items-center justify-between gap-3 flex-wrap">
               <h3 class="text-sm font-bold flex items-center gap-2">
                 {{ p.displayName }}
-                <v-chip v-if="p.isTl" size="x-small" label class="text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 font-bold">TL</v-chip>
+                <v-chip v-if="p.isTl" size="x-small" label color="amber">TL</v-chip>
                 <span class="text-[10px] font-normal" :class="teamColorClass(p.teamName)">{{ p.teamName }}</span>
               </h3>
               <div class="text-[11px] font-mono tabular-nums flex items-center gap-3 flex-wrap">
@@ -457,7 +458,7 @@ const handlePrint = () => window.print();
             </div>
 
             <!-- 出場試合一覧 -->
-            <v-table v-if="p.matches.length > 0" class="text-xs bg-transparent [&_table]:min-w-[820px] [&_td]:h-auto [&_th]:h-auto">
+            <v-table v-if="p.matches.length > 0" density="compact" class="[&_table]:min-w-[820px]">
                 <thead>
                   <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                     <th class="text-left py-1 px-2">試合</th>
@@ -487,7 +488,7 @@ const handlePrint = () => window.print();
                       <td v-if="si === 0" :rowspan="pm.songs.length" class="py-1.5 px-2 align-middle whitespace-nowrap font-bold">
                         {{ pm.matchKindLabel }}
                         <div v-if="pm.requiredGenre" class="mt-0.5">
-                          <v-chip size="x-small" label class="text-[9px] font-bold px-1" :class="genreBadgeClass(pm.requiredGenre)">
+                          <v-chip size="x-small" label :color="genreChipColor(pm.requiredGenre)">
                             {{ pm.requiredGenre }}
                           </v-chip>
                         </div>
@@ -507,7 +508,8 @@ const handlePrint = () => window.print();
                           v-if="song.replacedByStrategy"
                           size="x-small"
                           label
-                          class="mr-1 text-[9px] font-bold px-1 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 align-middle"
+                          color="amber"
+                          class="mr-1 align-middle"
                           title="相手のストラテジーで差し替えられた曲"
                         >⚡</v-chip>
                         <span class="truncate max-w-[200px] inline-block align-middle" :title="song.title ?? ''">
@@ -521,7 +523,8 @@ const handlePrint = () => window.print();
                           v-if="song.ownPick"
                           size="x-small"
                           label
-                          class="ml-1 text-[9px] px-1 bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 align-middle"
+                          color="light-blue"
+                          class="ml-1 align-middle"
                           title="本人の選曲枠 (相手のストラテジー発動時は抽選曲に差し替わる)"
                         >自枠</v-chip>
                       </td>
@@ -551,6 +554,7 @@ const handlePrint = () => window.print();
                 </tbody>
             </v-table>
             <p v-else class="text-[11px] text-slate-400">出場記録なし</p>
+            </v-card-text>
           </v-card>
         </template>
       </div>

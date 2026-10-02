@@ -274,55 +274,58 @@ async function fetchCommentStats() {
   <!-- 画面全体: カード型レイアウトで見出し＋表を配置 -->
   <div class="space-y-6">
     <!-- メインカード: 曲別平均スコアレート一覧 -->
-    <v-card class="p-6">
-      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">曲別平均スコアレート</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
-        全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）。各プレイヤーの自己歴代ベスト（現行作＋過去作）を1票として集計
-      </p>
+    <v-card>
+      <v-card-item>
+        <v-card-title>曲別平均スコアレート</v-card-title>
+        <v-card-subtitle class="whitespace-normal">
+          全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）。各プレイヤーの自己歴代ベスト（現行作＋過去作）を1票として集計
+        </v-card-subtitle>
+      </v-card-item>
+      <v-card-text>
 
       <!-- ローディング中: 青スピナー -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <v-progress-circular size="32" width="2" />
+        <v-progress-circular size="32" width="2" color="primary" indeterminate />
         <span class="ml-3 text-sm text-slate-500">読み込み中...</span>
       </div>
 
       <!-- エラー時: 赤文字でメッセージ -->
-      <v-alert v-else-if="errorMsg" type="error" class="text-sm my-4">{{ errorMsg }}</v-alert>
+      <v-alert v-else-if="errorMsg" type="error" variant="tonal" class="my-4">{{ errorMsg }}</v-alert>
 
       <!-- 通常時: 件数表示＋ソート可能テーブル -->
       <template v-else>
         <p class="text-sm text-slate-500 mb-4">{{ scoreRates.length }}曲</p>
 
-        <v-table class="rounded-md border border-slate-200 dark:border-slate-700 text-sm">
+        <v-table density="compact" hover>
             <thead>
-              <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
-                <th class="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-8">#</th>
+              <tr>
+                <th class="text-left w-8">#</th>
                 <th
-                  class="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 cursor-pointer hover:text-blue-600 select-none"
+                  class="text-left cursor-pointer select-none"
                   @click="toggleSort('title')"
                 >曲名 {{ sortIcon('title') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-20 cursor-pointer hover:text-blue-600 select-none"
+                  class="text-center w-20 cursor-pointer select-none"
                   @click="toggleSort('rank')"
                 >難易度 {{ sortIcon('rank') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-28 cursor-pointer hover:text-blue-600 select-none"
+                  class="text-center w-28 cursor-pointer select-none"
                   @click="toggleSort('avgScoreRate')"
                 >平均レート {{ sortIcon('avgScoreRate') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-bold text-amber-600 dark:text-amber-400 w-32 cursor-pointer hover:text-amber-700 dark:hover:text-amber-300 select-none bg-amber-50/50 dark:bg-amber-900/20"
+                  class="text-center text-amber-600 dark:text-amber-400 w-32 cursor-pointer select-none"
                   @click="toggleSort('maxMinusRate')"
                 >MAX- {{ sortIcon('maxMinusRate') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-bold text-emerald-600 dark:text-emerald-400 w-32 cursor-pointer hover:text-emerald-700 dark:hover:text-emerald-300 select-none bg-emerald-50/50 dark:bg-emerald-900/20"
+                  class="text-center text-emerald-600 dark:text-emerald-400 w-32 cursor-pointer select-none"
                   @click="toggleSort('aaaRate')"
                 >AAA {{ sortIcon('aaaRate') }}</th>
                 <th
-                  class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-20 cursor-pointer hover:text-blue-600 select-none"
+                  class="text-center w-20 cursor-pointer select-none"
                   @click="toggleSort('playerCount')"
                 >人数 {{ sortIcon('playerCount') }}</th>
-                <th class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-16">コメ</th>
-                <th class="text-center px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-28">ドラフト</th>
+                <th class="text-center w-16">コメ</th>
+                <th class="text-center w-28">ドラフト</th>
               </tr>
             </thead>
             <!-- 各行: ランク境界で赤線（ランクソート時のみ）。セル内容はスコアレート・MAX-・AAA 等 -->
@@ -330,42 +333,41 @@ async function fetchCommentStats() {
               <tr
                 v-for="(row, idx) in sortedData"
                 :key="`${row.title}_${row.difficultyName}`"
-                class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                :class="hasRedLine(idx) ? 'border-t-2 border-t-red-500 border-b border-b-slate-100 dark:border-b-slate-700/50' : 'border-b border-slate-100 dark:border-slate-700/50'"
+                :class="hasRedLine(idx) ? 'border-t-2 border-t-red-500' : ''"
               >
-                <td class="px-3 py-2 text-slate-400 text-xs">{{ getFixedRank(row) }}</td>
-                <td class="px-3 py-2">
-                  <span class="font-medium text-slate-800 dark:text-slate-200">{{ row.title }}</span>
-                  <v-chip v-if="row.difficultyName === 'LEGGENDARIA'" label size="x-small" color="orange" class="ml-1 text-[10px] font-bold px-1">[L]</v-chip>
+                <td class="text-slate-400 text-xs">{{ getFixedRank(row) }}</td>
+                <td>
+                  <span class="font-medium">{{ row.title }}</span>
+                  <v-chip v-if="row.difficultyName === 'LEGGENDARIA'" label size="x-small" color="orange" class="ml-1">[L]</v-chip>
                 </td>
-                <td class="px-3 py-2 text-center font-mono text-slate-700 dark:text-slate-300">{{ getRank(row) }}</td>
-                <td class="px-3 py-2 text-center font-mono font-bold text-slate-700 dark:text-slate-300">{{ row.avgScoreRate.toFixed(2) }}%</td>
-                <td class="px-3 py-2 text-center font-mono font-bold bg-amber-50/50 dark:bg-amber-900/20 whitespace-nowrap"
+                <td class="text-center font-mono">{{ getRank(row) }}</td>
+                <td class="text-center font-mono font-bold">{{ row.avgScoreRate.toFixed(2) }}%</td>
+                <td class="text-center font-mono font-bold whitespace-nowrap"
                     :class="row.maxMinusRate >= 50 ? 'text-amber-600 dark:text-amber-400' : row.maxMinusRate >= 20 ? 'text-amber-500 dark:text-amber-500' : 'text-slate-500 dark:text-slate-400'"
                 >{{ row.maxMinusRate.toFixed(1) }}% <span class="text-slate-400 dark:text-slate-500 font-normal">({{ row.maxMinusCount }})</span></td>
-                <td class="px-3 py-2 text-center font-mono font-bold bg-emerald-50/50 dark:bg-emerald-900/20 whitespace-nowrap"
+                <td class="text-center font-mono font-bold whitespace-nowrap"
                     :class="row.aaaRate >= 50 ? 'text-emerald-600 dark:text-emerald-400' : row.aaaRate >= 20 ? 'text-emerald-500 dark:text-emerald-500' : 'text-slate-500 dark:text-slate-400'"
                 >{{ row.aaaRate.toFixed(1) }}% <span class="text-slate-400 dark:text-slate-500 font-normal">({{ row.aaaCount }})</span></td>
-                <td class="px-3 py-2 text-center text-slate-500 dark:text-slate-400">{{ row.playerCount }}</td>
-                <td class="px-3 py-2 text-center">
+                <td class="text-center text-slate-500 dark:text-slate-400">{{ row.playerCount }}</td>
+                <td class="text-center">
                   <v-btn
                     variant="text"
                     size="x-small"
-                    class="gap-0.5 text-xs px-1.5 min-w-0"
-                    :class="getCommentCount(row) > 0 ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-slate-400 dark:text-slate-500'"
+                    :color="getCommentCount(row) > 0 ? 'primary' : undefined"
+                    :prepend-icon="mdiMessageOutline"
                     @click="openCommentModal(row)"
                   >
-                    <v-icon :icon="mdiMessageOutline" size="14" />
                     <span v-if="getCommentCount(row) > 0">{{ getCommentCount(row) }}</span>
                   </v-btn>
                 </td>
-                <td class="px-3 py-2 text-center text-xs">
-                  <v-chip v-if="getDraft(row)" label size="x-small" color="purple" class="font-bold">{{ getDraft(row) }}</v-chip>
+                <td class="text-center">
+                  <v-chip v-if="getDraft(row)" label size="x-small" color="purple">{{ getDraft(row) }}</v-chip>
                 </td>
               </tr>
             </tbody>
         </v-table>
       </template>
+      </v-card-text>
     </v-card>
   </div>
 

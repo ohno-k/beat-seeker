@@ -266,26 +266,25 @@ const copyBookmarkletCode = async () => {
   <div class="space-y-4">
 
     <!-- Result messages -->
-    <v-alert v-if="resultError" type="error" class="text-sm">
+    <v-alert v-if="resultError" type="error">
       {{ resultError }}
     </v-alert>
-    <v-alert v-if="resultMsg" type="success" class="text-sm font-medium">
+    <v-alert v-if="resultMsg" type="success">
       {{ resultMsg }}
     </v-alert>
 
     <!-- Android アプリ内のみ: ブックマークレット不要の 1 タップ取り込み -->
     <v-alert v-if="isNativeApp" type="info" :icon="false">
       <div class="space-y-2">
-        <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">{{ t('import.nativeHint') }}</p>
+        <p class="text-sm">{{ t('import.nativeHint') }}</p>
         <v-btn
           color="primary"
           block
-          class="text-sm"
           :disabled="isImporting"
           @click="handleNativeImport"
         >
           <v-icon v-if="!isImporting" :icon="mdiRefresh" size="16" class="mr-2" />
-          <v-progress-circular v-else size="16" width="2" color="white" class="mr-2" />
+          <v-progress-circular indeterminate v-else size="16" width="2" class="mr-2" />
           {{ isImporting ? (nativeMessage || t('import.importing')) : t('import.nativeImport') }}
         </v-btn>
       </div>
@@ -293,9 +292,9 @@ const copyBookmarkletCode = async () => {
 
     <!-- ARENA info banner -->
     <v-alert type="warning" :icon="mdiInformationOutline">
-      <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+      <p class="text-sm">
         {{ t('import.arenaHint') }}
-        <button @click="showHelpModal = true" class="font-bold underline underline-offset-2 hover:text-amber-600 dark:hover:text-amber-200 transition-colors">
+        <button @click="showHelpModal = true" class="font-bold underline underline-offset-2">
           {{ t('import.bookmarkletHelp') }}
         </button>
       </p>
@@ -303,8 +302,8 @@ const copyBookmarkletCode = async () => {
 
     <!-- Tab switcher -->
     <v-tabs v-model="importTab" grow>
-      <v-tab value="text" class="text-sm font-medium">{{ t('import.tabText') }}</v-tab>
-      <v-tab value="file" class="text-sm font-medium">{{ t('import.tabFile') }}</v-tab>
+      <v-tab value="text">{{ t('import.tabText') }}</v-tab>
+      <v-tab value="file">{{ t('import.tabFile') }}</v-tab>
     </v-tabs>
 
     <!-- Text paste tab -->
@@ -316,7 +315,7 @@ const copyBookmarkletCode = async () => {
         v-model="pastedText"
         no-resize
         rows="4"
-        class="text-xs font-mono"
+        hide-details
         :placeholder="t('import.textareaPlaceholder')"
       />
     </div>
@@ -335,8 +334,8 @@ const copyBookmarkletCode = async () => {
         @drop="handleDrop"
         @click="fileInput?.click()"
       >
-        <v-icon v-if="!selectedFile" :icon="mdiCloudUploadOutline" size="32" class="text-slate-400 dark:text-slate-500" />
-        <v-icon v-else :icon="mdiCheckCircleOutline" size="32" class="text-green-500" />
+        <v-icon v-if="!selectedFile" :icon="mdiCloudUploadOutline" size="32" class="text-medium-emphasis" />
+        <v-icon v-else :icon="mdiCheckCircleOutline" size="32" color="success" />
         <div class="text-center">
           <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
             {{ selectedFile ? selectedFile.name : t('import.dropPlaceholder') }}
@@ -354,13 +353,14 @@ const copyBookmarkletCode = async () => {
     <!-- Unified submit button -->
     <v-btn
       block
-      class="text-sm bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white"
+      color="primary"
+      size="large"
       :disabled="isImporting || (importTab === 'file' && !selectedFile)"
       @click="handleSubmit"
     >
       <v-icon v-if="!isImporting && importTab === 'text' && !pastedText.trim()" :icon="mdiClipboardOutline" size="16" class="mr-2" />
       <v-icon v-else-if="!isImporting" :icon="mdiCloudDownloadOutline" size="16" class="mr-2" />
-      <v-progress-circular v-else size="16" width="2" color="white" class="mr-2" />
+      <v-progress-circular indeterminate v-else size="16" width="2" class="mr-2" />
       <template v-if="isImporting">{{ t('import.importing') }}</template>
       <template v-else-if="importTab === 'text' && !pastedText.trim()">{{ t('import.loadFromClipboard') }}</template>
       <template v-else>{{ t('import.load') }}</template>
@@ -370,20 +370,21 @@ const copyBookmarkletCode = async () => {
 
   <!-- Bookmarklet help modal -->
   <v-dialog v-model="showHelpModal" max-width="512">
-    <v-card class="p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-base font-bold text-slate-800 dark:text-white">{{ t('import.helpTitle') }}</h3>
-        <v-btn icon variant="text" size="small" class="text-slate-400" aria-label="close" @click="showHelpModal = false">
+    <v-card>
+      <v-card-title class="flex justify-between items-center">
+        <span>{{ t('import.helpTitle') }}</span>
+        <v-btn icon variant="text" size="small" aria-label="close" @click="showHelpModal = false">
           <v-icon :icon="mdiClose" />
         </v-btn>
-      </div>
+      </v-card-title>
 
+      <v-card-text>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ t('import.helpDesc') }}</p>
 
       <!-- PC / SP tab switcher -->
-      <v-btn-toggle v-model="deviceTab" mandatory class="mb-4">
-        <v-btn value="sp" size="small" class="px-4 text-xs">{{ t('import.deviceSp') }}</v-btn>
-        <v-btn value="pc" size="small" class="px-4 text-xs">{{ t('import.devicePc') }}</v-btn>
+      <v-btn-toggle v-model="deviceTab" mandatory variant="outlined" divided color="primary" density="compact" class="mb-4">
+        <v-btn value="sp" size="small">{{ t('import.deviceSp') }}</v-btn>
+        <v-btn value="pc" size="small">{{ t('import.devicePc') }}</v-btn>
       </v-btn-toggle>
 
       <!-- Smartphone instructions -->
@@ -405,7 +406,6 @@ const copyBookmarkletCode = async () => {
         </ol>
         <v-btn
           :color="codeCopied ? 'success' : 'primary'"
-          class="text-sm"
           :prepend-icon="codeCopied ? mdiCheck : mdiContentCopy"
           @click="copyBookmarkletCode"
         >
@@ -436,6 +436,7 @@ const copyBookmarkletCode = async () => {
           <span class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.dragToRegister') }}</span>
         </div>
       </div>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>

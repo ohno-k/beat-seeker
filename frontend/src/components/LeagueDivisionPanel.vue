@@ -15,6 +15,7 @@ import { useI18n } from '../composables/useI18n';
 import { useLeague, type LeagueCurrent } from '../composables/useLeague';
 import { toJstDate } from '../utils/jstTime';
 import DivisionIcon from './DivisionIcon.vue';
+import { mdiChevronRight } from '@mdi/js';
 
 const emit = defineEmits<{ (e: 'open-league'): void }>();
 
@@ -95,12 +96,15 @@ const countdown = computed(() => {
     type="button"
     @click="emit('open-league')"
     :aria-label="`${divisionLabel} — ${t('dashboard.leagueLive.view')}`"
-    class="group w-full text-left rounded-xl border-2 border-indigo-400 dark:border-indigo-500/60 bg-gradient-to-r from-indigo-50 via-white to-white dark:from-indigo-950/60 dark:via-slate-800 dark:to-slate-800 px-4 sm:px-5 py-4 shadow-sm flex items-center gap-3 sm:gap-4 cursor-pointer transition-all duration-200 hover:border-indigo-500 hover:shadow-md dark:hover:border-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+    color="primary"
+    variant="tonal"
+    class="w-full text-left"
   >
+   <v-card-text class="flex items-center gap-3 sm:gap-4">
     <DivisionIcon :tier="myTier ?? 10" :size="60" class="shrink-0" />
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 flex-wrap">
-        <v-chip size="x-small" variant="flat" class="gap-1.5 rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white">
+        <v-chip size="x-small" variant="flat" color="primary" class="gap-1.5">
           <span class="relative flex h-1.5 w-1.5">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
             <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
@@ -116,12 +120,10 @@ const countdown = computed(() => {
       </p>
     </div>
     <!-- 導線（見た目はボタンだが、押下可能なのはパネル全体） -->
-    <span class="shrink-0 inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-indigo-600 group-hover:bg-indigo-700 text-white text-sm font-bold whitespace-nowrap transition-colors">
+    <v-btn tag="span" color="primary" variant="flat" :append-icon="mdiChevronRight" class="shrink-0">
       {{ t('dashboard.leagueLive.view') }}
-      <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-      </svg>
-    </span>
+    </v-btn>
+   </v-card-text>
   </v-card>
 
   <!-- 非開催（週の合間・次週から参加）: 控えめな DIVISION 表示。こちらもリーグ画面へ飛べる。 -->
@@ -131,8 +133,9 @@ const countdown = computed(() => {
     type="button"
     @click="emit('open-league')"
     :aria-label="`${divisionLabel} — ${t('dashboard.leagueLive.view')}`"
-    class="group relative w-full bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-3 cursor-pointer transition-all duration-200 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+    class="group w-full"
   >
+   <v-card-text class="relative flex items-center justify-center gap-3">
     <DivisionIcon :tier="myTier ?? 10" :size="52" class="shrink-0" />
     <div class="text-center sm:text-left">
       <p class="text-[10px] font-bold text-slate-400">{{ t('dashboard.currentDivision') }}</p>
@@ -145,5 +148,6 @@ const countdown = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </span>
+   </v-card-text>
   </v-card>
 </template>

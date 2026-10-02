@@ -22,12 +22,12 @@ import { mdiMagnify } from '@mdi/js';
 const { t } = useI18n();
 
 /** 難易度コード→表示用情報のマップ（名称・文字色・背景色） */
-const DIFF_MAP: Record<string, { name: string; color: string; bg: string }> = {
-  '1': { name: 'BEGINNER', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/40' },
-  '2': { name: 'NORMAL', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/40' },
-  '3': { name: 'HYPER', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/40' },
-  '4': { name: 'ANOTHER', color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/40' },
-  '10': { name: 'LEGGENDARIA', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/40' },
+const DIFF_MAP: Record<string, { name: string; color: string }> = {
+  '1': { name: 'BEGINNER', color: 'green' },
+  '2': { name: 'NORMAL', color: 'blue' },
+  '3': { name: 'HYPER', color: 'amber-darken-2' },
+  '4': { name: 'ANOTHER', color: 'red' },
+  '10': { name: 'LEGGENDARIA', color: 'purple' },
 };
 
 /** 検索クエリ。title／artist に対する部分一致 */
@@ -143,7 +143,7 @@ const sortIcon = (key: string) => {
 };
 
 /** 難易度コードを DIFF_MAP から引く。未知のコードはデフォルト色でフォールバック */
-const getDiff = (d: string) => DIFF_MAP[d] || { name: d, color: 'text-slate-600', bg: 'bg-slate-100' };
+const getDiff = (d: string) => DIFF_MAP[d] || { name: d, color: 'grey' };
 
 /** textage.cc の譜面閲覧URLを生成（空なら空文字） */
 const textageUrl = (s: SongDataEntry) => {
@@ -161,14 +161,15 @@ const textageUrl = (s: SongDataEntry) => {
     </div>
 
     <!-- フィルタ領域: 検索＋難易度＋レベル＋結果件数表示 -->
-    <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4">
-      <div class="flex flex-wrap gap-3 items-center">
+    <v-card>
+      <v-card-text class="flex flex-wrap gap-3 items-center">
         <!-- 検索入力: 入力のたびに1ページ目に戻す -->
         <v-text-field
           v-model="searchQuery"
           type="text"
           :placeholder="t('chartList.searchPlaceholder')"
           :prepend-inner-icon="mdiMagnify"
+          hide-details
           class="flex-1 min-w-[200px]"
           @update:model-value="currentPage = 1"
         />
@@ -179,6 +180,7 @@ const textageUrl = (s: SongDataEntry) => {
           :items="[{ title: t('chartList.allDifficulties'), value: '' }, ...Object.entries(DIFF_MAP).map(([code, info]) => ({ title: info.name, value: code }))]"
           item-title="title"
           item-value="value"
+          hide-details
           class="flex-none min-w-[180px]"
           @update:model-value="currentPage = 1"
         />
@@ -189,6 +191,7 @@ const textageUrl = (s: SongDataEntry) => {
           :items="[{ title: t('chartList.allLevels'), value: '' }, ...availableLevels.map(lv => ({ title: `Lv.${lv}`, value: lv }))]"
           item-title="title"
           item-value="value"
+          hide-details
           class="flex-none min-w-[140px]"
           @update:model-value="currentPage = 1"
         />
@@ -197,12 +200,12 @@ const textageUrl = (s: SongDataEntry) => {
         <span class="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">
           {{ filtered.length.toLocaleString() }} {{ t('chartList.charts') }}
         </span>
-      </div>
+      </v-card-text>
     </v-card>
 
     <!-- 譜面一覧テーブル: ヘッダクリックでソート、行ホバーで色付け -->
-    <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
-      <v-table class="bg-transparent text-sm">
+    <v-card class="overflow-hidden">
+      <v-table>
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30">
               <th
@@ -280,9 +283,8 @@ const textageUrl = (s: SongDataEntry) => {
                 <v-chip
                   label
                   size="x-small"
-                  variant="flat"
-                  :class="[getDiff(song.difficulty).color, getDiff(song.difficulty).bg]"
-                  class="text-[10px] font-bold"
+                  variant="tonal"
+                  :color="getDiff(song.difficulty).color"
                 >
                   {{ getDiff(song.difficulty).name }}
                 </v-chip>
@@ -324,7 +326,6 @@ const textageUrl = (s: SongDataEntry) => {
         <v-btn
           variant="outlined"
           size="small"
-          class="text-xs"
           :disabled="currentPage <= 1"
           @click="currentPage--"
         >
@@ -336,7 +337,6 @@ const textageUrl = (s: SongDataEntry) => {
         <v-btn
           variant="outlined"
           size="small"
-          class="text-xs"
           :disabled="currentPage >= totalPages"
           @click="currentPage++"
         >

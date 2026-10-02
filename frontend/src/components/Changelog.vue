@@ -103,7 +103,8 @@ function editionLabel(version: number): string {
 <template>
   <div class="space-y-8 animate-fade-in pb-16">
     <!-- ヘッダー部（タイトル + タブ切替ボタン） -->
-    <v-card class="p-8 transition-colors duration-200">
+    <v-card>
+      <v-card-text class="pa-6 pa-sm-8">
       <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
@@ -116,23 +117,24 @@ function editionLabel(version: number): string {
 
       <!-- タブ切替ボタン（システム更新 / 難易度改訂） -->
       <div class="flex flex-wrap mt-6 gap-2 border-t border-slate-100 dark:border-slate-700 pt-6">
-        <v-tabs v-model="activeTab">
-          <v-tab value="changelog" class="text-sm font-bold text-none">
+        <v-tabs v-model="activeTab" color="primary">
+          <v-tab value="changelog">
             {{ t('changelog.tabSystem') }}
           </v-tab>
-          <v-tab value="difficulty" color="#4f46e5" class="text-sm font-bold text-none">
+          <v-tab value="difficulty" color="indigo">
             {{ t('changelog.tabDifficulty') }}
           </v-tab>
         </v-tabs>
       </div>
+    </v-card-text>
     </v-card>
 
     <div v-if="activeTab === 'changelog'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
       <!-- Update Entry: v1.7.0 -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.7.0</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.7.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v170Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.may2026') }}</span>
@@ -152,10 +154,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.6.0 -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.6.0</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.6.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v160Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -176,10 +178,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.5.0 -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.5.0</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.5.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v150Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -200,10 +202,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.4.0 -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.4.0</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.4.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v140Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -224,10 +226,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.3.1 (Localization Support) -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.3.1</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.3.1</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v131Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -248,10 +250,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.3.0 (Difficulty Revision) -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.3.0</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.3.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v130Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -273,10 +275,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.2.0 (Notification Tabs & Vote UI) -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.2.0</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.2.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v120Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -307,10 +309,10 @@ function editionLabel(version: number): string {
       </v-card>
 
       <!-- Update Entry: v1.1.1 (Folder Rank System Redesign) -->
-      <v-card class="overflow-hidden transition-colors duration-200">
+      <v-card>
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.1.1</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">Ver 1.1.1</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v111Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -337,10 +339,10 @@ function editionLabel(version: number): string {
     <!-- 難易度改訂履歴タブ（JSON からループ描画） -->
     <div v-else-if="activeTab === 'difficulty'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
 
-      <v-card v-for="rev in revisions" :key="rev.version" class="overflow-hidden transition-colors duration-200">
+      <v-card v-for="rev in revisions" :key="rev.version">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">{{ editionLabel(rev.version) }}</v-chip>
+            <v-chip label variant="flat" color="indigo" size="small">{{ editionLabel(rev.version) }}</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }}<template v-if="rev.appVersion"> ({{ rev.appVersion }})</template></h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ formatDate(rev.date) }}</span>
@@ -363,8 +365,9 @@ function editionLabel(version: number): string {
             <v-btn
               v-if="hiddenCount(rev, 'added', rev.added) > 0"
               variant="text"
-              size="x-small"
-              class="mt-3 ml-2 px-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+              size="small"
+              color="indigo"
+              class="mt-3 ml-2"
               @click="expand(rev, 'added')"
             >
               {{ t('changelog.showAll', { n: hiddenCount(rev, 'added', rev.added) }) }}
@@ -391,8 +394,9 @@ function editionLabel(version: number): string {
             <v-btn
               v-if="hiddenCount(rev, 'changed', rev.changed) > 0"
               variant="text"
-              size="x-small"
-              class="mt-3 ml-2 px-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+              size="small"
+              color="warning"
+              class="mt-3 ml-2"
               @click="expand(rev, 'changed')"
             >
               {{ t('changelog.showAll', { n: hiddenCount(rev, 'changed', rev.changed) }) }}
@@ -415,8 +419,9 @@ function editionLabel(version: number): string {
             <v-btn
               v-if="hiddenCount(rev, 'removed', rev.removed) > 0"
               variant="text"
-              size="x-small"
-              class="mt-3 ml-2 px-1 text-xs font-bold text-rose-500 dark:text-rose-400 hover:underline"
+              size="small"
+              color="error"
+              class="mt-3 ml-2"
               @click="expand(rev, 'removed')"
             >
               {{ t('changelog.showAll', { n: hiddenCount(rev, 'removed', rev.removed) }) }}

@@ -108,19 +108,6 @@ function rankColor(rank: string): string {
   return 'text-blue-600 dark:text-blue-400';
 }
 
-/**
- * 【関数の役割】 ランクカードの背景色＋ボーダー色クラスを返す（上の色分けと統一感を持たせる）。
- */
-function rankBadgeBg(rank: string): string {
-  if (!isNumericRank(rank)) return 'bg-slate-100 dark:bg-slate-700';
-  const v = parseFloat(rank);
-  if (v >= 13.0) return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
-  if (v >= 12.5) return 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800';
-  if (v >= 12.0) return 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800';
-  if (v >= 11.5) return 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800';
-  return 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
-}
-
 /** 検索入力のたびにヒット対象を一括展開して可視化する */
 function handleSearch() {
   if (searchQuery.value.trim()) {
@@ -132,7 +119,8 @@ function handleSearch() {
 <template>
   <div class="space-y-6 pb-20 animate-fade-in">
     <!-- ヘッダー: タイトル・統計・展開／折りたたみボタン・検索ボックス -->
-    <v-card class="bg-white dark:bg-slate-800 p-6 border-slate-200 dark:border-slate-700">
+    <v-card>
+      <v-card-text>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">
@@ -143,10 +131,10 @@ function handleSearch() {
           </p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <v-btn size="small" variant="tonal" class="text-xs" @click="expandAll">
+          <v-btn size="small" variant="tonal" @click="expandAll">
             {{ t('diffTable.expandAll') }}
           </v-btn>
-          <v-btn size="small" variant="tonal" class="text-xs" @click="collapseAll">
+          <v-btn size="small" variant="tonal" @click="collapseAll">
             {{ t('diffTable.collapseAll') }}
           </v-btn>
         </div>
@@ -158,9 +146,11 @@ function handleSearch() {
         type="text"
         :placeholder="t('diffTable.searchPlaceholder')"
         :prepend-inner-icon="mdiMagnify"
+        hide-details
         class="mt-4"
         @update:model-value="handleSearch"
       />
+      </v-card-text>
     </v-card>
 
     <!-- ログイン促進バナー: 未ログイン時のみ表示 -->
@@ -168,9 +158,8 @@ function handleSearch() {
       v-if="!isLoggedIn"
       variant="flat"
       color="primary"
-      class="bg-blue-700 dark:bg-blue-600 p-6 text-white"
     >
-      <div class="flex flex-col sm:flex-row items-center gap-4">
+      <v-card-text class="flex flex-col sm:flex-row items-center gap-4">
         <div class="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center shrink-0">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -178,9 +167,9 @@ function handleSearch() {
         </div>
         <div class="text-center sm:text-left flex-1">
           <h3 class="font-bold text-lg">{{ t('diffTable.ctaTitle') }}</h3>
-          <p class="text-blue-100 text-sm mt-1">{{ t('diffTable.ctaDesc') }}</p>
+          <p class="opacity-80 text-sm mt-1">{{ t('diffTable.ctaDesc') }}</p>
         </div>
-      </div>
+      </v-card-text>
     </v-card>
 
     <!-- ランクリスト: アコーディオン形式でランクごとに曲一覧を展開 -->
@@ -192,8 +181,7 @@ function handleSearch() {
       <v-card
         v-for="rankEntry in filteredRanks"
         :key="rankEntry.rank"
-        class="bg-white dark:bg-slate-800 overflow-hidden transition-colors"
-        :class="[rankBadgeBg(rankEntry.rank), isNumericRank(rankEntry.rank) ? '' : 'border-slate-200 dark:border-slate-700']"
+        class="overflow-hidden"
       >
         <!-- ランクヘッダー（クリックで展開／折りたたみトグル） -->
         <button
@@ -236,7 +224,7 @@ function handleSearch() {
                 size="x-small"
                 variant="tonal"
                 color="purple"
-                class="mr-1.5 text-xs font-bold"
+                class="mr-1.5"
               >L</v-chip>
               {{ song.endsWith('[L]') ? song.slice(0, -3) : song }}
             </div>

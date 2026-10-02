@@ -142,10 +142,10 @@ const handleTextSubmit = async () => {
 
     <!-- タブ切替（テキスト貼り付け / ファイルドロップ） -->
     <v-tabs v-model="activeTab" grow class="w-full mb-4">
-      <v-tab value="text" class="text-sm font-medium">
+      <v-tab value="text">
         {{ t('upload.textTab') }}
       </v-tab>
-      <v-tab value="file" class="text-sm font-medium">
+      <v-tab value="file">
         {{ t('upload.fileTab') }}
       </v-tab>
     </v-tabs>
@@ -180,7 +180,6 @@ const handleTextSubmit = async () => {
             <v-btn
                 color="primary"
                 size="large"
-                class="px-6 font-medium"
                 @click.stop="triggerFileInput"
             >
                 {{ t('upload.select') }}
@@ -199,11 +198,12 @@ const handleTextSubmit = async () => {
         <transition name="fade">
             <v-card
             v-if="activeTab === 'text'"
-            class="absolute inset-0 w-full h-full p-6 flex flex-col"
+            class="absolute inset-0 w-full h-full flex flex-col"
             >
-            <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">
+            <v-card-title>
                 {{ t('upload.pasteTitle') }}
-            </h3>
+            </v-card-title>
+            <v-card-text class="flex-1 flex flex-col">
             <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">
                 <a href="https://p.eagate.573.jp/game/2dx/34/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ t('upload.officialSiteLinkText') }}</a>{{ t('upload.officialSiteManualHint') }}
             </p>
@@ -212,25 +212,25 @@ const handleTextSubmit = async () => {
                 v-model="pastedCsvText"
                 no-resize
                 rows="4"
-                class="flex-1 w-full font-mono text-sm mb-4"
+                class="flex-1 w-full mb-4"
                 :placeholder="t('upload.textareaPlaceholder')"
             />
 
             <v-btn
                 block
                 size="large"
-                class="font-medium bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white"
-                :class="{'opacity-75 cursor-wait': isLoadingFromClipboard}"
+                color="primary"
                 @click="handleTextSubmit"
                 :disabled="isLoadingFromClipboard"
             >
                 <v-icon v-if="!isLoadingFromClipboard" :icon="mdiClipboardCheckOutline" size="20" class="mr-2" />
-                <v-progress-circular v-else size="20" width="2" color="white" class="mr-2" />
+                <v-progress-circular indeterminate v-else size="20" width="2" class="mr-2" />
                 {{ pastedCsvText.trim() ? t('upload.load') : t('upload.loadFromClipboard') }}
             </v-btn>
             <p v-if="!pastedCsvText.trim()" class="text-xs text-slate-400 dark:text-slate-500 text-center mt-3">
                 {{ t('upload.clipboardAutoLoad') }}
             </p>
+            </v-card-text>
             </v-card>
         </transition>
     </div>

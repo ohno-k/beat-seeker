@@ -132,17 +132,18 @@ function goToMyRank() {
   >
     <v-card class="w-full max-h-[90vh] flex flex-col">
       <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
-        <div class="flex items-center gap-2">
+      <v-card-item class="shrink-0">
+        <v-card-title class="flex items-center gap-2">
           <span class="inline-block w-2.5 h-2.5 rounded-full" :class="parseFloat(props.rank) >= 12.5 ? 'bg-purple-500 dark:bg-purple-400' : 'bg-blue-500 dark:bg-blue-400'"></span>
-          <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">
-            ☆{{ props.rank }} {{ t('table.difficultyRankingTitle') }}
-          </h3>
-        </div>
-        <v-btn icon variant="text" size="small" aria-label="閉じる" class="text-slate-500 dark:text-slate-400 shrink-0 ml-2" @click="emit('close')">
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+          ☆{{ props.rank }} {{ t('table.difficultyRankingTitle') }}
+        </v-card-title>
+        <template #append>
+          <v-btn icon variant="text" size="small" aria-label="閉じる" @click="emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
+      <v-divider />
 
       <!-- Toolbar: find-my-rank + 全曲プレイ済みフィルタ -->
       <div v-if="!isLoading && !error && ranking.length > 0" class="px-4 pt-3 flex items-center justify-between gap-3 flex-wrap shrink-0">
@@ -151,7 +152,6 @@ function goToMyRank() {
           variant="tonal"
           color="primary"
           size="small"
-          class="text-xs"
           :prepend-icon="mdiMagnify"
           @click="goToMyRank"
         >
@@ -160,22 +160,21 @@ function goToMyRank() {
         <v-switch
           v-model="onlyFullPlay"
           color="amber"
+          density="compact"
+          hide-details
+          :label="t('table.onlyFullPlay')"
           class="ml-auto flex-none whitespace-nowrap"
-        >
-          <template #label>
-            <span class="text-xs font-bold text-slate-600 dark:text-slate-400">{{ t('table.onlyFullPlay') }}</span>
-          </template>
-        </v-switch>
+        />
       </div>
 
       <!-- Body -->
       <div class="overflow-auto flex-1 px-2 sm:px-4 py-3">
         <div v-if="isLoading" class="flex flex-col items-center justify-center py-16">
-          <v-progress-circular size="40" width="4" class="mb-3" />
+          <v-progress-circular size="40" width="4" color="primary" indeterminate class="mb-3" />
           <p class="text-slate-500 dark:text-slate-400 font-bold text-sm">{{ t('ranking.loading') }}</p>
         </div>
 
-        <v-alert v-else-if="error" type="error" :icon="false" class="p-6 text-center font-bold text-sm">
+        <v-alert v-else-if="error" type="error" variant="tonal">
           {{ error }}
         </v-alert>
 
@@ -187,26 +186,25 @@ function goToMyRank() {
           <p class="text-slate-500 dark:text-slate-400 font-bold text-sm">{{ t('table.noFullPlayUsers') }}</p>
         </div>
 
-        <v-table v-else-if="paginated.length > 0" class="w-full bg-transparent">
+        <v-table v-else-if="paginated.length > 0" hover class="w-full">
           <thead>
-            <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
-              <th class="pb-3 pl-2 text-xs font-bold text-slate-400 w-14">{{ t('ranking.colRank') }}</th>
-              <th class="pb-3 text-xs font-bold text-slate-400">{{ t('ranking.colPlayer') }}</th>
-              <th class="pb-3 text-xs font-bold text-slate-400 w-14 text-center">{{ t('ranking.colTier') }}</th>
-              <th class="pb-3 text-xs font-bold text-slate-400 text-right pr-2">{{ t('table.colTotalPt') }}</th>
+            <tr>
+              <th class="text-left w-14">{{ t('ranking.colRank') }}</th>
+              <th class="text-left">{{ t('ranking.colPlayer') }}</th>
+              <th class="w-14 text-center">{{ t('ranking.colTier') }}</th>
+              <th class="text-right">{{ t('table.colTotalPt') }}</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-50 dark:divide-slate-700/30">
+          <tbody>
             <tr
               v-for="(entry, idx) in paginated"
               :key="entry.iidxId || `anon-${idx}`"
               :id="`diff-ranking-row-${entry.iidxId}`"
-              class="transition-colors"
               :class="user && entry.iidxId === user.iidxId
-                ? 'bg-blue-50 dark:bg-blue-900/20 border-l-4 border-l-blue-500'
-                : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'"
+                ? 'bg-blue-50 dark:bg-blue-900/20'
+                : ''"
             >
-              <td class="py-2 pl-2">
+              <td>
                 <div
                   class="flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs"
                   :class="[
@@ -220,20 +218,20 @@ function goToMyRank() {
                   {{ (page - 1) * PAGE_SIZE + idx + 1 }}
                 </div>
               </td>
-              <td class="py-2">
+              <td>
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-bold text-sm text-slate-800 dark:text-slate-100">
+                  <span class="font-bold text-sm">
                     {{ entry.displayName || 'Unnamed Player' }}
                   </span>
                   <span v-if="(entry.privacyLevel ?? 1) !== 0" class="text-xs text-slate-400" :title="(entry.privacyLevel ?? 1) === 2 ? '非公開' : 'フレンドのみ公開'">🔒</span>
                   <v-chip v-if="user && entry.iidxId === user.iidxId"
-                    label size="x-small" variant="flat" color="blue" class="text-[9px] font-bold px-1.5">{{ t('ranking.you') }}</v-chip>
+                    label size="x-small" variant="flat" color="primary">{{ t('ranking.you') }}</v-chip>
                   <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
                     {{ entry.playedCount }}/{{ props.totalCount }} {{ t('table.colPlayed') }}
                   </span>
                 </div>
               </td>
-              <td class="py-2 px-1 text-center">
+              <td class="text-center">
                 <div class="flex justify-center">
                   <RankIcon
                     :rank-name="tierFor(entry).name"
@@ -246,10 +244,10 @@ function goToMyRank() {
                   />
                 </div>
               </td>
-              <td class="py-2 text-right pr-2">
+              <td class="text-right">
                 <div class="flex items-baseline justify-end gap-1">
                   <span class="text-base sm:text-lg font-bold tabular-nums"
-                    :class="user && entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-slate-100'">
+                    :class="user && entry.iidxId === user.iidxId ? 'text-blue-700 dark:text-blue-300' : ''">
                     {{ entry.totalBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}
                   </span>
                   <span class="text-[9px] font-bold text-slate-400">PT</span>
@@ -261,23 +259,18 @@ function goToMyRank() {
       </div>
 
       <!-- Pagination -->
-      <div v-if="!isLoading && !error && totalPages > 1" class="flex items-center justify-center gap-2 py-3 border-t border-slate-100 dark:border-slate-700/50 shrink-0">
-        <v-btn variant="text" size="small" class="min-w-0 px-2 text-xs text-slate-500" :disabled="page === 1" @click="page = 1">
-          &laquo;
-        </v-btn>
-        <v-btn variant="text" size="small" class="min-w-0 px-2 text-xs text-slate-500" :disabled="page === 1" @click="page--">
-          &lsaquo;
-        </v-btn>
-        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">
-          {{ page }} / {{ totalPages }}
-        </span>
-        <v-btn variant="text" size="small" class="min-w-0 px-2 text-xs text-slate-500" :disabled="page === totalPages" @click="page++">
-          &rsaquo;
-        </v-btn>
-        <v-btn variant="text" size="small" class="min-w-0 px-2 text-xs text-slate-500" :disabled="page === totalPages" @click="page = totalPages">
-          &raquo;
-        </v-btn>
-      </div>
+      <template v-if="!isLoading && !error && totalPages > 1">
+        <v-divider />
+        <v-card-actions class="shrink-0 justify-center">
+          <v-pagination
+            v-model="page"
+            :length="totalPages"
+            :total-visible="5"
+            density="compact"
+            show-first-last-page
+          />
+        </v-card-actions>
+      </template>
     </v-card>
   </v-dialog>
 </template>

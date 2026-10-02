@@ -301,13 +301,13 @@ const gradeColor = (grade: string): string => {
 // アリーナクラス（A1〜A5）用のバッジ背景色。未知のクラスはデフォルトの灰色。
 const classColor = (cls: string) => {
   const map: Record<string, string> = {
-    A1: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
-    A2: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-    A3: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-    A4: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-    A5: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+    A1: 'amber',
+    A2: 'blue',
+    A3: 'green',
+    A4: 'purple',
+    A5: 'red',
   };
-  return map[cls] ?? 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+  return map[cls];
 };
 
 </script>
@@ -321,59 +321,63 @@ const classColor = (cls: string) => {
     </div>
 
     <!-- 未ログイン時: ログインを促すメッセージのみ表示 -->
-    <v-card v-if="!isLoggedIn" class="p-8 text-center bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-      <p class="text-slate-500 dark:text-slate-400">{{ t('arena.loginPrompt') }}</p>
+    <v-card v-if="!isLoggedIn">
+      <v-card-text class="text-center py-8">
+        <p class="text-slate-500 dark:text-slate-400">{{ t('arena.loginPrompt') }}</p>
+      </v-card-text>
     </v-card>
 
     <template v-else>
       <!-- 統計バー: 総試合数 + 1〜4位の獲得回数を横並びに表示 -->
       <div v-if="matches.length > 0" class="grid grid-cols-5 gap-3">
-        <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4 text-center">
-          <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ stats.total }}</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ t('arena.totalMatches') }}</p>
+        <v-card>
+          <v-card-text class="text-center">
+            <p class="text-2xl font-bold text-slate-800 dark:text-white">{{ stats.total }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ t('arena.totalMatches') }}</p>
+          </v-card-text>
         </v-card>
-        <v-card v-for="(cnt, i) in stats.ranks" :key="i" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4 text-center">
-          <p class="text-2xl font-bold" :class="rankColor(i + 1)">{{ cnt }}</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ rankLabel(i + 1) }}</p>
+        <v-card v-for="(cnt, i) in stats.ranks" :key="i">
+          <v-card-text class="text-center">
+            <p class="text-2xl font-bold" :class="rankColor(i + 1)">{{ cnt }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ rankLabel(i + 1) }}</p>
+          </v-card-text>
         </v-card>
       </div>
 
       <!-- インポートパネル（折りたたみ式）。他人閲覧モード時は非表示。 -->
-      <v-card v-if="!props.viewingUserId" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
-        <!-- トグル行: クリックで showImportPanel を反転 -->
-        <v-btn
-          variant="text"
-          block
-          rounded="0"
+      <v-card v-if="!props.viewingUserId">
+        <!-- トグル行: クリックで showImportPanel を反転（左にラベル、右に開閉の矢印が並ぶ一覧の行） -->
+        <v-list-item
+          link
+          :prepend-icon="mdiTrayArrowUp"
+          :title="t('arena.importData')"
           @click="showImportPanel = !showImportPanel"
           :aria-expanded="showImportPanel"
           aria-controls="arena-import-panel"
-          class="w-full h-auto px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors [&_.v-btn\_\_content]:w-full [&_.v-btn\_\_content]:justify-between"
         >
-          <span class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
-            <v-icon :icon="mdiTrayArrowUp" size="16" />
-            {{ t('arena.importData') }}
-          </span>
-          <v-icon :icon="mdiChevronDown" size="16" class="text-slate-400 transition-transform" :class="showImportPanel ? 'rotate-180' : ''" />
-        </v-btn>
+          <template #append>
+            <v-icon :icon="mdiChevronDown" :class="showImportPanel ? 'rotate-180' : ''" />
+          </template>
+        </v-list-item>
 
         <!-- 展開時: 統合インポートコンポーネント（ブックマークレットコード + 手動貼り付け） -->
-        <div v-if="showImportPanel" id="arena-import-panel" class="border-t border-slate-100 dark:border-slate-700 p-5">
-          <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @close="showImportPanel = false; fetchMatches()" />
-        </div>
+        <template v-if="showImportPanel">
+          <v-divider />
+          <v-card-text id="arena-import-panel">
+            <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @close="showImportPanel = false; fetchMatches()" />
+          </v-card-text>
+        </template>
       </v-card>
 
       <!-- メイン本体: 対戦履歴 / 相手別サマリの切り替え表示 -->
       <div class="space-y-3">
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <!-- メイン表示モード切替（履歴 / 相手別） -->
-          <v-btn-toggle v-model="mainView" mandatory>
+          <v-btn-toggle v-model="mainView" mandatory color="primary" variant="outlined" divided density="comfortable">
             <v-btn
               v-for="v in [{ id: 'history', label: t('arena.matchHistory') }, { id: 'opponents', label: t('arena.opponents') }]"
               :key="v.id"
               :value="v.id"
-              size="small"
-              class="px-3 text-xs font-bold"
             >{{ v.label }}</v-btn>
           </v-btn-toggle>
           <!-- 履歴サブタブ（履歴ビュー時のみ表示）: 全 / オンライン / ローカル -->
@@ -381,6 +385,10 @@ const classColor = (cls: string) => {
             v-if="mainView === 'history'"
             v-model="activeTab"
             mandatory
+            color="primary"
+            variant="outlined"
+            divided
+            density="compact"
             @update:model-value="expandedMatchId = null"
           >
             <v-btn
@@ -388,13 +396,12 @@ const classColor = (cls: string) => {
               :key="tab.id"
               :value="tab.id"
               size="small"
-              class="px-3 text-xs font-bold"
             >{{ tab.label }}</v-btn>
           </v-btn-toggle>
         </div>
 
         <div v-if="isFetching" class="flex justify-center py-8">
-          <v-progress-circular size="32" width="4" />
+          <v-progress-circular indeterminate color="primary" />
         </div>
 
         <div v-else-if="matches.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500">
@@ -406,8 +413,8 @@ const classColor = (cls: string) => {
           <div v-if="opponentStats.length === 0" class="text-center py-10 text-slate-400 dark:text-slate-500">
             {{ t('arena.noOpponents') }}
           </div>
-          <v-card v-else class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
-            <v-table class="w-full text-sm bg-transparent">
+          <v-card v-else>
+            <v-table class="w-full">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700">
                   <th scope="col" class="px-4 py-3 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.djName') }}</th>
@@ -431,7 +438,7 @@ const classColor = (cls: string) => {
                   >
                     <td class="px-4 py-2.5">
                       <div class="flex items-center gap-2">
-                        <v-icon :icon="mdiChevronDown" size="12" class="text-slate-400 transition-transform shrink-0" :class="expandedOpponent === opp.djName ? 'rotate-180' : ''" />
+                        <v-icon :icon="mdiChevronDown" size="16" class="shrink-0" :class="expandedOpponent === opp.djName ? 'rotate-180' : ''" />
                         <span class="font-bold text-slate-800 dark:text-slate-100 text-sm">{{ opp.djName }}</span>
                       </div>
                     </td>
@@ -459,7 +466,7 @@ const classColor = (cls: string) => {
                         <div v-for="m in matchesWithOpponent(opp.djName)" :key="m.id" class="px-4 py-3">
                           <!-- 試合ヘッダ: 対戦タイプ・日時・自分と相手の順位 -->
                           <div class="flex items-center gap-2 mb-2 flex-wrap">
-                            <v-chip size="x-small" label variant="flat" class="text-[10px] font-bold px-2 py-0.5 h-auto bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ m.battleType }}</v-chip>
+                            <v-chip size="x-small" label variant="tonal">{{ m.battleType }}</v-chip>
                             <span class="text-xs font-mono text-slate-500 dark:text-slate-400">{{ m.matchDate }}</span>
                             <span class="text-xs font-bold" :class="rankColor(m.myRank)">{{ t('arena.self') }}: {{ rankLabel(m.myRank) }}</span>
                             <span class="text-[10px] text-slate-400">{{ t('arena.vs') }}</span>
@@ -514,7 +521,6 @@ const classColor = (cls: string) => {
         <v-card
           v-for="match in filteredMatches"
           :key="match.id"
-          class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden"
         >
           <!-- 試合ヘッダ（クリックで詳細テーブルの開閉をトグル） -->
           <div
@@ -527,11 +533,11 @@ const classColor = (cls: string) => {
             @keydown.space.prevent="expandedMatchId = expandedMatchId === match.id ? null : match.id"
           >
             <div class="flex items-center gap-3 flex-wrap">
-              <v-chip size="small" label variant="flat" class="text-xs font-bold px-2 py-0.5 h-auto bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+              <v-chip size="small" label variant="tonal">
                 {{ match.battleType }}
               </v-chip>
               <span class="text-sm font-mono text-slate-500 dark:text-slate-400">{{ match.matchDate }}</span>
-              <v-chip size="small" label variant="flat" class="text-xs font-bold px-2 py-0.5 h-auto" :class="classColor(match.myArenaClass)">
+              <v-chip size="small" label variant="tonal" :color="classColor(match.myArenaClass)">
                 {{ match.myArenaClass }}
               </v-chip>
               <span class="text-sm font-bold" :class="rankColor(match.myRank)">
@@ -547,17 +553,16 @@ const classColor = (cls: string) => {
                 size="small"
                 @click.stop="handleDelete(match.id)"
                 :aria-label="t('arena.deleteConfirm')"
-                class="text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
               >
-                <v-icon :icon="mdiDeleteOutline" size="16" />
+                <v-icon :icon="mdiDeleteOutline" />
               </v-btn>
-              <v-icon :icon="mdiChevronDown" size="16" class="text-slate-400 transition-transform" :class="expandedMatchId === match.id ? 'rotate-180' : ''" />
+              <v-icon :icon="mdiChevronDown" :class="expandedMatchId === match.id ? 'rotate-180' : ''" />
             </div>
           </div>
 
           <!-- 試合詳細: 参加者全員を行、曲を列にした横長テーブル -->
           <div v-if="expandedMatchId === match.id" class="border-t border-slate-100 dark:border-slate-700 overflow-x-auto">
-            <v-table class="w-full text-sm bg-transparent [&_table]:min-w-max">
+            <v-table class="w-full [&_table]:min-w-max">
               <thead>
                 <tr class="bg-slate-50 dark:bg-slate-900/50">
                   <th scope="col" class="px-4 py-2 text-left font-bold text-slate-600 dark:text-slate-400 text-xs">{{ t('arena.opponentTable.djName') }}</th>
@@ -587,7 +592,7 @@ const classColor = (cls: string) => {
                     <span v-if="player.djName === match.myDjName" class="ml-1 text-[10px] font-bold text-blue-600 dark:text-blue-400">{{ t('arena.you') }}</span>
                   </td>
                   <td class="px-3 py-2 text-center">
-                    <v-chip size="x-small" label variant="flat" class="text-[10px] font-bold px-1.5 py-0.5 h-auto" :class="classColor(player.arenaClass)">{{ player.arenaClass }}</v-chip>
+                    <v-chip size="x-small" label variant="tonal" :color="classColor(player.arenaClass)">{{ player.arenaClass }}</v-chip>
                   </td>
                   <td class="px-3 py-2 text-center text-xs font-mono text-slate-700 dark:text-slate-300">{{ player.totalPt }}pt</td>
                   <td class="px-3 py-2 text-center text-xs font-bold" :class="rankColor(player.rank)">{{ rankLabel(player.rank) }}</td>

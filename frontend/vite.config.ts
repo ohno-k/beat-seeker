@@ -57,8 +57,18 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+        // 既定はローカルのバックエンド。API_PROXY_TARGET=https://beat-seeker.onrender.com で本番 API に中継できる
+        // （そのときは VITE_API_BASE= を空にして、フロントから同じオリジンの /api を呼ばせる）
+        target: process.env.API_PROXY_TARGET ?? 'http://localhost:8080',
+        changeOrigin: true,
+        secure: true,
+        // 本番 API は CORS で beat-seeker.com と localhost:5173 しか許可しないので、中継時は Origin を本番のフロントに書き換える
+        configure: (proxy) => {
+          if (!process.env.API_PROXY_TARGET) return
+          proxy.on('proxyReq', (proxyReq) => {
+            if (proxyReq.getHeader('origin')) proxyReq.setHeader('origin', 'https://beat-seeker.com')
+          })
+        },
       }
     }
   }

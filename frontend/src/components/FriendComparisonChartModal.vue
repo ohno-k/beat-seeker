@@ -612,38 +612,39 @@ watch(
 
 <template>
   <v-dialog :model-value="isOpen" @update:model-value="(v) => { if (!v) emit('close') }" max-width="768">
-      <v-card class="bg-white dark:bg-slate-800 max-h-[95vh] sm:max-h-[90vh]">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
-          <div class="min-w-0">
-            <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+      <v-card class="max-h-[95vh] sm:max-h-[90vh]">
+        <v-card-item class="shrink-0">
+          <v-card-title class="flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18M7 14l3-3 4 4 5-7" />
               </svg>
               勝敗の変遷
-            </h3>
-            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+          </v-card-title>
+          <v-card-subtitle>
               {{ scopeLabel }} — vs <span class="text-blue-600 dark:text-blue-400 font-bold">{{ friend.displayName }}</span>
-            </p>
-          </div>
+          </v-card-subtitle>
+          <template #append>
           <div class="flex items-center gap-2 shrink-0">
             <v-btn v-if="snapshots.length > 0" type="button" @click="resetZoom"
-              variant="tonal" size="small" :prepend-icon="mdiArrowExpandAll" class="text-xs">
+              variant="tonal" size="small" :prepend-icon="mdiArrowExpandAll">
               リセット
             </v-btn>
-            <v-btn icon variant="text" size="small" @click="emit('close')" aria-label="閉じる" class="text-slate-500 dark:text-slate-400">
+            <v-btn icon variant="text" size="small" @click="emit('close')" aria-label="閉じる">
               <v-icon :icon="mdiClose" />
             </v-btn>
           </div>
-        </div>
-        <v-card-text class="flex-1 overflow-auto p-3 sm:p-4">
+          </template>
+        </v-card-item>
+        <v-divider />
+        <v-card-text class="flex-1 overflow-auto">
           <div v-if="isLoading" class="py-12 flex flex-col items-center justify-center">
-            <v-progress-circular size="32" width="4" color="indigo" />
+            <v-progress-circular indeterminate size="32" width="4" color="primary" />
             <p class="mt-3 text-xs text-slate-500 dark:text-slate-400 font-bold">履歴を再構築中...</p>
           </div>
           <div v-else-if="errorMsg" class="py-8 text-center text-red-500 dark:text-red-400 font-bold">{{ errorMsg }}</div>
           <div v-else-if="snapshots.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">表示できる履歴がありません</div>
           <div v-else>
-            <v-alert v-if="friendHistoryUnavailable" type="warning" :icon="false" class="mb-3 text-[11px] sm:text-xs font-bold leading-relaxed">
+            <v-alert v-if="friendHistoryUnavailable" type="warning" :icon="false" density="compact" class="mb-3">
               <p v-if="virtualArea">バーチャルライバルは履歴がないため、相手のスコアは現在値で固定して変遷を再構築しています。</p>
               <p v-else>このフレンドは履歴を非公開にしているため、相手のスコアは現在値で固定して変遷を再構築しています。</p>
             </v-alert>
@@ -653,11 +654,13 @@ watch(
                 :model-value="displayMode"
                 @update:model-value="setDisplayMode"
                 mandatory
-                color="indigo"
-                class="shrink-0 text-xs"
+                color="primary"
+                variant="outlined"
+                density="compact"
+                class="shrink-0"
               >
-                <v-btn value="count" size="small" class="text-xs">件数</v-btn>
-                <v-btn value="ratio" size="small" class="text-xs">割合</v-btn>
+                <v-btn value="count" size="small">件数</v-btn>
+                <v-btn value="ratio" size="small">割合</v-btn>
               </v-btn-toggle>
               <!-- 割合モード時の凡例代わり注釈。狭い画面では非表示にして崩れを防ぐ。 -->
               <div v-if="displayMode === 'ratio'" class="hidden sm:flex items-center gap-3 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold flex-wrap justify-end">

@@ -257,74 +257,61 @@ const showLv12 = ref(true);
     :fullscreen="$vuetify.display.xs"
     @update:model-value="(v: boolean) => { if (!v) emit('close') }"
   >
-      <v-card class="bg-white dark:bg-slate-800 w-full shadow-xl overflow-hidden flex flex-col border-slate-200 dark:border-slate-700">
+      <v-card class="w-full overflow-hidden flex flex-col">
         <!-- ヘッダー -->
-        <div class="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-          <div class="min-w-0">
-            <h2 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-              スコア比較 (管理者)
-            </h2>
-            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-bold mt-1 truncate">
-              <span class="text-blue-600 dark:text-blue-400 font-bold">{{ userA.displayName }}</span>
-              <span class="mx-1.5 text-slate-400">vs</span>
-              <span class="text-red-500 dark:text-red-400 font-bold">{{ userB.displayName }}</span>
-            </p>
-          </div>
-          <v-btn icon variant="text" class="shrink-0 text-slate-400" aria-label="close" @click="emit('close')">
-            <v-icon :icon="mdiClose" />
-          </v-btn>
-        </div>
+        <v-card-item>
+          <v-card-title class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            スコア比較 (管理者)
+          </v-card-title>
+          <v-card-subtitle>
+            <span class="text-blue-600 dark:text-blue-400">{{ userA.displayName }}</span>
+            <span class="mx-1.5">vs</span>
+            <span class="text-red-500 dark:text-red-400">{{ userB.displayName }}</span>
+          </v-card-subtitle>
+          <template #append>
+            <v-btn icon variant="text" aria-label="close" @click="emit('close')">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
+          </template>
+        </v-card-item>
+        <v-divider />
 
         <!-- コンテンツ本体 -->
-        <div class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-6 sm:space-y-8">
+        <v-card-text class="flex-1 overflow-y-auto space-y-6 sm:space-y-8">
           <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-            <v-progress-circular size="48" width="4" class="mb-4" />
+            <v-progress-circular indeterminate size="48" width="4" class="mb-4" />
             <p class="text-slate-500 font-bold">データを集計中...</p>
           </div>
 
-          <v-alert v-else-if="error" type="error" class="text-center">
-            <p class="font-bold">{{ error }}</p>
+          <v-alert v-else-if="error" type="error">
+            <p>{{ error }}</p>
           </v-alert>
 
           <div v-else class="space-y-6 sm:space-y-8">
             <!-- フィルタートグル群 -->
             <div class="flex flex-wrap items-center justify-start sm:justify-end gap-x-3 gap-y-2 sm:gap-4">
               <div class="flex items-center gap-2 sm:gap-3">
-                <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
-                <v-checkbox v-model="showLv10Minus" color="indigo" class="flex-none">
-                  <template #label>
-                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
-                  </template>
-                </v-checkbox>
-                <v-checkbox v-model="showLv11" color="indigo" class="flex-none">
-                  <template #label>
-                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
-                  </template>
-                </v-checkbox>
-                <v-checkbox v-model="showLv12" color="indigo" class="flex-none">
-                  <template #label>
-                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
-                  </template>
-                </v-checkbox>
+                <span class="text-sm font-bold">公式レベル</span>
+                <v-checkbox v-model="showLv10Minus" color="primary" label="Lv.10以下" density="compact" hide-details class="flex-none" />
+                <v-checkbox v-model="showLv11" color="primary" label="Lv.11" density="compact" hide-details class="flex-none" />
+                <v-checkbox v-model="showLv12" color="primary" label="Lv.12" density="compact" hide-details class="flex-none" />
               </div>
-              <v-divider vertical class="hidden sm:block h-5 self-center" />
-              <div class="flex items-center gap-2 sm:gap-3">
-                <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ</span>
-                <v-switch v-model="showBothPlayedOnly" class="flex-none shrink-0" aria-label="両者プレイ済みのみ" />
-              </div>
+              <v-divider vertical class="hidden sm:block self-center" />
+              <v-switch v-model="showBothPlayedOnly" color="primary" label="両者プレイ済みのみ" density="compact" hide-details class="flex-none shrink-0" aria-label="両者プレイ済みのみ" />
             </div>
 
             <!-- サマリーカード -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <v-card v-for="(stats, key) in comparisonStats.summary" :key="key"
                 v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
-                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 border-slate-200 dark:border-slate-800 transition-all">
-                <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3">
+                variant="outlined">
+                <v-card-subtitle class="pt-3">
                   {{ key === 'overall' ? '全体' : key === 'lv10minus' ? 'レベル 10 以下' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
-                </h3>
+                </v-card-subtitle>
+                <v-card-text>
                 <div class="font-bold text-center" :class="showBothPlayedOnly ? 'grid grid-cols-3 gap-1' : 'grid grid-cols-5 gap-1'">
                   <div class="flex flex-col">
                     <span class="text-xl sm:text-2xl text-blue-600 dark:text-blue-400">{{ stats.win }}</span>
@@ -356,6 +343,7 @@ const showLv12 = ref(true);
                   <div class="h-full bg-red-400" :style="{ width: `${stats.total > 0 ? (stats.loss/stats.total)*100 : 0}%` }"></div>
                 </div>
                 <p class="mt-2 text-[10px] text-right text-slate-400 font-bold">{{ stats.total }} 曲対象</p>
+                </v-card-text>
               </v-card>
             </div>
 
@@ -365,24 +353,24 @@ const showLv12 = ref(true);
                 <span class="w-1.5 h-5 sm:h-6 bg-indigo-500 rounded-full"></span>
                 非公式難易度別 勝敗 <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
               </h3>
-              <v-table class="cmp-table text-left bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 overflow-hidden">
-                  <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
+              <v-table hover class="cmp-table">
+                  <thead>
                     <tr>
-                      <th class="p-2 sm:p-4 w-14 sm:w-24">ランク</th>
-                      <th class="p-2 sm:p-4 text-center">WIN (A)</th>
-                      <th v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center bg-blue-50/50 dark:bg-blue-900/10">A Only</th>
-                      <th class="p-2 sm:p-4 text-center">DRAW</th>
-                      <th v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center bg-red-50/50 dark:bg-red-900/10">B Only</th>
-                      <th class="p-2 sm:p-4 text-center">LOSS (A)</th>
+                      <th class="w-14 sm:w-24">ランク</th>
+                      <th class="text-center">WIN (A)</th>
+                      <th v-if="!showBothPlayedOnly" class="text-center">A Only</th>
+                      <th class="text-center">DRAW</th>
+                      <th v-if="!showBothPlayedOnly" class="text-center">B Only</th>
+                      <th class="text-center">LOSS (A)</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm sm:text-lg">
+                  <tbody>
                     <template v-for="[rank, stats] in comparisonStats.unofficial" :key="rank">
                       <tr
                         @click="toggleRank(rank)"
-                        class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer select-none"
+                        class="cursor-pointer select-none"
                       >
-                        <td class="p-2 sm:p-4 font-bold">
+                        <td class="font-bold">
                           <div class="flex items-center gap-1 sm:gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform text-slate-400 shrink-0" :class="{ 'rotate-90': expandedRanks.has(rank) }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -390,14 +378,14 @@ const showLv12 = ref(true);
                             <span class="text-slate-800 dark:text-slate-200 whitespace-nowrap">{{ rank }}</span>
                           </div>
                         </td>
-                        <td class="p-2 sm:p-4 text-center font-bold text-blue-600 dark:text-blue-400">{{ stats.win }}</td>
-                        <td v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center font-bold text-blue-500/80 bg-blue-50/30 dark:bg-blue-900/5">{{ stats.aOnly }}</td>
-                        <td class="p-2 sm:p-4 text-center font-bold text-slate-400">{{ stats.draw }}</td>
-                        <td v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center font-bold text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ stats.bOnly }}</td>
-                        <td class="p-2 sm:p-4 text-center font-bold text-red-500 dark:text-red-400">{{ stats.loss }}</td>
+                        <td class="text-center font-bold text-blue-600 dark:text-blue-400">{{ stats.win }}</td>
+                        <td v-if="!showBothPlayedOnly" class="text-center font-bold text-blue-500/80">{{ stats.aOnly }}</td>
+                        <td class="text-center font-bold text-slate-400">{{ stats.draw }}</td>
+                        <td v-if="!showBothPlayedOnly" class="text-center font-bold text-red-500/80">{{ stats.bOnly }}</td>
+                        <td class="text-center font-bold text-red-500 dark:text-red-400">{{ stats.loss }}</td>
                       </tr>
                       <tr v-if="expandedRanks.has(rank)">
-                        <td :colspan="showBothPlayedOnly ? 4 : 6" class="p-0 bg-slate-50/50 dark:bg-slate-900/20">
+                        <td :colspan="showBothPlayedOnly ? 4 : 6" class="p-0">
                           <div class="p-3 sm:p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             <div v-if="stats.winSongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
@@ -467,7 +455,7 @@ const showLv12 = ref(true);
 
             <!-- 注意書き -->
             <v-alert type="info">
-              <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
+              <div class="text-sm min-w-0">
                 <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較 (A 視点)</p>
                 <p>・A Only: ユーザー A のみプレイ済み / B Only: ユーザー B のみプレイ済み</p>
@@ -475,18 +463,19 @@ const showLv12 = ref(true);
               </div>
             </v-alert>
           </div>
-        </div>
+        </v-card-text>
 
         <!-- フッター -->
-        <div class="p-3 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-right">
+        <v-divider />
+        <v-card-actions>
+          <v-spacer />
           <v-btn
-            size="x-large"
-            class="w-full sm:w-auto px-8 sm:px-12 bg-slate-900 hover:bg-black text-white text-base sm:text-lg"
+            variant="text"
             @click="emit('close')"
           >
             閉じる
           </v-btn>
-        </div>
+        </v-card-actions>
       </v-card>
   </v-dialog>
 </template>

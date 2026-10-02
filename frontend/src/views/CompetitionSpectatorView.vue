@@ -19,7 +19,7 @@ import {
   type SpectatorMatchDto,
 } from '../composables/useCompetitionSpectator';
 import { useToast } from '../composables/useToast';
-import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
+import { teamColorClass, genreChipColor } from '../composables/competitionColors';
 import { KIND_LABEL_JA, kindLevelLabel, pointsPerSong } from '../composables/competitionMatchKinds';
 import { formatJst } from '../utils/jstTime';
 import { mdiRefresh } from '@mdi/js';
@@ -189,17 +189,17 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
 <template>
   <div class="competition-spectator-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
     <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">
-      <v-progress-circular size="20" width="2" class="mr-2" />読み込み中…
+      <v-progress-circular indeterminate size="20" width="2" class="mr-2" />読み込み中…
     </div>
 
     <v-alert
       v-else-if="!view"
       type="error"
       :icon="false"
-      class="max-w-2xl mx-auto p-6 text-center"
+      class="max-w-2xl mx-auto text-center"
     >
-      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">対戦表が見つかりません</p>
-      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">
+      <p class="text-lg font-bold">対戦表が見つかりません</p>
+      <p class="text-sm mt-2">
         URL が間違っているか、主催により無効化された可能性があります。
       </p>
     </v-alert>
@@ -210,7 +210,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
         <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">SPECTATOR</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
           <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">{{ view.competition.name }}</h1>
-          <v-chip size="small" label class="text-[10px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">観戦</v-chip>
+          <v-chip size="small" label color="light-blue">観戦</v-chip>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           ステータス <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
@@ -229,7 +229,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
           variant="tonal"
           color="indigo"
           size="small"
-          class="mt-3 text-xs"
+          class="mt-3"
         >📊 サマリー (試合別 / 選手別)</v-btn>
       </div>
 
@@ -237,12 +237,12 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
       <v-card
         v-if="view.standings && view.standings.rows.length > 0"
         tag="section"
-        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
       >
+        <v-card-text class="space-y-3">
         <h2 class="text-sm font-bold text-slate-500">
           順位表 ({{ view.standings.prelimRecordedCount }} / {{ view.standings.prelimMatchupCount }} matchup 記録済)
         </h2>
-        <v-table class="text-sm bg-transparent [&_table]:min-w-[520px] [&_td]:h-auto [&_th]:h-auto">
+        <v-table density="compact" class="[&_table]:min-w-[520px]">
             <thead>
               <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                 <th class="text-left py-1 px-2">順位</th>
@@ -288,19 +288,20 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
           <span v-else-if="view.standings.allPrelimRecorded">予選全結果記録済</span>
           <span v-else>予選 {{ view.standings.prelimMatchupCount - view.standings.prelimRecordedCount }} 試合の結果記録待ち</span>
         </p>
+        </v-card-text>
       </v-card>
 
       <!-- 途中経過マトリクス: 5×5 で各 matchup の row 視点の戦ポイントを表示 -->
       <v-card
         v-if="view.standings && view.teams.length > 0"
         tag="section"
-        class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
       >
+        <v-card-text class="space-y-3">
         <h2 class="text-sm font-bold text-slate-500">途中経過</h2>
         <p class="text-[11px] text-slate-500">
           セル「自軍戦pt ○/×/△ 相手戦pt」: ○=行チームが勝ち / ×=負け / △=引分。「?」 = 未記録、「-」 = 同チーム同士。合計列は勝ち点合計 (matchup 勝点のみ)。
         </p>
-        <v-table class="text-xs bg-transparent [&_table]:w-auto [&_table]:border-collapse [&_td]:h-auto [&_th]:h-auto">
+        <v-table density="compact" class="[&_table]:w-auto">
             <thead>
               <tr>
                 <th class="py-1 px-2 text-[10px] font-mono text-slate-400"></th>
@@ -350,6 +351,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
               </tr>
             </tbody>
         </v-table>
+        </v-card-text>
       </v-card>
 
       <!-- 対戦表 -->
@@ -357,17 +359,16 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
         <p class="text-xs font-bold text-slate-500">
           対戦表 ({{ sortedMatchups.length }} 組)
         </p>
-        <v-card
-          v-if="sortedMatchups.length === 0"
-          class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-        >
-          まだ公開された対戦はありません。<br />主催が対戦を設定すると表示されます。
+        <v-card v-if="sortedMatchups.length === 0">
+          <v-card-text class="text-center">
+            <p class="text-sm text-slate-400 italic py-2">まだ公開された対戦はありません。<br />主催が対戦を設定すると表示されます。</p>
+          </v-card-text>
         </v-card>
 
         <v-card
           v-for="mu in sortedMatchups"
           :key="mu.matchupId"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden"
+          class="overflow-hidden"
         >
           <!--
             総合 (先鋒〜大将の全戦合計)。戦ポイント = 勝ち曲数 × 戦の配点 (予選 先鋒2/中堅3/大将4)
@@ -391,19 +392,18 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
                 v-if="matchupTotals[mu.matchupId].winner === 'a' || matchupTotals[mu.matchupId].winner === 'b'"
                 size="small"
                 label
-                class="text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                color="success"
               >○ {{ (matchupTotals[mu.matchupId].winner === 'a' ? mu.teamA?.teamName : mu.teamB?.teamName) ?? '?' }} 勝ち</v-chip>
               <v-chip
                 v-else-if="matchupTotals[mu.matchupId].winner === 'draw'"
                 size="small"
                 label
-                class="text-[11px] font-bold bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
               >△ 引分</v-chip>
               <v-chip
                 v-else
                 size="small"
                 label
-                class="text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                color="warning"
               >途中経過</v-chip>
               <span class="text-[10px] font-mono text-slate-400">
                 曲数 {{ matchupTotals[mu.matchupId].aSongs }} - {{ matchupTotals[mu.matchupId].bSongs }}
@@ -441,8 +441,8 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
                   v-if="match.requiredGenre"
                   size="x-small"
                   label
-                  class="mt-1 text-[9px] font-bold"
-                  :class="genreBadgeClass(match.requiredGenre)"
+                  class="mt-1"
+                  :color="genreChipColor(match.requiredGenre)"
                 >
                   指定 {{ match.requiredGenre }}
                 </v-chip>
@@ -450,7 +450,7 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
                   v-else
                   size="x-small"
                   label
-                  class="mt-1 text-[9px] font-bold bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
+                  class="mt-1"
                 >
                   ジャンル未指定
                 </v-chip>
@@ -545,7 +545,8 @@ const winnerSide = (m: SpectatorMatchDto): 'a' | 'b' | 'draw' | null => {
       color="primary"
       size="large"
       rounded="pill"
-      class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] pl-4 pr-5 shadow-lg text-sm"
+      elevation="8"
+      class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))]"
     >
       <template #prepend>
         <v-icon :icon="mdiRefresh" aria-hidden="true" :class="isLoading ? 'animate-spin' : ''" />

@@ -104,7 +104,7 @@ const fmtPt = (n: number) => n.toFixed(1);
       color="primary"
       size="x-small"
       @click="$emit('toggle-songs')"
-      class="mt-1.5 ml-1 px-1 text-[11px] font-bold"
+      class="mt-1.5 ml-1"
     >
       <template v-if="expandedSongs">折りたたむ</template>
       <template v-else>ほか {{ sortedUpdatedSongs.length - PREVIEW_SONG_LIMIT }} 譜面を表示</template>
@@ -119,14 +119,14 @@ const fmtPt = (n: number) => n.toFixed(1);
     </p>
     <p v-else-if="viewerRel === 'OVERTAKE_BY_ME'" class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ asSong.rivalName }}</span>
-      <v-chip v-if="asSong.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
+      <v-chip v-if="asSong.isVirtual" size="x-small" label color="warning" class="ml-1">仮想</v-chip>
       のスコアを抜きました
     </p>
     <p v-else class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ entry.displayName }}</span>
       が
       <span class="font-bold">{{ asSong.rivalName }}</span>
-      <v-chip v-if="asSong.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
+      <v-chip v-if="asSong.isVirtual" size="x-small" label color="warning" class="ml-1">仮想</v-chip>
       のスコアを抜きました
     </p>
     <div
@@ -177,14 +177,14 @@ const fmtPt = (n: number) => n.toFixed(1);
     </p>
     <p v-else-if="viewerRel === 'OVERTAKE_BY_ME'" class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ asTotal.rivalName }}</span>
-      <v-chip v-if="asTotal.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
+      <v-chip v-if="asTotal.isVirtual" size="x-small" label color="warning" class="ml-1">仮想</v-chip>
       を総合 BEAT-PT で抜きました
     </p>
     <p v-else class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ entry.displayName }}</span>
       が
       <span class="font-bold">{{ asTotal.rivalName }}</span>
-      <v-chip v-if="asTotal.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
+      <v-chip v-if="asTotal.isVirtual" size="x-small" label color="warning" class="ml-1">仮想</v-chip>
       を総合 BEAT-PT で抜きました
     </p>
     <div

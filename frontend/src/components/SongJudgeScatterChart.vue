@@ -454,7 +454,6 @@ const chartOptions = computed(() => {
         type="button"
         variant="outlined"
         size="x-small"
-        class="text-[11px] text-slate-600 dark:text-slate-200"
         :prepend-icon="mdiArrowCollapseAll"
         @click="resetUserZoom"
       >
@@ -466,8 +465,6 @@ const chartOptions = computed(() => {
         :variant="zoomSelf ? 'flat' : 'outlined'"
         :color="zoomSelf ? 'success' : undefined"
         size="x-small"
-        class="text-[11px]"
-        :class="zoomSelf ? '' : 'text-slate-600 dark:text-slate-200'"
         :prepend-icon="zoomSelf ? mdiMagnifyMinusOutline : mdiMagnifyPlusOutline"
         @click="toggleZoomSelf"
       >

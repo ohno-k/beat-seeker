@@ -132,33 +132,33 @@ const formatDate = (dateString: string) => formatJstDateTime(dateString);
     max-width="672"
     @update:model-value="(v: boolean) => { if (!v) emit('close') }"
   >
-    <v-card class="w-full max-h-[90vh] flex flex-col overflow-hidden">
+    <v-card class="w-full max-h-[90vh] flex flex-col">
 
       <!-- ヘッダー（曲名 + 難易度バッジ + ×ボタン） -->
-      <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
-        <div>
-          <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <v-chip
-              label
-              size="small"
-              :color="difficultyName === 'LEGGENDARIA' ? 'purple' : 'orange'"
-              class="text-xs font-bold"
-            >
-              {{ difficultyName === 'LEGGENDARIA' ? 'LEG' : 'ANO' }}
-            </v-chip>
-            {{ title }}
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">コメントスレッド</p>
-        </div>
-        <v-btn icon variant="text" size="small" aria-label="close" class="text-slate-400" @click="emit('close')">
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+      <v-card-item class="shrink-0">
+        <v-card-title class="flex items-center gap-2">
+          <v-chip
+            label
+            size="small"
+            :color="difficultyName === 'LEGGENDARIA' ? 'purple' : 'orange'"
+          >
+            {{ difficultyName === 'LEGGENDARIA' ? 'LEG' : 'ANO' }}
+          </v-chip>
+          {{ title }}
+        </v-card-title>
+        <v-card-subtitle>コメントスレッド</v-card-subtitle>
+        <template #append>
+          <v-btn icon variant="text" size="small" aria-label="close" @click="emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
+      <v-divider />
 
       <!-- コメント表示領域（チャット風） -->
-      <div ref="commentsContainer" class="flex-1 overflow-y-auto p-6 space-y-4 bg-white dark:bg-slate-800">
+      <div ref="commentsContainer" class="flex-1 overflow-y-auto p-6 space-y-4">
         <div v-if="isLoading" class="flex justify-center py-8">
-          <v-progress-circular size="24" width="2" />
+          <v-progress-circular size="24" width="2" color="primary" indeterminate />
         </div>
 
         <div v-else-if="comments.length === 0" class="text-center py-12 text-slate-400 dark:text-slate-500 text-sm">
@@ -179,10 +179,11 @@ const formatDate = (dateString: string) => formatJstDateTime(dateString);
       </div>
 
       <!-- 入力フォーム（未ログイン時は案内を表示） -->
-      <div class="p-4 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-        <div v-if="errorMsg" class="mb-2 text-xs text-red-500 dark:text-red-400 px-2">{{ errorMsg }}</div>
+      <v-divider />
+      <v-card-text class="shrink-0">
+        <v-alert v-if="errorMsg" type="error" variant="tonal" density="compact" class="mb-2">{{ errorMsg }}</v-alert>
 
-        <v-alert v-if="!isLoggedIn" type="warning" :icon="false" class="text-sm text-center font-medium">
+        <v-alert v-if="!isLoggedIn" type="warning" variant="tonal" density="compact">
           ログインするとコメントを投稿できます
         </v-alert>
 
@@ -193,20 +194,22 @@ const formatDate = (dateString: string) => formatJstDateTime(dateString);
             rows="1"
             auto-grow
             max-rows="5"
-            class="flex-1 text-sm"
+            hide-details
+            class="flex-1"
             @keydown.enter.ctrl.prevent="submitComment"
           />
           <v-btn
             color="primary"
-            class="shrink-0 h-11 px-5"
+            size="large"
+            class="shrink-0"
             :disabled="!newComment.trim() || isSubmitting"
             @click="submitComment"
           >
             <span>送信</span>
           </v-btn>
         </div>
-        <div v-if="isLoggedIn" class="mt-2 text-right text-[10px] text-slate-400">Ctrl + Enter で送信</div>
-      </div>
+        <div v-if="isLoggedIn" class="mt-2 text-right text-caption text-medium-emphasis">Ctrl + Enter で送信</div>
+      </v-card-text>
 
     </v-card>
   </v-dialog>

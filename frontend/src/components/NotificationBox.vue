@@ -107,37 +107,37 @@ const notificationIconClass = (type: string) => {
 </script>
 
 <template>
-  <v-card v-if="isOpen" class="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] mt-2 shadow-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+  <v-card v-if="isOpen" elevation="8" class="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] mt-2 z-50 animate-in slide-in-from-top-2 duration-200">
     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
       <h4 class="text-sm font-bold text-slate-800 dark:text-white">通知</h4>
       <div class="flex items-center gap-2">
         <v-btn
           v-if="activeTab === 'app' && unreadAppCount > 0"
           variant="text"
-          size="x-small"
+          size="small"
           color="info"
-          class="text-[10px] font-bold px-2"
           @click="handleMarkAllRead"
         >
           全て既読
         </v-btn>
-        <v-btn icon variant="text" size="x-small" class="text-slate-400 hover:text-slate-600" @click="emit('close')">
-          <v-icon :icon="mdiClose" size="16" />
+        <v-btn icon variant="text" size="small" @click="emit('close')">
+          <v-icon :icon="mdiClose" />
         </v-btn>
       </div>
     </div>
 
     <!-- タブ切替（フレンド申請 / アクティビティ通知） -->
-    <v-tabs v-model="activeTab" grow class="border-b border-slate-100 dark:border-slate-700">
-      <v-tab value="friend" class="text-xs font-bold text-none">
+    <v-tabs v-model="activeTab" grow color="primary">
+      <v-tab value="friend">
         フレンド申請
         <v-badge v-if="pendingRequests.length > 0" inline color="info" :content="pendingRequests.length" class="ml-1" />
       </v-tab>
-      <v-tab value="app" class="text-xs font-bold text-none">
+      <v-tab value="app">
         アクティビティ
         <v-badge v-if="unreadAppCount > 0" inline color="error" :content="unreadAppCount" class="ml-1" />
       </v-tab>
     </v-tabs>
+    <v-divider />
 
     <div class="max-h-96 overflow-y-auto">
       <!-- フレンド申請タブの中身 -->
@@ -168,10 +168,10 @@ const notificationIconClass = (type: string) => {
                 </div>
               </div>
               <div class="flex gap-2 pl-11">
-                <v-btn color="primary" size="small" class="flex-1 text-[11px]" :disabled="isActionLoading === req.id" @click="handleAccept(req.id)">
+                <v-btn color="primary" size="small" class="flex-1" :disabled="isActionLoading === req.id" @click="handleAccept(req.id)">
                   承認
                 </v-btn>
-                <v-btn variant="tonal" size="small" class="flex-1 text-[11px]" :disabled="isActionLoading === req.id" @click="handleReject(req.id)">
+                <v-btn variant="tonal" size="small" class="flex-1" :disabled="isActionLoading === req.id" @click="handleReject(req.id)">
                   拒否
                 </v-btn>
               </div>

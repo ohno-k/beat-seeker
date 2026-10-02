@@ -270,19 +270,19 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
     <!-- 未ログイン（自分の振り返りは要ログイン） -->
     <div v-if="showLoginPrompt" class="flex flex-col items-center justify-center min-h-screen gap-4 text-slate-700 dark:text-slate-300">
       <p>この振り返りを見るにはログインが必要です</p>
-      <v-btn color="primary" @click="router.push('/')" class="px-6 rounded-xl font-bold">トップへ</v-btn>
+      <v-btn color="primary" @click="router.push('/')">トップへ</v-btn>
     </div>
 
     <!-- 読み込み中 -->
     <div v-else-if="isLoading" class="flex items-center justify-center gap-2 min-h-screen text-slate-500">
-      <v-progress-circular size="20" width="2" />
+      <v-progress-circular indeterminate size="20" width="2" />
       <p>読み込み中...</p>
     </div>
 
     <!-- エラー -->
     <div v-else-if="error" class="flex flex-col items-center justify-center min-h-screen gap-3 text-slate-700 dark:text-slate-300">
       <p class="text-red-500">{{ error }}</p>
-      <v-btn variant="text" size="small" @click="router.back()" class="text-sm text-blue-500 underline">戻る</v-btn>
+      <v-btn variant="text" color="primary" @click="router.back()">戻る</v-btn>
     </div>
 
     <!-- 振り返り本体 -->
@@ -297,8 +297,8 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
           <p class="text-xs md:text-sm tracking-[0.4em] opacity-70 mb-3">BEAT-SEEKER WRAPPED</p>
           <h1 class="text-5xl md:text-7xl font-black mb-4">{{ data.displayMonth }}</h1>
           <p class="text-lg md:text-2xl opacity-80 mb-12">{{ data.displayName }} さんの記録</p>
-          <v-btn variant="text" @click="scrollToCard(1)" class="text-sm text-white font-normal opacity-60 hover:opacity-100 transition-opacity animate-bounce">
-            ↓ スクロールして見る
+          <v-btn variant="text" theme="dark" append-icon="$expand" @click="scrollToCard(1)" class="animate-bounce">
+            スクロールして見る
           </v-btn>
         </section>
 
@@ -479,12 +479,12 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
           <p class="opacity-70 mb-10 text-sm md:text-base">来月もよい記録を</p>
           <v-btn
             size="x-large"
+            color="black"
             @click="handleShare"
             :disabled="isGeneratingShare"
-            class="px-8 h-auto py-4 bg-black text-white font-bold text-base md:text-lg rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-wait"
           >
             <template v-if="isGeneratingShare">
-              <v-progress-circular size="20" width="2" color="white" class="mr-3" aria-hidden="true" />
+              <v-progress-circular indeterminate size="20" width="2" class="mr-3" aria-hidden="true" />
               <span>画像を生成中...</span>
             </template>
             <template v-else>
@@ -497,9 +497,9 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
           </p>
           <v-btn
             variant="text"
-            size="small"
+            theme="dark"
             @click="router.push('/dashboard')"
-            class="mt-6 text-xs md:text-sm text-white font-normal opacity-60 hover:opacity-100 underline"
+            class="mt-6"
           >
             ダッシュボードへ戻る
           </v-btn>

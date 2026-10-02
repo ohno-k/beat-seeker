@@ -229,23 +229,25 @@ const errorBody = computed(() => {
   <div class="w-full max-w-6xl mx-auto px-3 py-6 flex flex-col gap-4">
 
     <!-- 共有元ユーザーのバナー -->
-    <v-card v-if="info" class="w-full px-5 py-3 flex items-center gap-3">
-      <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-        </svg>
-      </div>
-      <div class="min-w-0 flex-1">
-        <div class="text-xs text-slate-500 dark:text-slate-400 font-bold">共有リンク</div>
-        <div class="font-bold text-slate-700 dark:text-slate-200 truncate">
+    <v-card v-if="info" class="w-full">
+      <v-card-item>
+        <template #prepend>
+          <v-avatar color="primary" variant="tonal" size="36">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+            </svg>
+          </v-avatar>
+        </template>
+        <v-card-subtitle>共有リンク</v-card-subtitle>
+        <v-card-title>
           {{ info.user.displayName || info.user.iidxId }} さんのデータ
-        </div>
-      </div>
+        </v-card-title>
+      </v-card-item>
     </v-card>
 
     <!-- ローディング -->
     <div v-if="isLoading" class="py-16 flex flex-col items-center justify-center gap-3">
-      <v-progress-circular size="40" width="4" />
+      <v-progress-circular size="40" width="4" color="primary" indeterminate />
       <p class="text-slate-500 dark:text-slate-400 font-medium">読み込み中...</p>
     </div>
 
@@ -269,17 +271,17 @@ const errorBody = computed(() => {
     <!-- 本体 -->
     <template v-else-if="info">
       <!-- 共有範囲のみのタブナビ -->
-      <nav v-if="availableSections.length > 0" class="w-full border-b border-slate-200 dark:border-slate-700 -mx-3 px-3 sm:mx-0 sm:px-0">
-        <v-tabs v-model="activeSection" show-arrows>
+      <nav v-if="availableSections.length > 0" class="w-full -mx-3 px-3 sm:mx-0 sm:px-0">
+        <v-tabs v-model="activeSection" color="primary" show-arrows>
           <v-tab
             v-for="s in availableSections"
             :key="s.key"
             :value="s.key"
-            class="font-bold text-sm"
           >
             {{ s.label }}
           </v-tab>
         </v-tabs>
+        <v-divider />
       </nav>
 
       <!-- ダッシュボード -->

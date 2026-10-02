@@ -4,28 +4,27 @@
     fullscreen
     @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
   >
-    <v-card rounded="0" class="h-full border-0 bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-200">
+    <v-card rounded="0" class="h-full flex flex-col">
       <!-- ヘッダー（タイトル + 閉じるボタン） -->
-      <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
-        <div>
-          <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('rateTierInfo.title') }}</h3>
-          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5">{{ t('rateTierInfo.subtitle') }}</p>
-        </div>
-        <v-btn icon variant="text" class="text-slate-400 dark:text-slate-500" aria-label="close" @click="$emit('close')">
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+      <v-card-item class="shrink-0">
+        <v-card-title>{{ t('rateTierInfo.title') }}</v-card-title>
+        <v-card-subtitle>{{ t('rateTierInfo.subtitle') }}</v-card-subtitle>
+        <template #append>
+          <v-btn icon variant="text" aria-label="close" @click="$emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
+
+      <!-- タブ切替（解説 / 閾値表） -->
+      <v-tabs v-model="activeTab" color="success" class="shrink-0">
+        <v-tab value="about">{{ t('beatTierInfo.tabAbout') }}</v-tab>
+        <v-tab value="table">{{ t('rateTierInfo.tabTable') }}</v-tab>
+      </v-tabs>
+      <v-divider />
 
       <!-- スクロール可能な本文領域 -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-200">
-        <!-- タブ切替（解説 / 閾値表） -->
-        <div class="px-8 pt-6 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-10 transition-colors duration-200">
-          <v-tabs v-model="activeTab" color="success" class="border-b border-slate-200 dark:border-slate-700">
-            <v-tab value="about" class="text-sm font-bold">{{ t('beatTierInfo.tabAbout') }}</v-tab>
-            <v-tab value="table" class="text-sm font-bold">{{ t('rateTierInfo.tabTable') }}</v-tab>
-          </v-tabs>
-        </div>
-
+      <div class="flex-1 overflow-y-auto custom-scrollbar">
         <div class="p-4 sm:p-8">
           <!-- 解説タブ（Rate-PT の仕組みと計算式） -->
           <div v-if="activeTab === 'about'" class="space-y-8 animate-fade-in">
@@ -59,7 +58,7 @@
                   <span class="w-1.5 h-6 bg-purple-600 dark:bg-purple-500 rounded-full"></span>
                   {{ t('beatTierInfo.rankBoardTitle') }}
                 </h4>
-                <v-chip label class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Hierarchy</v-chip>
+                <v-chip label size="small">Hierarchy</v-chip>
               </div>
 
               <!-- Premium Dark/Light Grid for Ranks -->
@@ -95,10 +94,10 @@
                             <div class="relative">
                               <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
                               <!-- Hover Tooltip -->
-                              <v-tooltip activator="parent" content-class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white p-3 rounded-md text-xs whitespace-nowrap">
-                                <div class="flex flex-col items-center gap-1">
-                                  <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">{{ name }} {{ 6 - tier }}</span>
-                                  <span class="font-bold text-slate-600 dark:text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
+                              <v-tooltip activator="parent" location="top">
+                                <div class="flex flex-col items-center">
+                                  <span class="font-bold">{{ name }} {{ 6 - tier }}</span>
+                                  <span>{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
                                 </div>
                               </v-tooltip>
                             </div>
@@ -137,31 +136,36 @@
               </p>
             </section>
 
-            <v-card class="overflow-hidden">
-              <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 grid grid-cols-3 gap-4">
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('table.colRate') }}</span>
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 text-right">{{ t('table.colPoints') }}</span>
-                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 text-right">{{ t('rateTierInfo.scoreExampleTitle') }}</span>
-              </div>
-              <div class="divide-y divide-slate-100 dark:divide-slate-700">
-                <div
-                  v-for="(threshold, i) in SCORE_RATE_THRESHOLDS"
-                  :key="i"
-                  class="px-5 py-4 grid grid-cols-3 gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                >
-                  <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full shrink-0" :class="thresholdColor(threshold.points)"></div>
-                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100 tabular-nums">{{ threshold.rate.toFixed(2) }}%</span>
-                    <v-chip v-if="threshold.rate === 100" label size="x-small" variant="flat" color="amber" class="text-[9px] font-bold px-1.5 text-white">PERFECT</v-chip>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-sm font-bold tabular-nums" :class="thresholdTextColor(threshold.points)">{{ threshold.points }} pt</span>
-                  </div>
-                  <div class="text-right">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tabular-nums">{{ Math.round(threshold.rate / 100 * 3000).toLocaleString() }} / 3000</span>
-                  </div>
-                </div>
-              </div>
+            <v-card>
+              <v-table hover>
+                <thead>
+                  <tr>
+                    <th class="text-left">{{ t('table.colRate') }}</th>
+                    <th class="text-right">{{ t('table.colPoints') }}</th>
+                    <th class="text-right">{{ t('rateTierInfo.scoreExampleTitle') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(threshold, i) in SCORE_RATE_THRESHOLDS"
+                    :key="i"
+                  >
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full shrink-0" :class="thresholdColor(threshold.points)"></div>
+                        <span class="font-bold tabular-nums">{{ threshold.rate.toFixed(2) }}%</span>
+                        <v-chip v-if="threshold.rate === 100" label size="x-small" variant="flat" color="amber">PERFECT</v-chip>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <span class="font-bold tabular-nums" :class="thresholdTextColor(threshold.points)">{{ threshold.points }} pt</span>
+                    </td>
+                    <td class="text-right">
+                      <span class="tabular-nums text-medium-emphasis">{{ Math.round(threshold.rate / 100 * 3000).toLocaleString() }} / 3000</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
             </v-card>
 
             <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 text-center">
@@ -172,11 +176,10 @@
       </div>
 
       <!-- フッター（更新日表示） -->
-      <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
-        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-          {{ t('rateTierInfo.footerDesc') }} • {{ todayLabel }}
-        </p>
-      </div>
+      <v-divider />
+      <v-card-text class="shrink-0 text-center text-caption text-medium-emphasis">
+        {{ t('rateTierInfo.footerDesc') }} • {{ todayLabel }}
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>

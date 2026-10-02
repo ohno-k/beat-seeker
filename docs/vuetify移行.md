@@ -3,12 +3,26 @@
 フロントエンドの UI 部品（ボタン・モーダル・入力欄・セレクト・タブ・カード・チップ・アラート・メニュー・表など）を
 Tailwind の手組みから Vuetify 4 のコンポーネントに置き換えた。レイアウト・余白・文字の大きさ・個別の色は Tailwind のまま。
 
+## 見た目の方針（Vuetify らしさを残す）
+
+元の Tailwind の見た目に寄せず、**Vuetify（Material Design）標準の見た目**にする。
+
+- 色・影・角丸・リップル・入力欄（filled）・ボタンの文字・余白は Vuetify の既定のまま。テーマも Vuetify 標準の light / dark。
+- Vuetify のコンポーネントには、見た目を変える Tailwind のクラス（`bg-*`・`text-{色}`・`border*`・`rounded*`・`shadow*`・
+  `font-*`・`text-{xs,sm,…}`・`px-*`/`py-*`・`h-*`・`hover:*`・`dark:*`・`transition*` など）を付けない。
+  意図は props で表す: 色 → `color="primary/error/success/warning/info"`、大きさ → `size="small/large"`・`density="compact"`、
+  種類 → `variant="flat/tonal/outlined/text/elevated"`、影 → `elevation`。
+- Tailwind で残してよいのは配置だけ: `flex`・`grid`・`gap-*`・`m*-*`（外側の余白）・`w-*`/`max-w-*`/`min-w-0`・`self-*`/`ml-auto`・
+  `hidden sm:inline` などのレスポンシブな出し分け・`truncate`。
+- `v-card` の中身は `v-card-title` / `v-card-subtitle` / `v-card-text` / `v-card-actions` を使う（中のレイアウトは Tailwind でよい）。
+- ヘッダー・サイドバー・本文の枠組み（App.vue のレイアウト）は手組みのまま。
+- 置き換えない部分（下記）と、ただの文章・データ表示の要素（Vuetify のコンポーネントでない `div`・`span` など）の Tailwind はそのまま。
+
 ## 土台
 
-- `src/plugins/vuetify.ts`: テーマ（light / dark）と各コンポーネントの既定値。
-  - 色は既存デザインに合わせる: primary = blue-700（dark は blue-600）、背景 slate-50 / slate-900、面 white / slate-800、罫線 slate-200 / slate-700。
+- `src/plugins/vuetify.ts`: Vuetify 標準テーマ（light / dark）。コンポーネントの既定値は変えていない。
   - ダークモードは従来どおり `useDarkMode` が `<html>` の `dark` クラスで切り替え、Vuetify のテーマはそのクラスを監視して追従する。
-  - 既定値: ボタンは大文字化しない・影なし・角丸 md、入力欄は outlined + compact + `hide-details="auto"`、カードは outlined（影なし）、リップルなし。
+- `index.html`: Material Design の標準フォント Roboto を読み込む。
 - `vite.config.ts`: `vite-plugin-vuetify`（`autoImport: true`）。使ったコンポーネントだけが bundle に入る。
 - `main.ts`: `vuetify/styles` を読み込み、`app.use(vuetify)`。
 - `App.vue`: 全体を `<v-app>` で包む。
@@ -16,8 +30,10 @@ Tailwind の手組みから Vuetify 4 のコンポーネントに置き換えた
 ## CSS の優先順位
 
 Vuetify 4 の CSS はすべてカスケードレイヤー（`vuetify-core` / `vuetify-components` / … / `vuetify-final`）に入っている。
-Tailwind（v3）の出力はレイヤー外なので、**同じ要素に Tailwind のクラスを付ければ常に Tailwind が勝つ**。
-Vuetify コンポーネントの見た目を部分的に変えたいときは、`class` に Tailwind のクラスを足せばよい（`!important` 不要）。
+Tailwind（v3）のユーティリティはレイヤー外なので、**同じ要素に Tailwind のクラスを付けると常に Tailwind が勝つ**。
+だからこそ、Vuetify のコンポーネントに見た目の Tailwind クラスを付けると Vuetify らしさが消える（上の「見た目の方針」）。
+Tailwind の base（preflight。`* { border-width: 0 }`・`button { background: transparent }` など）は `src/layers.css` で
+Vuetify より下のレイヤー（`tw-base`）に置いている。これが Vuetify より上にあると、ボタンの色や枠線が消える。
 
 ## 置き換えの対応表
 

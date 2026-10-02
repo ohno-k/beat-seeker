@@ -36,21 +36,21 @@ interface Song {
 }
 
 // ジャンル定義 (表示メタ)
-const GENRES: { key: Genre; label: string; gradient: string; glow: string; icon: string }[] = [
-  { key: 'NOTES',   label: 'NOTES',   gradient: 'from-sky-500 via-blue-500 to-indigo-600',       glow: 'shadow-blue-500/50',    icon: 'M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z' },
-  { key: 'PEAK',    label: 'PEAK',    gradient: 'from-red-500 via-rose-500 to-pink-600',         glow: 'shadow-rose-500/50',    icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
-  { key: 'CHORD',   label: 'CHORD',   gradient: 'from-emerald-500 via-green-500 to-teal-600',    glow: 'shadow-emerald-500/50', icon: 'M4 6h16M4 12h16M4 18h16' },
-  { key: 'CHARGE',  label: 'CHARGE',  gradient: 'from-amber-400 via-yellow-500 to-orange-500',   glow: 'shadow-amber-500/50',   icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-  { key: 'SCRATCH', label: 'SCRATCH', gradient: 'from-violet-500 via-purple-500 to-fuchsia-600', glow: 'shadow-purple-500/50',  icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-  { key: 'SOF-LAN', label: 'SOF-LAN', gradient: 'from-pink-500 via-fuchsia-500 to-purple-600',   glow: 'shadow-fuchsia-500/50', icon: 'M3 12h3l3-9 4 18 3-9h5' },
-  { key: 'INSANE',  label: 'INSANE',  gradient: 'from-slate-800 via-red-700 to-black',           glow: 'shadow-red-600/60',     icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' },
-  { key: '12ALL',   label: '12ALL',   gradient: 'from-yellow-300 via-fuchsia-400 to-cyan-300',   glow: 'shadow-fuchsia-400/50', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
+const GENRES: { key: Genre; label: string; gradient: string; glow: string; color: string; icon: string }[] = [
+  { key: 'NOTES',   label: 'NOTES',   gradient: 'from-sky-500 via-blue-500 to-indigo-600',       glow: 'shadow-blue-500/50',    color: 'blue',        icon: 'M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z' },
+  { key: 'PEAK',    label: 'PEAK',    gradient: 'from-red-500 via-rose-500 to-pink-600',         glow: 'shadow-rose-500/50',    color: 'pink',        icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' },
+  { key: 'CHORD',   label: 'CHORD',   gradient: 'from-emerald-500 via-green-500 to-teal-600',    glow: 'shadow-emerald-500/50', color: 'green',       icon: 'M4 6h16M4 12h16M4 18h16' },
+  { key: 'CHARGE',  label: 'CHARGE',  gradient: 'from-amber-400 via-yellow-500 to-orange-500',   glow: 'shadow-amber-500/50',   color: 'amber',       icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+  { key: 'SCRATCH', label: 'SCRATCH', gradient: 'from-violet-500 via-purple-500 to-fuchsia-600', glow: 'shadow-purple-500/50',  color: 'deep-purple', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+  { key: 'SOF-LAN', label: 'SOF-LAN', gradient: 'from-pink-500 via-fuchsia-500 to-purple-600',   glow: 'shadow-fuchsia-500/50', color: 'purple',      icon: 'M3 12h3l3-9 4 18 3-9h5' },
+  { key: 'INSANE',  label: 'INSANE',  gradient: 'from-slate-800 via-red-700 to-black',           glow: 'shadow-red-600/60',     color: 'red-darken-4', icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' },
+  { key: '12ALL',   label: '12ALL',   gradient: 'from-yellow-300 via-fuchsia-400 to-cyan-300',   glow: 'shadow-fuchsia-400/50', color: 'cyan',        icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' },
 ];
 
-const MATCHES: { key: MatchKind; label: string; sub: string; levels: number[]; gradient: string }[] = [
-  { key: 'vanguard', label: '先鋒戦', sub: 'Lv8 - 10', levels: [8, 9, 10], gradient: 'from-emerald-400 to-teal-500' },
-  { key: 'middle',   label: '中堅戦', sub: 'Lv11',      levels: [11],       gradient: 'from-amber-400 to-orange-500' },
-  { key: 'captain',  label: '大将戦', sub: 'Lv12',      levels: [12],       gradient: 'from-rose-500 to-red-600' },
+const MATCHES: { key: MatchKind; label: string; sub: string; levels: number[]; gradient: string; color: string }[] = [
+  { key: 'vanguard', label: '先鋒戦', sub: 'Lv8 - 10', levels: [8, 9, 10], gradient: 'from-emerald-400 to-teal-500', color: 'teal' },
+  { key: 'middle',   label: '中堅戦', sub: 'Lv11',      levels: [11],       gradient: 'from-amber-400 to-orange-500', color: 'orange' },
+  { key: 'captain',  label: '大将戦', sub: 'Lv12',      levels: [12],       gradient: 'from-rose-500 to-red-600', color: 'red' },
 ];
 
 const songs = strategySongs as Record<Genre, Record<string, Song[]>>;
@@ -331,6 +331,8 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
     class="strategy-card-view min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white p-4 sm:p-8 relative overflow-hidden"
     :class="{ 'is-fullscreen': isFullscreen }"
   >
+    <!-- このページは暗い背景で組んでいるので、Vuetify のコンポーネントは dark テーマで描く -->
+    <v-theme-provider theme="dark">
     <!-- 背景の装飾的グリッド -->
     <div class="absolute inset-0 opacity-10 pointer-events-none bg-grid"></div>
 
@@ -340,9 +342,8 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
         <v-btn
           icon
           variant="text"
-          size="x-small"
+          size="small"
           @click="se.toggleMuted()"
-          class="text-slate-300 hover:text-white transition-colors"
           :title="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
           :aria-label="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
         >
@@ -355,15 +356,15 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
           :max="100"
           :step="1"
           color="#e879f9"
+          hide-details
           class="w-20 flex-none"
           aria-label="SE 音量"
         />
       </div>
       <v-btn
         icon
-        variant="text"
+        variant="tonal"
         @click="toggleFullscreen"
-        class="w-11 h-11 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
         :title="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
         :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
       >
@@ -381,7 +382,8 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
     </div>
 
     <!-- メインカード -->
-    <v-card class="relative max-w-6xl mx-auto bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-10 flex flex-col gap-10 text-white overflow-visible">
+    <v-card class="relative max-w-6xl mx-auto overflow-visible" elevation="8">
+      <v-card-text class="flex flex-col gap-10">
 
       <!-- Step 1: ジャンル選択 -->
       <section>
@@ -397,14 +399,12 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             type="button"
             @click="selectGenre(g.key)"
             :disabled="isSpinning"
-            class="genre-card relative group rounded-2xl p-4 text-left text-white transition-all duration-300 overflow-hidden border-2"
-            :class="[
-              selectedGenre === g.key
-                ? `bg-gradient-to-br ${g.gradient} border-white/40 shadow-xl ${g.glow} scale-105 -translate-y-1`
-                : 'bg-slate-800/60 border-white/5 hover:border-white/20 hover:bg-slate-800',
-              isSpinning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-            ]"
+            :color="selectedGenre === g.key ? g.color : undefined"
+            :variant="selectedGenre === g.key ? 'flat' : 'tonal'"
+            :elevation="selectedGenre === g.key ? 8 : 0"
+            class="genre-card text-left"
           >
+            <v-card-text>
             <div class="flex items-center gap-2 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="selectedGenre === g.key ? 'text-white' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="g.icon" />
@@ -414,8 +414,7 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             <p class="text-lg font-black tracking-wide" :class="selectedGenre === g.key ? 'text-white' : 'text-slate-200'">
               {{ g.label }}
             </p>
-            <!-- 光るリング -->
-            <div v-if="selectedGenre === g.key" class="absolute inset-0 rounded-2xl ring-2 ring-white/40 animate-pulse pointer-events-none"></div>
+            </v-card-text>
           </v-card>
         </div>
       </section>
@@ -434,20 +433,16 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             type="button"
             @click="selectMatch(m.key)"
             :disabled="isSpinning || matchDisabled(m.key)"
-            class="match-card relative rounded-2xl p-5 text-left text-white transition-all duration-300 overflow-hidden border-2"
-            :class="[
-              selectedMatch === m.key
-                ? `bg-gradient-to-br ${m.gradient} border-white/40 shadow-xl scale-[1.02]`
-                : matchDisabled(m.key)
-                  ? 'bg-slate-900/40 border-white/5 opacity-40 cursor-not-allowed'
-                  : 'bg-slate-800/60 border-white/5 hover:border-white/20 hover:bg-slate-800',
-              isSpinning ? 'opacity-50 cursor-not-allowed' : ''
-            ]"
+            :color="selectedMatch === m.key ? m.color : undefined"
+            :variant="selectedMatch === m.key ? 'flat' : 'tonal'"
+            :elevation="selectedMatch === m.key ? 8 : 0"
+            class="match-card relative text-left"
           >
+            <v-card-text>
             <p class="text-2xl font-black tracking-wide mb-1" :class="selectedMatch === m.key ? 'text-white' : 'text-slate-200'">{{ m.label }}</p>
             <p class="text-xs font-mono tracking-widest" :class="selectedMatch === m.key ? 'text-white/80' : 'text-slate-500'">{{ m.sub }}</p>
-            <v-chip v-if="matchDisabled(m.key)" size="x-small" label variant="flat" class="absolute top-2 right-2 h-auto text-[9px] font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase tracking-wider">N/A</v-chip>
-            <div v-if="selectedMatch === m.key" class="absolute inset-0 rounded-2xl ring-2 ring-white/40 animate-pulse pointer-events-none"></div>
+            <v-chip v-if="matchDisabled(m.key)" size="x-small" label class="absolute top-2 right-2">N/A</v-chip>
+            </v-card-text>
           </v-card>
         </div>
         <p v-if="selectedGenre && captainOnlyGenres.includes(selectedGenre)" class="mt-3 text-[11px] text-rose-300/80 font-mono">※ {{ selectedGenre }} は大将戦 (Lv12) のみ抽選可能</p>
@@ -484,10 +479,10 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
 
             <p class="relative text-xs font-mono tracking-[0.4em] text-amber-300">DECIDED</p>
             <div class="relative flex items-center justify-center gap-2 flex-wrap">
-              <v-chip v-if="activeGenreMeta" variant="flat" class="px-3 py-1 h-auto rounded-full text-white text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeGenreMeta.gradient">{{ activeGenreMeta.label }}</v-chip>
-              <v-chip v-if="activeMatchMeta" variant="flat" class="px-3 py-1 h-auto rounded-full text-white text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeMatchMeta.gradient">{{ activeMatchMeta.label }}</v-chip>
-              <v-chip variant="flat" class="px-3 py-1 h-auto rounded-full text-white text-[10px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ resultSong.level }}</v-chip>
-              <v-chip variant="flat" class="px-3 py-1 h-auto rounded-full text-[10px] font-black tracking-widest uppercase" :class="resultSong.diff === 'L' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'">
+              <v-chip v-if="activeGenreMeta" variant="flat" :color="activeGenreMeta.color">{{ activeGenreMeta.label }}</v-chip>
+              <v-chip v-if="activeMatchMeta" variant="flat" :color="activeMatchMeta.color">{{ activeMatchMeta.label }}</v-chip>
+              <v-chip variant="outlined">Lv{{ resultSong.level }}</v-chip>
+              <v-chip variant="tonal" :color="resultSong.diff === 'L' ? 'amber' : 'red'">
                 {{ resultSong.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
               </v-chip>
             </div>
@@ -548,21 +543,16 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
         <!-- アクションボタン -->
         <div class="flex flex-col sm:flex-row gap-3 mt-6">
           <v-btn
-            size="x-large"
+            color="primary"
             @click="spin"
             :disabled="!canSpin"
-            class="flex-1 h-auto py-4 px-8 rounded-2xl text-lg font-black tracking-widest uppercase transition-all relative overflow-hidden disabled:opacity-100"
-            :class="canSpin
-              ? 'bg-gradient-to-r from-cyan-500 via-fuchsia-500 to-amber-500 text-white shadow-xl shadow-fuchsia-500/40 hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95'
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed'"
+            class="flex-1"
           >
             <span v-if="isSpinning" class="flex items-center justify-center gap-2">
-              <v-progress-circular size="20" width="2" color="currentColor" />
+              <v-progress-circular indeterminate size="20" width="2" />
               DRAWING...
             </span>
             <span v-else>{{ resultSong ? 'もう一度抽選' : '抽選する' }}</span>
-            <!-- ボタンの内部光沢アニメーション -->
-            <span v-if="canSpin" class="absolute inset-0 button-shine pointer-events-none"></span>
           </v-btn>
           <v-btn
             v-if="resultSong || currentDisplay"
@@ -570,13 +560,14 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             size="x-large"
             @click="reset"
             :disabled="isSpinning"
-            class="h-auto py-4 px-6 rounded-2xl text-sm font-bold tracking-wider uppercase bg-slate-800/60 border border-white/10 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
           >
             リセット
           </v-btn>
         </div>
       </section>
+      </v-card-text>
     </v-card>
+    </v-theme-provider>
   </div>
 </template>
 
@@ -631,15 +622,6 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
   animation: titleGlow 2.4s ease-in-out infinite;
 }
 
-/* 抽選ボタンの内部光沢 */
-@keyframes buttonShine {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.button-shine {
-  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
-  animation: buttonShine 2.5s linear infinite;
-}
 
 /* === 当選時の演出 (ホワイトアウトの代わり) === */
 

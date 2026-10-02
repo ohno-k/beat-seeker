@@ -78,29 +78,29 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
     max-width="672"
   >
       <!-- 本体パネル -->
-      <v-card class="max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl overflow-hidden transition-colors duration-200">
+      <v-card class="max-h-[85vh] flex flex-col overflow-hidden">
         <!-- ヘッダー -->
-        <v-card-title class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('league.rankingModal.title') }}</h3>
+        <v-card-title class="flex justify-between items-center">
+          <span>{{ t('league.rankingModal.title') }}</span>
           <v-btn
             icon
             variant="text"
             size="small"
-            class="text-slate-400 dark:text-slate-500"
             @click="$emit('close')"
           >
             <v-icon :icon="mdiClose" />
           </v-btn>
         </v-card-title>
+        <v-divider />
 
         <!-- 本文（スクロール領域） -->
-        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar">
           <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ t('league.rankingModal.desc') }}</p>
 
           <div v-if="loading" class="mt-6 text-center text-sm text-slate-400 dark:text-slate-500">
             {{ t('league.rankingModal.loading') }}
           </div>
-          <v-alert v-else-if="error" type="error" class="mt-4 text-sm">
+          <v-alert v-else-if="error" type="error" variant="tonal" class="mt-4">
             {{ error }}
           </v-alert>
           <div v-else-if="isEmpty" class="mt-6 text-center text-sm text-slate-400 dark:text-slate-500">
@@ -119,28 +119,27 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
                 </template>
               </span>
             </h4>
-            <v-table class="text-sm bg-transparent">
+            <v-table density="compact">
                 <thead>
-                  <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
-                    <th class="py-1.5 pr-2 w-10">{{ t('league.rank') }}</th>
-                    <th class="py-1.5 pr-2">{{ t('league.player') }}</th>
-                    <th class="py-1.5 pl-2 text-right w-16">{{ t('league.rankingModal.pt') }}</th>
+                  <tr>
+                    <th class="w-10">{{ t('league.rank') }}</th>
+                    <th>{{ t('league.player') }}</th>
+                    <th class="text-right w-16">{{ t('league.rankingModal.pt') }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr
                     v-for="row in div.entries"
                     :key="row.userId"
-                    class="border-b border-slate-100 dark:border-slate-700/50"
                     :class="[
                       row.userId === myUserId ? 'bg-indigo-50 dark:bg-indigo-900/30 font-semibold' : '',
                       rowClass(row.active),
                     ]"
                   >
-                    <td class="py-1.5 pr-2 tabular-nums text-slate-600 dark:text-slate-300">
+                    <td class="tabular-nums">
                       {{ row.rank ?? '–' }}
                     </td>
-                    <td class="py-1.5 pr-2 break-words text-slate-700 dark:text-slate-200">
+                    <td class="break-words">
                       <span class="inline-flex items-center gap-1.5 align-middle">
                         <RankIcon
                           :rank-name="beatTier(row.totalBeatPt).name"
@@ -156,12 +155,12 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
                           size="x-small"
                           label
                           variant="outlined"
-                          class="shrink-0 px-1 text-[10px] font-normal leading-tight text-slate-500 dark:text-slate-400"
+                          class="shrink-0"
                           :title="t('league.rankingModal.inactiveTitle')"
                         >{{ t('league.rankingModal.inactive') }}</v-chip>
                       </span>
                     </td>
-                    <td class="py-1.5 pl-2 text-right tabular-nums font-semibold" :class="ptClass(row.points)">
+                    <td class="text-right tabular-nums font-semibold" :class="ptClass(row.points)">
                       {{ fmtPt(row.points) }}
                     </td>
                   </tr>

@@ -890,7 +890,6 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
           variant="text"
           size="small"
           @click.stop="se.toggleMuted()"
-          class="text-slate-300 hover:text-white"
           :aria-label="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
           :title="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
         >
@@ -911,7 +910,7 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
         <v-btn
           type="button"
           @click="openImportModal"
-          class="px-4 rounded-xl text-xs font-black tracking-widest uppercase bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-500 text-white hover:shadow-lg"
+          color="deep-purple-accent-2"
           title="主催権限でログイン中の場合のみ動作"
         >
           📥 大会から取り込み
@@ -927,11 +926,9 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
             type="text"
             maxlength="40"
             placeholder="プレイヤー名を入力"
-            density="comfortable"
             color="cyan-accent-2"
-            bg-color="rgba(15, 23, 42, 0.7)"
-            rounded="xl"
-            class="w-full text-white"
+            hide-details
+            class="w-full"
           />
         </div>
         <div>
@@ -941,11 +938,9 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
             type="text"
             maxlength="40"
             placeholder="プレイヤー名を入力"
-            density="comfortable"
             color="amber-lighten-1"
-            bg-color="rgba(15, 23, 42, 0.7)"
-            rounded="xl"
-            class="w-full text-white"
+            hide-details
+            class="w-full"
           />
         </div>
       </div>
@@ -956,60 +951,58 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
           tag="button"
           type="button"
           @click="activeSide = 'left'"
-          class="text-left rounded-2xl border-2 p-4 transition-all text-white"
-          :class="activeSide === 'left'
-            ? 'border-cyan-400 bg-gradient-to-br from-slate-900 to-cyan-950/40 shadow-lg shadow-cyan-500/20'
-            : 'border-white/10 bg-slate-900/50 hover:border-white/20'"
+          class="text-left"
+          :variant="activeSide === 'left' ? 'tonal' : 'outlined'"
+          :color="activeSide === 'left' ? 'cyan' : undefined"
         >
+         <v-card-text>
           <div class="flex items-center justify-between mb-2">
             <p class="text-[10px] font-mono text-cyan-300 tracking-[0.3em]">LEFT SIDE</p>
-            <v-chip v-if="activeSide === 'left'" size="x-small" label variant="outlined" class="text-[9px] font-black tracking-widest uppercase px-2 bg-cyan-500/30 text-cyan-200 border-cyan-400/50">ACTIVE</v-chip>
+            <v-chip v-if="activeSide === 'left'" size="x-small" label variant="flat" color="cyan">ACTIVE</v-chip>
           </div>
           <div v-if="selectedLeft" class="space-y-1">
             <p class="text-lg font-black truncate">{{ selectedLeft.title }}</p>
             <p class="text-xs text-slate-400 truncate">{{ selectedLeft.artist }}</p>
             <div class="flex items-center gap-2 mt-1">
-              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase"
-                :class="selectedLeft.difficulty === '10'
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'bg-red-500/20 text-red-300 border-red-500/40'">
+              <v-chip size="x-small" label variant="tonal"
+                :color="selectedLeft.difficulty === '10' ? 'amber' : 'red'">
                 {{ diffName(selectedLeft.difficulty) }}
               </v-chip>
-              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase bg-white/10 border-white/20">Lv{{ selectedLeft.level }}</v-chip>
+              <v-chip size="x-small" label variant="outlined">Lv{{ selectedLeft.level }}</v-chip>
               <span @click.stop="clearSlot('left')" class="ml-auto text-[10px] text-slate-500 hover:text-rose-400 cursor-pointer">クリア</span>
             </div>
           </div>
           <p v-else class="text-slate-500 text-sm font-mono">未選択</p>
+         </v-card-text>
         </v-card>
 
         <v-card
           tag="button"
           type="button"
           @click="activeSide = 'right'"
-          class="text-left rounded-2xl border-2 p-4 transition-all text-white"
-          :class="activeSide === 'right'
-            ? 'border-amber-400 bg-gradient-to-br from-slate-900 to-amber-950/40 shadow-lg shadow-amber-500/20'
-            : 'border-white/10 bg-slate-900/50 hover:border-white/20'"
+          class="text-left"
+          :variant="activeSide === 'right' ? 'tonal' : 'outlined'"
+          :color="activeSide === 'right' ? 'amber' : undefined"
         >
+         <v-card-text>
           <div class="flex items-center justify-between mb-2">
             <p class="text-[10px] font-mono text-amber-300 tracking-[0.3em]">RIGHT SIDE</p>
-            <v-chip v-if="activeSide === 'right'" size="x-small" label variant="outlined" class="text-[9px] font-black tracking-widest uppercase px-2 bg-amber-500/30 text-amber-200 border-amber-400/50">ACTIVE</v-chip>
+            <v-chip v-if="activeSide === 'right'" size="x-small" label variant="flat" color="amber">ACTIVE</v-chip>
           </div>
           <div v-if="selectedRight" class="space-y-1">
             <p class="text-lg font-black truncate">{{ selectedRight.title }}</p>
             <p class="text-xs text-slate-400 truncate">{{ selectedRight.artist }}</p>
             <div class="flex items-center gap-2 mt-1">
-              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase"
-                :class="selectedRight.difficulty === '10'
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'bg-red-500/20 text-red-300 border-red-500/40'">
+              <v-chip size="x-small" label variant="tonal"
+                :color="selectedRight.difficulty === '10' ? 'amber' : 'red'">
                 {{ diffName(selectedRight.difficulty) }}
               </v-chip>
-              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase bg-white/10 border-white/20">Lv{{ selectedRight.level }}</v-chip>
+              <v-chip size="x-small" label variant="outlined">Lv{{ selectedRight.level }}</v-chip>
               <span @click.stop="clearSlot('right')" class="ml-auto text-[10px] text-slate-500 hover:text-rose-400 cursor-pointer">クリア</span>
             </div>
           </div>
           <p v-else class="text-slate-500 text-sm font-mono">未選択</p>
+         </v-card-text>
         </v-card>
       </div>
 
@@ -1019,21 +1012,18 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
         type="text"
         :placeholder="`${activeSide === 'left' ? 'LEFT' : 'RIGHT'} 側の曲を検索 (タイトル / アーティスト)`"
         :prepend-inner-icon="mdiMagnify"
-        density="default"
         color="cyan-accent-2"
-        bg-color="rgba(15, 23, 42, 0.7)"
-        rounded="xl"
-        class="w-full text-white [&_input]:text-lg"
+        hide-details
+        class="w-full"
       />
 
       <!-- 検索結果リスト -->
-      <v-card v-if="searchResults.length > 0" class="bg-slate-900/50 border-white/10 rounded-2xl overflow-hidden max-h-[45vh] overflow-y-auto custom-scrollbar">
-        <v-list class="bg-transparent p-0">
+      <v-card v-if="searchResults.length > 0" class="max-h-[45vh] overflow-y-auto custom-scrollbar">
+        <v-list>
           <v-list-item
             v-for="(chart, i) in searchResults"
             :key="`${chart.title}-${chart.difficulty}-${i}`"
             @click="selectChart(chart)"
-            class="px-4 py-3 text-white hover:bg-cyan-500/10 border-b border-white/5 last:border-b-0"
           >
             <div class="flex items-center gap-3">
               <div class="flex-1 min-w-0">
@@ -1043,15 +1033,13 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
               <v-chip
                 size="small"
                 label
-                variant="outlined"
-                class="shrink-0 px-2.5 text-[9px] font-black tracking-widest uppercase"
-                :class="chart.difficulty === '10'
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'bg-red-500/20 text-red-300 border-red-500/40'"
+                variant="tonal"
+                class="shrink-0"
+                :color="chart.difficulty === '10' ? 'amber' : 'red'"
               >
                 {{ diffName(chart.difficulty) }}
               </v-chip>
-              <v-chip size="small" label variant="outlined" class="shrink-0 px-2.5 text-[9px] font-black tracking-widest uppercase bg-white/10 border-white/20">
+              <v-chip size="small" label variant="outlined" class="shrink-0">
                 Lv{{ chart.level }}
               </v-chip>
             </div>
@@ -1090,23 +1078,23 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
       max-width="768"
       theme="dark"
     >
-      <v-card class="bg-slate-900 border-slate-700 rounded-2xl max-h-[85vh] overflow-hidden flex flex-col text-white">
+      <v-card class="max-h-[85vh] overflow-hidden flex flex-col">
         <!-- ヘッダ -->
-        <v-card-title class="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
-          <p class="text-sm font-black tracking-widest uppercase text-cyan-300">大会から取り込み</p>
-          <v-btn type="button" icon variant="text" size="small" @click="closeImportModal" class="text-slate-400 hover:text-white">
+        <v-card-title class="flex items-center justify-between">
+          <span>大会から取り込み</span>
+          <v-btn type="button" icon variant="text" size="small" @click="closeImportModal">
             <v-icon :icon="mdiClose" />
           </v-btn>
         </v-card-title>
+        <v-divider />
 
         <!-- Step 1: 大会選択 -->
         <div v-if="!selectedImportCompetitionId" class="flex-1 overflow-y-auto">
           <p class="px-5 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500">Step 1: 大会を選ぶ</p>
-          <v-list v-if="competitions.length > 0" class="bg-transparent p-0 divide-y divide-slate-800">
+          <v-list v-if="competitions.length > 0">
             <v-list-item
               v-for="c in competitions"
               :key="c.id"
-              class="px-5 py-3 hover:bg-slate-800 text-white"
               @click="handleSelectImportCompetition(c.id)"
             >
               <p class="font-bold">{{ c.name }}</p>
@@ -1127,15 +1115,13 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
               variant="text"
               size="x-small"
               @click="selectedImportCompetitionId = null; importRevealData = null"
-              class="text-[10px] font-normal text-slate-400 hover:text-white"
             >← 大会を選び直す</v-btn>
           </div>
           <div v-if="isImportLoading" class="px-5 py-8 text-center text-slate-500 text-sm">読み込み中…</div>
-          <v-list v-else-if="importRevealData && importRevealData.matches.length > 0" class="flex-1 overflow-y-auto bg-transparent p-0 divide-y divide-slate-800">
+          <v-list v-else-if="importRevealData && importRevealData.matches.length > 0" class="flex-1 overflow-y-auto">
             <v-list-item
               v-for="m in importRevealData.matches"
               :key="m.matchId"
-              class="px-5 py-3 hover:bg-slate-800 text-white"
               :class="(!m.playerAPick || !m.playerBPick) ? 'opacity-50' : ''"
               @click="handleApplyMatchToReveal(m)"
             >
@@ -1474,9 +1460,7 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
         <v-btn
           variant="outlined"
           size="small"
-          rounded="pill"
           @click.stop="reset"
-          class="px-4 text-[10px] font-bold tracking-widest uppercase bg-slate-800/80 hover:bg-slate-700 border-white/10 text-slate-300 hover:text-white backdrop-blur"
         >
           ◀ Reset
         </v-btn>

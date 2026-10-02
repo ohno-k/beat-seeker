@@ -5,39 +5,37 @@
     max-width="768"
     :scrollable="false"
   >
-      <v-card class="w-full rounded-2xl shadow-xl flex flex-col overflow-hidden h-[85vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <v-card class="w-full flex flex-col overflow-hidden h-[85vh]">
 
         <!-- ヘッダ -->
-        <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
-          <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <v-icon :icon="mdiMessageProcessingOutline" class="text-blue-600 dark:text-blue-400" />
-            お問い合わせ
-            <v-chip
-              v-if="totalUnread > 0"
-              size="small"
-              label
-              class="text-[11px] font-bold rounded-full bg-rose-500 text-white"
-            >未読 {{ totalUnread }}</v-chip>
-          </h2>
-          <div class="flex items-center gap-2">
+        <v-card-title class="flex items-center gap-2 shrink-0">
+          <v-icon :icon="mdiMessageProcessingOutline" color="primary" />
+          お問い合わせ
+          <v-chip
+            v-if="totalUnread > 0"
+            size="small"
+            color="error"
+            variant="flat"
+          >未読 {{ totalUnread }}</v-chip>
+          <div class="ml-auto flex items-center gap-2">
             <v-btn
               variant="tonal"
               size="small"
               @click="loadThreads"
-              class="text-xs"
             >再読込</v-btn>
             <v-btn
               icon
               variant="text"
               size="small"
               @click="$emit('close')"
-              class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 -mr-2"
+              class="-mr-2"
               aria-label="閉じる"
             >
               <v-icon :icon="mdiClose" />
             </v-btn>
           </div>
-        </div>
+        </v-card-title>
+        <v-divider />
 
         <!-- 本体: 左スレッド一覧 / 右会話 (LINE 風) -->
         <div class="flex-1 grid grid-cols-1 sm:grid-cols-[240px_1fr] overflow-hidden">
@@ -45,19 +43,18 @@
           <!-- 左: スレッド一覧 -->
           <div class="border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 max-h-[30vh] sm:max-h-none">
             <div v-if="loadingThreads" class="p-6 text-center text-xs text-slate-400">
-              <v-progress-circular size="20" width="2" class="mr-1" />読み込み中...
+              <v-progress-circular indeterminate size="20" width="2" class="mr-1" />読み込み中...
             </div>
             <p v-else-if="threads.length === 0" class="p-6 text-center text-xs text-slate-400 italic">
               まだお問い合わせはありません。
             </p>
-            <v-list v-else density="compact" class="py-0 bg-transparent">
+            <v-list v-else density="compact" bg-color="transparent">
               <v-list-item
                 v-for="th in threads"
                 :key="th.userId"
                 @click="selectThread(th.userId)"
                 :active="selectedUserId === th.userId"
                 color="primary"
-                class="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800"
               >
                 <div class="flex items-center gap-2">
                   <div class="w-8 h-8 rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
@@ -69,8 +66,9 @@
                       <v-chip
                         v-if="th.unreadCount > 0"
                         size="x-small"
-                        label
-                        class="shrink-0 text-[10px] font-bold rounded-full bg-rose-500 text-white"
+                        color="error"
+                        variant="flat"
+                        class="shrink-0"
                       >{{ th.unreadCount }}</v-chip>
                     </div>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
@@ -86,17 +84,17 @@
           <div class="flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900/40">
             <template v-if="selectedUserId !== null">
               <!-- 相手情報バー -->
-              <div class="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex items-center gap-2">
+              <div class="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 shrink-0 flex items-center gap-2">
                 <span class="font-bold text-sm text-slate-800 dark:text-white">{{ selectedThread?.displayName || '名無し' }}</span>
                 <span class="text-[11px] text-slate-400 font-mono">{{ selectedThread?.iidxId }}</span>
-                <v-chip v-if="selectedThread?.danRank" size="x-small" label class="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold">{{ selectedThread?.danRank }}</v-chip>
-                <v-chip v-if="selectedThread?.arenaRank" size="x-small" label class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold">{{ selectedThread?.arenaRank }}</v-chip>
+                <v-chip v-if="selectedThread?.danRank" size="x-small" label color="amber">{{ selectedThread?.danRank }}</v-chip>
+                <v-chip v-if="selectedThread?.arenaRank" size="x-small" label color="blue">{{ selectedThread?.arenaRank }}</v-chip>
               </div>
 
               <!-- メッセージ一覧 -->
               <div ref="listEl" class="flex-1 overflow-y-auto px-4 py-4 space-y-2">
                 <p v-if="loadingMessages" class="text-center text-[11px] text-slate-400 py-8">
-                  <v-progress-circular size="20" width="2" class="mr-1" />読み込み中...
+                  <v-progress-circular indeterminate size="20" width="2" class="mr-1" />読み込み中...
                 </p>
                 <p v-else-if="messages.length === 0" class="text-center text-[11px] text-slate-400 italic py-8">
                   まだメッセージはありません。
@@ -119,7 +117,7 @@
               </div>
 
               <!-- 返信入力 -->
-              <div class="p-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+              <div class="p-2 border-t border-slate-200 dark:border-slate-800 shrink-0">
                 <div class="flex items-end gap-2">
                   <v-textarea
                     v-model="replyDraft"
@@ -129,15 +127,17 @@
                     max-rows="5"
                     no-resize
                     color="indigo"
+                    density="compact"
+                    hide-details
                     placeholder="返信を入力 (Enterで送信 / Shift+Enterで改行)"
-                    class="flex-1 text-[13px]"
+                    class="flex-1"
                   />
                   <v-btn
                     color="indigo"
                     @click="handleSendReply"
                     :disabled="isSending || !replyDraft.trim()"
                     :loading="isSending"
-                    class="shrink-0 text-xs"
+                    class="shrink-0 mb-1"
                   >送信</v-btn>
                 </div>
               </div>

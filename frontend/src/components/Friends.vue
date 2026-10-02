@@ -143,27 +143,31 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
 
 <template>
   <div class="space-y-6">
-    <v-card class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <div>
-        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">フレンド一覧</h2>
-        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">ライバルの進捗を確認しましょう</p>
-      </div>
-      <v-btn
-        @click="isSearchModalOpen = true"
-        color="primary"
-        size="large"
-        :prepend-icon="mdiPlus"
-      >
-        フレンド追加
-      </v-btn>
+    <v-card>
+      <v-card-item>
+        <v-card-title>フレンド一覧</v-card-title>
+        <v-card-subtitle>ライバルの進捗を確認しましょう</v-card-subtitle>
+        <template #append>
+          <v-btn
+            @click="isSearchModalOpen = true"
+            color="primary"
+            :prepend-icon="mdiPlus"
+          >
+            フレンド追加
+          </v-btn>
+        </template>
+      </v-card-item>
     </v-card>
 
-    <v-card v-if="!isLoaded" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800">
-      <v-progress-circular size="40" width="4" class="mb-4" />
-      <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
+    <v-card v-if="!isLoaded">
+      <v-card-text class="flex flex-col items-center justify-center py-12">
+        <v-progress-circular indeterminate size="40" width="4" class="mb-4" />
+        <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
+      </v-card-text>
     </v-card>
 
-    <v-card v-else-if="!hasAnyRival" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 border-dashed">
+    <v-card v-else-if="!hasAnyRival">
+     <v-card-text class="flex flex-col items-center justify-center py-12">
       <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -171,12 +175,12 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
       </div>
       <p class="text-slate-500 dark:text-slate-400 font-bold">フレンドがまだいません</p>
       <p class="text-slate-400 dark:text-slate-500 text-sm mt-1">右上のボタンからフレンドを探してみましょう！</p>
+     </v-card-text>
     </v-card>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      <v-card v-for="friend in friends" :key="'u-' + friend.id"
-        class="bg-white dark:bg-slate-800 p-5 border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all group"
-      >
+      <v-card v-for="friend in friends" :key="'u-' + friend.id">
+       <v-card-text>
         <div class="flex items-center gap-4 mb-4">
           <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0">
             {{ friend.displayName?.charAt(0) || 'U' }}
@@ -198,7 +202,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
             @click="handleRemoveFriend(friend)"
             :disabled="removingId === friend.id"
             :loading="removingId === friend.id"
-            class="shrink-0 text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+            class="shrink-0"
             title="フレンドを削除"
             aria-label="フレンドを削除"
           >
@@ -233,10 +237,10 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
               v-if="canViewDashboard(friend)"
               @click="openComparison(friend)"
               variant="tonal"
-              color="indigo"
+              color="primary"
               size="small"
               :prepend-icon="mdiChartBar"
-              class="flex-1 text-xs"
+              class="flex-1"
             >
               比較する
             </v-btn>
@@ -245,11 +249,11 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
             </div>
           </div>
         </div>
+       </v-card-text>
       </v-card>
 
-      <v-card v-for="rival in virtualRivals" :key="'v-' + rival.id"
-        class="bg-white dark:bg-slate-800 p-5 border-amber-200/60 dark:border-amber-800/40 hover:border-amber-300 dark:hover:border-amber-700 transition-all group"
-      >
+      <v-card v-for="rival in virtualRivals" :key="'v-' + rival.id">
+       <v-card-text>
         <div class="flex items-center gap-4 mb-4">
           <div class="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center text-white text-lg font-bold shrink-0">
             👑
@@ -271,7 +275,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
             @click="handleRemoveVirtualRival(rival)"
             :disabled="removingVirtualId === rival.id"
             :loading="removingVirtualId === rival.id"
-            class="shrink-0 text-slate-300 hover:text-red-500 dark:text-slate-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+            class="shrink-0"
             title="ライバルを解除"
             aria-label="ライバルを解除"
           >
@@ -304,10 +308,10 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
             <v-btn
               @click="openVirtualComparison(rival)"
               variant="tonal"
-              color="amber-darken-3"
+              color="warning"
               size="small"
               :prepend-icon="mdiChartBar"
-              class="flex-1 text-xs"
+              class="flex-1"
             >
               比較する
             </v-btn>
@@ -316,6 +320,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
             </div>
           </div>
         </div>
+       </v-card-text>
       </v-card>
     </div>
 

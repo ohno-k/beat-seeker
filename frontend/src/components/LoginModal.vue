@@ -164,128 +164,107 @@ const switchMode = (newMode: 'login' | 'register' | 'forgot') => {
     :aria-label="t('a11y.dialog.login')"
     @update:model-value="(v) => { if (!v) emit('close') }"
   >
-    <v-card class="overflow-hidden flex flex-col transition-colors duration-200">
+    <v-card>
 
       <!-- タブ切替（ログイン / 新規登録 / パスワードを忘れた） -->
       <v-tabs
         :model-value="mode"
         grow
-        class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors duration-200"
+        color="primary"
       >
-        <v-tab value="login" class="text-sm font-bold text-none" @click="switchMode('login')">
+        <v-tab value="login" @click="switchMode('login')">
           {{ t('auth.login') }}
         </v-tab>
-        <v-tab value="register" class="text-sm font-bold text-none" @click="switchMode('register')">
+        <v-tab value="register" @click="switchMode('register')">
           {{ t('auth.register') }}
         </v-tab>
-        <v-tab value="forgot" class="text-xs font-bold text-none" @click="switchMode('forgot')">
+        <v-tab value="forgot" @click="switchMode('forgot')">
           {{ t('auth.forgotPassword') }}
         </v-tab>
       </v-tabs>
+      <v-divider />
 
-      <v-card-text class="p-6 overflow-y-auto">
-        <form @submit.prevent="handleSubmit" class="space-y-5">
+      <v-card-text class="overflow-y-auto">
+        <form @submit.prevent="handleSubmit" class="space-y-2">
 
-          <v-alert v-if="errorMsg" type="error" class="text-sm transition-colors duration-200">
+          <v-alert v-if="errorMsg" type="error" density="compact" class="mb-4">
             {{ errorMsg }}
           </v-alert>
-          <v-alert v-if="successMsg" type="success" class="text-sm">
+          <v-alert v-if="successMsg" type="success" density="compact" class="mb-4">
             {{ successMsg }}
           </v-alert>
 
           <!-- パスワードリセットフォーム -->
           <template v-if="mode === 'forgot'">
-            <p class="text-sm text-slate-600 dark:text-slate-400">{{ t('auth.forgotHint') }}</p>
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('auth.iidxId') }}</label>
-              <v-text-field
-                v-model="inputIidxId"
-                type="text"
-                placeholder="1234-5678"
-                pattern="\d{4}-\d{4}"
-                maxlength="9"
-                @input="formatIidxId"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('auth.registeredEmail') }}</label>
-              <v-text-field v-model="forgotEmail" type="email" placeholder="example@email.com" />
-            </div>
-            <div class="pt-2 flex gap-3">
-              <v-btn type="button" variant="tonal" size="large" class="flex-1" @click="emit('close')">{{ t('auth.cancel') }}</v-btn>
-              <v-btn type="submit" color="primary" size="large" class="flex-[2]" :disabled="isSubmitting">
-                <v-progress-circular v-if="isSubmitting" size="16" width="2" color="white" class="mr-2" />
-                {{ t('auth.resetSend') }}
-              </v-btn>
-            </div>
-          </template>
-
-          <div v-if="mode !== 'forgot'">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.iidxId') }}</label>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">{{ t('auth.forgotHint') }}</p>
             <v-text-field
               v-model="inputIidxId"
+              :label="t('auth.iidxId')"
               type="text"
-              required
               placeholder="1234-5678"
               pattern="\d{4}-\d{4}"
               maxlength="9"
               @input="formatIidxId"
             />
-            <p v-if="mode === 'register'" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1 transition-colors duration-200">{{ t('auth.iidxIdHint') }}</p>
-          </div>
-
-          <div v-if="mode !== 'forgot'">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.password') }}</label>
-            <v-text-field v-model="password" type="password" required placeholder="••••••••" minlength="4" />
-          </div>
-
-          <div v-if="mode === 'register'">
-            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.passwordConfirm') }}</label>
-            <v-text-field v-model="passwordConfirm" type="password" required placeholder="••••••••" minlength="4" />
-          </div>
-
-          <template v-if="mode === 'register'">
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.username') }}</label>
-              <v-text-field v-model="displayName" type="text" required :placeholder="t('auth.displayName')" />
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.danRank') }}</label>
-                <v-select
-                  v-model="danRank"
-                  :items="danRankOptions.map((rank) => ({ title: t(rank.labelKey), value: rank.value }))"
-                  item-title="title"
-                  item-value="value"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.arenaRank') }}</label>
-                <v-select v-model="arenaRank" :items="[...arenaRanks]" />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5 transition-colors duration-200">{{ t('auth.playSide') }}</label>
-              <v-radio-group v-model="playSide" inline>
-                <v-radio value="1P" class="mr-4">
-                  <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">1P</span></template>
-                </v-radio>
-                <v-radio value="2P">
-                  <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">2P</span></template>
-                </v-radio>
-              </v-radio-group>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ t('auth.playSideHint') }}</p>
+            <v-text-field v-model="forgotEmail" :label="t('auth.registeredEmail')" type="email" placeholder="example@email.com" />
+            <div class="pt-2 flex gap-3">
+              <v-btn type="button" variant="text" size="large" class="flex-1" @click="emit('close')">{{ t('auth.cancel') }}</v-btn>
+              <v-btn type="submit" color="primary" variant="flat" size="large" class="flex-[2]" :loading="isSubmitting" :disabled="isSubmitting">
+                {{ t('auth.resetSend') }}
+              </v-btn>
             </div>
           </template>
 
+          <v-text-field
+            v-if="mode !== 'forgot'"
+            v-model="inputIidxId"
+            :label="t('auth.iidxId')"
+            type="text"
+            required
+            placeholder="1234-5678"
+            pattern="\d{4}-\d{4}"
+            maxlength="9"
+            :hint="mode === 'register' ? t('auth.iidxIdHint') : undefined"
+            :persistent-hint="mode === 'register'"
+            @input="formatIidxId"
+          />
+
+          <v-text-field v-if="mode !== 'forgot'" v-model="password" :label="t('auth.password')" type="password" required placeholder="••••••••" minlength="4" />
+
+          <v-text-field v-if="mode === 'register'" v-model="passwordConfirm" :label="t('auth.passwordConfirm')" type="password" required placeholder="••••••••" minlength="4" />
+
+          <template v-if="mode === 'register'">
+            <v-text-field v-model="displayName" :label="t('auth.username')" type="text" required :placeholder="t('auth.displayName')" />
+
+            <div class="grid grid-cols-2 gap-4">
+              <v-select
+                v-model="danRank"
+                :label="t('auth.danRank')"
+                :items="danRankOptions.map((rank) => ({ title: t(rank.labelKey), value: rank.value }))"
+                item-title="title"
+                item-value="value"
+              />
+              <v-select v-model="arenaRank" :label="t('auth.arenaRank')" :items="[...arenaRanks]" />
+            </div>
+
+            <v-radio-group
+              v-model="playSide"
+              :label="t('auth.playSide')"
+              inline
+              color="primary"
+              :hint="t('auth.playSideHint')"
+              persistent-hint
+            >
+              <v-radio value="1P" label="1P" />
+              <v-radio value="2P" label="2P" />
+            </v-radio-group>
+          </template>
+
           <div v-if="mode !== 'forgot'" class="pt-2 flex gap-3">
-            <v-btn type="button" variant="tonal" size="large" class="flex-1" @click="emit('close')">
+            <v-btn type="button" variant="text" size="large" class="flex-1" @click="emit('close')">
               {{ t('auth.cancel') }}
             </v-btn>
-            <v-btn type="submit" color="primary" size="large" class="flex-[2]" :disabled="isSubmitting">
-              <v-progress-circular v-if="isSubmitting" size="16" width="2" color="white" class="mr-2" />
+            <v-btn type="submit" color="primary" variant="flat" size="large" class="flex-[2]" :loading="isSubmitting" :disabled="isSubmitting">
               {{ mode === 'login' ? t('auth.loginBtn') : t('auth.registerBtn') }}
             </v-btn>
           </div>

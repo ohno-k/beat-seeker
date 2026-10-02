@@ -158,64 +158,50 @@ const handleUpdate = async () => {
     aria-labelledby="profile-edit-title"
     @update:model-value="(v) => { if (!v) emit('close') }"
   >
-    <v-card class="overflow-hidden flex flex-col transition-colors duration-200">
+    <v-card>
 
-      <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-        <h3 id="profile-edit-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('profile.editTitle') }}</h3>
-        <v-btn icon variant="text" size="small" :aria-label="t('a11y.modal.close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="emit('close')">
+      <v-card-title class="flex justify-between items-center">
+        <h3 id="profile-edit-title">{{ t('profile.editTitle') }}</h3>
+        <v-btn icon variant="text" size="small" :aria-label="t('a11y.modal.close')" @click="emit('close')">
           <v-icon :icon="mdiClose" />
         </v-btn>
-      </div>
+      </v-card-title>
+      <v-divider />
 
-      <v-card-text class="p-6 overflow-y-auto">
+      <v-card-text class="overflow-y-auto">
         <form @submit.prevent="handleUpdate" class="space-y-6">
 
-          <v-alert v-if="errorMsg" type="error" class="text-sm border border-red-200 dark:border-red-800/50">
+          <v-alert v-if="errorMsg" type="error" density="compact">
             {{ errorMsg }}
           </v-alert>
 
-          <v-alert v-if="successMsg" type="success" class="text-sm border border-emerald-200 dark:border-emerald-800/50">
+          <v-alert v-if="successMsg" type="success" density="compact">
             {{ successMsg }}
           </v-alert>
 
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.displayName') }}</label>
-              <v-text-field v-model="displayName" type="text" required />
-            </div>
+          <div class="space-y-2">
+            <v-text-field v-model="displayName" :label="t('profile.displayName')" type="text" required />
 
             <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.danRank') }}</label>
-                <v-select
-                  v-model="danRank"
-                  :items="danRankOptions.map((rank) => ({ title: t(rank.labelKey), value: rank.value }))"
-                  item-title="title"
-                  item-value="value"
-                />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.arenaRank') }}</label>
-                <v-select v-model="arenaRank" :items="[...arenaRanks]" />
-              </div>
+              <v-select
+                v-model="danRank"
+                :label="t('profile.danRank')"
+                :items="danRankOptions.map((rank) => ({ title: t(rank.labelKey), value: rank.value }))"
+                item-title="title"
+                item-value="value"
+              />
+              <v-select v-model="arenaRank" :label="t('profile.arenaRank')" :items="[...arenaRanks]" />
             </div>
 
             <div class="grid grid-cols-1">
+              <v-radio-group v-model="playSide" :label="t('profile.playSide')" inline color="primary">
+                <v-radio value="1P" label="1P" />
+                <v-radio value="2P" label="2P" />
+              </v-radio-group>
               <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.playSide') }}</label>
-                <v-radio-group v-model="playSide" inline class="py-1">
-                  <v-radio value="1P" class="mr-4">
-                    <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">1P</span></template>
-                  </v-radio>
-                  <v-radio value="2P">
-                    <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">2P</span></template>
-                  </v-radio>
-                </v-radio-group>
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.privacySetting') }}</label>
                 <v-select
                   v-model="privacyLevel"
+                  :label="t('profile.privacySetting')"
                   :items="[
                     { title: t('profile.privacyPublic'), value: 0 },
                     { title: t('profile.privacyFriendsOnly'), value: 1 },
@@ -232,31 +218,19 @@ const handleUpdate = async () => {
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <div class="flex items-center gap-2">
               <h4 class="text-sm font-bold text-slate-400">{{ t('profile.emailSection') }}</h4>
-              <v-chip v-if="!user?.email" label variant="outlined" class="h-auto text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/50">{{ t('profile.emailNotRegistered') }}</v-chip>
+              <v-chip v-if="!user?.email" label variant="tonal" color="warning" size="x-small">{{ t('profile.emailNotRegistered') }}</v-chip>
             </div>
-            <div>
-              <v-text-field v-model="email" type="email" :placeholder="t('profile.emailNotRegistered')" />
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1">{{ t('profile.emailHint') }}</p>
-            </div>
+            <v-text-field v-model="email" type="email" :placeholder="t('profile.emailNotRegistered')" :hint="t('profile.emailHint')" persistent-hint />
           </div>
 
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <h4 class="text-sm font-bold text-slate-400">{{ t('profile.passwordChange') }}</h4>
 
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.currentPassword') }}</label>
-              <v-text-field v-model="currentPassword" type="password" :placeholder="t('profile.currentPasswordPlaceholder')" />
-            </div>
+            <v-text-field v-model="currentPassword" :label="t('profile.currentPassword')" type="password" :placeholder="t('profile.currentPasswordPlaceholder')" />
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.newPassword') }}</label>
-                <v-text-field v-model="newPassword" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.confirmNewPassword') }}</label>
-                <v-text-field v-model="newPasswordConfirm" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
-              </div>
+              <v-text-field v-model="newPassword" :label="t('profile.newPassword')" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
+              <v-text-field v-model="newPasswordConfirm" :label="t('profile.confirmNewPassword')" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
             </div>
           </div>
 
@@ -271,6 +245,7 @@ const handleUpdate = async () => {
               <v-switch
                 :model-value="showRateTier"
                 color="success"
+                hide-details
                 class="ml-4 shrink-0 flex-none"
                 :aria-label="t('profile.showRateTier')"
                 @update:model-value="(v) => setRateTier(!!v)"
@@ -279,11 +254,11 @@ const handleUpdate = async () => {
           </div>
 
           <div class="pt-4 flex gap-3">
-            <v-btn type="button" variant="tonal" size="large" class="flex-1" @click="emit('close')">
+            <v-btn type="button" variant="text" size="large" class="flex-1" @click="emit('close')">
               {{ t('common.cancel') }}
             </v-btn>
-            <v-btn type="submit" color="primary" size="large" class="flex-[2]" :disabled="isSubmitting">
-              <v-progress-circular v-if="isSubmitting" size="16" width="2" color="white" class="mr-2" />
+            <v-btn type="submit" color="primary" variant="flat" size="large" class="flex-[2]" :disabled="isSubmitting">
+              <v-progress-circular v-if="isSubmitting" size="16" width="2" indeterminate class="mr-2" />
               {{ isSubmitting ? t('profile.saving') : t('profile.saveChanges') }}
             </v-btn>
           </div>

@@ -16,7 +16,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useCompetitionTl, type MatchKind, type TlMatchDto, type TlMatchupDto } from '../composables/useCompetitionTl';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
-import { teamColorClass, genreBadgeClass } from '../composables/competitionColors';
+import { teamColorClass, genreChipColor } from '../composables/competitionColors';
 import { kindLevelLabel, isAdjacentKind } from '../composables/competitionMatchKinds';
 import CompetitionChatWidget from '../components/CompetitionChatWidget.vue';
 import { formatJstDateTime } from '../utils/jstTime';
@@ -149,7 +149,11 @@ const undecidedStrategyCount = computed<number>(() =>
     <v-btn-toggle
       :model-value="currentLang"
       mandatory
-      class="absolute top-3 right-3 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur shadow-sm"
+      variant="outlined"
+      divided
+      density="compact"
+      color="primary"
+      class="absolute top-3 right-3 z-30"
     >
       <v-btn
         v-for="lang in availableLanguages"
@@ -158,22 +162,21 @@ const undecidedStrategyCount = computed<number>(() =>
         size="small"
         @click="setLanguage(lang)"
         :aria-pressed="currentLang === lang"
-        class="text-[11px]"
       >{{ t(`lang.${lang}`) }}</v-btn>
     </v-btn-toggle>
 
     <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">
-      <v-progress-circular size="20" width="2" class="mr-2" />{{ t('competition.player.loading') }}
+      <v-progress-circular indeterminate size="20" width="2" class="mr-2" />{{ t('competition.player.loading') }}
     </div>
 
     <v-alert
       v-else-if="!view"
       type="error"
       :icon="false"
-      class="max-w-2xl mx-auto rounded-2xl p-6 text-center"
+      class="max-w-2xl mx-auto text-center"
     >
-      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">{{ t('competition.tl.invalidToken') }}</p>
-      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ t('competition.tl.invalidTokenHint') }}</p>
+      <p class="text-lg font-bold">{{ t('competition.tl.invalidToken') }}</p>
+      <p class="text-sm mt-2">{{ t('competition.tl.invalidTokenHint') }}</p>
     </v-alert>
 
     <div v-else class="max-w-5xl mx-auto space-y-6">
@@ -182,7 +185,7 @@ const undecidedStrategyCount = computed<number>(() =>
         <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
-          <v-chip size="small" label class="text-[10px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlAdminBadge') }}</v-chip>
+          <v-chip size="small" label color="amber">{{ t('competition.common.tlAdminBadge') }}</v-chip>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
@@ -191,7 +194,8 @@ const undecidedStrategyCount = computed<number>(() =>
       </div>
 
       <!-- メンバー一覧 + 予選コスト残量 -->
-      <v-card tag="section" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+      <v-card tag="section">
+        <v-card-text>
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
           <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.membersHeader') }}</p>
           <div class="flex items-center gap-3 flex-wrap">
@@ -201,7 +205,7 @@ const undecidedStrategyCount = computed<number>(() =>
               {{ t('competition.matchKind.middle') }} {{ view.costPerKind.middle }} ·
               {{ t('competition.matchKind.captain') }} {{ view.costPerKind.captain }}
             </p>
-            <v-chip size="small" label class="text-[10px] font-black bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 tracking-wider">
+            <v-chip size="small" label color="purple">
               ⚡ ストラテジー {{ view.strategyUsedMatchupCount }} / {{ view.strategyLimit }} 組
             </v-chip>
             <!-- 決定できる状態なのに未決定の試合が残っていれば警告表示 (意思決定漏れの防止) -->
@@ -209,7 +213,7 @@ const undecidedStrategyCount = computed<number>(() =>
               v-if="undecidedStrategyCount > 0"
               size="small"
               label
-              class="text-[10px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider"
+              color="warning"
             >{{ t('competition.tl.strategyUndecidedCount', { n: undecidedStrategyCount }) }}</v-chip>
           </div>
         </div>
@@ -221,7 +225,7 @@ const undecidedStrategyCount = computed<number>(() =>
           >
             <p class="font-bold text-sm truncate">
               {{ m.displayName }}
-              <v-chip v-if="m.isTl" size="x-small" label class="ml-1 text-[9px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">{{ t('competition.common.tlBadge') }}</v-chip>
+              <v-chip v-if="m.isTl" size="x-small" label color="amber" class="ml-1 align-middle">{{ t('competition.common.tlBadge') }}</v-chip>
             </p>
             <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
               <span class="text-slate-400">{{ t('competition.tl.costRemaining') }}</span>
@@ -237,19 +241,22 @@ const undecidedStrategyCount = computed<number>(() =>
             </div>
           </div>
         </div>
+        </v-card-text>
       </v-card>
 
       <!-- 4 matchup ぶんのアサイン UI -->
       <section class="space-y-4">
         <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.matchupsHeader', { n: sortedMatchups.length }) }}</p>
-        <v-card v-if="sortedMatchups.length === 0" class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
-          {{ t('competition.tl.noMatchups') }}<br />{{ t('competition.tl.noMatchupsHint') }}
+        <v-card v-if="sortedMatchups.length === 0">
+          <v-card-text class="text-center">
+            <p class="text-sm text-slate-400 italic py-2">{{ t('competition.tl.noMatchups') }}<br />{{ t('competition.tl.noMatchupsHint') }}</p>
+          </v-card-text>
         </v-card>
 
         <v-card
           v-for="mu in sortedMatchups"
           :key="mu.matchupId"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
+          class="overflow-hidden"
         >
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm">
@@ -258,7 +265,9 @@ const undecidedStrategyCount = computed<number>(() =>
                 v-if="mu.isFinals"
                 size="small"
                 label
-                class="ml-2 text-[10px] font-black bg-amber-500 text-white tracking-wider"
+                color="amber"
+                variant="flat"
+                class="ml-2"
               >🏆 {{ t('competition.tl.finalsBadge') }}</v-chip>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
@@ -266,13 +275,12 @@ const undecidedStrategyCount = computed<number>(() =>
                 v-if="mu.myLineupPublished"
                 size="x-small"
                 label
-                class="text-[9px] font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+                color="success"
               >{{ t('competition.tl.mySidePublished') }}</v-chip>
               <v-chip
                 v-else
                 size="x-small"
                 label
-                class="text-[9px] font-black bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
               >{{ t('competition.tl.mySideUnpublished') }}</v-chip>
               <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
                 {{ t('competition.tl.matchupOrder', { n: mu.matchupOrder }) }} · {{ t('competition.tl.mySideLabel', { side: mu.mySide.toUpperCase() }) }}
@@ -301,8 +309,8 @@ const undecidedStrategyCount = computed<number>(() =>
                   v-if="match.requiredGenre"
                   size="x-small"
                   label
-                  class="mt-1 text-[9px] font-black tracking-wider"
-                  :class="genreBadgeClass(match.requiredGenre)"
+                  class="mt-1"
+                  :color="genreChipColor(match.requiredGenre)"
                 >
                   {{ t('competition.tl.requiredGenrePrefix') }} {{ match.requiredGenre }}
                 </v-chip>
@@ -310,7 +318,7 @@ const undecidedStrategyCount = computed<number>(() =>
                   v-else
                   size="x-small"
                   label
-                  class="mt-1 text-[9px] font-black bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+                  class="mt-1"
                 >
                   {{ t('competition.tl.genreUnspecified') }}
                 </v-chip>
@@ -333,7 +341,9 @@ const undecidedStrategyCount = computed<number>(() =>
                       })),
                     ]"
                     @update:model-value="(v: number | string | null) => handleAssign(match, v == null ? '' : String(v))"
-                    class="flex-1 text-sm"
+                    density="compact"
+                    hide-details
+                    class="flex-1"
                   />
                 </div>
                 <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
@@ -364,18 +374,14 @@ const undecidedStrategyCount = computed<number>(() =>
                         <v-btn
                           size="x-small"
                           @click="handleSetStrategy(match, true)"
-                          class="rounded-lg text-[10px] font-black tracking-wider uppercase"
-                          :class="match.myStrategyDecided && match.myStrategyEnabled
-                            ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow'
-                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-fuchsia-100 hover:text-fuchsia-700 dark:hover:bg-fuchsia-900/40 dark:hover:text-fuchsia-300'"
+                          :color="match.myStrategyDecided && match.myStrategyEnabled ? 'purple' : undefined"
+                          :variant="match.myStrategyDecided && match.myStrategyEnabled ? 'flat' : 'tonal'"
                         >{{ t('competition.tl.strategyUse') }}</v-btn>
                         <v-btn
                           size="x-small"
                           @click="handleSetStrategy(match, false)"
-                          class="rounded-lg text-[10px] font-black tracking-wider uppercase"
-                          :class="match.myStrategyDecided && !match.myStrategyEnabled
-                            ? 'bg-slate-600 text-white shadow dark:bg-slate-500'
-                            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
+                          :color="match.myStrategyDecided && !match.myStrategyEnabled ? 'blue-grey' : undefined"
+                          :variant="match.myStrategyDecided && !match.myStrategyEnabled ? 'flat' : 'tonal'"
                         >{{ t('competition.tl.strategySkip') }}</v-btn>
                       </div>
                     </div>

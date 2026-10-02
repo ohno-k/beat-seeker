@@ -288,42 +288,42 @@ const sessionLeveledUp = computed(() => {
   >
     <v-card aria-labelledby="rank-quiz-modal-title" class="w-full max-h-[90vh] overflow-y-auto">
       <!-- ヘッダ: タイトル + Lv/XP + 閉じる -->
-      <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
-        <div class="w-9 h-9 bg-indigo-600 rounded-md flex items-center justify-center text-white shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.518-4.674z" />
-          </svg>
+      <v-card-item>
+        <template #prepend>
+          <v-avatar color="indigo" rounded size="36">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.539 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.518-4.674z" />
+            </svg>
+          </v-avatar>
+        </template>
+        <v-card-title id="rank-quiz-modal-title">非公式難易度クイズ</v-card-title>
+        <div v-if="progress" class="flex items-center gap-2 mt-0.5">
+          <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">Lv.{{ progress.level }}</span>
+          <v-progress-linear
+            :model-value="levelProgressPct"
+            color="indigo"
+            height="4"
+            rounded
+            class="flex-1"
+          />
+          <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">{{ progress.xp }}/{{ progress.xpForNextLevel }}</span>
         </div>
-        <div class="flex-1 min-w-0">
-          <h3 id="rank-quiz-modal-title" class="text-sm font-bold text-slate-800 dark:text-slate-100">非公式難易度クイズ</h3>
-          <div v-if="progress" class="flex items-center gap-2 mt-0.5">
-            <span class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">Lv.{{ progress.level }}</span>
-            <v-progress-linear
-              :model-value="levelProgressPct"
-              color="indigo"
-              bg-color="surface-variant"
-              bg-opacity="1"
-              height="4"
-              rounded
-              class="flex-1"
-            />
-            <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">{{ progress.xp }}/{{ progress.xpForNextLevel }}</span>
-          </div>
-        </div>
-        <v-btn
-          icon
-          variant="text"
-          size="small"
-          aria-label="閉じる"
-          class="text-slate-400"
-          @click="$emit('close')"
-        >
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+        <template #append>
+          <v-btn
+            icon
+            variant="text"
+            size="small"
+            aria-label="閉じる"
+            @click="$emit('close')"
+          >
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
+      <v-divider />
 
       <!-- 本体 -->
-      <div class="p-5">
+      <v-card-text>
         <!-- エラー or 空状態 -->
         <div v-if="initError" class="text-center py-10 text-sm text-slate-500 dark:text-slate-400">
           {{ initError }}
@@ -342,7 +342,7 @@ const sessionLeveledUp = computed(() => {
               正答 <span class="font-bold text-slate-800 dark:text-slate-100">{{ correctCount }}/{{ questions.length }}</span>
               ・ 獲得 <span class="font-bold text-amber-500">+{{ xpGainedTotal }} XP</span>
             </p>
-            <v-chip v-if="sessionLeveledUp" label variant="flat" color="amber" class="font-bold text-xs text-white">
+            <v-chip v-if="sessionLeveledUp" label variant="flat" color="amber">
               🎉 LEVEL UP! Lv.{{ progress?.level }}
             </v-chip>
           </div>
@@ -362,7 +362,7 @@ const sessionLeveledUp = computed(() => {
               </span>
               <span class="font-bold text-slate-700 dark:text-slate-200 tabular-nums">★{{ a.correctRank }}</span>
               <span v-if="!a.correct" class="text-[10px] text-rose-500 tabular-nums">→ ★{{ a.chosenRank }}</span>
-              <v-chip v-if="a.isReview" label size="x-small" color="purple" class="text-[8px] font-bold px-1">復習</v-chip>
+              <v-chip v-if="a.isReview" label size="x-small" color="purple">復習</v-chip>
             </li>
           </ul>
           <div class="flex gap-2 mt-5">
@@ -376,7 +376,7 @@ const sessionLeveledUp = computed(() => {
           <!-- 進捗メーター -->
           <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-3">
             <span>問題 {{ currentIndex + 1 }} / {{ questions.length }}</span>
-            <v-chip v-if="currentQuestion.isReview" label size="x-small" color="purple" class="text-[9px] font-bold">復習問題 +{{ 20 }}XP</v-chip>
+            <v-chip v-if="currentQuestion.isReview" label size="x-small" color="purple">復習問題 +{{ 20 }}XP</v-chip>
             <span v-else class="text-slate-400">新規問題 +{{ 10 }}XP</span>
           </div>
 
@@ -388,27 +388,26 @@ const sessionLeveledUp = computed(() => {
               label
               size="x-small"
               :color="currentQuestion.difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
-              class="text-[10px] font-bold"
             >{{ currentQuestion.difficultyName }}</v-chip>
           </div>
 
           <!-- 選択肢 -->
           <div class="grid grid-cols-2 gap-2">
+            <!-- 回答後も色（正解=success / 誤答=error）を見せたいので disabled ではなく readonly でクリックを止める -->
             <v-btn
               v-for="ch in currentQuestion.choices"
               :key="ch"
-              variant="outlined"
-              :disabled="!!currentAnswered || isSubmitting"
-              class="h-auto opacity-100 px-4 py-3 text-base font-bold tabular-nums border-2 transition-all"
-              :class="[
-                !currentAnswered
-                  ? 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-800 dark:text-slate-100 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
-                  : ch === currentQuestion.correctRank
-                    ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-400 text-emerald-700 dark:text-emerald-300'
-                    : ch === currentAnswered.chosenRank
-                      ? 'bg-rose-50 dark:bg-rose-900/30 border-rose-400 text-rose-700 dark:text-rose-300'
-                      : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500'
-              ]"
+              size="large"
+              class="tabular-nums"
+              :readonly="!!currentAnswered || isSubmitting"
+              :variant="currentAnswered && (ch === currentQuestion.correctRank || ch === currentAnswered.chosenRank) ? 'flat' : 'outlined'"
+              :color="!currentAnswered
+                ? 'primary'
+                : ch === currentQuestion.correctRank
+                  ? 'success'
+                  : ch === currentAnswered.chosenRank
+                    ? 'error'
+                    : undefined"
               @click="chooseAnswer(ch)"
             >★{{ ch }}</v-btn>
           </div>
@@ -417,20 +416,20 @@ const sessionLeveledUp = computed(() => {
           <v-alert
             v-if="currentAnswered"
             :type="currentAnswered.correct ? 'success' : 'error'"
-            :icon="false"
-            class="mt-4 text-sm font-bold"
+            variant="tonal"
+            class="mt-4"
           >
             <div class="flex items-center justify-between gap-2">
               <span>
                 <template v-if="currentAnswered.correct">○ 正解！ +{{ currentAnswered.xpGained }} XP</template>
                 <template v-else>× 正解は ★{{ currentAnswered.correctRank }}</template>
               </span>
-              <v-chip v-if="lastResult?.leveledUp" label size="x-small" variant="flat" color="amber" class="text-[10px] font-bold text-white">
+              <v-chip v-if="lastResult?.leveledUp" label size="x-small" variant="flat" color="amber">
                 🎉 Lv UP! → {{ lastResult.newLevel }}
               </v-chip>
             </div>
-            <p class="text-[11px] font-medium mt-1 text-slate-600 dark:text-slate-300">
-              覚え方: <span class="font-bold text-slate-800 dark:text-slate-100">{{ currentAnswered.title }}{{ currentAnswered.difficultyName === 'LEGGENDARIA' ? '[L]' : '' }} = ★{{ currentAnswered.correctRank }}</span>
+            <p class="text-[11px] font-medium mt-1">
+              覚え方: <span class="font-bold">{{ currentAnswered.title }}{{ currentAnswered.difficultyName === 'LEGGENDARIA' ? '[L]' : '' }} = ★{{ currentAnswered.correctRank }}</span>
             </p>
             <v-btn color="primary" block class="mt-3" @click="next">{{ currentIndex < questions.length - 1 ? '次の問題 →' : '結果を見る →' }}</v-btn>
           </v-alert>
@@ -440,7 +439,7 @@ const sessionLeveledUp = computed(() => {
         <div v-else class="text-center py-10 text-sm text-slate-400">
           読み込み中...
         </div>
-      </div>
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>

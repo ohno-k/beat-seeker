@@ -15,7 +15,7 @@ import { compressImage } from '../utils/imageCompress';
 import { useResultImages } from '../composables/useResultImages';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
-import { mdiClose } from '@mdi/js';
+import { mdiClose, mdiImagePlus, mdiMagnify } from '@mdi/js';
 
 type Song = { id: number; version: string; title: string; diff: 'A' | 'L'; level: number };
 type Genre = 'NOTES' | 'PEAK' | 'CHORD' | 'CHARGE' | 'SCRATCH' | 'SOF-LAN' | 'INSANE';
@@ -156,19 +156,19 @@ onBeforeUnmount(() => {
     max-width="672"
     @update:model-value="(v: boolean) => { if (!v) close() }"
   >
-    <v-card variant="flat" class="w-full overflow-hidden flex flex-col max-h-[92vh] shadow-xl">
+    <v-card class="w-full overflow-hidden flex flex-col max-h-[92vh]">
       <!-- ヘッダ -->
-      <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('shareImport.title') }}</p>
+      <v-card-title class="flex items-center justify-between">
+        <span>{{ t('shareImport.title') }}</span>
         <v-btn
           icon
           variant="text"
           size="small"
-          class="text-slate-500 dark:text-slate-400"
           aria-label="close"
           @click="close"
         ><v-icon :icon="mdiClose" /></v-btn>
-      </div>
+      </v-card-title>
+      <v-divider />
 
       <!-- 保存完了 -->
       <div v-if="savedChart" class="p-6 flex flex-col items-center text-center gap-4">
@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ savedChart }}</p>
         </div>
         <div class="flex gap-2 w-full max-w-xs">
-          <v-btn variant="tonal" class="flex-1" @click="reset">
+          <v-btn variant="outlined" class="flex-1" @click="reset">
             {{ t('shareImport.another') }}
           </v-btn>
           <v-btn color="primary" class="flex-1" @click="close">
@@ -196,16 +196,17 @@ onBeforeUnmount(() => {
             <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('shareImport.pickChart') }}</p>
             </div>
-            <v-btn variant="text" size="small" color="primary" class="text-xs shrink-0" @click="triggerPick">
+            <v-btn variant="text" size="small" color="primary" class="shrink-0" @click="triggerPick">
               {{ t('shareImport.changeImage') }}
             </v-btn>
           </div>
           <v-btn
             v-else
-            variant="outlined"
+            variant="tonal"
+            color="primary"
             block
-            height="auto"
-            class="py-6 border-2 border-dashed border-slate-300 dark:border-slate-600 text-sm font-normal text-slate-500 dark:text-slate-400 hover:border-blue-400 hover:text-blue-500"
+            size="x-large"
+            :prepend-icon="mdiImagePlus"
             @click="triggerPick"
           >
             {{ t('shareImport.pickImage') }}
@@ -217,7 +218,7 @@ onBeforeUnmount(() => {
         <v-alert v-if="!isLoggedIn" type="warning" :icon="false" class="m-4">
           <div class="flex items-center justify-between gap-3">
             <p class="text-xs sm:text-sm">{{ t('shareImport.loginRequired') }}</p>
-            <v-btn size="small" color="warning" class="shrink-0 text-xs" @click="emit('login')">
+            <v-btn size="small" color="warning" class="shrink-0" @click="emit('login')">
               {{ t('shareImport.login') }}
             </v-btn>
           </div>
@@ -229,21 +230,23 @@ onBeforeUnmount(() => {
             v-model="search"
             type="text"
             :placeholder="t('shareImport.searchPlaceholder')"
+            :prepend-inner-icon="mdiMagnify"
+            hide-details
           />
-          <v-btn-toggle v-model="levelFilter" mandatory class="flex-wrap">
-            <v-btn value="ALL" size="small" class="text-xs">ALL</v-btn>
-            <v-btn
+          <v-chip-group v-model="levelFilter" mandatory selected-class="text-primary" column>
+            <v-chip value="ALL" size="small" filter>ALL</v-chip>
+            <v-chip
               v-for="lv in ALL_LEVELS"
               :key="lv"
               :value="lv"
               size="small"
-              class="text-xs"
-            >Lv {{ lv }}</v-btn>
-          </v-btn-toggle>
+              filter
+            >Lv {{ lv }}</v-chip>
+          </v-chip-group>
         </div>
 
         <!-- エラー -->
-        <v-alert v-if="error" type="error" class="mx-4 mt-3 text-xs sm:text-sm">
+        <v-alert v-if="error" type="error" density="compact" class="mx-4 mt-3">
           {{ error }}
         </v-alert>
 
@@ -252,19 +255,15 @@ onBeforeUnmount(() => {
           <p v-if="hits.list.length === 0" class="px-5 py-10 text-center text-sm text-slate-400 italic">
             {{ t('shareImport.empty') }}
           </p>
-          <v-list v-else density="compact" class="py-0 divide-y divide-slate-100 dark:divide-slate-700/60">
+          <v-list v-else density="compact" lines="two">
             <v-list-item
               v-for="h in hits.list"
               :key="`${h.id}-${h.diff}`"
               :disabled="!localBlob || uploading"
-              class="px-5 py-2"
+              :title="h.title"
+              :subtitle="`${h.version} · ${h.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER'} · Lv ${h.level}`"
               @click="pickChart(h)"
-            >
-              <p class="font-bold text-sm truncate">{{ h.title }}</p>
-              <p class="text-[10px] font-mono text-slate-400 mt-0.5">
-                {{ h.version }} · {{ h.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }} · Lv {{ h.level }}
-              </p>
-            </v-list-item>
+            />
           </v-list>
           <p v-if="hits.overflow" class="px-5 py-3 text-center text-[11px] text-slate-400 italic">
             {{ t('shareImport.empty') }}
@@ -272,7 +271,7 @@ onBeforeUnmount(() => {
 
           <!-- アップロード中オーバーレイ -->
           <div v-if="uploading" class="absolute inset-0 bg-white/70 dark:bg-slate-800/70 flex items-center justify-center gap-2">
-            <v-progress-circular size="20" width="2" />
+            <v-progress-circular indeterminate size="20" width="2" />
             <span class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t('shareImport.uploading') }}</span>
           </div>
         </div>

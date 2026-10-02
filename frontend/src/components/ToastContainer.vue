@@ -28,7 +28,7 @@ const { t } = useI18n();
         leave-from-class="opacity-100"
         leave-to-class="opacity-0 translate-x-4"
       >
-        <!-- 背景は不透明にしたいので Tailwind の bg-* を重ねる（tonal のままだと下が透ける） -->
+        <!-- v-alert の既定（flat・塗りつぶし）は不透明なので、そのまま重ねる -->
         <v-alert
           v-for="toast in items"
           :key="toast.id"
@@ -37,15 +37,11 @@ const { t } = useI18n();
           :icon="toast.type === 'success' ? mdiCheck : toast.type === 'error' ? mdiAlertOutline : mdiInformationOutline"
           closable
           :close-label="t('a11y.modal.close')"
-          class="pointer-events-auto rounded-xl shadow-lg border backdrop-blur-sm"
-          :class="{
-            'bg-emerald-50/95 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200': toast.type === 'success',
-            'bg-red-50/95 dark:bg-red-900/40 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200': toast.type === 'error',
-            'bg-blue-50/95 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200': toast.type === 'info',
-          }"
+          elevation="6"
+          class="pointer-events-auto"
           @click:close="dismiss(toast.id)"
         >
-          <p class="text-sm font-medium leading-5 whitespace-pre-line">{{ toast.message }}</p>
+          <p class="whitespace-pre-line">{{ toast.message }}</p>
         </v-alert>
       </TransitionGroup>
     </div>

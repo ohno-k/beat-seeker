@@ -7,16 +7,11 @@
 @layer tw-base, vuetify-core, vuetify-components, vuetify-overrides, vuetify-utilities, vuetify-final;
 
 /*
- * Vuetify の既定の見た目の調整（vuetify-overrides レイヤー。Tailwind のクラスを付ければそちらが勝つ）。
- * 色の指定が無い outlined のボタン・ボタントグルの枠線は、文字色ではなくテーマの罫線色（slate-200 / slate-700）にする
- * （既存の .btn-secondary と同じ）。color を指定したもの（text-primary など）は従来どおり文字色の枠線。
+ * Vuetify と Tailwind でクラス名が衝突する分の調整（レイヤー外。特定度 0 なので Tailwind の text-* があればそちらが勝つ）。
+ * Vuetify の `.bg-white` / `.bg-black` は背景と一緒に文字色まで #000 / #fff に固定する。Tailwind の `bg-white dark:bg-slate-800`
+ * を付けた手組みの要素（サイドバーなど）では、ダークで背景だけ暗くなり文字が黒いまま残るので、Vuetify のコンポーネント以外では
+ * 文字色を変えない（従来の Tailwind と同じ）。Vuetify のコンポーネント（color="white" など）は Vuetify の指定のまま。
  */
-@layer vuetify-overrides {
-  .v-btn--variant-outlined,
-  .v-btn-group--border {
-    border-color: rgba(var(--v-border-color), var(--v-border-opacity));
-  }
-  .v-btn--variant-outlined:is(.text-primary, .text-secondary, .text-success, .text-warning, .text-error, .text-info) {
-    border-color: currentColor;
-  }
+:where(.bg-white:not([class*="v-"]), .bg-black:not([class*="v-"])) {
+  color: inherit;
 }

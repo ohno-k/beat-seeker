@@ -396,10 +396,8 @@ const chartOptions = computed(() => {
 function diffShort(name: string): string {
   return name === 'LEGGENDARIA' ? 'LEG' : name === 'ANOTHER' ? 'ANO' : name.slice(0, 3).toUpperCase();
 }
-function diffBadgeClass(name: string): string {
-  return name === 'LEGGENDARIA'
-    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';
+function diffColor(name: string): string {
+  return name === 'LEGGENDARIA' ? 'purple' : 'red';
 }
 
 /** 各 A の貢献度 (%): visibleRefs に含まれるものだけ意味を持つ（合計 100% になる）。 */
@@ -407,24 +405,8 @@ function contributionPct(r: RefItem): number {
   return totalVisibleWeight.value > 0 ? (r.weight / totalVisibleWeight.value) * 100 : 0;
 }
 
-/** モードに応じたアクセントカラー（cyan/emerald）の Tailwind クラス断片。 */
-const accentClasses = computed(() => props.mode === 'strength'
-  ? {
-      btnBg: 'bg-emerald-600',
-      headerBg: 'bg-emerald-600',
-      ring: 'ring-emerald-500',
-      activeBg: 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500',
-      pillBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-      spinnerBorder: 'border-emerald-100 border-t-emerald-600',
-    }
-  : {
-      btnBg: 'bg-cyan-600',
-      headerBg: 'bg-cyan-600',
-      ring: 'ring-cyan-500',
-      activeBg: 'bg-cyan-50 dark:bg-cyan-900/30 border-cyan-500',
-      pillBg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
-      spinnerBorder: 'border-cyan-100 border-t-cyan-600',
-    });
+/** モードに応じたアクセントカラー（Vuetify の色名。強み = 緑 / 伸びしろ = シアン）。 */
+const accentColor = computed(() => props.mode === 'strength' ? 'green-darken-1' : 'cyan-darken-2');
 </script>
 
 <template>
@@ -433,26 +415,27 @@ const accentClasses = computed(() => props.mode === 'strength'
     @update:model-value="(v: boolean) => { if (!v) emit('close') }"
     max-width="1024"
     :fullscreen="$vuetify.display.xs"
+    scrollable
   >
-      <v-card class="bg-white dark:bg-slate-900 w-full flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border-slate-200 dark:border-slate-800">
+      <v-card>
 
         <!-- ヘッダー -->
-        <div class="relative px-4 sm:px-6 py-3 sm:py-4 shrink-0" :class="accentClasses.headerBg">
+        <v-sheet :color="accentColor" class="relative shrink-0">
           <v-btn
             icon
             variant="text"
             size="small"
             @click="emit('close')"
-            class="absolute top-1 right-1 z-50 text-white/70 hover:text-white"
+            class="absolute top-1 right-1"
             aria-label="Close"
           >
-            <v-icon :icon="mdiClose" size="18" />
+            <v-icon :icon="mdiClose" />
           </v-btn>
-          <div class="pr-10">
+          <v-card-item class="pr-12">
             <p class="text-[10px] sm:text-xs font-bold text-white/80">{{ t('potentialDetails.title') }}</p>
             <h2 class="text-base sm:text-lg font-bold text-white tracking-tight leading-tight truncate">{{ targetTitle }}</h2>
             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-white/20 text-white">
+              <v-chip size="x-small" label variant="tonal">
                 {{ diffShort(targetDifficultyName) }} {{ targetDifficultyLevel }}
               </v-chip>
               <span v-if="targetSupportCount != null" class="text-[10px] font-bold text-white/80">
@@ -468,11 +451,11 @@ const accentClasses = computed(() => props.mode === 'strength'
                 ({{ targetCurrentRate.toFixed(2) }}% → {{ targetPredictedRate.toFixed(2) }}%)
               </span>
             </div>
-          </div>
-        </div>
+          </v-card-item>
+        </v-sheet>
 
         <!-- 本体: モバイル縦積み / デスクトップ横並び -->
-        <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+        <v-card-text class="pa-0">
           <div class="grid grid-cols-1 md:grid-cols-2 md:divide-x md:divide-slate-200 dark:md:divide-slate-700 md:h-full">
 
             <!-- 左カラム: 参照譜面リスト -->
@@ -487,7 +470,7 @@ const accentClasses = computed(() => props.mode === 'strength'
               </div>
 
               <div v-if="isLoadingRefs" class="flex flex-col items-center justify-center py-12 gap-3">
-                <v-progress-circular size="32" width="4" :color="mode === 'strength' ? '#059669' : '#0891b2'" />
+                <v-progress-circular indeterminate :color="accentColor" />
                 <p class="text-xs font-bold text-slate-500">{{ t('potentialDetails.loadingRefs') }}</p>
               </div>
 
@@ -510,20 +493,20 @@ const accentClasses = computed(() => props.mode === 'strength'
                     tag="button"
                     type="button"
                     @click="pickRef(r)"
-                    class="block w-full text-left p-2.5 rounded-md border-2 transition-colors active:scale-[0.99]"
-                    :class="selectedRef && selectedRef.title === r.title && selectedRef.difficultyName === r.difficultyName
-                      ? accentClasses.activeBg
-                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
+                    class="block w-full text-left"
+                    :variant="selectedRef && selectedRef.title === r.title && selectedRef.difficultyName === r.difficultyName ? 'tonal' : 'outlined'"
+                    :color="selectedRef && selectedRef.title === r.title && selectedRef.difficultyName === r.difficultyName ? accentColor : undefined"
                   >
+                    <v-card-text>
                     <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ r.title }}</p>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="diffBadgeClass(r.difficultyName)">
+                      <v-chip size="x-small" label variant="tonal" :color="diffColor(r.difficultyName)">
                         {{ diffShort(r.difficultyName) }} {{ r.difficultyLevel }}
                       </v-chip>
-                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="accentClasses.pillBg">
+                      <v-chip size="x-small" label variant="tonal" :color="accentColor">
                         |r| {{ Math.abs(r.r).toFixed(3) }}
                       </v-chip>
-                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                      <v-chip size="x-small" label variant="tonal">
                         n={{ r.n }}
                       </v-chip>
                     </div>
@@ -540,6 +523,7 @@ const accentClasses = computed(() => props.mode === 'strength'
                       {{ t('potentialDetails.singlePred') }}: {{ Math.round(r.predScore).toLocaleString() }}
                       <template v-if="r.notesB"> ({{ ((r.predScore / (r.notesB * 2)) * 100).toFixed(2) }}%)</template>
                     </p>
+                    </v-card-text>
                   </v-card>
                 </li>
               </ul>
@@ -557,18 +541,19 @@ const accentClasses = computed(() => props.mode === 'strength'
               </div>
 
               <template v-else>
-                <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+                <v-card variant="outlined">
+                  <v-card-text>
                   <!-- メタ情報: 選択中の A と相関係数 -->
                   <div class="mb-3">
                     <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ selectedRef.title }}</p>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="diffBadgeClass(selectedRef.difficultyName)">
+                      <v-chip size="x-small" label variant="tonal" :color="diffColor(selectedRef.difficultyName)">
                         {{ diffShort(selectedRef.difficultyName) }} {{ selectedRef.difficultyLevel }}
                       </v-chip>
-                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="accentClasses.pillBg">
+                      <v-chip size="x-small" label variant="tonal" :color="accentColor">
                         r = {{ selectedRef.r.toFixed(3) }}
                       </v-chip>
-                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                      <v-chip size="x-small" label variant="tonal">
                         n = {{ selectedRef.n }}
                       </v-chip>
                     </div>
@@ -576,7 +561,7 @@ const accentClasses = computed(() => props.mode === 'strength'
 
                   <!-- 散布図本体 / ローディング / エラー -->
                   <div v-if="isLoadingScatter" class="flex flex-col items-center justify-center py-12 gap-3">
-                    <v-progress-circular size="32" width="4" :color="mode === 'strength' ? '#059669' : '#0891b2'" />
+                    <v-progress-circular indeterminate :color="accentColor" />
                     <p class="text-xs font-bold text-slate-500">{{ t('potentialDetails.loadingScatter') }}</p>
                   </div>
                   <div v-else-if="scatterError" class="text-center py-12">
@@ -591,12 +576,13 @@ const accentClasses = computed(() => props.mode === 'strength'
                       <Scatter :data="chartData" :options="chartOptions" />
                     </div>
                   </template>
+                  </v-card-text>
                 </v-card>
               </template>
             </div>
 
           </div>
-        </div>
+        </v-card-text>
 
       </v-card>
   </v-dialog>

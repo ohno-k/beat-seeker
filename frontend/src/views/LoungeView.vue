@@ -537,7 +537,6 @@ onBeforeUnmount(stopPolling);
           type="button"
           variant="outlined"
           size="small"
-          class="rounded-lg border-stone-700 px-3 text-xs font-bold text-stone-300"
           @click="showRules = !showRules"
         >
           {{ showRules ? 'ルールを閉じる' : 'ルールを見る' }}
@@ -550,7 +549,9 @@ onBeforeUnmount(stopPolling);
       <v-alert
         v-if="error"
         type="error"
-        class="mb-4 rounded-lg px-3 py-2 text-sm text-red-200"
+        variant="tonal"
+        density="compact"
+        class="mb-4"
       >
         {{ error }}
       </v-alert>
@@ -561,8 +562,9 @@ onBeforeUnmount(stopPolling);
       <v-card
         v-if="showRules"
         tag="section"
-        class="mb-6 space-y-4 rounded-xl border-stone-700 bg-stone-800/60 p-4 text-sm leading-relaxed text-stone-300"
+        class="mb-6"
       >
+       <v-card-text class="space-y-4">
         <div>
           <h2 class="mb-1 font-bold text-stone-100">目的</h2>
           <p>
@@ -618,6 +620,7 @@ onBeforeUnmount(stopPolling);
             相手の駒種は API 応答にも棋譜にも含まれないため、通信を覗いても布陣は分かりません。
           </p>
         </div>
+       </v-card-text>
       </v-card>
 
       <p v-if="isLoading" class="py-16 text-center text-sm text-stone-400">読み込み中…</p>
@@ -634,12 +637,13 @@ onBeforeUnmount(stopPolling);
             maxlength="40"
             placeholder="名無し"
             color="amber-darken-2"
-            bg-color="#292524"
-            class="w-full text-sm"
+            hide-details
+            class="w-full"
           />
         </div>
 
-        <v-card class="rounded-xl border-stone-700 bg-stone-800/60 p-4">
+        <v-card>
+         <v-card-text>
           <h2 class="mb-1 font-bold">部屋を作る</h2>
           <p class="mb-3 text-xs text-stone-400">先手になります。表示された入室コードを友達に伝えてください。</p>
           <v-btn
@@ -647,38 +651,41 @@ onBeforeUnmount(stopPolling);
             block
             color="amber-darken-3"
             :disabled="isBusy"
-            class="rounded-lg px-4 text-sm font-bold text-white"
             @click="onCreate()"
           >
             部屋を作る
           </v-btn>
+         </v-card-text>
         </v-card>
 
-        <v-card class="rounded-xl border-stone-700 bg-stone-800/60 p-4">
+        <v-card>
+         <v-card-text>
           <h2 class="mb-1 font-bold">部屋に入る</h2>
           <p class="mb-3 text-xs text-stone-400">後手になります。友達から聞いた 4 文字の入室コードを入力してください。</p>
-          <div class="flex gap-2">
+          <div class="flex items-center gap-2">
             <v-text-field
               v-model="codeInput"
               type="text"
               maxlength="8"
               placeholder="7K2M"
               color="amber-darken-2"
-              bg-color="#292524"
-              class="w-32 flex-none [&_input]:font-mono [&_input]:text-lg [&_input]:uppercase [&_input]:tracking-widest"
+              hide-details
+              class="w-32 flex-none"
               @keyup.enter="onJoin()"
             />
             <v-btn
               type="button"
-              color="#44403c"
-              height="40"
+              color="amber-darken-3"
+              variant="tonal"
+              size="large"
               :disabled="isBusy || !codeInput.trim()"
-              class="flex-1 rounded-lg px-4 text-sm font-bold text-white"
+              class="flex-1"
               @click="onJoin()"
             >
               入る
             </v-btn>
           </div>
+         </v-card-text>
         </v-card>
       </section>
 
@@ -687,7 +694,8 @@ onBeforeUnmount(stopPolling);
       <!-- ============================================================ -->
       <section v-else-if="state" class="space-y-5">
         <!-- 対局情報バー -->
-        <v-card class="flex flex-wrap items-center justify-between gap-3 rounded-xl border-stone-700 bg-stone-800/60 px-4 py-3">
+        <v-card>
+         <v-card-text class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span class="font-mono text-lg font-bold tracking-widest text-amber-400">{{ state.roomCode }}</span>
             <span class="text-stone-300">
@@ -702,7 +710,6 @@ onBeforeUnmount(stopPolling);
               type="button"
               variant="outlined"
               size="small"
-              class="rounded-lg border-stone-700 px-3 text-xs font-bold text-stone-300"
               @click="copyInvite()"
             >
               {{ copied ? 'コピーしました' : '招待をコピー' }}
@@ -711,42 +718,43 @@ onBeforeUnmount(stopPolling);
               type="button"
               variant="outlined"
               size="small"
-              class="rounded-lg border-stone-700 px-3 text-xs font-bold text-stone-400"
               @click="leaveRoom()"
             >
               部屋を出る
             </v-btn>
           </div>
+         </v-card-text>
         </v-card>
 
         <!-- 状況の案内 -->
         <v-alert
           v-if="state.status === 'WAITING'"
-          variant="outlined"
+          variant="tonal"
+          color="amber"
           :icon="false"
-          class="rounded-xl border-amber-800/60 bg-amber-950/40 px-4 py-5 text-center"
+          class="text-center"
         >
-          <p class="text-sm text-amber-200">対戦相手の入室を待っています…</p>
-          <p class="mt-2 text-xs text-amber-200/70">
+          <p class="text-sm">対戦相手の入室を待っています…</p>
+          <p class="mt-2 text-xs">
             この URL と入室コード <b class="font-mono">{{ state.roomCode }}</b> を友達に伝えてください。
           </p>
         </v-alert>
 
         <v-alert
           v-else-if="state.status === 'FINISHED'"
-          variant="outlined"
+          variant="tonal"
+          :color="state.winner === state.me ? 'success' : 'error'"
           :icon="false"
-          class="rounded-xl px-4 py-4 text-center"
-          :class="state.winner === state.me ? 'border-emerald-700 bg-emerald-950/50' : 'border-red-800 bg-red-950/50'"
+          class="text-center"
         >
-          <p class="text-lg font-bold" :class="state.winner === state.me ? 'text-emerald-300' : 'text-red-300'">
+          <p class="text-lg font-bold">
             {{ resultHeadline }}
           </p>
           <p class="mt-1 text-xs text-stone-400">互いの駒を開示しています（感想戦）。</p>
           <v-btn
             type="button"
             color="amber-darken-3"
-            class="mt-3 rounded-lg px-4 text-sm font-bold text-white"
+            class="mt-3"
             @click="leaveRoom()"
           >
             もう一局
@@ -858,7 +866,8 @@ onBeforeUnmount(stopPolling);
           <!-- ============================================================ -->
           <div class="min-w-0 flex-1 space-y-4">
             <!-- 布陣の駒箱 -->
-            <v-card v-if="editingSetup && board" class="rounded-xl border-stone-700 bg-stone-800/60 p-4">
+            <v-card v-if="editingSetup && board">
+             <v-card-text>
               <div class="mb-2 flex items-center justify-between">
                 <h2 class="font-bold">駒箱</h2>
                 <span class="text-xs" :class="placedCount === board.armySize ? 'text-emerald-400' : 'text-stone-400'">
@@ -890,7 +899,6 @@ onBeforeUnmount(stopPolling);
                   variant="outlined"
                   size="small"
                   :disabled="isBusy"
-                  class="rounded-lg border-stone-600 px-3 text-xs font-bold text-stone-300"
                   @click="onSuggestSetup()"
                 >
                   おまかせ配置
@@ -899,7 +907,6 @@ onBeforeUnmount(stopPolling);
                   type="button"
                   variant="outlined"
                   size="small"
-                  class="rounded-lg border-stone-600 px-3 text-xs font-bold text-stone-300"
                   @click="onClearSetup()"
                 >
                   全部戻す
@@ -909,7 +916,7 @@ onBeforeUnmount(stopPolling);
                   size="small"
                   color="amber-darken-3"
                   :disabled="isBusy || placedCount !== board.armySize"
-                  class="ml-auto rounded-lg px-4 text-xs font-bold text-white"
+                  class="ml-auto"
                   @click="onSubmitSetup()"
                 >
                   この布陣で開始
@@ -918,10 +925,12 @@ onBeforeUnmount(stopPolling);
               <p class="mt-2 text-[11px] text-stone-500">
                 提出すると布陣は変えられません。軍旗はすぐ後ろに強い駒を置くと硬くなります。
               </p>
+             </v-card-text>
             </v-card>
 
             <!-- 失った駒（自分の分だけ。決着後は相手の分も） -->
-            <v-card v-if="state.status !== 'SETUP'" class="rounded-xl border-stone-700 bg-stone-800/60 p-4">
+            <v-card v-if="state.status !== 'SETUP'">
+             <v-card-text>
               <h2 class="mb-2 font-bold">失った駒</h2>
               <div class="space-y-2 text-xs">
                 <div>
@@ -933,8 +942,8 @@ onBeforeUnmount(stopPolling);
                       :key="`mine-${i}`"
                       size="x-small"
                       label
-                      variant="flat"
-                      class="bg-stone-700 px-1.5 text-xs font-bold text-stone-300 line-through"
+                      variant="tonal"
+                      class="line-through"
                     >{{ d.type ? SHORT_LABEL[d.type] : '?' }}</v-chip>
                   </div>
                 </div>
@@ -947,8 +956,8 @@ onBeforeUnmount(stopPolling);
                       :key="`opp-${i}`"
                       size="x-small"
                       label
-                      variant="flat"
-                      class="bg-red-950/70 px-1.5 text-xs font-bold text-red-300"
+                      variant="tonal"
+                      color="error"
                       :class="d.type ? 'line-through' : ''"
                     >{{ d.type ? SHORT_LABEL[d.type] : '？' }}</v-chip>
                   </div>
@@ -957,10 +966,12 @@ onBeforeUnmount(stopPolling);
                   </p>
                 </div>
               </div>
+             </v-card-text>
             </v-card>
 
             <!-- 棋譜（審判の宣告ログ） -->
-            <v-card v-if="state.log.length" class="rounded-xl border-stone-700 bg-stone-800/60 p-4">
+            <v-card v-if="state.log.length">
+             <v-card-text>
               <h2 class="mb-2 font-bold">審判の記録</h2>
               <ol class="max-h-64 space-y-0.5 overflow-y-auto text-xs">
                 <li
@@ -973,6 +984,7 @@ onBeforeUnmount(stopPolling);
                   ]"
                 >{{ logLine(entry) }}</li>
               </ol>
+             </v-card-text>
             </v-card>
 
             <!-- 投了 -->
@@ -982,7 +994,7 @@ onBeforeUnmount(stopPolling);
                 type="button"
                 variant="text"
                 size="small"
-                class="px-0 text-xs font-bold text-stone-500 hover:text-red-400"
+                color="error"
                 @click="confirmResign = true"
               >
                 投了する
@@ -993,7 +1005,6 @@ onBeforeUnmount(stopPolling);
                   type="button"
                   size="small"
                   color="red-darken-3"
-                  class="rounded px-3 text-xs font-bold text-white"
                   @click="onResign()"
                 >
                   はい
@@ -1002,7 +1013,6 @@ onBeforeUnmount(stopPolling);
                   type="button"
                   variant="outlined"
                   size="small"
-                  class="rounded border-stone-600 px-3 text-xs font-bold text-stone-300"
                   @click="confirmResign = false"
                 >
                   やめる

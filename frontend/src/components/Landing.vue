@@ -11,7 +11,8 @@ defineEmits<{
 
 <template>
   <div class="space-y-16 pb-20 animate-fade-in text-slate-900 dark:text-white">
-    <v-card tag="section" class="p-8 md:p-14">
+    <v-card tag="section">
+      <v-card-text class="pa-6 pa-md-12">
       <div class="max-w-3xl">
         <div class="flex items-center gap-3 mb-5">
           <!-- 鍵盤7つ+スクラッチのモチーフ -->
@@ -34,14 +35,15 @@ defineEmits<{
           {{ t('landing.heroDesc') }}
         </p>
         <div class="flex flex-wrap items-center gap-4">
-          <v-btn color="primary" size="large" class="px-6" @click="$emit('navigate', 'dashboard')">
+          <v-btn color="primary" size="large" @click="$emit('navigate', 'dashboard')">
             {{ t('landing.ctaTry') }}
           </v-btn>
-          <v-btn variant="text" color="primary" class="text-sm font-semibold" @click="$emit('open-login')">
+          <v-btn variant="text" color="primary" size="large" @click="$emit('open-login')">
             {{ t('landing.ctaLogin') }}
           </v-btn>
         </div>
       </div>
+      </v-card-text>
     </v-card>
 
     <section>
@@ -49,44 +51,46 @@ defineEmits<{
         {{ t('landing.featuresTitle') }}
       </h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <v-card class="p-6">
-          <h3 class="text-lg font-bold mb-2">{{ t('landing.feat1Title') }}</h3>
-          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('landing.feat1Desc') }}</p>
+        <v-card>
+          <v-card-title class="whitespace-normal">{{ t('landing.feat1Title') }}</v-card-title>
+          <v-card-text>{{ t('landing.feat1Desc') }}</v-card-text>
         </v-card>
-        <v-card class="p-6">
-          <h3 class="text-lg font-bold mb-2">{{ t('landing.feat2Title') }}</h3>
-          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('landing.feat2Desc') }}</p>
+        <v-card>
+          <v-card-title class="whitespace-normal">{{ t('landing.feat2Title') }}</v-card-title>
+          <v-card-text>{{ t('landing.feat2Desc') }}</v-card-text>
         </v-card>
-        <v-card class="p-6">
-          <h3 class="text-lg font-bold mb-2">{{ t('landing.feat3Title') }}</h3>
-          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('landing.feat3Desc') }}</p>
+        <v-card>
+          <v-card-title class="whitespace-normal">{{ t('landing.feat3Title') }}</v-card-title>
+          <v-card-text>{{ t('landing.feat3Desc') }}</v-card-text>
         </v-card>
-        <v-card class="p-6">
-          <h3 class="text-lg font-bold mb-2">{{ t('landing.feat4Title') }}</h3>
-          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('landing.feat4Desc') }}</p>
+        <v-card>
+          <v-card-title class="whitespace-normal">{{ t('landing.feat4Title') }}</v-card-title>
+          <v-card-text>{{ t('landing.feat4Desc') }}</v-card-text>
         </v-card>
-        <v-card class="p-6">
-          <h3 class="text-lg font-bold mb-2">{{ t('landing.feat5Title') }}</h3>
-          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('landing.feat5Desc') }}</p>
+        <v-card>
+          <v-card-title class="whitespace-normal">{{ t('landing.feat5Title') }}</v-card-title>
+          <v-card-text>{{ t('landing.feat5Desc') }}</v-card-text>
         </v-card>
-        <v-card class="p-6">
-          <h3 class="text-lg font-bold mb-2">{{ t('landing.feat6Title') }}</h3>
-          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">{{ t('landing.feat6Desc') }}</p>
+        <v-card>
+          <v-card-title class="whitespace-normal">{{ t('landing.feat6Title') }}</v-card-title>
+          <v-card-text>{{ t('landing.feat6Desc') }}</v-card-text>
         </v-card>
       </div>
     </section>
 
-    <v-card tag="section" class="bg-slate-50 dark:bg-slate-800/50 p-8">
-      <h2 class="text-lg md:text-xl font-bold mb-4">{{ t('landing.aboutTitle') }}</h2>
-      <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+    <v-card tag="section" variant="tonal">
+      <v-card-title class="whitespace-normal">{{ t('landing.aboutTitle') }}</v-card-title>
+      <v-card-text>
+      <p class="leading-relaxed mb-3">
         {{ t('landing.aboutP1') }}
       </p>
-      <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+      <p class="leading-relaxed">
         {{ t('landing.aboutP2') }}
       </p>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-6">
+      <p class="text-xs opacity-70 mt-6">
         {{ t('landing.copyrightDisclaimer') }}
       </p>
+      </v-card-text>
     </v-card>
   </div>
 </template>

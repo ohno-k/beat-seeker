@@ -4,28 +4,27 @@
     fullscreen
     @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
   >
-    <v-card rounded="0" class="h-full border-0 bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-200">
+    <v-card rounded="0" class="h-full flex flex-col">
       <!-- ヘッダー（タイトル + ×閉じる） -->
-      <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
-        <div>
-          <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('beatTierInfo.title') }}</h3>
-          <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5">{{ t('beatTierInfo.subtitle') }}</p>
-        </div>
-        <v-btn icon variant="text" class="text-slate-400 dark:text-slate-500" aria-label="close" @click="$emit('close')">
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+      <v-card-item class="shrink-0">
+        <v-card-title>{{ t('beatTierInfo.title') }}</v-card-title>
+        <v-card-subtitle>{{ t('beatTierInfo.subtitle') }}</v-card-subtitle>
+        <template #append>
+          <v-btn icon variant="text" aria-label="close" @click="$emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
+
+      <!-- タブ切替（解説 / 対象曲一覧） -->
+      <v-tabs v-model="activeTab" color="primary" class="shrink-0">
+        <v-tab value="about">{{ t('beatTierInfo.tabAbout') }}</v-tab>
+        <v-tab value="songs">{{ t('beatTierInfo.tabSongs') }}</v-tab>
+      </v-tabs>
+      <v-divider />
 
       <!-- 本体スクロール領域 -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-200">
-        <!-- タブ切替（解説 / 対象曲一覧） -->
-        <div class="px-8 pt-6 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-10 transition-colors duration-200">
-          <v-tabs v-model="activeTab" class="border-b border-slate-200 dark:border-slate-700">
-            <v-tab value="about" class="text-sm font-bold">{{ t('beatTierInfo.tabAbout') }}</v-tab>
-            <v-tab value="songs" class="text-sm font-bold">{{ t('beatTierInfo.tabSongs') }}</v-tab>
-          </v-tabs>
-        </div>
-
+      <div class="flex-1 overflow-y-auto custom-scrollbar">
         <div class="p-4 sm:p-8">
           <!-- 解説タブ（Beat-PT の仕組み・計算式・階段） -->
           <div v-if="activeTab === 'about'" class="space-y-8 animate-fade-in">
@@ -59,7 +58,7 @@
                   <span class="w-1.5 h-6 bg-purple-600 dark:bg-purple-500 rounded-full"></span>
                   {{ t('beatTierInfo.rankBoardTitle') }}
                 </h4>
-                <v-chip label class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Hierarchy</v-chip>
+                <v-chip label size="small">Hierarchy</v-chip>
               </div>
 
               <!-- Premium Dark/Light Grid for Ranks -->
@@ -100,10 +99,10 @@
                             <div class="relative transition-all duration-300">
                               <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
                               <!-- Hover Tooltip -->
-                              <v-tooltip activator="parent" content-class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white p-3 rounded-md text-xs whitespace-nowrap shadow-xl">
-                                <div class="flex flex-col items-center gap-1">
-                                  <span class="font-bold text-blue-600 dark:text-blue-400 text-sm">{{ name }} {{ 6 - tier }}</span>
-                                  <span class="font-bold text-slate-600 dark:text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
+                              <v-tooltip activator="parent" location="top">
+                                <div class="flex flex-col items-center">
+                                  <span class="font-bold">{{ name }} {{ 6 - tier }}</span>
+                                  <span>{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
                                 </div>
                               </v-tooltip>
                             </div>
@@ -138,23 +137,22 @@
                 type="text"
                 :placeholder="t('beatTierInfo.songSearchPlaceholder')"
                 :prepend-inner-icon="mdiMagnify"
-                class="flex-1 text-sm"
+                hide-details
+                class="flex-1"
               />
             </div>
 
             <div class="space-y-4">
-              <v-card v-for="group in filteredSongGroups" :key="group.rank" class="overflow-hidden transition-colors duration-200">
-                <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('beatTierInfo.unofficialDifficulty') }}</span>
-                    <span class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ group.rank }}</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-400 dark:text-slate-500">{{ t('beatTierInfo.weight') }}</span>
-                    <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ group.weight }} pt</span>
-                  </div>
-                </div>
-                <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 lg:gap-y-4">
+              <v-card v-for="group in filteredSongGroups" :key="group.rank">
+                <v-card-item>
+                  <v-card-subtitle>{{ t('beatTierInfo.unofficialDifficulty') }}</v-card-subtitle>
+                  <v-card-title>{{ group.rank }}</v-card-title>
+                  <template #append>
+                    <v-chip color="primary" size="small" label>{{ t('beatTierInfo.weight') }} {{ group.weight }} pt</v-chip>
+                  </template>
+                </v-card-item>
+                <v-divider />
+                <v-card-text class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 lg:gap-y-4">
                   <div 
                     v-for="song in group.songs" 
                     :key="song"
@@ -164,7 +162,7 @@
                     <div class="w-1.5 h-1.5 shrink-0 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                     {{ song }}
                   </div>
-                </div>
+                </v-card-text>
               </v-card>
               <div v-if="filteredSongGroups.length === 0" class="py-20 text-center text-slate-400 dark:text-slate-500 font-bold">
                 {{ t('beatTierInfo.noSongsFound') }}
@@ -175,11 +173,10 @@
       </div>
       
       <!-- フッター（更新日表示） -->
-      <div class="px-8 py-5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700/50 text-center transition-colors duration-200">
-        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
-          {{ t('beatTierInfo.footerDesc') }} • {{ todayLabel }}
-        </p>
-      </div>
+      <v-divider />
+      <v-card-text class="shrink-0 text-center text-caption text-medium-emphasis">
+        {{ t('beatTierInfo.footerDesc') }} • {{ todayLabel }}
+      </v-card-text>
     </v-card>
   </v-dialog>
 </template>

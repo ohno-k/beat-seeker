@@ -49,13 +49,12 @@ onBeforeUnmount(() => {
     <v-btn
       v-if="visible"
       icon
-      variant="outlined"
-      rounded="circle"
+      elevation="4"
       :aria-label="t('a11y.backToTop')"
-      class="fixedbottom-20 right-4 z-40 w-11 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 active:scale-95"
+      class="fixed bottom-20 right-4 z-40"
       @click="scrollToTop"
     >
-      <v-icon :icon="mdiChevronUp" size="22" />
+      <v-icon :icon="mdiChevronUp" />
     </v-btn>
   </Transition>
 </template>

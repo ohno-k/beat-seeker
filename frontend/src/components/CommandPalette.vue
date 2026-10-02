@@ -312,7 +312,7 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
     content-class="self-start mt-[14vh]"
     @update:model-value="(v) => { if (!v) close() }"
   >
-    <v-card class="overflow-hidden flex flex-col shadow-xl animate-scale-pop">
+    <v-card class="flex flex-col animate-scale-pop">
       <!-- 検索バー -->
       <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
         <svg aria-hidden="true" class="h-5 w-5 text-slate-400 dark:text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -322,18 +322,18 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
           ref="inputRef"
           v-model="query"
           type="text"
-          variant="plain"
           autofocus
+          hide-details
+          density="comfortable"
           :placeholder="t('cmdk.placeholder')"
-          class="flex-1 text-base"
+          class="flex-1"
           @keydown="onInputKeydown"
         />
         <v-btn
           icon
           variant="text"
-          size="x-small"
+          size="small"
           :aria-label="t('a11y.modal.close')"
-          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
           @click="close"
         >
           <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -347,19 +347,16 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
         <div v-if="filteredItems.length === 0" class="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
           {{ t('cmdk.empty') }}
         </div>
-        <v-list v-else density="compact" class="p-0 bg-transparent">
-          <div v-for="g in groupedItems" :key="g.group" class="py-1">
-            <v-list-subheader class="px-4 pt-2 pb-1 min-h-0 h-auto text-[10px] font-bold text-slate-400 dark:text-slate-500">
+        <v-list v-else density="compact" color="primary" class="p-0 bg-transparent">
+          <div v-for="g in groupedItems" :key="g.group">
+            <v-list-subheader>
               {{ groupLabel(g.group) }}
             </v-list-subheader>
             <v-list-item
               v-for="(item, i) in g.items"
               :key="item.id"
               :data-cmdk-idx="idxOffset(g.group) + i"
-              class="w-full px-4 py-2.5 min-h-0 text-sm transition-colors"
-              :class="selectedIdx === idxOffset(g.group) + i
-                ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200'
-                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60'"
+              :active="selectedIdx === idxOffset(g.group) + i"
               @mousemove="selectedIdx = idxOffset(g.group) + i"
               @click="item.onSelect(); close()"
             >

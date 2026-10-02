@@ -759,7 +759,8 @@ watch(selectedVersion, async () => {
 
 <template>
   <div class="w-full max-w-4xl space-y-6 animate-fade-in">
-    <v-card class="bg-white dark:bg-slate-800 p-6 sm:p-8 transition-colors">
+    <v-card>
+     <v-card-text>
       <!-- Header -->
       <div class="flex items-center gap-4 mb-6">
         <div class="p-3 rounded-md bg-amber-100 dark:bg-amber-900/30 transition-colors">
@@ -776,7 +777,8 @@ watch(selectedVersion, async () => {
 
       <!-- BEAT-TIER × RATE-TIER 散布図 -->
       <v-card v-if="showRateTier && !isLoading && !error && scatterPoints.length > 0"
-        class="mb-6 p-4 sm:p-5 bg-slate-50 dark:bg-slate-900/40">
+        variant="outlined" class="mb-6">
+       <v-card-text>
         <div class="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <h3 class="text-sm font-bold text-slate-600 dark:text-slate-300">
             {{ t('scatter.distributionTitle') }}
@@ -786,6 +788,7 @@ watch(selectedVersion, async () => {
           </span>
         </div>
         <RankingScatterChart :points="scatterPoints" />
+       </v-card-text>
       </v-card>
 
       <!-- Find My Rank Button + Mode Toggle -->
@@ -797,7 +800,6 @@ watch(selectedVersion, async () => {
           color="primary"
           size="small"
           :prepend-icon="mdiMagnify"
-          class="text-xs"
         >
           {{ t('ranking.findMyRank') }}
         </v-btn>
@@ -805,7 +807,7 @@ watch(selectedVersion, async () => {
 
       <!-- 作品セレクト（前作の終了時点のランキング）。前作のアーカイブがある期間だけ出す -->
       <div v-if="versionOptions.length > 1" class="flex items-center justify-end gap-3 mb-3 flex-wrap">
-        <v-chip v-if="isPastVersion" label color="deep-purple" class="text-[11px] font-bold">
+        <v-chip v-if="isPastVersion" label color="secondary">
           {{ t('ranking.archiveBadge', { name: versionName(selectedVersion) }) }}
         </v-chip>
         <span v-if="isPastVersion && (viewMode === 'average' || viewMode === 'simulation')" class="text-[11px] text-amber-600 dark:text-amber-400">
@@ -817,7 +819,9 @@ watch(selectedVersion, async () => {
             v-model="selectedVersion"
             :items="versionOptions.map(v => ({ title: `${v.num} ${versionName(v.num)}`, value: v.num }))"
             :aria-label="t('ranking.versionSelect')"
-            class="text-xs font-semibold min-w-[11rem]"
+            density="compact"
+            hide-details
+            class="min-w-[11rem]"
           />
         </div>
       </div>
@@ -827,35 +831,30 @@ watch(selectedVersion, async () => {
         <v-btn-toggle
           v-model="viewMode"
           mandatory
-          :color="viewMode === 'rate' ? 'success' : viewMode === 'average' ? 'purple' : viewMode === 'simulation' ? 'amber-darken-2' : 'primary'"
+          :color="viewMode === 'rate' ? 'success' : viewMode === 'average' ? 'purple' : viewMode === 'simulation' ? 'warning' : 'primary'"
+          variant="outlined"
+          divided
+          density="compact"
           class="w-fit"
         >
-          <v-btn value="beat" size="small" class="px-4 text-xs">Beat-Tier</v-btn>
-          <v-btn v-if="showRateTier" value="rate" size="small" class="px-4 text-xs">Rate-Tier</v-btn>
-          <v-btn value="average" size="small" class="px-4 text-xs">Average</v-btn>
-          <v-btn v-if="isAdmin" value="simulation" size="small" class="px-4 text-xs">難易度シミュ</v-btn>
+          <v-btn value="beat" size="small">Beat-Tier</v-btn>
+          <v-btn v-if="showRateTier" value="rate" size="small">Rate-Tier</v-btn>
+          <v-btn value="average" size="small">Average</v-btn>
+          <v-btn v-if="isAdmin" value="simulation" size="small">難易度シミュ</v-btn>
         </v-btn-toggle>
         <div v-if="viewMode === 'beat' || viewMode === 'rate'" class="flex flex-col sm:flex-row sm:items-center gap-2">
-          <v-switch v-model="showTopRankers" color="amber" class="flex-none whitespace-nowrap [&_.v-label]:opacity-100">
-            <template #label>
-              <span class="ml-2 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">TOPランカー仮想ユーザを表示</span>
-            </template>
-          </v-switch>
-          <v-switch v-if="isAdmin" v-model="showArenaTopRankers" color="indigo" class="flex-none whitespace-nowrap [&_.v-label]:opacity-100">
-            <template #label>
-              <span class="ml-2 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">アリーナTOPランカー仮想ユーザを表示</span>
-            </template>
-          </v-switch>
+          <v-switch v-model="showTopRankers" color="warning" label="TOPランカー仮想ユーザを表示" density="compact" hide-details class="flex-none whitespace-nowrap" />
+          <v-switch v-if="isAdmin" v-model="showArenaTopRankers" color="primary" label="アリーナTOPランカー仮想ユーザを表示" density="compact" hide-details class="flex-none whitespace-nowrap" />
         </div>
       </div>
 
       <!-- Loading / Error / Empty -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-        <v-progress-circular size="48" width="4" class="mb-4" />
+        <v-progress-circular indeterminate size="48" width="4" class="mb-4" />
         <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.loading') }}</p>
       </div>
 
-      <v-alert v-else-if="error" type="error" class="p-6 font-bold">
+      <v-alert v-else-if="error" type="error">
         {{ t('ranking.error') }}
       </v-alert>
 
@@ -866,7 +865,7 @@ watch(selectedVersion, async () => {
             <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
           </div>
           <div v-else class="overflow-x-auto">
-            <v-table class="w-full bg-transparent">
+            <v-table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
                   <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-28">{{ t('ranking.colRank') }}</th>
@@ -1006,23 +1005,19 @@ watch(selectedVersion, async () => {
             </v-table>
             <!-- Beat Pagination -->
             <div v-if="beatTotalPages > 1" class="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50">
-              <v-btn variant="text" size="small" @click="beatPage = 1" :disabled="beatPage === 1"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="beatPage = 1" :disabled="beatPage === 1">
                 <v-icon :icon="mdiChevronDoubleLeft" />
               </v-btn>
-              <v-btn variant="text" size="small" @click="beatPage--" :disabled="beatPage === 1"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="beatPage--" :disabled="beatPage === 1">
                 <v-icon :icon="mdiChevronLeft" />
               </v-btn>
               <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">
                 {{ beatPage }} / {{ beatTotalPages }}
               </span>
-              <v-btn variant="text" size="small" @click="beatPage++" :disabled="beatPage === beatTotalPages"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="beatPage++" :disabled="beatPage === beatTotalPages">
                 <v-icon :icon="mdiChevronRight" />
               </v-btn>
-              <v-btn variant="text" size="small" @click="beatPage = beatTotalPages" :disabled="beatPage === beatTotalPages"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="beatPage = beatTotalPages" :disabled="beatPage === beatTotalPages">
                 <v-icon :icon="mdiChevronDoubleRight" />
               </v-btn>
             </div>
@@ -1035,7 +1030,7 @@ watch(selectedVersion, async () => {
             <p class="text-slate-500 dark:text-slate-400 font-bold" v-html="t('ranking.emptyRate')"></p>
           </div>
           <div v-else class="overflow-x-auto">
-            <v-table class="w-full bg-transparent">
+            <v-table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
                   <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-28">{{ t('ranking.colRank') }}</th>
@@ -1173,23 +1168,19 @@ watch(selectedVersion, async () => {
             </v-table>
             <!-- Rate Pagination -->
             <div v-if="rateTotalPages > 1" class="flex items-center justify-center gap-2 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50">
-              <v-btn variant="text" size="small" @click="ratePage = 1" :disabled="ratePage === 1"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="ratePage = 1" :disabled="ratePage === 1">
                 <v-icon :icon="mdiChevronDoubleLeft" />
               </v-btn>
-              <v-btn variant="text" size="small" @click="ratePage--" :disabled="ratePage === 1"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="ratePage--" :disabled="ratePage === 1">
                 <v-icon :icon="mdiChevronLeft" />
               </v-btn>
               <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">
                 {{ ratePage }} / {{ rateTotalPages }}
               </span>
-              <v-btn variant="text" size="small" @click="ratePage++" :disabled="ratePage === rateTotalPages"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="ratePage++" :disabled="ratePage === rateTotalPages">
                 <v-icon :icon="mdiChevronRight" />
               </v-btn>
-              <v-btn variant="text" size="small" @click="ratePage = rateTotalPages" :disabled="ratePage === rateTotalPages"
-                class="min-w-0 px-2 text-xs text-slate-500">
+              <v-btn icon variant="text" size="small" @click="ratePage = rateTotalPages" :disabled="ratePage === rateTotalPages">
                 <v-icon :icon="mdiChevronDoubleRight" />
               </v-btn>
             </div>
@@ -1204,7 +1195,7 @@ watch(selectedVersion, async () => {
             <div class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">
               公式難易度 Lv11/Lv12 の ANOTHER/LEGGENDARIA 全曲（{{ averageRanking[0]?.totalSongs ?? 0 }}曲）における平均順位ランキング。未プレイ曲は「プレイ人数+1」位として算入されます。
             </div>
-            <v-table class="w-full bg-transparent">
+            <v-table class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
                   <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-20">{{ t('ranking.colRank') }}</th>
@@ -1263,15 +1254,11 @@ watch(selectedVersion, async () => {
             </v-table>
             <!-- AVERAGE Pagination -->
             <div class="flex items-center justify-end gap-1 mt-4 pr-4">
-              <v-btn variant="text" size="small" @click="averagePage = 1" :disabled="averagePage === 1"
-                class="min-w-0 px-2 text-xs text-slate-500"><v-icon :icon="mdiChevronDoubleLeft" /></v-btn>
-              <v-btn variant="text" size="small" @click="averagePage--" :disabled="averagePage === 1"
-                class="min-w-0 px-2 text-xs text-slate-500"><v-icon :icon="mdiChevronLeft" /></v-btn>
+              <v-btn icon variant="text" size="small" @click="averagePage = 1" :disabled="averagePage === 1"><v-icon :icon="mdiChevronDoubleLeft" /></v-btn>
+              <v-btn icon variant="text" size="small" @click="averagePage--" :disabled="averagePage === 1"><v-icon :icon="mdiChevronLeft" /></v-btn>
               <span class="text-xs font-bold text-slate-500 dark:text-slate-400 px-2 tabular-nums">{{ averagePage }} / {{ averageTotalPages }}</span>
-              <v-btn variant="text" size="small" @click="averagePage++" :disabled="averagePage === averageTotalPages"
-                class="min-w-0 px-2 text-xs text-slate-500"><v-icon :icon="mdiChevronRight" /></v-btn>
-              <v-btn variant="text" size="small" @click="averagePage = averageTotalPages" :disabled="averagePage === averageTotalPages"
-                class="min-w-0 px-2 text-xs text-slate-500"><v-icon :icon="mdiChevronDoubleRight" /></v-btn>
+              <v-btn icon variant="text" size="small" @click="averagePage++" :disabled="averagePage === averageTotalPages"><v-icon :icon="mdiChevronRight" /></v-btn>
+              <v-btn icon variant="text" size="small" @click="averagePage = averageTotalPages" :disabled="averagePage === averageTotalPages"><v-icon :icon="mdiChevronDoubleRight" /></v-btn>
             </div>
           </div>
         </div>
@@ -1280,7 +1267,7 @@ watch(selectedVersion, async () => {
         <div v-if="viewMode === 'simulation' && isAdmin">
           <!-- Draft changes summary -->
           <div v-if="draftDiffChanges.length > 0" class="mb-4 space-y-2">
-            <v-alert v-if="promotionChanges.length > 0" type="success" :icon="false" class="p-3">
+            <v-alert v-if="promotionChanges.length > 0" type="success" :icon="false" density="compact">
               <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">▲ 昇格 ({{ promotionChanges.length }}件)</p>
               <div class="flex flex-wrap gap-1.5">
                 <span v-for="c in promotionChanges" :key="c.title"
@@ -1290,7 +1277,7 @@ watch(selectedVersion, async () => {
                 </span>
               </div>
             </v-alert>
-            <v-alert v-if="demotionChanges.length > 0" type="error" :icon="false" class="p-3">
+            <v-alert v-if="demotionChanges.length > 0" type="error" :icon="false" density="compact">
               <p class="text-xs font-bold text-red-700 dark:text-red-400 mb-2">▼ 降格 ({{ demotionChanges.length }}件)</p>
               <div class="flex flex-wrap gap-1.5">
                 <span v-for="c in demotionChanges" :key="c.title"
@@ -1301,13 +1288,13 @@ watch(selectedVersion, async () => {
               </div>
             </v-alert>
           </div>
-          <v-alert v-else-if="!isSimulationLoading && !simulationError" type="info" color="secondary" :icon="false" class="mb-4 p-3 text-xs">
+          <v-alert v-else-if="!isSimulationLoading && !simulationError" type="info" :icon="false" density="compact" class="mb-4">
             難易度表のドラフト変更がありません。
           </v-alert>
 
           <!-- ティア変動サマリ（適用で BEAT-Tier が上下したユーザー数） -->
           <v-alert v-if="!isSimulationLoading && !simulationError && tierChangeStats.total > 0"
-            type="warning" :icon="false" class="mb-4 p-3">
+            type="warning" :icon="false" density="compact" class="mb-4">
             <div class="flex items-center gap-3 flex-wrap">
               <span class="text-xs font-bold text-amber-700 dark:text-amber-400">ティア変動 {{ tierChangeStats.total }}人</span>
               <span v-if="tierChangeStats.up > 0" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">▲ 昇格 {{ tierChangeStats.up }}</span>
@@ -1316,14 +1303,14 @@ watch(selectedVersion, async () => {
           </v-alert>
 
           <div v-if="isSimulationLoading" class="flex flex-col items-center justify-center py-20">
-            <v-progress-circular size="48" width="4" color="amber" class="mb-4" />
+            <v-progress-circular indeterminate size="48" width="4" color="warning" class="mb-4" />
             <p class="text-slate-500 dark:text-slate-400 font-bold">シミュレーション計算中...</p>
           </div>
-          <v-alert v-else-if="simulationError" type="error" class="p-6 font-bold">
+          <v-alert v-else-if="simulationError" type="error">
             {{ simulationError }}
           </v-alert>
           <div v-else class="overflow-x-auto">
-            <v-table class="w-full text-sm bg-transparent">
+            <v-table density="compact" class="w-full">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
                   <th class="pb-3 pl-4 text-xs font-bold text-slate-400 w-24">順位変動</th>
@@ -1388,7 +1375,7 @@ watch(selectedVersion, async () => {
           </div>
         </div>
       </template>
-
+     </v-card-text>
     </v-card>
   </div>
 </template>

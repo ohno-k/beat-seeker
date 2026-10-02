@@ -34,18 +34,18 @@ onMounted(() => {
           {{ t('ranking.totalUserCount', { n: totalUsers }) }}
         </span>
         <v-btn-toggle v-model="sortMode" mandatory :color="sortMode === 'most' ? 'primary' : 'orange'">
-          <v-btn value="most" size="small" class="text-xs">{{ t('ranking.sortMost') }}</v-btn>
-          <v-btn value="least" size="small" class="text-xs">{{ t('ranking.sortLeast') }}</v-btn>
+          <v-btn value="most" size="small">{{ t('ranking.sortMost') }}</v-btn>
+          <v-btn value="least" size="small">{{ t('ranking.sortLeast') }}</v-btn>
         </v-btn-toggle>
       </div>
     </div>
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-      <v-progress-circular size="48" width="4" class="mb-4" />
+      <v-progress-circular indeterminate size="48" width="4" color="primary" class="mb-4" />
       <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.songRankingAggregating') }}</p>
     </div>
 
-    <v-alert v-else-if="error" type="error" class="text-center font-bold">
+    <v-alert v-else-if="error" type="error">
       {{ error }}
     </v-alert>
 
@@ -53,7 +53,7 @@ onMounted(() => {
       <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
     </div>
 
-    <v-table v-else class="bg-transparent">
+    <v-table v-else>
         <thead>
           <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
             <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-14">{{ t('ranking.colRank') }}</th>
@@ -94,7 +94,6 @@ onMounted(() => {
                   size="x-small"
                   variant="tonal"
                   :color="entry.difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
-                  class="text-[10px] font-bold"
                 >
                   {{ entry.difficultyName === 'LEGGENDARIA' ? 'LEGGEN' : 'ANO' }}
                 </v-chip>
@@ -107,7 +106,6 @@ onMounted(() => {
                 size="small"
                 variant="tonal"
                 :color="entry.difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
-                class="text-xs font-bold"
               >
                 {{ entry.difficultyName === 'LEGGENDARIA' ? 'LEGGEN' : 'ANOTHER' }}
               </v-chip>

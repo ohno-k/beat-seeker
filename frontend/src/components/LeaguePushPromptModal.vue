@@ -96,8 +96,8 @@ async function enable() {
     @update:model-value="(v: boolean) => { if (!v) close() }"
     max-width="448"
   >
-    <v-card class="bg-white dark:bg-slate-800 overflow-hidden flex flex-col">
-        <v-card-text class="p-6 text-center">
+    <v-card>
+        <v-card-text class="text-center">
           <div class="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -116,25 +116,23 @@ async function enable() {
         </v-card-text>
 
         <v-divider />
-        <v-card-actions class="p-4 flex gap-2">
+        <v-card-actions>
+          <v-spacer />
           <v-btn
             type="button"
-            variant="tonal"
-            height="40"
-            class="flex-1 text-sm"
+            variant="text"
             @click="close"
           >
             後で
           </v-btn>
           <v-btn
             type="button"
-            color="indigo"
-            height="40"
+            color="primary"
+            variant="flat"
             :disabled="isSubscribing"
-            class="flex-1 text-sm"
+            :loading="isSubscribing"
             @click="enable"
           >
-            <v-progress-circular v-if="isSubscribing" size="16" width="2" color="white" class="mr-2" />
             通知を有効にする
           </v-btn>
         </v-card-actions>

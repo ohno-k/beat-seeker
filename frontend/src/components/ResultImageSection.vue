@@ -146,37 +146,36 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>
-  <v-card
-    class="overflow-hidden transition-colors duration-200 mt-6"
-  >
+  <v-card class="mt-6">
     <!-- ヘッダ: タイトル + 枚数 + 追加ボタン -->
-    <div
-      class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-2 sm:py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3 transition-colors duration-200"
-    >
-      <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2">
+    <v-card-item>
+      <v-card-title class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
         </svg>
         {{ t('resultImage.section') }}
-        <span v-if="images.length > 0" class="text-slate-400 dark:text-slate-500 font-bold">{{ images.length }}</span>
-      </p>
-      <v-btn
-        v-if="isLoggedIn"
-        color="primary"
-        size="small"
-        class="text-xs shrink-0"
-        :disabled="uploading"
-        @click="triggerPick"
-      >
-        <template #prepend>
-          <v-icon v-if="!uploading" :icon="mdiPlus" size="14" />
-          <v-progress-circular v-else size="14" width="2" color="current" />
-        </template>
-        {{ uploading ? t('resultImage.uploading') : t('resultImage.add') }}
-      </v-btn>
-    </div>
+        <v-chip v-if="images.length > 0" size="small">{{ images.length }}</v-chip>
+      </v-card-title>
+      <template #append>
+        <v-btn
+          v-if="isLoggedIn"
+          color="primary"
+          size="small"
+          class="shrink-0"
+          :disabled="uploading"
+          @click="triggerPick"
+        >
+          <template #prepend>
+            <v-icon v-if="!uploading" :icon="mdiPlus" />
+            <v-progress-circular v-else size="14" width="2" indeterminate />
+          </template>
+          {{ uploading ? t('resultImage.uploading') : t('resultImage.add') }}
+        </v-btn>
+      </template>
+    </v-card-item>
+    <v-divider />
 
-    <div class="p-4 sm:p-6">
+    <v-card-text>
       <!-- 未ログイン: ヒントのみ -->
       <p v-if="!isLoggedIn" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 text-center py-4">
         {{ t('resultImage.loginRequired') }}
@@ -187,7 +186,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         <v-alert
           v-if="error"
           type="error"
-          class="mb-3 text-xs sm:text-sm"
+          variant="tonal"
+          density="compact"
+          class="mb-3"
         >
           {{ error }}
         </v-alert>
@@ -223,16 +224,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
               icon
               size="x-small"
               variant="flat"
-              class="absolute top-1 right-1 w-6 h-6 bg-black/55 hover:bg-red-600 text-white"
+              color="grey-darken-4"
+              class="absolute top-1 right-1"
               :aria-label="t('resultImage.delete')"
               @click.stop="onDelete(img)"
             >
-              <v-icon :icon="mdiClose" size="14" />
+              <v-icon :icon="mdiClose" />
             </v-btn>
           </div>
         </div>
       </template>
-    </div>
+    </v-card-text>
 
     <!-- ファイル選択（非表示） -->
     <input
@@ -260,8 +262,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <!-- 閉じる -->
       <v-btn
         icon
-        variant="flat"
-        class="absolute top-4 right-4 bg-white/15 hover:bg-white/30 text-white"
+        variant="tonal"
+        color="white"
+        class="absolute top-4 right-4"
         aria-label="close"
         @click="closeLightbox"
       >
@@ -272,8 +275,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <v-btn
         v-if="images.length > 1"
         icon
-        variant="flat"
-        class="absolute left-3 sm:left-6 bg-white/15 hover:bg-white/30 text-white"
+        variant="tonal"
+        color="white"
+        class="absolute left-3 sm:left-6"
         aria-label="prev"
         @click.stop="showPrev"
       >
@@ -291,8 +295,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <v-btn
         v-if="images.length > 1"
         icon
-        variant="flat"
-        class="absolute right-3 sm:right-6 bg-white/15 hover:bg-white/30 text-white"
+        variant="tonal"
+        color="white"
+        class="absolute right-3 sm:right-6"
         aria-label="next"
         @click.stop="showNext"
       >
@@ -303,8 +308,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       <v-chip
         v-if="images.length > 1"
         label
-        variant="flat"
-        class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/15 text-white text-xs font-bold tabular-nums"
+        variant="tonal"
+        color="white"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 tabular-nums"
       >
         {{ (lightboxIndex ?? 0) + 1 }} / {{ images.length }}
       </v-chip>

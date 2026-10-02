@@ -2,12 +2,14 @@
   <div class="w-full space-y-6 animate-fade-in">
 
     <!-- 成長軌跡 -->
-    <v-card class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('dashboard.title') }}</h2>
-      <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">{{ t('dashboard.subtitle') }}</p>
-
+    <v-card>
+      <v-card-item>
+        <v-card-title>{{ t('dashboard.title') }}</v-card-title>
+        <v-card-subtitle>{{ t('dashboard.subtitle') }}</v-card-subtitle>
+      </v-card-item>
+     <v-card-text>
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-12">
-        <v-progress-circular size="40" width="4" class="mb-4" />
+        <v-progress-circular indeterminate size="40" width="4" class="mb-4" />
         <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('dashboard.loading') }}</p>
       </div>
 
@@ -23,34 +25,34 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.summary') }}</h3>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            <v-card class="stat-card border-blue-100 dark:border-slate-600 bg-blue-50/50 dark:bg-slate-700/50">
+            <v-card variant="tonal" color="primary"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-blue-500 dark:text-blue-400 mb-1">{{ t('dashboard.snapshot') }}</span>
               <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ historyData.length }}</span>
-            </v-card>
-            <v-card class="stat-card border-violet-100 dark:border-slate-600 bg-violet-50/50 dark:bg-slate-700/50">
+            </v-card-text></v-card>
+            <v-card variant="tonal" color="deep-purple"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-violet-500 dark:text-violet-400 mb-1">{{ t('dashboard.latestBeatPt') }}</span>
               <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ latestBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
-            </v-card>
-            <v-card class="stat-card border-amber-100 dark:border-slate-600 bg-amber-50/50 dark:bg-slate-700/50">
+            </v-card-text></v-card>
+            <v-card variant="tonal" color="warning"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-amber-500 dark:text-amber-400 mb-1">{{ t('dashboard.totalExScore') }}</span>
               <span class="text-lg font-bold text-slate-700 dark:text-slate-200">{{ latestTotalScore.toLocaleString() }}</span>
-            </v-card>
-            <v-card class="stat-card border-yellow-100 dark:border-slate-600 bg-yellow-50/50 dark:bg-slate-700/50">
+            </v-card-text></v-card>
+            <v-card variant="tonal" color="amber"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 mb-1">{{ t('dashboard.latestAaa') }}</span>
               <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ latestAaaCount }}</span>
-            </v-card>
-            <v-card class="stat-card border-emerald-100 dark:border-slate-600 bg-emerald-50/50 dark:bg-slate-700/50">
+            </v-card-text></v-card>
+            <v-card variant="tonal" color="success"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 mb-1">{{ t('dashboard.latestFc') }}</span>
               <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ latestFcCount }}</span>
-            </v-card>
-            <v-card class="stat-card border-purple-100 dark:border-slate-600 bg-purple-50/50 dark:bg-slate-700/50">
+            </v-card-text></v-card>
+            <v-card variant="tonal" color="purple"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-purple-500 dark:text-purple-400 mb-1">{{ t('dashboard.avgIncrease') }}</span>
               <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ avgBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
-            </v-card>
-            <v-card class="stat-card border-indigo-100 dark:border-slate-600 bg-indigo-50/50 dark:bg-slate-700/50">
+            </v-card-text></v-card>
+            <v-card variant="tonal" color="indigo"><v-card-text class="stat-card">
               <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 mb-1">{{ t('dashboard.maxIncrease') }}</span>
               <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ maxBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
-            </v-card>
+            </v-card-text></v-card>
           </div>
         </div>
 
@@ -61,57 +63,58 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.trends') }}</h3>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <v-card class="chart-card lg:col-span-2">
+            <v-card variant="outlined" class="lg:col-span-2"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.beatPtTrend') }}</h4>
               <div class="h-56"><LineChart v-if="beatPtChartData" :data="beatPtChartData" :options="lineOpts" /></div>
-            </v-card>
-            <v-card class="chart-card lg:col-span-2">
+            </v-card-text></v-card>
+            <v-card variant="outlined" class="lg:col-span-2"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.increaseTrend') }}</h4>
               <div class="h-44"><BarChart v-if="uploadIncreaseChartData" :data="uploadIncreaseChartData" :options="barOpts" /></div>
-            </v-card>
-            <v-card class="chart-card">
+            </v-card-text></v-card>
+            <v-card variant="outlined"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.scoreTrend') }}</h4>
               <div class="h-44"><LineChart v-if="scoreChartData" :data="scoreChartData" :options="lineOpts" /></div>
-            </v-card>
-            <v-card class="chart-card">
+            </v-card-text></v-card>
+            <v-card variant="outlined"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.djLevelTrend') }}</h4>
               <div class="h-44"><LineChart v-if="djLevelTrendData" :data="djLevelTrendData" :options="lineOpts" /></div>
-            </v-card>
-            <v-card class="chart-card lg:col-span-2">
+            </v-card-text></v-card>
+            <v-card variant="outlined" class="lg:col-span-2"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.clearTypeTrend') }}</h4>
               <div class="h-44"><LineChart v-if="clearChartData" :data="clearChartData" :options="lineOpts" /></div>
-            </v-card>
+            </v-card-text></v-card>
           </div>
         </div>
       </div>
+     </v-card-text>
     </v-card>
 
     <!-- スコア分析 -->
-    <v-card v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">
+    <v-card v-if="myAnotherLegg.length > 0">
+      <v-card-item>
+        <v-card-title>
             {{ t('dashboard.analysis') }}
-            <v-chip v-if="showAllTime" size="x-small" label color="amber-darken-3" class="ml-1.5 align-middle text-[9px]">{{ t('past.tierBadge') }}</v-chip>
-          </h2>
-          <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('dashboard.analysisHint', { n: myScoresActive.length }) }}</p>
-        </div>
-        <div v-if="avgPgreatRate !== null" class="text-right">
+            <v-chip v-if="showAllTime" size="x-small" label color="warning" class="ml-1.5 align-middle">{{ t('past.tierBadge') }}</v-chip>
+        </v-card-title>
+        <v-card-subtitle>{{ t('dashboard.analysisHint', { n: myScoresActive.length }) }}</v-card-subtitle>
+        <template v-if="avgPgreatRate !== null" #append>
+         <div class="text-right">
           <span class="text-[9px] font-bold text-slate-400 block">{{ t('dashboard.avgPgreatRate') }}</span>
           <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ avgPgreatRate }}%</span>
-        </div>
-      </div>
+         </div>
+        </template>
+      </v-card-item>
+     <v-card-text>
 
       <!-- Level filter ＋「歴代ベストを反映」トグル -->
       <div class="flex flex-wrap items-center gap-x-5 gap-y-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
         <div class="flex items-center gap-3">
           <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('dashboard.targetLevel') }}</span>
-          <v-btn-toggle v-model="selectedAnalysisLevel" mandatory>
+          <v-btn-toggle v-model="selectedAnalysisLevel" mandatory color="primary" variant="outlined" divided density="compact">
             <v-btn
               v-for="lvl in ['ALL', '11', '12']" :key="lvl"
               :value="lvl"
               size="small"
-              class="px-3 text-xs"
             >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</v-btn>
           </v-btn-toggle>
         </div>
@@ -125,17 +128,13 @@
           <v-switch
             :model-value="showAllTime"
             @update:model-value="toggleAllTime"
-            color="amber"
-            class="flex-none [&_.v-label]:opacity-100"
-          >
-            <template #label>
-              <span
-                class="ml-2 text-xs font-bold transition-colors"
-                :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'"
-              >{{ t('past.toggle') }}</span>
-            </template>
-          </v-switch>
-          <v-progress-circular v-if="isLoadingPast" size="12" width="2" color="amber" />
+            color="warning"
+            :label="t('past.toggle')"
+            density="compact"
+            hide-details
+            class="flex-none"
+          />
+          <v-progress-circular v-if="isLoadingPast" indeterminate size="12" width="2" color="warning" />
         </div>
 
         <!-- 集計値と「成長軌跡」がずれる理由を明示する -->
@@ -152,22 +151,22 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.clearStatus') }}</h3>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <v-card class="chart-card">
+            <v-card variant="outlined"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.clearTypeDist') }}</h4>
               <div class="h-52"><DoughnutChart v-if="clearTypeDoughnut" :data="clearTypeDoughnut" :options="doughnutOpts" /></div>
-            </v-card>
-            <v-card class="chart-card">
+            </v-card-text></v-card>
+            <v-card variant="outlined"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.djLevelDist') }}</h4>
               <div class="h-52"><BarChart v-if="djLevelCurrentData" :data="djLevelCurrentData" :options="barOpts" /></div>
-            </v-card>
-            <v-card class="chart-card lg:col-span-2">
+            </v-card-text></v-card>
+            <v-card variant="outlined" class="lg:col-span-2"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.scoreRateDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="scoreRateHistData" :data="scoreRateHistData" :options="scoreRateHistOpts" /></div>
-            </v-card>
-            <v-card class="chart-card lg:col-span-2">
+            </v-card-text></v-card>
+            <v-card variant="outlined" class="lg:col-span-2"><v-card-text>
               <h4 class="chart-title">{{ t('dashboard.songRankDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="songRankDistData" :data="songRankDistData" :options="songRankBarOpts" /></div>
-            </v-card>
+            </v-card-text></v-card>
           </div>
         </div>
 
@@ -177,7 +176,7 @@
             <div class="w-1 h-5 bg-amber-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.informalClearStatus') }}</h3>
           </div>
-          <v-table class="w-full text-sm bg-transparent [&_th]:font-bold">
+          <v-table density="compact" class="w-full">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-bold">
                   <th class="pb-3 pl-2 text-left text-slate-400">{{ t('dashboard.rank') }}</th>
@@ -224,14 +223,14 @@
             <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top100Dist') }}</h3>
           </div>
-          <v-card class="chart-card">
+          <v-card variant="outlined"><v-card-text>
             <h4 class="chart-title">{{ t('dashboard.top100CountByType') }}</h4>
             <p class="text-[11px] text-slate-400 dark:text-slate-500 -mt-1 mb-1">{{ t('dashboard.top100Border') }}</p>
             <!-- 21本×2行ラベル(☆難易度+ボーダー%)。狭幅では下段%が潰れるので横スクロール+最小幅でバー幅を確保する -->
             <div class="overflow-x-auto">
               <div class="h-44 min-w-[700px]"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="top100DiffBarOpts" /></div>
             </div>
-          </v-card>
+          </v-card-text></v-card>
         </div>
 
         <!-- BEAT-PT上位10曲 -->
@@ -240,7 +239,7 @@
             <div class="w-1 h-5 bg-violet-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top10') }}</h3>
           </div>
-          <v-table class="w-full text-sm bg-transparent [&_th]:font-bold">
+          <v-table density="compact" class="w-full">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-400">
                   <th class="pb-3 pl-2 text-left w-6">#</th>
@@ -263,7 +262,7 @@
                         size="x-small"
                         label
                         variant="outlined"
-                        class="shrink-0 px-1 text-[9px] font-bold"
+                        class="shrink-0"
                         :class="versionBadgeClass(s.allTimeVersion)"
                         :title="versionName(s.allTimeVersion)"
                       >{{ versionShort(s.allTimeVersion) }}</v-chip>
@@ -279,21 +278,23 @@
           </v-table>
         </div>
       </div>
+     </v-card-text>
     </v-card>
 
     <!-- Score Rate Band Modal -->
     <v-dialog v-model="histModalOpen" max-width="672">
-        <v-card class="bg-white dark:bg-slate-800 max-h-[80vh]">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
-            <div>
-              <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ histModalLabel }}</h3>
-              <p class="text-xs text-slate-400 mt-0.5">{{ histModalSongs.length }} 曲</p>
-            </div>
-            <v-btn icon variant="text" size="small" aria-label="閉じる" @click="histModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-              <v-icon :icon="mdiClose" />
-            </v-btn>
-          </div>
-          <v-table fixed-header class="w-full text-sm flex-1 min-h-0 flex flex-col [&_th]:font-bold">
+        <v-card class="max-h-[80vh]">
+          <v-card-item class="shrink-0">
+            <v-card-title>{{ histModalLabel }}</v-card-title>
+            <v-card-subtitle>{{ histModalSongs.length }} 曲</v-card-subtitle>
+            <template #append>
+              <v-btn icon variant="text" size="small" aria-label="閉じる" @click="histModalOpen = false">
+                <v-icon :icon="mdiClose" />
+              </v-btn>
+            </template>
+          </v-card-item>
+          <v-divider />
+          <v-table fixed-header density="compact" class="w-full flex-1 min-h-0 flex flex-col">
               <thead class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                 <tr class="text-xs font-bold text-slate-400">
                   <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
@@ -333,12 +334,11 @@
 
     <!-- Single-Song Tier Modal -->
     <v-dialog v-model="tierModalOpen" max-width="672">
-        <v-card class="bg-white dark:bg-slate-800 max-h-[80vh]">
-          <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
-            <div class="min-w-0">
-              <h3 class="font-bold text-slate-800 dark:text-slate-100 truncate">{{ tierModalLabel }}</h3>
-              <p class="text-xs text-slate-400 mt-0.5">{{ tierModalSongs.length }} 曲</p>
-            </div>
+        <v-card class="max-h-[80vh]">
+          <v-card-item class="shrink-0">
+            <v-card-title>{{ tierModalLabel }}</v-card-title>
+            <v-card-subtitle>{{ tierModalSongs.length }} 曲</v-card-subtitle>
+            <template #append>
             <div class="flex items-center gap-2 shrink-0">
               <span class="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:inline">{{ t('dashboard.targetRank') }}</span>
               <v-select
@@ -347,14 +347,18 @@
                   ? [{ type: 'subheader', title: g.name }, ...g.items.map(b => ({ title: b.label, value: b.key }))]
                   : [{ title: g.items[0].label, value: g.items[0].key }])"
                 :aria-label="t('dashboard.targetRank')"
-                class="text-xs font-bold w-[9rem] max-w-[9rem]"
+                density="compact"
+                hide-details
+                class="w-[9rem] max-w-[9rem]"
               />
-              <v-btn icon variant="text" size="small" aria-label="閉じる" @click="tierModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <v-btn icon variant="text" size="small" aria-label="閉じる" @click="tierModalOpen = false">
                 <v-icon :icon="mdiClose" />
               </v-btn>
             </div>
-          </div>
-          <v-table fixed-header class="w-full text-sm flex-1 min-h-0 flex flex-col [&_th]:font-bold">
+            </template>
+          </v-card-item>
+          <v-divider />
+          <v-table fixed-header density="compact" class="w-full flex-1 min-h-0 flex flex-col">
               <thead class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                 <tr class="text-xs font-bold text-slate-400">
                   <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
@@ -396,13 +400,14 @@
     </v-dialog>
 
     <!-- URL 共有 -->
-    <v-card v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+    <v-card v-if="!props.viewingUserId && !props.shareToken">
+      <v-card-title class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
         </svg>
         URL共有
-      </h3>
+      </v-card-title>
+     <v-card-text>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
         ログインしていない人に向けて、ダッシュボードやスコア一覧を期間限定で公開できます。
       </p>
@@ -410,22 +415,23 @@
         type="button"
         color="primary"
         @click="isShareModalOpen = true"
-        class="px-6 text-sm"
       >
         共有 URL を管理
       </v-btn>
+     </v-card-text>
     </v-card>
 
     <ShareTokenModal :is-open="isShareModalOpen" @close="isShareModalOpen = false" />
 
     <!-- 外部連携トークン -->
-    <v-card v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+    <v-card v-if="!props.viewingUserId && !props.shareToken">
+      <v-card-title class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
         </svg>
         外部連携トークン
-      </h3>
+      </v-card-title>
+     <v-card-text>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
         iidx-memo など連携先アプリの設定欄に貼り付けて使うトークンを発行・管理できます。
       </p>
@@ -433,34 +439,35 @@
         type="button"
         color="primary"
         @click="isIntegrationModalOpen = true"
-        class="px-6 text-sm"
       >
         連携トークンを管理
       </v-btn>
+     </v-card-text>
     </v-card>
 
     <IntegrationTokenModal :is-open="isIntegrationModalOpen" @close="isIntegrationModalOpen = false" />
 
     <!-- 通知設定 -->
-    <v-card v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
-      <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
+    <v-card v-if="!props.viewingUserId && !props.shareToken">
+      <v-card-title class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
         </svg>
         {{ t('dashboard.notifications') }}
-      </h3>
+      </v-card-title>
+     <v-card-text>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
         {{ t('dashboard.notificationsHint') }}
         <br/>{{ t('dashboard.iosPwaHint') }}
       </p>
       <!-- サーバー側で Push が無効（VAPID 鍵未設定など）なら、誰が何をしても通知は届かない。
            「許可済みなのに来ない」を利用者側の問題と誤解させないよう明示する。 -->
-      <v-alert v-if="pushStatus && !pushStatus.serverEnabled" type="error" class="text-sm mb-4">
+      <v-alert v-if="pushStatus && !pushStatus.serverEnabled" type="error" class="mb-4">
         {{ t('dashboard.pushServerDisabled') }}
       </v-alert>
       <!-- 許可はしているが購読がサーバーに無い状態（購読失効・管理者リセット後など）。
            このときボタンを押せば復旧できる。 -->
-      <v-alert v-else-if="notificationStatus === 'granted' && pushStatus && !pushStatus.subscribed" type="warning" class="text-sm mb-4">
+      <v-alert v-else-if="notificationStatus === 'granted' && pushStatus && !pushStatus.subscribed" type="warning" class="mb-4">
         {{ t('dashboard.pushNotSubscribed') }}
       </v-alert>
       <div class="flex items-center gap-4 flex-wrap">
@@ -472,7 +479,6 @@
           :color="isPushReady ? 'success' : 'primary'"
           :variant="isPushReady ? 'tonal' : 'flat'"
           :prepend-icon="isPushReady ? mdiCheck : undefined"
-          class="px-6 text-sm"
           :class="{ 'cursor-default': isPushReady }"
         >
           {{ isPushReady
@@ -483,7 +489,6 @@
           @click="handleTestNotification"
           :disabled="isTesting"
           variant="tonal"
-          class="text-sm"
         >
           <span v-if="isTesting">{{ t('dashboard.sending') }}</span>
           <span v-else>{{ t('dashboard.testNotification') }}</span>
@@ -498,21 +503,22 @@
         <v-switch
           :model-value="pushStatus.leagueNotifications"
           @update:model-value="handleToggleLeagueNotifications"
-          color="indigo"
-          class="[&_.v-label]:opacity-100"
+          color="primary"
+          hide-details
         >
           <template #label>
             <span class="min-w-0 ml-2">
-              <span class="block text-sm font-bold text-slate-700 dark:text-slate-200">
+              <span class="block">
                 {{ t('dashboard.leagueNotifications') }}
               </span>
-              <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <span class="block text-xs mt-0.5">
                 {{ t('dashboard.leagueNotificationsHint') }}
               </span>
             </span>
           </template>
         </v-switch>
       </div>
+     </v-card-text>
     </v-card>
 
     <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う。
@@ -1579,10 +1585,7 @@ const doughnutOpts = computed(() => ({
   @apply flex items-center gap-2 mb-4;
 }
 .stat-card {
-  @apply p-3 rounded-md border flex flex-col items-center text-center transition-colors duration-200;
-}
-.chart-card {
-  @apply bg-slate-50 dark:bg-slate-700/20 p-4 rounded-md border border-slate-100 dark:border-slate-700/50;
+  @apply flex flex-col items-center text-center;
 }
 .chart-title {
   @apply font-bold text-slate-700 dark:text-slate-200 text-sm mb-3;

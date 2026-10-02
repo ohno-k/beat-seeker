@@ -36,17 +36,19 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
   <v-dialog
     :model-value="true"
     max-width="672"
+    scrollable
     @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
   >
-    <v-card class="max-h-[85vh] bg-white dark:bg-slate-800 rounded-2xl" variant="flat">
-        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">スコアロードマップのルール</h3>
+    <v-card>
+        <v-card-title class="flex justify-between items-center">
+          <span>スコアロードマップのルール</span>
           <v-btn icon variant="text" size="small" aria-label="閉じる" @click="$emit('close')">
             <v-icon :icon="mdiClose" />
           </v-btn>
-        </div>
+        </v-card-title>
+        <v-divider />
 
-        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-7 text-sm text-slate-700 dark:text-slate-300">
+        <v-card-text class="space-y-7">
           <!-- 1. 目標とレベル -->
           <section>
             <h4 class="font-bold text-slate-900 dark:text-white mb-2">1. 目標とレベル</h4>
@@ -127,7 +129,7 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
                 <span class="text-xs text-slate-500">{{ ex.note }}</span>
               </div>
             </div>
-            <v-alert type="info" :icon="false" class="mt-3 text-xs text-slate-700 dark:text-slate-200">
+            <v-alert type="info" variant="tonal" density="compact" :icon="false" class="mt-3">
               <b>一度達成したレベルは、未達成に戻りません。</b>達成後に新しい目標をプレーして 3 分の 2 を下回っても、そのレベルは「達成済み」のままです。気にせず新しい譜面に挑戦してください。
             </v-alert>
           </section>

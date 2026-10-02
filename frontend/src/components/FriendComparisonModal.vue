@@ -359,33 +359,34 @@ const openRankChart = (rank: string, ev: Event) => {
 
 <template>
   <v-dialog :model-value="isOpen" @update:model-value="(v) => { if (!v) emit('close') }" persistent max-width="1024" :fullscreen="$vuetify.display.xs">
-      <v-card class="bg-white dark:bg-slate-800">
+      <v-card>
         <!-- ヘッダー（タイトル + 相手表示名 + ×ボタン） -->
-        <div class="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
-          <div class="min-w-0">
-            <h2 class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <v-card-item>
+          <v-card-title class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
               スコア比較
-            </h2>
-            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-bold mt-1 truncate">
+          </v-card-title>
+          <v-card-subtitle>
               vs <span class="text-blue-600 dark:text-blue-400 font-bold">{{ friend.displayName }}</span>
-            </p>
-          </div>
-          <v-btn icon variant="text" @click="emit('close')" aria-label="閉じる" class="shrink-0 text-slate-400 hover:text-slate-600">
-            <v-icon :icon="mdiClose" />
-          </v-btn>
-        </div>
+          </v-card-subtitle>
+          <template #append>
+            <v-btn icon variant="text" @click="emit('close')" aria-label="閉じる">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
+          </template>
+        </v-card-item>
+        <v-divider />
 
         <!-- コンテンツ本体（ローディング/エラー/本文 を状態で切替） -->
-        <v-card-text class="flex-1 p-3 sm:p-6 space-y-6 sm:space-y-8">
+        <v-card-text class="flex-1 space-y-6 sm:space-y-8">
           <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-            <v-progress-circular size="48" width="4" class="mb-4" />
+            <v-progress-circular indeterminate size="48" width="4" class="mb-4" />
             <p class="text-slate-500 font-bold">データを集計中...</p>
           </div>
 
-          <v-alert v-else-if="error" type="error" class="p-6 font-bold">
+          <v-alert v-else-if="error" type="error">
             {{ error }}
           </v-alert>
 
@@ -395,21 +396,9 @@ const openRankChart = (rank: string, ev: Event) => {
               <!-- レベル選択チェックボックス (ANOTHER/LEGGENDARIA 譜面のみ集計) -->
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
-                <v-checkbox v-model="showLv10Minus" color="indigo" class="flex-none [&_.v-label]:opacity-100">
-                  <template #label>
-                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
-                  </template>
-                </v-checkbox>
-                <v-checkbox v-model="showLv11" color="indigo" class="flex-none [&_.v-label]:opacity-100">
-                  <template #label>
-                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
-                  </template>
-                </v-checkbox>
-                <v-checkbox v-model="showLv12" color="indigo" class="flex-none [&_.v-label]:opacity-100">
-                  <template #label>
-                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
-                  </template>
-                </v-checkbox>
+                <v-checkbox v-model="showLv10Minus" color="primary" label="Lv.10以下" density="compact" hide-details class="flex-none" />
+                <v-checkbox v-model="showLv11" color="primary" label="Lv.11" density="compact" hide-details class="flex-none" />
+                <v-checkbox v-model="showLv12" color="primary" label="Lv.12" density="compact" hide-details class="flex-none" />
               </div>
               <!-- 仕切り線（狭幅時は折り返しが入るので装飾は sm: 以上のみ） -->
               <v-divider vertical class="hidden sm:block h-5 self-center" />
@@ -419,6 +408,9 @@ const openRankChart = (rank: string, ev: Event) => {
                 <v-switch
                   v-model="showBothPlayedOnly"
                   aria-label="両者プレイ済みのみ"
+                  color="primary"
+                  density="compact"
+                  hide-details
                   class="flex-none shrink-0"
                 />
               </div>
@@ -429,7 +421,8 @@ const openRankChart = (rank: string, ev: Event) => {
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <v-card v-for="(stats, key) in comparisonStats.summary" :key="key"
                 v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
-                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 dark:border-slate-800 transition-all">
+                variant="tonal">
+               <v-card-text>
                 <div class="flex items-center justify-between mb-3">
                   <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500">
                     {{ summaryLabel(key) }}
@@ -440,7 +433,6 @@ const openRankChart = (rank: string, ev: Event) => {
                     size="x-small"
                     type="button"
                     @click="openSummaryChart(key, $event)"
-                    class="text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
                     title="勝敗の変遷をグラフで見る"
                     aria-label="勝敗の変遷をグラフで見る"
                   >
@@ -478,6 +470,7 @@ const openRankChart = (rank: string, ev: Event) => {
                   <div class="h-full bg-red-400" :style="{ width: `${stats.total > 0 ? (stats.loss/stats.total)*100 : 0}%` }"></div>
                 </div>
                 <p class="mt-2 text-[10px] text-right text-slate-400 font-bold">{{ stats.total }} 曲対象</p>
+               </v-card-text>
               </v-card>
             </div>
 
@@ -487,8 +480,8 @@ const openRankChart = (rank: string, ev: Event) => {
                 <span class="w-1.5 h-5 sm:h-6 bg-indigo-500 rounded-full"></span>
                 非公式難易度別 勝敗 <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
               </h3>
-              <v-card class="bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 overflow-hidden">
-                <v-table class="w-full text-left bg-transparent [&_table]:border-collapse [&_table]:table-fixed">
+              <v-card>
+                <v-table class="w-full text-left [&_table]:table-fixed">
                   <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
                     <tr>
                       <!-- ランク列はアイコン2つ + 文字を入れる必要があるので、最低 5em 確保 -->
@@ -518,7 +511,7 @@ const openRankChart = (rank: string, ev: Event) => {
                               size="x-small"
                               type="button"
                               @click="openRankChart(rank, $event)"
-                              class="ml-auto text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 shrink-0"
+                              class="ml-auto shrink-0"
                               title="このランクの勝敗の変遷をグラフで見る"
                               aria-label="このランクの勝敗の変遷をグラフで見る"
                             >
@@ -609,7 +602,7 @@ const openRankChart = (rank: string, ev: Event) => {
             </div>
 
             <!-- 注意書き（集計ルールの補足表示） -->
-            <v-alert type="info" class="p-3 sm:p-4">
+            <v-alert type="info" density="compact">
               <div class="text-[11px] sm:text-xs font-bold leading-relaxed min-w-0">
                 <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較</p>
@@ -621,8 +614,9 @@ const openRankChart = (rank: string, ev: Event) => {
         </v-card-text>
 
         <!-- フッター（閉じるボタン） -->
-        <v-card-actions class="p-3 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 justify-end">
-          <v-btn @click="emit('close')" size="x-large" class="w-full sm:w-auto px-8 sm:px-12 bg-slate-900 hover:bg-black text-white text-base sm:text-lg">
+        <v-divider />
+        <v-card-actions class="justify-end">
+          <v-btn @click="emit('close')" variant="text" class="w-full sm:w-auto">
             閉じる
           </v-btn>
         </v-card-actions>

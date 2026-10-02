@@ -306,34 +306,29 @@ watch(selectedVersion, () => {
 </script>
 
 <template>
-  <v-card class="w-full max-w-6xl animate-fade-in p-6 border-slate-100 dark:border-slate-700 transition-colors duration-200">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <v-icon :icon="mdiClockOutline" size="24" class="text-indigo-500 dark:text-indigo-400" />
+  <v-card class="w-full max-w-6xl animate-fade-in">
+    <v-card-title class="flex flex-wrap items-center justify-between gap-2">
+      <span class="flex items-center gap-2">
+        <v-icon :icon="mdiClockOutline" color="indigo" />
         {{ t('history.title') }}
-      </h2>
+      </span>
       <div class="flex items-center gap-2">
         <!-- 作品セレクト（前作の成長記録も見られる）。共有 URL では出さない -->
-        <label
+        <v-select
           v-if="!props.shareToken && versionOptions.length > 1"
-          class="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"
+          v-model="selectedVersion"
+          :items="versionOptions.map(v => ({ title: `${v.num} ${versionName(v.num)}`, value: v.num }))"
+          item-title="title"
+          item-value="value"
+          :label="t('history.versionSelect')"
           :title="t('history.versionSelectHint')"
-        >
-          <span class="max-sm:hidden">{{ t('history.versionSelect') }}</span>
-          <v-select
-            v-model="selectedVersion"
-            :items="versionOptions.map(v => ({ title: `${v.num} ${versionName(v.num)}`, value: v.num }))"
-            item-title="title"
-            item-value="value"
-            class="text-xs font-semibold min-w-[11rem]"
-          />
-        </label>
+          density="compact"
+          hide-details
+          class="min-w-[11rem]"
+        />
         <v-btn
-          size="small"
           :variant="groupByDay ? 'tonal' : 'outlined'"
           :color="groupByDay ? 'indigo' : undefined"
-          class="text-xs font-semibold"
-          :class="groupByDay ? '' : 'text-slate-500 dark:text-slate-400'"
           :title="t('history.groupByDayHint')"
           @click="groupByDay = !groupByDay"
         >{{ t('history.groupByDay') }}</v-btn>
@@ -341,7 +336,6 @@ watch(selectedVersion, () => {
           icon
           variant="text"
           size="small"
-          class="text-slate-500 dark:text-slate-400"
           :title="t('history.refresh')"
           :aria-label="t('history.refresh')"
           @click="fetchHistory"
@@ -349,10 +343,11 @@ watch(selectedVersion, () => {
           <v-icon :icon="mdiRefresh" />
         </v-btn>
       </div>
-    </div>
+    </v-card-title>
 
+    <v-card-text>
     <div v-if="isLoading" class="py-12 flex justify-center">
-      <v-progress-circular size="32" width="4" color="indigo" />
+      <v-progress-circular indeterminate size="32" width="4" color="indigo" />
     </div>
 
     <v-alert v-else-if="errorMsg" type="error" class="my-4">
@@ -363,26 +358,26 @@ watch(selectedVersion, () => {
       {{ t('history.empty') }}
     </div>
 
-    <v-table v-else class="text-left whitespace-nowrap rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-table v-else hover class="whitespace-nowrap">
         <thead>
-          <tr class="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors duration-200">
-            <th class="p-4 font-semibold text-center w-16">{{ t('history.colTier') }}</th>
-            <th class="p-4 font-semibold text-center">{{ t('history.colDate') }}</th>
-            <th class="p-4 font-semibold text-center">{{ t('history.colType') }}</th>
-            <th class="p-4 font-semibold text-center w-36">{{ t('history.colBeatPt') }}</th>
-            <th v-if="showRateTier" class="p-4 font-semibold text-center w-36">{{ t('history.colRatePt') }}</th>
+          <tr>
+            <th class="text-center w-16">{{ t('history.colTier') }}</th>
+            <th class="text-center">{{ t('history.colDate') }}</th>
+            <th class="text-center">{{ t('history.colType') }}</th>
+            <th class="text-center w-36">{{ t('history.colBeatPt') }}</th>
+            <th v-if="showRateTier" class="text-center w-36">{{ t('history.colRatePt') }}</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm text-slate-700 dark:text-slate-200 transition-colors duration-200">
+        <tbody>
           <tr
             v-for="item in groupedList"
             :key="item._isGrouped ? item._dateKey : item.snapshotId"
-            class="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group"
+            class="group"
             :class="(item._isGrouped ? item._mergedDiffJson !== '[]' : (item.diffJson && item.diffJson !== '[]')) ? 'cursor-pointer' : ''"
             @click="openDiffModal(item)"
           >
             <!-- ティアアイコン列（Beat-Tier、RateTier 表示が有効なら Rate-Tier も） -->
-            <td class="p-4 text-center align-middle">
+            <td class="text-center align-middle">
               <div class="flex justify-center items-center gap-1">
                 <RankIcon
                   :rankName="item.tierInfo?.name || 'Unranked'"
@@ -405,7 +400,7 @@ watch(selectedVersion, () => {
             </td>
 
             <!-- アップロード日時列（グループ時は日付のみ + 回数バッジ） -->
-            <td class="p-4 font-medium text-slate-800 dark:text-slate-100 text-center align-middle">
+            <td class="text-center align-middle">
               <template v-if="item._isGrouped">
                 {{ item._dateKey }}
                 <span class="ml-1 text-xs text-slate-400 dark:text-slate-500">{{ t('history.times', { n: item._itemCount }) }}</span>
@@ -416,19 +411,19 @@ watch(selectedVersion, () => {
             </td>
 
             <!-- 種別列（更新曲数 or 難易度改訂バッジ） -->
-            <td class="p-4 text-center align-middle font-bold">
+            <td class="text-center align-middle">
               <div class="flex items-center justify-center gap-1.5">
-                <v-chip v-if="item.updatedCount > 0" label variant="flat" size="default" class="px-3 font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 text-base">
+                <v-chip v-if="item.updatedCount > 0" label variant="tonal" color="indigo">
                   {{ item.updatedCount }} {{ t('history.unitSongs') }}
                 </v-chip>
-                <v-chip v-else label variant="flat" size="default" class="px-3 font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-sm">
+                <v-chip v-else label variant="tonal" color="warning">
                   {{ t('history.revision') }}
                 </v-chip>
               </div>
             </td>
 
             <!-- Beat-PT 列（合計値 + 増減バッジ） -->
-            <td class="p-4 text-center align-middle w-36">
+            <td class="text-center align-middle w-36">
               <div class="font-bold text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalBeatPt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
               </div>
@@ -441,7 +436,7 @@ watch(selectedVersion, () => {
             </td>
 
             <!-- Rate-PT 列（有効時のみ、合計値 + 増減バッジ） -->
-            <td v-if="showRateTier" class="p-4 text-center align-middle w-36">
+            <td v-if="showRateTier" class="text-center align-middle w-36">
               <div class="font-bold text-slate-700 dark:text-slate-200 text-lg">
                 {{ item.totalRatePt.toFixed(1) }} <span class="text-xs font-bold text-slate-400">pt</span>
               </div>
@@ -455,6 +450,7 @@ watch(selectedVersion, () => {
           </tr>
         </tbody>
     </v-table>
+    </v-card-text>
 
     <!-- アップロード差分モーダル（行クリックで開く） -->
     <UploadResultModal

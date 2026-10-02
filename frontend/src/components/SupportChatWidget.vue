@@ -111,7 +111,9 @@ onBeforeUnmount(() => {
       icon
       color="primary"
       @click="toggleOpen"
-      class="fixed bottom-4 right-4 z-40 w-14 h-14 shadow-lg overflow-visible"
+      size="large"
+      elevation="8"
+      class="fixed bottom-4 right-4 z-40 overflow-visible"
       :aria-label="isOpen ? 'お問い合わせを閉じる' : '運営へお問い合わせ'"
     >
       <v-icon v-if="!isOpen" :icon="mdiMessageProcessingOutline" />
@@ -127,18 +129,21 @@ onBeforeUnmount(() => {
     <transition name="chat-pop">
       <v-card
         v-if="isOpen"
-        class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+        elevation="12"
+        class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col overflow-hidden"
       >
         <!-- ヘッダ -->
-        <div class="px-4 py-3 bg-blue-600 dark:bg-blue-500 text-white flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <v-icon :icon="mdiMessageProcessingOutline" size="20" />
-            <p class="font-bold text-sm">運営へお問い合わせ</p>
-          </div>
-          <v-btn icon variant="text" size="small" @click="toggleOpen" class="text-white/80 hover:text-white -my-2 -mr-2" aria-label="閉じる">
-            <v-icon :icon="mdiClose" />
-          </v-btn>
-        </div>
+        <v-toolbar color="primary" density="compact" class="shrink-0">
+          <template #prepend>
+            <v-icon :icon="mdiMessageProcessingOutline" />
+          </template>
+          <v-toolbar-title>運営へお問い合わせ</v-toolbar-title>
+          <template #append>
+            <v-btn icon variant="text" size="small" @click="toggleOpen" aria-label="閉じる">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
+          </template>
+        </v-toolbar>
 
         <!-- 案内文 -->
         <div class="px-4 py-2 bg-blue-50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700">
@@ -170,7 +175,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 入力 -->
-        <div class="p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div class="p-2 border-t border-slate-200 dark:border-slate-700">
           <div class="flex items-end gap-2">
             <v-textarea
               v-model="draft"
@@ -179,15 +184,17 @@ onBeforeUnmount(() => {
               auto-grow
               max-rows="4"
               no-resize
+              density="compact"
+              hide-details
               placeholder="メッセージを入力 (Enterで送信)"
-              class="flex-1 text-[13px]"
+              class="flex-1"
             />
             <v-btn
               color="primary"
               @click="handleSend"
               :disabled="isSending || !draft.trim()"
               :loading="isSending"
-              class="shrink-0 text-xs"
+              class="shrink-0 mb-1"
             >送信</v-btn>
           </div>
         </div>

@@ -135,7 +135,9 @@ const levelLabel = (l: number) => `☆${l}`;
 </script>
 
 <template>
-  <v-card tag="section" class="ranking text-xs text-slate-600 dark:text-slate-300">
+  <v-card tag="section">
+  <v-card-text>
+  <div class="text-xs text-slate-600 dark:text-slate-300">
     <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
       各譜面で、選んだ並びが RANDOM の 5,040 通り中の何位か（1P 基準・配置評価と同じ基準）を一覧にします。順位が小さいほど当たりです。
     </p>
@@ -144,12 +146,12 @@ const levelLabel = (l: number) => `☆${l}`;
     <div class="controls mt-3">
       <div class="control">
         <span class="control-label">並び</span>
-        <v-btn-toggle v-model="mode" mandatory>
-          <v-btn v-for="m in MODES" :key="m.value" :value="m.value" type="button" size="small" class="text-xs">{{ m.label }}</v-btn>
+        <v-btn-toggle v-model="mode" mandatory color="primary" variant="outlined" divided density="compact">
+          <v-btn v-for="m in MODES" :key="m.value" :value="m.value" type="button" size="small">{{ m.label }}</v-btn>
         </v-btn-toggle>
         <template v-if="mode === 'free'">
           <v-text-field :model-value="freeInput" type="text" inputmode="numeric" maxlength="7" placeholder="例: 2461357" aria-label="並び"
-            class="free-input flex-none tabular-nums"
+            density="compact" hide-details class="free-input flex-none tabular-nums"
             :error="!!freeInput && !freePattern"
             @input="onFreeInput" />
           <PatternChips v-if="freePattern" :pattern="freePattern" small />
@@ -158,18 +160,18 @@ const levelLabel = (l: number) => `☆${l}`;
       </div>
       <div class="control">
         <span class="control-label">レベル</span>
-        <v-btn-toggle v-model="level" mandatory>
-          <v-btn type="button" value="all" size="small" class="text-xs">すべて</v-btn>
-          <v-btn type="button" :value="12" size="small" class="text-xs">☆12</v-btn>
-          <v-btn type="button" :value="11" size="small" class="text-xs">☆11</v-btn>
-          <v-btn type="button" value="low" size="small" class="text-xs">☆10以下</v-btn>
+        <v-btn-toggle v-model="level" mandatory color="primary" variant="outlined" divided density="compact">
+          <v-btn type="button" value="all" size="small">すべて</v-btn>
+          <v-btn type="button" :value="12" size="small">☆12</v-btn>
+          <v-btn type="button" :value="11" size="small">☆11</v-btn>
+          <v-btn type="button" value="low" size="small">☆10以下</v-btn>
         </v-btn-toggle>
         <v-text-field v-model="query" type="search" placeholder="曲名で絞り込み" aria-label="曲名で絞り込み" autocomplete="off"
-          class="search" />
+          density="compact" hide-details class="search" />
       </div>
     </div>
 
-    <v-alert v-if="loadError" type="error" class="mt-3 text-xs">{{ loadError }}</v-alert>
+    <v-alert v-if="loadError" type="error" density="compact" class="mt-3">{{ loadError }}</v-alert>
     <p v-else-if="!summary" class="mt-3 text-slate-400">読み込み中…</p>
     <template v-else>
       <div class="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
@@ -180,7 +182,7 @@ const levelLabel = (l: number) => `☆${l}`;
           <span class="tabular-nums">上位 5% に入る譜面 <b class="text-amber-600 dark:text-amber-400">{{ topCount }}</b></span>
           <span v-if="query.trim() && rows.length === 0" class="text-red-500 dark:text-red-400">
             曲名「{{ query.trim() }}」に一致する譜面がありません
-            <v-btn type="button" variant="text" size="x-small" class="ml-1 underline text-xs" @click="query = ''">絞り込みを解除</v-btn>
+            <v-btn type="button" variant="text" color="primary" size="x-small" class="ml-1" @click="query = ''">絞り込みを解除</v-btn>
           </span>
         </template>
       </div>
@@ -189,16 +191,16 @@ const levelLabel = (l: number) => `☆${l}`;
         <li v-for="(v, n) in shown" :key="v.row.x" :class="{ top: v.rank <= TOP5 }">
           <span class="pos tabular-nums">{{ n + 1 }}</span>
           <span class="lv tabular-nums" :class="v.row.d === '10' ? 'leg' : 'ano'">{{ levelLabel(v.row.l) }} {{ diffLabel(v.row.d) }}</span>
-          <v-btn type="button" variant="text" size="small" density="compact" class="title text-xs" :title="`${v.row.t} を譜面分析で開く`" @click="emit('open', v.row.x)"><span class="title-text">{{ v.row.t }}</span></v-btn>
+          <v-btn type="button" variant="text" color="primary" size="small" density="compact" class="title" :title="`${v.row.t} を譜面分析で開く`" @click="emit('open', v.row.x)"><span class="title-text">{{ v.row.t }}</span></v-btn>
           <PatternChips v-if="mode === 'rran'" :pattern="v.pattern" small class="chips" />
           <span class="rank tabular-nums">
-            <v-chip v-if="v.rank <= TOP5" size="x-small" variant="flat" class="top-badge">上位5%</v-chip>
+            <v-chip v-if="v.rank <= TOP5" size="x-small" color="amber-darken-2" variant="flat" class="mr-1">上位5%</v-chip>
             {{ v.rankTo ? `${v.rank}〜${v.rankTo}` : v.rank }}位
             <span class="pct">（{{ percent(v.rank) }}%）</span>
           </span>
         </li>
       </ol>
-      <v-btn v-if="rows.length > limit" type="button" variant="text" color="primary" size="small" class="more mt-2 text-xs"
+      <v-btn v-if="rows.length > limit" type="button" variant="text" color="primary" size="small" class="more mt-2"
         @click="limit += PAGE">さらに表示（残り {{ rows.length - limit }}）</v-btn>
 
       <p class="mt-4 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
@@ -207,16 +209,16 @@ const levelLabel = (l: number) => `☆${l}`;
         曲名を押すと譜面分析タブでその譜面を開きます（配置評価で細かい内訳を確認できます）。
       </p>
     </template>
+  </div>
+  </v-card-text>
   </v-card>
 </template>
 
 <style scoped>
-.ranking { padding: 0.9rem; }
-
 .controls { display: flex; flex-direction: column; gap: 0.5rem; }
 .control { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
 .control-label { flex: none; width: 3.5rem; font-weight: 600; color: rgb(100 116 139); }
-.free-input { width: 7rem; }
+.free-input { width: 8.5rem; }
 .free-input :deep(input) { letter-spacing: 0.1em; font-weight: 700; }
 .search { flex: 1 1 10rem; min-width: 0; max-width: 16rem; }
 
@@ -239,33 +241,13 @@ const levelLabel = (l: number) => `☆${l}`;
 .lv.leg { color: rgb(147 51 234); }
 .dark .lv.ano { color: rgb(248 113 113); }
 .dark .lv.leg { color: rgb(192 132 252); }
-.title {
-  min-width: 0;
-  height: auto;
-  padding: 0;
-  justify-content: flex-start;
-  overflow: hidden;
-  text-align: left;
-  font-weight: 600;
-  color: rgb(30 41 59);
-}
+/* 曲名（v-btn text）。行の幅に合わせて省略記号で切る */
+.title { min-width: 0; justify-content: flex-start; overflow: hidden; }
 .title :deep(.v-btn__content) { min-width: 0; max-width: 100%; }
 .title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.title:hover { color: rgb(37 99 235); text-decoration: underline; }
-.dark .title { color: rgb(226 232 240); }
-.dark .title:hover { color: rgb(96 165 250); }
 .rank { white-space: nowrap; text-align: right; font-weight: 700; color: rgb(51 65 85); }
 .dark .rank { color: rgb(226 232 240); }
 .pct { font-weight: 400; color: rgb(148 163 184); }
-.top-badge {
-  margin-right: 0.3rem;
-  padding: 0.05rem 0.35rem;
-  border-radius: 9999px;
-  font-size: 10px;
-  font-weight: 700;
-  color: rgb(69 26 3);
-  background: rgb(251 191 36);
-}
 
 /* スマホ幅: 順位は 2 行目に回し、R乱の並びも 2 行目へ */
 @media (max-width: 479px) {

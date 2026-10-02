@@ -48,6 +48,24 @@ export function genreBadgeClass(g?: string | null): string {
   return (g ? GENRE_BADGE[g] : undefined) ?? DEFAULT_GENRE_BADGE;
 }
 
+/**
+ * ジャンル → Vuetify の color 名 (v-chip などの `color` prop 用)。色の対応は genreBadgeClass と同じ。
+ */
+const GENRE_CHIP_COLOR: Record<string, string> = {
+  NOTES: 'pink',
+  PEAK: 'orange',
+  CHORD: 'lime',
+  CHARGE: 'purple',
+  SCRATCH: 'red',
+  'SOF-LAN': 'blue',
+  INSANE: 'blue-grey',
+};
+
+/** ジャンルの Vuetify color 名。未指定/不明は中立の緑。 */
+export function genreChipColor(g?: string | null): string {
+  return (g ? GENRE_CHIP_COLOR[g] : undefined) ?? 'green';
+}
+
 /** ジャンルの文字色のみ (インラインのジャンル名強調用)。 */
 const GENRE_TEXT: Record<string, string> = {
   NOTES: 'text-pink-600 dark:text-pink-300',

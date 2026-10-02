@@ -82,8 +82,10 @@ function close() {
   <v-card
     v-if="visible"
     variant="flat"
-    class="w-full bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-md px-5 py-4 flex items-center justify-between gap-4 transition-colors"
+    color="primary"
+    class="w-full"
   >
+    <v-card-text class="flex items-center justify-between gap-4">
     <!-- 左側: ロゴ風アイコン + テキスト -->
     <button
       @click="open"
@@ -107,7 +109,8 @@ function close() {
     <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
       <v-btn
         size="small"
-        class="hidden sm:inline-flex px-4 text-xs font-bold bg-white/20 hover:bg-white/30 text-white"
+        variant="tonal"
+        class="hidden sm:inline-flex"
         @click="open"
       >
         見る →
@@ -116,13 +119,13 @@ function close() {
         icon
         variant="text"
         size="small"
-        class="w-8 h-8 text-white hover:bg-white/20"
         aria-label="今月の振り返りを閉じる"
         title="今月の振り返りを閉じる"
         @click="close"
       >
-        <v-icon :icon="mdiClose" size="20" />
+        <v-icon :icon="mdiClose" />
       </v-btn>
     </div>
+    </v-card-text>
   </v-card>
 </template>

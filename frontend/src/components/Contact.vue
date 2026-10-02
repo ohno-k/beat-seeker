@@ -5,7 +5,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <v-card class="p-6 sm:p-10 animate-fade-in text-slate-800 dark:text-slate-200">
+  <v-card class="animate-fade-in">
+  <v-card-text class="pa-6 pa-sm-10">
     <h1 class="text-2xl sm:text-3xl font-bold mb-8 text-slate-900 dark:text-white border-b pb-4 border-slate-200 dark:border-slate-700">
       {{ t('contactPage.title') }}
     </h1>
@@ -52,5 +53,6 @@ const { t } = useI18n();
         {{ t('contactPage.copyrightDisclaimer') }}
       </p>
     </section>
+  </v-card-text>
   </v-card>
 </template>

@@ -234,7 +234,7 @@ onBeforeUnmount(() => {
         label
         size="x-small"
         variant="flat"
-        class="ml-auto shrink-0 text-[9px] font-bold px-1.5"
+        class="ml-auto shrink-0"
         :class="props.badgeClass"
       >{{ props.badgeLabel }}</v-chip>
       <span class="shrink-0 text-slate-400 text-[9px]">▼</span>
@@ -255,7 +255,8 @@ onBeforeUnmount(() => {
             type="text"
             density="compact"
             placeholder="曲名 または 管理番号 (例: 1762) で検索"
-            class="w-full text-xs"
+            hide-details
+            class="w-full"
             @keydown="onSearchKeydown"
           />
         </div>

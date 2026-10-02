@@ -28,7 +28,7 @@ import { useCompetitionPlayerIndividual } from '../composables/useCompetitionPla
 import { API_BASE } from '../composables/constants';
 import { useToast } from '../composables/useToast';
 import { useI18n } from '../composables/useI18n';
-import { teamColorClass, genreBadgeClass, genreTextClass } from '../composables/competitionColors';
+import { teamColorClass, genreChipColor, genreTextClass } from '../composables/competitionColors';
 import { LEVELS_FOR_KIND, kindLevelLabel } from '../composables/competitionMatchKinds';
 
 const props = defineProps<{ token: string }>();
@@ -260,7 +260,11 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
     <v-btn-toggle
       :model-value="currentLang"
       mandatory
-      class="absolute top-3 right-3 z-30 bg-white/80 dark:bg-slate-800/80"
+      variant="outlined"
+      divided
+      density="compact"
+      color="primary"
+      class="absolute top-3 right-3 z-30"
     >
       <v-btn
         v-for="lang in availableLanguages"
@@ -269,12 +273,11 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         size="small"
         @click="setLanguage(lang)"
         :aria-pressed="currentLang === lang"
-        class="text-[11px]"
       >{{ t(`lang.${lang}`) }}</v-btn>
     </v-btn-toggle>
 
     <div v-if="peekedFormat === null && (isLoading || individualPlayer.isLoading.value)" class="text-center py-20 text-slate-400 text-sm">
-      <v-progress-circular size="20" width="2" class="mr-2" />{{ t('competition.player.loading') }}
+      <v-progress-circular indeterminate size="20" width="2" class="mr-2" />{{ t('competition.player.loading') }}
     </div>
 
     <!-- ────────── 個人戦 (individual4) リードオンリービュー ────────── -->
@@ -288,7 +291,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         </p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
           <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">{{ individualPlayer.view.value.participant.displayName }}</h1>
-          <v-chip size="small" label class="text-[10px] font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">個人戦</v-chip>
+          <v-chip size="small" label color="deep-purple">個人戦</v-chip>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           状態: <span class="font-bold">{{ statusLabel(individualPlayer.view.value.competition.status) }}</span>
@@ -297,17 +300,15 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
 
       <section class="space-y-3">
         <h2 class="text-xs font-bold text-slate-500">出場試合 ({{ individualPlayer.view.value.matches.length }} 試合)</h2>
-        <v-card
-          v-if="individualPlayer.view.value.matches.length === 0"
-          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-        >
-          まだ試合表が作成されていません。
+        <v-card v-if="individualPlayer.view.value.matches.length === 0">
+          <v-card-text class="text-center">
+            <p class="text-sm text-slate-400 italic py-6">まだ試合表が作成されていません。</p>
+          </v-card-text>
         </v-card>
         <v-card
           v-for="m in individualPlayer.view.value.matches"
           :key="m.matchId"
-          class="bg-white dark:bg-slate-800 border overflow-x-auto"
-          :class="m.isFinals ? 'border-amber-300 dark:border-amber-700' : 'border-slate-200 dark:border-slate-700'"
+          class="overflow-x-auto"
         >
           <div
             class="px-4 py-2 border-b flex items-center justify-between flex-wrap gap-2"
@@ -324,7 +325,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               <span v-else class="italic">未記録</span>
             </p>
           </div>
-          <v-table class="text-xs bg-transparent [&_table]:min-w-[600px] [&_td]:h-auto [&_th]:h-auto">
+          <v-table density="compact" class="[&_table]:min-w-[600px]">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono text-slate-400">
                 <th class="px-3 py-2 text-left">プレイヤー</th>
@@ -399,10 +400,10 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
       v-else-if="!view"
       type="error"
       :icon="false"
-      class="max-w-2xl mx-auto p-6 text-center"
+      class="max-w-2xl mx-auto text-center"
     >
-      <p class="text-lg font-bold text-rose-700 dark:text-rose-300">{{ t('competition.player.invalidToken') }}</p>
-      <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ t('competition.player.invalidTokenHint') }}</p>
+      <p class="text-lg font-bold">{{ t('competition.player.invalidToken') }}</p>
+      <p class="text-sm mt-2">{{ t('competition.player.invalidTokenHint') }}</p>
     </v-alert>
 
     <div v-else class="max-w-4xl mx-auto space-y-6">
@@ -413,7 +414,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
           <h1 class="text-2xl sm:text-3xl font-bold tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
           <span class="text-slate-400">·</span>
           <p class="text-lg sm:text-2xl font-bold">{{ view.participant.displayName }}</p>
-          <v-chip v-if="view.participant.isTl" size="small" label class="text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ t('competition.common.tlBadge') }}</v-chip>
+          <v-chip v-if="view.participant.isTl" size="small" label color="amber">{{ t('competition.common.tlBadge') }}</v-chip>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
@@ -443,17 +444,16 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
       <!-- ===== 担当試合 ===== -->
       <section class="space-y-3">
         <h2 class="text-xs font-bold text-slate-500">{{ t('competition.player.matchesHeader') }}</h2>
-        <v-card
-          v-if="view.matches.length === 0"
-          class="text-center text-sm text-slate-400 italic py-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-        >
-          {{ t('competition.player.noMatchesAssigned') }}<br />{{ t('competition.player.noMatchesAssignedHint') }}
+        <v-card v-if="view.matches.length === 0">
+          <v-card-text class="text-center">
+            <p class="text-sm text-slate-400 italic py-6">{{ t('competition.player.noMatchesAssigned') }}<br />{{ t('competition.player.noMatchesAssignedHint') }}</p>
+          </v-card-text>
         </v-card>
 
         <v-card
           v-for="m in view.matches"
           :key="m.matchId"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden"
+          class="overflow-hidden"
         >
           <!-- カードヘッダ -->
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
@@ -472,8 +472,7 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                 v-if="m.requiredGenre"
                 size="small"
                 label
-                class="text-[10px] font-bold"
-                :class="genreBadgeClass(m.requiredGenre)"
+                :color="genreChipColor(m.requiredGenre)"
               >
                 {{ t('competition.player.requiredGenrePrefix') }} {{ m.requiredGenre }}
               </v-chip>
@@ -481,7 +480,6 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                 v-else
                 size="small"
                 label
-                class="text-[10px] font-bold bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400"
               >
                 {{ t('competition.player.genreUnspecified') }}
               </v-chip>
@@ -509,7 +507,6 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                   color="primary"
                   size="small"
                   @click="startEditing(m)"
-                  class="text-[11px]"
                 >{{ m.myPick ? t('competition.player.editButton') : t('competition.player.selectSongButton') }}</v-btn>
                 <v-btn
                   v-if="m.myPick"
@@ -517,7 +514,6 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                   variant="tonal"
                   size="x-small"
                   @click="removePick(m)"
-                  class="text-[10px]"
                 >{{ t('competition.player.cancelButton') }}</v-btn>
               </div>
             </div>
@@ -558,7 +554,6 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                 variant="tonal"
                 size="x-small"
                 @click="cancelEditing"
-                class="text-[10px]"
               >{{ t('competition.player.closeButton') }}</v-btn>
             </div>
 
@@ -567,7 +562,8 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               ジャンル別 TXT に振られた id (1〜) を入れて Enter で即提出。
               Lv 帯は matchKind から自動。
             -->
-            <v-card class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3">
+            <v-card variant="outlined">
+              <v-card-text>
               <p class="text-[10px] font-mono text-slate-500 mb-2">
                 {{ t('competition.player.directIdSection') }}
               </p>
@@ -578,13 +574,14 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
                   inputmode="numeric"
                   pattern="[0-9]*"
                   :placeholder="t('competition.player.directIdPlaceholder')"
-                  class="flex-1 text-sm"
+                  density="compact"
+                  hide-details
+                  class="flex-1"
                   @keydown.enter.prevent="submitByDirectId"
                 />
                 <v-btn
                   color="primary"
                   @click="submitByDirectId"
-                  class="text-xs"
                   :disabled="!String(directIdInput).trim()"
                 >
                   {{ t('competition.player.confirmInput') }}
@@ -593,17 +590,17 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               <p class="text-[10px] font-mono text-slate-400 mt-1">
                 {{ t('competition.player.directIdHint') }}
               </p>
+              </v-card-text>
             </v-card>
 
             <!-- Step 1: Lv (vanguard のみ複数選択肢、他は自動セット済) -->
             <div v-if="availableLevels.length > 1">
               <p class="text-[10px] font-mono text-slate-500 mb-2">{{ t('competition.player.step1Lv') }}</p>
-              <v-btn-toggle :model-value="editingLevel" @update:model-value="(lv: number | null | undefined) => { if (lv != null) selectLevel(lv) }">
+              <v-btn-toggle :model-value="editingLevel" variant="outlined" divided color="primary" @update:model-value="(lv: number | null | undefined) => { if (lv != null) selectLevel(lv) }">
                 <v-btn
                   v-for="lv in availableLevels"
                   :key="lv"
                   :value="lv"
-                  class="text-sm"
                 >Lv {{ lv }}</v-btn>
               </v-btn-toggle>
             </div>
@@ -613,12 +610,11 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
               <p class="text-[10px] font-mono text-slate-500 mb-2">
                 {{ availableLevels.length > 1 ? 'Step 2' : 'Step 1' }}: {{ t('competition.player.stepSelectSong') }} ({{ availableSongs.length }})
               </p>
-              <v-list class="max-h-72 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-lg py-0 bg-white dark:bg-slate-800">
+              <v-list border class="max-h-72 overflow-y-auto">
                 <v-list-item
                   v-for="s in availableSongs"
                   :key="s.id"
                   @click="submitSong(s)"
-                  class="px-3 py-2 border-b border-slate-100 dark:border-slate-700/60"
                 >
                   <div class="flex items-baseline gap-2">
                     <span class="shrink-0 text-[10px] font-mono text-slate-400 tabular-nums w-10 text-right">#{{ s.id }}</span>
@@ -644,17 +640,20 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
             <v-chip
               v-if="!m.myStrategyUse"
               label
-              class="shrink-0 text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+              color="warning"
+              class="shrink-0"
             >{{ t('competition.player.strategyUndecided') }}</v-chip>
             <v-chip
               v-else-if="m.myStrategyUse.enabled"
               label
-              class="shrink-0 text-[11px] font-bold bg-fuchsia-600 text-white"
+              color="purple"
+              variant="flat"
+              class="shrink-0"
             >{{ t('competition.player.strategyDecidedUse') }}</v-chip>
             <v-chip
               v-else
               label
-              class="shrink-0 text-[11px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500"
+              class="shrink-0"
             >{{ t('competition.player.strategyDecidedSkip') }}</v-chip>
           </div>
         </v-card>
@@ -667,7 +666,8 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
       @update:model-value="(v: boolean) => { if (!v) cancelSubmitConfirm() }"
       max-width="448"
     >
-      <v-card v-if="pendingSubmitSong" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 space-y-4 shadow-xl">
+      <v-card v-if="pendingSubmitSong">
+        <v-card-text class="space-y-4">
         <p class="text-xs font-mono text-slate-500">{{ t('competition.player.confirmTitle') }}</p>
         <p class="text-base font-bold leading-relaxed">
           {{ t('competition.player.confirmHeading', { kind: editingMatch ? kindLabel(editingMatch.matchKind) : '' }) }}<br />
@@ -688,18 +688,18 @@ const canEditMatch = (m: PlayerMatchDto): boolean => {
         <p class="text-[11px] text-slate-500 leading-relaxed">
           {{ t('competition.player.confirmNote') }}
         </p>
-        <div class="flex gap-2 justify-end">
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
           <v-btn
-            variant="tonal"
             @click="cancelSubmitConfirm"
-            class="text-sm"
           >{{ t('competition.player.confirmCancel') }}</v-btn>
           <v-btn
             color="primary"
+            variant="flat"
             @click="submitSongConfirmed"
-            class="text-sm"
           >{{ t('competition.player.confirmYes') }}</v-btn>
-        </div>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>

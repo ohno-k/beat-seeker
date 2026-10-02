@@ -393,45 +393,45 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
     @update:model-value="(v: boolean) => { if (!v) emit('close') }"
     max-width="672"
     :fullscreen="$vuetify.display.xs"
+    scrollable
   >
-      <v-card
-        class="bg-white dark:bg-slate-900 w-full flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border-slate-200 dark:border-slate-800"
-      >
+      <v-card>
         <!-- ヘッダー -->
-        <div class="relative px-4 sm:px-6 py-3 sm:py-4 shrink-0 bg-blue-700 dark:bg-blue-600">
+        <v-sheet color="primary" class="relative shrink-0">
           <v-btn
             icon
             variant="text"
             size="small"
             @click="emit('close')"
-            class="absolute top-1 right-1 z-50 text-white/70 hover:text-white"
+            class="absolute top-1 right-1"
             :aria-label="t('common.close')"
           >
-            <v-icon :icon="mdiClose" size="18" />
+            <v-icon :icon="mdiClose" />
           </v-btn>
-          <div class="pr-10">
+          <v-card-item class="pr-12">
             <p class="text-[10px] sm:text-xs font-bold text-white/80">{{ t('adviceReason.title') }}</p>
             <h2 class="text-base sm:text-lg font-bold text-white tracking-tight leading-tight truncate">{{ item.title }}</h2>
             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-white/20 text-white">
+              <v-chip size="x-small" label variant="tonal">
                 {{ diffShort(item.difficultyName) }} {{ item.difficultyLevel }}
               </v-chip>
               <InformalRankBadge :rank="item.informalRank" size="xs" />
-              <v-chip v-if="item.unplayed" size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-white text-blue-700">
+              <v-chip v-if="item.unplayed" size="x-small" label variant="flat" color="white">
                 {{ t('advice.unplayedTag') }}
               </v-chip>
               <span class="text-[10px] font-bold text-white/80">
                 {{ t('advice.supportHint', { n: item.supportCount, acc: accuracyLabel() }) }}
               </span>
             </div>
-          </div>
-        </div>
+          </v-card-item>
+        </v-sheet>
 
         <!-- 本体 -->
-        <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900 p-3 sm:p-4 space-y-3">
+        <v-card-text class="space-y-3">
 
           <!-- 1. 式の分解 -->
-          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" variant="outlined">
+            <v-card-text>
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-2">{{ t('adviceReason.formulaLabel') }}</p>
             <div class="flex items-stretch justify-between gap-1 sm:gap-2 tabular-nums">
               <div class="flex-1 min-w-0 rounded-md bg-slate-50 dark:bg-slate-700/40 px-2 py-2 text-center">
@@ -456,10 +456,12 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
               {{ t('adviceReason.targetSentence', { target: label(item.targetScore), score: item.targetScore.toLocaleString(), rate: rateOf(item.targetScore) }) }}
               <template v-if="item.targetLabel"> {{ t('adviceReason.targetIsBorder', { label: item.targetLabel }) }}</template>
             </p>
+            </v-card-text>
           </v-card>
 
           <!-- 2. 図 -->
-          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" variant="outlined">
+            <v-card-text>
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1">{{ t('adviceReason.chartLabel') }}</p>
             <div ref="chartWrap" class="w-full">
             <svg :viewBox="`0 0 ${W} ${H}`" :width="W" :height="H" class="block max-w-full h-auto select-none" role="img" :aria-label="t('adviceReason.chartLabel')">
@@ -539,10 +541,12 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
               </span>
             </div>
             <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500 leading-snug">{{ t('adviceReason.chartHint') }}</p>
+            </v-card-text>
           </v-card>
 
           <!-- 3. 手順 -->
-          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" variant="outlined">
+            <v-card-text>
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-2">{{ t('adviceReason.stepsLabel') }}</p>
             <ol class="space-y-2.5">
               <!-- Step 1: 実力の推定 -->
@@ -592,10 +596,12 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
                 </div>
               </li>
             </ol>
+            </v-card-text>
           </v-card>
 
           <!-- 4. 推定に使った譜面 -->
-          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" variant="outlined">
+            <v-card-text>
             <div class="flex items-baseline justify-between mb-2">
               <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ t('adviceReason.refsLabel') }}</p>
               <span v-if="!isRough && !refsLoading && !refsError" class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -606,7 +612,7 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
               {{ t(item.accuracy === 'BASE' ? 'adviceReason.refsRoughBase' : 'adviceReason.refsRoughRank') }}
             </p>
             <div v-else-if="refsLoading" class="flex items-center justify-center gap-2 py-4 text-xs text-slate-400 dark:text-slate-500">
-              <v-progress-circular size="16" width="2" />
+              <v-progress-circular indeterminate size="16" width="2" />
               {{ t('potentialDetails.loadingRefs') }}
             </div>
             <div v-else-if="refsError" class="text-center py-4 text-xs text-rose-500">{{ refsError }}</div>
@@ -637,9 +643,10 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
                 {{ t('adviceReason.refsMore', { n: hiddenRefCount }) }}
               </li>
             </ul>
+            </v-card-text>
           </v-card>
 
-        </div>
+        </v-card-text>
       </v-card>
   </v-dialog>
 </template>

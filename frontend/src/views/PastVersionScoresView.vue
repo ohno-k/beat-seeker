@@ -36,7 +36,7 @@ import { flattenScores } from '../utils/scoreData';
 import type { ScoreData } from '../types/ScoreData';
 import {
   CURRENT_VERSION,
-  versionBadgeClass,
+  versionChartColor,
   versionName,
   versionShort,
 } from '../utils/iidxVersions';
@@ -82,13 +82,13 @@ const currentPage = ref(1);
 /** 1 ページあたりの表示件数。 */
 const PAGE_SIZE = 50;
 
-/** 難易度名 → バッジの配色。ChartListView と同じ色体系に揃える。 */
-const DIFF_STYLE: Record<string, string> = {
-  BEGINNER: 'text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40',
-  NORMAL: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40',
-  HYPER: 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40',
-  ANOTHER: 'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40',
-  LEGGENDARIA: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/40',
+/** 難易度名 → バッジの色（Vuetify の色名）。ChartListView と同じ色相に揃える。 */
+const DIFF_COLOR: Record<string, string> = {
+  BEGINNER: 'green',
+  NORMAL: 'blue',
+  HYPER: 'amber',
+  ANOTHER: 'red',
+  LEGGENDARIA: 'purple',
 };
 
 /** 難易度名の表示順（フィルタのプルダウンとソートの安定化に使う）。 */
@@ -304,7 +304,7 @@ onMounted(async () => {
       <v-btn
         variant="text"
         size="small"
-        class="-ml-2 px-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        class="-ml-2"
         :prepend-icon="mdiChevronLeft"
         @click="emit('back')"
       >
@@ -314,17 +314,15 @@ onMounted(async () => {
       <div class="flex flex-wrap items-center gap-2 mt-2">
         <v-chip
           label
-          variant="flat"
-          class="px-2 py-0.5 h-auto text-xs font-bold rounded border"
-          :class="versionBadgeClass(props.version)"
+          variant="tonal"
+          :color="versionChartColor(props.version)"
         >{{ props.version }}</v-chip>
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ versionName(props.version) }}</h1>
         <v-chip
           v-if="props.version === CURRENT_VERSION"
           size="x-small"
           label
-          variant="flat"
-          class="px-1.5 py-0.5 h-auto text-[10px] rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+          variant="tonal"
         >{{ t('past.manager.current') }}</v-chip>
       </div>
 
@@ -334,10 +332,10 @@ onMounted(async () => {
       </p>
     </div>
 
-    <v-alert v-if="errorMsg" type="error" class="text-xs">{{ errorMsg }}</v-alert>
+    <v-alert v-if="errorMsg" type="error" density="compact">{{ errorMsg }}</v-alert>
 
     <div v-if="isLoading" class="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 py-12 text-center">
-      <v-progress-circular size="20" width="2" />
+      <v-progress-circular indeterminate size="20" width="2" />
       {{ t('common.loading') }}
     </div>
 
@@ -347,29 +345,28 @@ onMounted(async () => {
 
     <template v-else>
       <!-- 歴代ベストの件数サマリー。円グラフのスライスと同じ数え方 -->
-      <v-card class="bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800/50 px-4 py-3">
-        <p class="text-sm text-amber-700 dark:text-amber-300 font-bold tabular-nums">
-          {{ t('past.list.bestCount', { n: allTimeBestCount.toLocaleString(), total: rows.length.toLocaleString() }) }}
-        </p>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('past.list.bestCountHint') }}</p>
+      <v-card color="amber" variant="tonal">
+        <v-card-text>
+          <p class="text-sm font-bold tabular-nums">
+            {{ t('past.list.bestCount', { n: allTimeBestCount.toLocaleString(), total: rows.length.toLocaleString() }) }}
+          </p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('past.list.bestCountHint') }}</p>
+        </v-card-text>
       </v-card>
 
       <!-- フィルタ領域: 歴代トグル + 検索 + 難易度 + ★ + 件数 -->
-      <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
+      <v-card>
+        <v-card-text class="flex flex-col gap-3">
         <!-- 自己歴代スコアのみ表示するトグル -->
         <v-switch
           v-model="onlyAllTimeBest"
-          color="#f59e0b"
+          color="amber"
+          inset
+          hide-details
           class="w-fit flex-none"
+          :label="t('past.list.onlyBest')"
           :title="t('past.list.onlyBestHint')"
-        >
-          <template #label>
-            <span
-              class="ml-2 text-xs sm:text-sm font-bold transition-colors"
-              :class="onlyAllTimeBest ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'"
-            >{{ t('past.list.onlyBest') }}</span>
-          </template>
-        </v-switch>
+        />
 
         <div class="flex flex-wrap gap-3 items-center">
           <!-- 曲名検索 -->
@@ -378,7 +375,8 @@ onMounted(async () => {
             type="text"
             :placeholder="t('past.list.searchPlaceholder')"
             :prepend-inner-icon="mdiMagnify"
-            class="flex-1 min-w-[200px] text-sm"
+            hide-details
+            class="flex-1 min-w-[200px]"
           />
 
           <!-- 難易度フィルタ -->
@@ -387,7 +385,8 @@ onMounted(async () => {
             :items="[{ title: t('chartList.allDifficulties'), value: '' }, ...availableDifficulties.map(d => ({ title: d, value: d }))]"
             item-title="title"
             item-value="value"
-            class="flex-none min-w-[160px] text-sm"
+            hide-details
+            class="flex-none min-w-[160px]"
           />
 
           <!-- ★レベルフィルタ -->
@@ -396,18 +395,20 @@ onMounted(async () => {
             :items="[{ title: t('chartList.allLevels'), value: '' as number | '' }, ...availableLevels.map(lv => ({ title: `Lv.${lv}`, value: lv as number | '' }))]"
             item-title="title"
             item-value="value"
-            class="flex-none min-w-[140px] text-sm"
+            hide-details
+            class="flex-none min-w-[140px]"
           />
 
           <span class="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">
             {{ filtered.length.toLocaleString() }} {{ t('chartList.charts') }}
           </span>
         </div>
+        </v-card-text>
       </v-card>
 
       <!-- スコア一覧テーブル。歴代ベストの行はアンバーで強調する -->
-      <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
-          <v-table class="w-full text-sm bg-transparent">
+      <v-card>
+          <v-table class="w-full">
             <thead>
               <tr class="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30">
                 <th
@@ -503,9 +504,8 @@ onMounted(async () => {
                   <v-chip
                     size="x-small"
                     label
-                    variant="flat"
-                    class="px-2 py-0.5 h-auto text-[10px] font-bold rounded-md"
-                    :class="DIFF_STYLE[row.difficultyName] || 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700'"
+                    variant="tonal"
+                    :color="DIFF_COLOR[row.difficultyName]"
                   >{{ row.difficultyName }}</v-chip>
                 </td>
                 <td class="px-3 py-3 text-center font-bold text-slate-700 dark:text-slate-300 tabular-nums">
@@ -533,8 +533,8 @@ onMounted(async () => {
                     v-if="row.isAllTimeBest"
                     size="x-small"
                     label
-                    variant="flat"
-                    class="px-2 py-0.5 h-auto text-[10px] font-bold rounded-md text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-900/40"
+                    variant="tonal"
+                    color="amber-darken-2"
                   >★ {{ t('past.list.bestBadge') }}</v-chip>
                   <span v-else class="text-xs tabular-nums text-slate-500 dark:text-slate-400">
                     {{ (row.score - row.bestScore).toLocaleString() }}
@@ -558,7 +558,6 @@ onMounted(async () => {
             variant="outlined"
             size="small"
             :disabled="currentPage <= 1"
-            class="px-3 text-xs font-bold rounded-lg border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             @click="currentPage--"
           >
             {{ t('chartList.prev') }}
@@ -570,7 +569,6 @@ onMounted(async () => {
             variant="outlined"
             size="small"
             :disabled="currentPage >= totalPages"
-            class="px-3 text-xs font-bold rounded-lg border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             @click="currentPage++"
           >
             {{ t('chartList.next') }}

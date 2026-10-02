@@ -1945,7 +1945,7 @@ const handleUnifiedClose = async () => {
 
 <template>
   <!-- Vuetify のルート。v-app-bar / v-main のレイアウト系は使わず、従来の sticky ヘッダー + fixed サイドバーの構成をそのまま中に置く -->
-  <v-app>
+  <v-app :class="{ 'bg-transparent': isObsIndividualStandingsPage }">
   <!-- パスワード再設定画面は独立ビューとして丸ごと差し替え、通常 UI は描画しない -->
   <ResetPasswordView v-if="isResetPasswordPage" />
   <!-- OBS ブラウザソース用: ストラテジーカードだけを単独描画。サイドバー等は全部省略。 -->
@@ -2046,10 +2046,11 @@ const handleUnifiedClose = async () => {
       @update:model-value="(v) => { if (!v) pastImportResult = null }"
     >
       <!-- 閉じるアニメーション中は pastImportResult が null になるので中身を v-if で守る -->
-      <v-card v-if="pastImportResult" class="w-full p-6">
-        <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-3">
+      <v-card v-if="pastImportResult" class="w-full">
+        <v-card-title>
           {{ t('past.result.title', { name: versionName(pastImportResult.version) }) }}
-        </h3>
+        </v-card-title>
+        <v-card-text>
         <dl class="text-sm space-y-1.5 mb-4">
           <div class="flex justify-between">
             <dt class="text-slate-500 dark:text-slate-400">{{ t('past.result.inserted') }}</dt>
@@ -2075,12 +2076,14 @@ const handleUnifiedClose = async () => {
             </div>
           </template>
         </dl>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
           {{ pastImportResult.archivedPt ? t('past.result.archivedNote', { name: versionName(pastImportResult.archivedPt.version) }) : t('past.notRanked') }}
         </p>
-        <div class="flex justify-end">
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
           <v-btn color="primary" @click="pastImportResult = null">{{ t('common.close') }}</v-btn>
-        </div>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -2109,7 +2112,7 @@ const handleUnifiedClose = async () => {
               icon
               variant="text"
               size="small"
-              class="-ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 lg:hidden"
+              class="-ml-2 lg:hidden"
               @click="isSidebarOpen = true"
             >
               <v-icon :icon="mdiMenu" />
@@ -2126,10 +2129,6 @@ const handleUnifiedClose = async () => {
               <v-btn
                 variant="text"
                 size="small"
-                class="h-auto min-w-0 px-1 text-sm font-medium"
-                :class="activeTab === 'dashboard'
-                  ? 'text-slate-800 dark:text-slate-100'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100'"
                 @click="activeTab = 'dashboard'"
               >
                 {{ t('nav.dashboard') }}
@@ -2154,7 +2153,7 @@ const handleUnifiedClose = async () => {
               v-if="isNativeApp && isLoggedIn"
               color="primary"
               size="small"
-              class="px-2.5 text-xs font-semibold shrink-0"
+              class="shrink-0"
               :title="t('nav.appCsvImport')"
               @click="showUploadArea = true"
             >
@@ -2167,7 +2166,7 @@ const handleUnifiedClose = async () => {
             </v-btn>
 
             <!-- Dark Mode Toggle -->
-            <v-btn icon variant="text" size="small" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" @click="toggleDarkMode">
+            <v-btn icon variant="text" size="small" @click="toggleDarkMode">
               <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
                 <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
               </svg>
@@ -2182,7 +2181,6 @@ const handleUnifiedClose = async () => {
                 icon
                 variant="text"
                 size="small"
-                class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 @click="isNotificationOpen = !isNotificationOpen"
               >
                 <v-badge
@@ -2199,12 +2197,12 @@ const handleUnifiedClose = async () => {
             </div>
 
             <template v-if="!isLoggedIn && !authLoading">
-              <v-btn variant="text" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" @click="isLoginModalOpen = true">
+              <v-btn variant="text" @click="isLoginModalOpen = true">
                 {{ t('nav.loginRegister') }}
               </v-btn>
             </template>
             <template v-if="isLoggedIn">
-              <v-avatar size="32" class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold cursor-pointer transition-colors lg:hidden" @click="isSidebarOpen = true">
+              <v-avatar size="32" color="primary" class="cursor-pointer lg:hidden" @click="isSidebarOpen = true">
                 {{ user?.displayName?.charAt(0) || user?.iidxId?.charAt(0) || 'U' }}
               </v-avatar>
             </template>
@@ -2219,7 +2217,6 @@ const handleUnifiedClose = async () => {
           <v-btn
             variant="text"
             size="small"
-            class="h-auto min-w-0 px-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100"
             @click="activeTab = 'dashboard'"
           >
             {{ t('nav.dashboard') }}
@@ -2231,7 +2228,8 @@ const handleUnifiedClose = async () => {
         </nav>
         <!-- ========== 閲覧中バナー: 他ユーザー/TOPランカー閲覧時に最上部へ固定表示 ========== -->
         <!-- 「自分のデータに戻る」「フレンド申請」「仮想ライバル登録」などの操作ボタンを配置 -->
-        <v-card v-if="viewingUserId || viewingMode === 'topRanker' || viewingMode === 'arenaTopRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 dark:bg-blue-900/20 p-4 border-blue-200 dark:border-blue-800 animate-fade-in shrink-0">
+        <v-card v-if="viewingUserId || viewingMode === 'topRanker' || viewingMode === 'arenaTopRanker'" color="primary" variant="tonal" class="w-full max-w-6xl mx-auto mb-6 animate-fade-in shrink-0">
+          <v-card-text class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3 w-full justify-center sm:justify-start">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -2245,7 +2243,7 @@ const handleUnifiedClose = async () => {
           <div class="flex items-center gap-2 shrink-0">
             <v-btn
               variant="outlined"
-              class="px-4 text-sm font-semibold whitespace-nowrap bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600"
+              class="whitespace-nowrap"
               @click="returnToMyData"
             >
               <template #prepend>
@@ -2259,7 +2257,7 @@ const handleUnifiedClose = async () => {
               <v-btn
                 v-if="virtualRivalRegistered === false"
                 color="success"
-                class="px-4 text-sm font-semibold whitespace-nowrap"
+                class="whitespace-nowrap"
                 :disabled="virtualRivalBusy"
                 @click="toggleVirtualRival"
               >
@@ -2272,8 +2270,9 @@ const handleUnifiedClose = async () => {
               </v-btn>
               <v-btn
                 v-else-if="virtualRivalRegistered === true"
-                variant="outlined"
-                class="px-4 text-sm font-semibold whitespace-nowrap bg-emerald-100 dark:bg-emerald-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 text-emerald-700 dark:text-emerald-400 hover:text-red-700 dark:hover:text-red-400 border-emerald-200 dark:border-emerald-800"
+                variant="tonal"
+                color="success"
+                class="whitespace-nowrap"
                 :disabled="virtualRivalBusy"
                 title="クリックで解除"
                 @click="toggleVirtualRival"
@@ -2283,7 +2282,7 @@ const handleUnifiedClose = async () => {
               <v-btn
                 v-if="friendStatus === 'none'"
                 color="success"
-                class="px-4 text-sm font-semibold whitespace-nowrap"
+                class="whitespace-nowrap"
                 @click="openFriendRequestModal"
               >
                 <template #prepend>
@@ -2296,72 +2295,73 @@ const handleUnifiedClose = async () => {
               <v-chip
                 v-else-if="friendStatus === 'requested'"
                 label
-                variant="outlined"
-                size="default"
-                class="px-4 font-semibold whitespace-nowrap text-sm bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                variant="tonal"
+                color="warning"
+                class="whitespace-nowrap"
               >申請済み</v-chip>
               <v-chip
                 v-else-if="friendStatus === 'friend'"
                 label
-                variant="outlined"
-                size="default"
-                class="px-4 font-semibold whitespace-nowrap text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+                variant="tonal"
+                color="success"
+                class="whitespace-nowrap"
               >フレンド</v-chip>
               <v-chip
                 v-else-if="friendStatus === 'incoming'"
                 label
-                variant="outlined"
-                size="default"
-                class="px-4 font-semibold whitespace-nowrap text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800"
+                variant="tonal"
+                color="info"
+                class="whitespace-nowrap"
               >申請受信中</v-chip>
             </template>
           </div>
+          </v-card-text>
         </v-card>
 
         <!-- ========== フレンド申請モーダル: メッセージを添えて申請を送信する ========== -->
         <v-dialog v-model="isFriendRequestModalOpen" max-width="448">
-          <v-card class="overflow-hidden">
-            <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-              <h3 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">{{ viewingUserName }} さんにフレンド申請</h3>
-              <v-btn icon variant="text" size="small" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="isFriendRequestModalOpen = false">
+          <v-card>
+            <v-card-title class="flex justify-between items-center">
+              <span class="truncate">{{ viewingUserName }} さんにフレンド申請</span>
+              <v-btn icon variant="text" size="small" @click="isFriendRequestModalOpen = false">
                 <v-icon :icon="mdiClose" />
               </v-btn>
-            </div>
-            <v-card-text class="p-6 space-y-4">
+            </v-card-title>
+            <v-card-text class="space-y-4">
               <div>
-                <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">申請メッセージ (任意)</span>
                 <v-textarea
                   v-model="friendRequestMessage"
+                  label="申請メッセージ (任意)"
                   maxlength="100"
                   rows="3"
                   no-resize
                   color="success"
                   placeholder="よろしくお願いします！"
-                  class="mt-2"
+                  hide-details
                 />
                 <span class="text-xs text-slate-400 mt-1 block text-right">{{ friendRequestMessage.length }} / 100</span>
               </div>
-              <v-alert v-if="friendRequestError" type="error" class="text-sm">
+              <v-alert v-if="friendRequestError" type="error" density="compact">
                 {{ friendRequestError }}
               </v-alert>
-              <div class="flex gap-2 justify-end">
-                <v-btn
-                  variant="tonal"
-                  class="px-4 font-semibold"
-                  :disabled="friendRequestSending"
-                  @click="isFriendRequestModalOpen = false"
-                >キャンセル</v-btn>
-                <v-btn
-                  color="success"
-                  class="px-4 font-semibold"
-                  :disabled="friendRequestSending"
-                  @click="submitFriendRequest"
-                >
-                  <v-progress-circular v-if="friendRequestSending" size="16" width="2" color="white" class="mr-2" />
-                  申請を送る
-                </v-btn>
-              </div>
             </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn
+                variant="text"
+                :disabled="friendRequestSending"
+                @click="isFriendRequestModalOpen = false"
+              >キャンセル</v-btn>
+              <v-btn
+                color="success"
+                variant="flat"
+                :loading="friendRequestSending"
+                :disabled="friendRequestSending"
+                @click="submitFriendRequest"
+              >
+                申請を送る
+              </v-btn>
+            </v-card-actions>
           </v-card>
         </v-dialog>
 
@@ -2372,14 +2372,16 @@ const handleUnifiedClose = async () => {
         @update:model-value="(v) => { if (!v) handleUnifiedClose() }"
       >
         <!-- v-dialog は一度開くと中身を残すので、従来どおり閉じるたびに UnifiedImport を作り直すため v-if を付ける -->
-        <v-card v-if="showUploadArea && isLoggedIn" class="w-full p-6 animate-fade-in">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ t('app.import.title') }}</h2>
-            <v-btn icon variant="text" size="small" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="handleUnifiedClose">
+        <v-card v-if="showUploadArea && isLoggedIn" class="w-full animate-fade-in">
+          <v-card-title class="flex justify-between items-center">
+            <h2>{{ t('app.import.title') }}</h2>
+            <v-btn icon variant="text" size="small" @click="handleUnifiedClose">
               <v-icon :icon="mdiClose" />
             </v-btn>
-          </div>
-          <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @score-file="handleUnifiedScoreFile" @close="handleUnifiedClose" />
+          </v-card-title>
+          <v-card-text>
+            <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @score-file="handleUnifiedScoreFile" @close="handleUnifiedClose" />
+          </v-card-text>
         </v-card>
       </v-dialog>
 
@@ -2593,7 +2595,8 @@ const handleUnifiedClose = async () => {
             </p>
 
             <!-- PWA インストールバナー: beforeinstallprompt を受けたときだけ出現 -->
-            <v-card v-if="showInstallBanner" variant="flat" class="mt-8 p-6 bg-blue-700 text-white flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+            <v-card v-if="showInstallBanner" variant="flat" color="primary" class="mt-8 animate-fade-in">
+              <v-card-text class="flex flex-col sm:flex-row items-center gap-4">
               <div class="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -2601,20 +2604,23 @@ const handleUnifiedClose = async () => {
               </div>
               <div class="text-center sm:text-left flex-1">
                 <h3 class="font-bold text-lg">{{ t('app.pwa.title') }}</h3>
-                <p class="text-blue-100 text-sm">{{ t('app.pwa.desc') }}</p>
+                <p class="text-sm opacity-80">{{ t('app.pwa.desc') }}</p>
               </div>
               <div class="flex gap-2">
-                <v-btn class="px-4 text-sm font-semibold bg-white/10 hover:bg-white/20 text-white" @click="showInstallBanner = false">{{ t('app.pwa.later') }}</v-btn>
-                <v-btn class="px-4 text-sm font-semibold bg-white text-blue-700 hover:bg-blue-50" @click="installApp">{{ t('app.pwa.install') }}</v-btn>
+                <v-btn variant="text" @click="showInstallBanner = false">{{ t('app.pwa.later') }}</v-btn>
+                <v-btn variant="elevated" color="surface" @click="installApp">{{ t('app.pwa.install') }}</v-btn>
               </div>
+              </v-card-text>
             </v-card>
           </div>
 
           <!-- ローディング表示: CSV 解析中 / スコア取得中 / 認証中のいずれかで表示 -->
           <div v-if="isParsing || isFetching || authLoading" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
-            <v-card class="w-full flex flex-col items-center justify-center p-12">
-              <v-progress-circular size="40" width="4" class="mb-4" />
-              <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">{{ t('app.loading.data') }}</p>
+            <v-card class="w-full">
+              <v-card-text class="flex flex-col items-center justify-center py-12">
+                <v-progress-circular size="40" width="4" color="primary" indeterminate class="mb-4" />
+                <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">{{ t('app.loading.data') }}</p>
+              </v-card-text>
             </v-card>
           </div>
 
@@ -2625,10 +2631,9 @@ const handleUnifiedClose = async () => {
             <v-alert
               v-if="errorMsg"
               type="error"
-              density="default"
-              class="w-full mt-6 border border-red-200 dark:border-red-800 animate-fade-in"
+              class="w-full mt-6 animate-fade-in"
             >
-              <span class="font-medium text-sm sm:text-base">{{ errorMsg }}</span>
+              {{ errorMsg }}
             </v-alert>
           </div>
 
@@ -2639,8 +2644,9 @@ const handleUnifiedClose = async () => {
             <!-- 取り込み案内: 自分のダッシュボード／一覧で、まだ現行作のスコアが 1 件もないとき -->
             <v-card
               v-if="isLoggedIn && !viewingUserId && scoreData.length === 0 && (activeTab === 'dashboard' || activeTab === 'table')"
-              class="w-full max-w-6xl mb-4 p-4 sm:p-5 border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"
+              class="w-full max-w-6xl mb-4 animate-fade-in"
             >
+              <v-card-text class="flex flex-col sm:flex-row items-center gap-4">
               <div class="w-11 h-11 shrink-0 bg-blue-100 dark:bg-blue-900/40 rounded-md flex items-center justify-center text-blue-700 dark:text-blue-400">
                 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -2653,7 +2659,7 @@ const handleUnifiedClose = async () => {
               <v-btn
                 color="primary"
                 size="large"
-                class="w-full sm:w-auto px-5 shrink-0"
+                class="w-full sm:w-auto shrink-0"
                 @click="showUploadArea = true"
               >
                 <template #prepend>
@@ -2663,6 +2669,7 @@ const handleUnifiedClose = async () => {
                 </template>
                 {{ t('empty.uploadCta') }}
               </v-btn>
+              </v-card-text>
             </v-card>
 
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
@@ -2716,12 +2723,12 @@ const handleUnifiedClose = async () => {
             <p>© 2026 beat-seeker.</p>
             <p class="text-xs mt-1 max-w-md">{{ t('landing.copyrightDisclaimer') }}</p>
           </div>
-          <div class="flex items-center gap-4 flex-wrap justify-center">
-            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'about'">{{ t('app.footer.desc') }}</v-btn>
-            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'terms'">{{ t('nav.terms') }}</v-btn>
-            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'privacy-policy'">{{ t('privacyPolicy.title') }}</v-btn>
-            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'contact'">{{ t('contactPage.title') }}</v-btn>
-            <v-btn v-if="!viewingUserId" variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'ranking'">{{ t('nav.ranking') }}</v-btn>
+          <div class="flex items-center gap-1 flex-wrap justify-center">
+            <v-btn variant="text" size="small" @click="activeTab = 'about'">{{ t('app.footer.desc') }}</v-btn>
+            <v-btn variant="text" size="small" @click="activeTab = 'terms'">{{ t('nav.terms') }}</v-btn>
+            <v-btn variant="text" size="small" @click="activeTab = 'privacy-policy'">{{ t('privacyPolicy.title') }}</v-btn>
+            <v-btn variant="text" size="small" @click="activeTab = 'contact'">{{ t('contactPage.title') }}</v-btn>
+            <v-btn v-if="!viewingUserId" variant="text" size="small" @click="activeTab = 'ranking'">{{ t('nav.ranking') }}</v-btn>
           </div>
         </div>
       </footer>
@@ -2744,7 +2751,7 @@ const handleUnifiedClose = async () => {
       <v-btn
         color="primary"
         size="small"
-        class="shrink-0 px-4 text-sm font-semibold"
+        class="shrink-0"
         @click="reloadPage"
       >
         {{ t('app.update.reload') }}

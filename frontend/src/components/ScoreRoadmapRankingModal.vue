@@ -77,18 +77,18 @@ function choose(e: Entry) {
   <v-dialog
     :model-value="true"
     max-width="576"
+    scrollable
     @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
   >
-    <v-card class="max-h-[85vh] bg-white dark:bg-slate-800 rounded-2xl" variant="flat">
-        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
-          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">ロードマップ レベルランキング</h3>
+    <v-card>
+        <v-card-title class="flex justify-between items-center">
+          <span>ロードマップ レベルランキング</span>
           <v-btn icon variant="text" size="small" aria-label="閉じる" @click="$emit('close')">
             <v-icon :icon="mdiClose" />
           </v-btn>
-        </div>
+        </v-card-title>
 
-        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar px-6 pt-0 pb-6">
-          <div class="sticky top-0 bg-white dark:bg-slate-800 pt-4 pb-3 z-10">
+        <div class="px-6 pb-3">
             <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
               達成しているレベルのうち一番高いもので並べています（同じレベルは同順位）。
               <template v-if="computedAt">{{ formatJstDateTime(computedAt) }} 時点の集計（3 時間ごとに更新）。</template>
@@ -100,17 +100,22 @@ function choose(e: Entry) {
               type="text"
               autocomplete="off"
               placeholder="名前で絞り込み"
-              class="mt-2 w-full text-sm"
+              density="compact"
+              hide-details
+              class="mt-2 w-full"
             />
-          </div>
+        </div>
+        <v-divider />
+
+        <v-card-text>
 
           <div v-if="loading" class="mt-6 text-center text-sm text-slate-400 dark:text-slate-500">読み込み中...</div>
-          <v-alert v-else-if="error" type="error" class="mt-4 text-sm">
+          <v-alert v-else-if="error" type="error" class="mt-4">
             {{ error }}
           </v-alert>
           <div v-else-if="!shown.length" class="mt-6 text-center text-sm text-slate-400 dark:text-slate-500">該当するユーザーがいません</div>
 
-          <v-table v-else class="w-full text-sm bg-transparent">
+          <v-table v-else density="compact" class="w-full">
             <thead>
               <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
                 <th class="py-1.5 pr-2 w-12">順位</th>

@@ -88,15 +88,16 @@ const handleSendRequest = async (friend: Friend) => {
 
 <template>
   <v-dialog :model-value="isOpen" @update:model-value="(v) => { if (!v) emit('close') }" max-width="672">
-    <v-card class="bg-white dark:bg-slate-800 max-h-[85vh] transition-colors duration-200">
-      <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
-        <h3 class="text-xl font-bold text-slate-800 dark:text-white tracking-tight">フレンドを検索</h3>
-        <v-btn icon variant="text" size="small" aria-label="閉じる" @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+    <v-card class="max-h-[85vh]">
+      <v-card-title class="flex justify-between items-center">
+        <span>フレンドを検索</span>
+        <v-btn icon variant="text" size="small" aria-label="閉じる" @click="emit('close')">
           <v-icon :icon="mdiClose" />
         </v-btn>
-      </div>
+      </v-card-title>
+      <v-divider />
 
-      <v-card-text class="p-6 space-y-6 overflow-y-auto">
+      <v-card-text class="space-y-6 overflow-y-auto">
         <!-- 検索フォーム（虫眼鏡アイコン付きテキスト + 検索ボタン） -->
         <form @submit.prevent="handleSearch" class="flex gap-2 items-center">
           <v-text-field
@@ -105,6 +106,7 @@ const handleSendRequest = async (friend: Friend) => {
             placeholder="表示名 または IIDX ID (ハイフン不要) ※完全一致"
             :prepend-inner-icon="mdiMagnify"
             density="comfortable"
+            hide-details
             class="flex-1"
           />
           <v-btn
@@ -113,26 +115,24 @@ const handleSendRequest = async (friend: Friend) => {
             size="large"
             :loading="isSearching"
             :disabled="isSearching"
-            class="px-6"
           >
             検索
           </v-btn>
         </form>
 
         <!-- エラー／成功メッセージ表示領域 -->
-        <v-alert v-if="error" type="error" class="font-medium">
+        <v-alert v-if="error" type="error">
           {{ error }}
         </v-alert>
 
-        <v-alert v-if="successMsg" type="success" class="font-medium">
+        <v-alert v-if="successMsg" type="success">
           {{ successMsg }}
         </v-alert>
 
         <!-- 検索結果一覧（アバター頭文字 + 表示名 + Beat-PT + ランク + 申請ボタン） -->
         <div class="space-y-3">
-          <v-card v-for="result in searchResults" :key="result.id"
-            class="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 hover:border-blue-200 dark:hover:border-blue-900 transition-all"
-          >
+          <v-card v-for="result in searchResults" :key="result.id" variant="outlined">
+           <v-card-text class="flex items-center gap-4">
             <div class="w-10 h-10 shrink-0 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center font-bold text-slate-500 dark:text-slate-400">
               {{ result.displayName?.charAt(0) || 'U' }}
             </div>
@@ -154,7 +154,8 @@ const handleSendRequest = async (friend: Friend) => {
                   type="text"
                   placeholder="申請メッセージ (任意)"
                   maxlength="100"
-                  class="text-xs"
+                  density="compact"
+                  hide-details
                 />
               </div>
             </div>
@@ -165,17 +166,17 @@ const handleSendRequest = async (friend: Friend) => {
                 @click="handleSendRequest(result)"
                 color="primary"
                 variant="tonal"
-                class="text-sm"
               >
                 申請
               </v-btn>
-              <v-chip v-else-if="result.isFriend" label color="success" class="font-bold">
+              <v-chip v-else-if="result.isFriend" label color="success">
                 フレンド
               </v-chip>
-              <v-chip v-else label color="warning" class="font-bold">
+              <v-chip v-else label color="warning">
                 申請済み
               </v-chip>
             </div>
+           </v-card-text>
           </v-card>
         </div>
       </v-card-text>

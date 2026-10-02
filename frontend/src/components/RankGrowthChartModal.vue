@@ -415,11 +415,9 @@ watch(() => props.rank, loadHistory);
 
 <template>
   <v-dialog :model-value="true" @update:model-value="(v) => { if (!v) emit('close') }" max-width="768">
-      <v-card class="bg-white dark:bg-slate-800 max-h-[90vh]">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
-          <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">
-            ☆{{ rank }} {{ t('table.growthChartTitle') }}
-          </h3>
+      <v-card class="max-h-[90vh]">
+        <v-card-title class="flex items-center justify-between shrink-0">
+          <span>☆{{ rank }} {{ t('table.growthChartTitle') }}</span>
           <div class="flex items-center gap-2">
             <v-btn
               v-if="series.length > 0"
@@ -430,18 +428,18 @@ watch(() => props.rank, loadHistory);
               variant="tonal"
               size="small"
               :prepend-icon="mdiArrowExpandAll"
-              class="text-xs"
             >
               {{ t('table.resetZoom') }}
             </v-btn>
-            <v-btn icon variant="text" size="small" @click="emit('close')" :aria-label="t('common.back')" class="text-slate-500 dark:text-slate-400">
+            <v-btn icon variant="text" size="small" @click="emit('close')" :aria-label="t('common.back')">
               <v-icon :icon="mdiClose" />
             </v-btn>
           </div>
-        </div>
-        <v-card-text class="flex-1 overflow-auto p-4">
+        </v-card-title>
+        <v-divider />
+        <v-card-text class="flex-1 overflow-auto">
           <div v-if="isLoading" class="py-12 flex justify-center">
-            <v-progress-circular size="32" width="4" color="indigo" />
+            <v-progress-circular indeterminate size="32" width="4" color="primary" />
           </div>
           <div v-else-if="errorMsg" class="py-8 text-center text-red-500 dark:text-red-400">{{ errorMsg }}</div>
           <div v-else-if="series.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">{{ t('history.empty') }}</div>

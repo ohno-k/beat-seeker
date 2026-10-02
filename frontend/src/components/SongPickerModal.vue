@@ -93,28 +93,29 @@ const pickSong = (h: Hit) => {
     max-width="768"
     @update:model-value="(v: boolean) => { if (!v) emit('close') }"
   >
-    <v-card class="w-full flex flex-col max-h-[85vh] overflow-hidden">
+    <v-card class="w-full flex flex-col max-h-[85vh]">
       <!-- ヘッダ -->
-      <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-        <p class="text-sm font-bold">曲を選択</p>
-        <v-btn icon variant="text" size="small" aria-label="close" class="text-slate-500" @click="emit('close')">
-          <v-icon :icon="mdiClose" />
-        </v-btn>
-      </div>
+      <v-card-item class="shrink-0">
+        <v-card-title>曲を選択</v-card-title>
+        <template #append>
+          <v-btn icon variant="text" size="small" aria-label="close" @click="emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </template>
+      </v-card-item>
 
       <!-- フィルタ -->
-      <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-700 space-y-2 bg-slate-50 dark:bg-slate-900/40">
+      <v-card-text class="shrink-0 space-y-3 pt-0">
         <!-- Lv -->
-        <div class="flex flex-wrap gap-1 items-center text-xs">
-          <span class="text-[10px] font-mono text-slate-400 w-16">Lv</span>
-          <v-btn-toggle v-model="levelFilter" mandatory class="flex-wrap h-auto">
-            <v-btn value="ALL" size="small" class="text-xs">全て</v-btn>
+        <div class="flex flex-wrap gap-1 items-center">
+          <span class="text-caption text-medium-emphasis w-16">Lv</span>
+          <v-btn-toggle v-model="levelFilter" mandatory color="primary" variant="outlined" density="compact" divided class="flex-wrap h-auto">
+            <v-btn value="ALL" size="small">全て</v-btn>
             <v-btn
               v-for="lv in ALL_LEVELS"
               :key="lv"
               :value="lv"
               size="small"
-              class="text-xs"
             >Lv {{ lv }}</v-btn>
           </v-btn-toggle>
         </div>
@@ -123,9 +124,11 @@ const pickSong = (h: Hit) => {
           v-model="search"
           type="text"
           placeholder="曲タイトルで絞り込み (部分一致)"
-          class="w-full text-sm"
+          hide-details
+          class="w-full"
         />
-      </div>
+      </v-card-text>
+      <v-divider />
 
       <!-- リスト -->
       <div class="flex-1 overflow-y-auto">
@@ -133,23 +136,19 @@ const pickSong = (h: Hit) => {
           v-if="filteredSongs.hits.length === 0"
           class="px-5 py-10 text-center text-sm text-slate-400 italic"
         >該当する曲がありません</p>
-        <v-list v-else density="compact" class="py-0 divide-y divide-slate-100 dark:divide-slate-700/60">
+        <v-list v-else lines="two">
           <v-list-item
             v-for="h in filteredSongs.hits"
             :key="`${h.genre}-${h.strategyId}`"
-            class="px-5 py-2"
-            :class="currentTitle === h.title ? 'bg-blue-50 dark:bg-blue-900/20' : ''"
+            :active="currentTitle === h.title"
+            color="primary"
+            :title="h.title"
+            :subtitle="`${h.version} · ${h.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER'} · Lv ${h.level}`"
             @click="pickSong(h)"
           >
-            <div class="flex items-baseline gap-3">
-              <span class="shrink-0 text-[10px] font-mono text-slate-400 tabular-nums w-12 text-right">#{{ h.strategyId }}</span>
-              <span class="flex-1 min-w-0">
-                <p class="font-bold text-sm truncate">{{ h.title }}</p>
-                <p class="text-[10px] font-mono text-slate-400 mt-0.5">
-                  {{ h.version }} · {{ h.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }} · Lv {{ h.level }}
-                </p>
-              </span>
-            </div>
+            <template #prepend>
+              <span class="shrink-0 text-caption font-mono text-medium-emphasis tabular-nums w-12 text-right mr-3">#{{ h.strategyId }}</span>
+            </template>
           </v-list-item>
         </v-list>
         <p

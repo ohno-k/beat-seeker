@@ -23,7 +23,7 @@
 import { computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import type { VersionDetectionResult } from '../utils/csvParser';
-import { versionName, versionBadgeClass, MIN_PAST_VERSION, CURRENT_VERSION } from '../utils/iidxVersions';
+import { versionName, versionChartColor, MIN_PAST_VERSION, CURRENT_VERSION } from '../utils/iidxVersions';
 
 const { t } = useI18n();
 
@@ -92,21 +92,21 @@ const errorMessage = computed(() => {
     max-width="448"
     @update:model-value="(v: boolean) => { if (!v) emit('cancel') }"
   >
-    <v-card v-if="detection" class="p-6">
+    <v-card v-if="detection">
 
       <!-- 判定成功: 取り込み内容の確認 -->
       <template v-if="isOk">
-        <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-4">
+        <v-card-title>
           {{ ambiguous ? t('past.confirm.ambiguousTitle') : t('past.confirm.title') }}
-        </h3>
+        </v-card-title>
 
+        <v-card-text>
         <!-- 判定された作品を主役として大きく見せる -->
         <div class="flex items-center gap-3 mb-3">
           <v-chip
             label
-            variant="outlined"
-            class="px-2 text-xs font-bold border"
-            :class="versionBadgeClass(detectedVersion)"
+            variant="tonal"
+            :color="versionChartColor(detectedVersion)"
           >{{ detectedVersion }}</v-chip>
           <span class="text-lg font-bold text-slate-800 dark:text-slate-100">
             {{ versionName(detectedVersion) }}
@@ -148,46 +148,42 @@ const errorMessage = computed(() => {
           <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
             {{ t('past.confirm.asCurrentNote') }}
           </p>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+          <p class="text-xs text-slate-500 dark:text-slate-400">
             {{ t('past.notRanked') }}
           </p>
-          <div class="flex justify-end">
-            <v-btn variant="outlined" :disabled="isSubmitting" @click="emit('cancel')">
-              {{ t('past.confirm.cancel') }}
-            </v-btn>
-          </div>
         </template>
 
         <!-- 通常の過去作取り込み -->
-        <template v-else>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
-            {{ t('past.notRanked') }}
-          </p>
+        <p v-else class="text-xs text-slate-500 dark:text-slate-400">
+          {{ t('past.notRanked') }}
+        </p>
+        </v-card-text>
 
-          <div class="flex justify-end gap-2">
-            <v-btn variant="outlined" :disabled="isSubmitting" @click="emit('cancel')">
-              {{ t('past.confirm.cancel') }}
-            </v-btn>
-            <v-btn color="primary" :disabled="isSubmitting" @click="emit('confirm')">
-              {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.submit') }}
-            </v-btn>
-          </div>
-        </template>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" :disabled="isSubmitting" @click="emit('cancel')">
+            {{ t('past.confirm.cancel') }}
+          </v-btn>
+          <v-btn v-if="!ambiguous" color="primary" variant="flat" :disabled="isSubmitting" @click="emit('confirm')">
+            {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.submit') }}
+          </v-btn>
+        </v-card-actions>
       </template>
 
       <!-- 判定失敗: 理由の提示のみ。取り込みボタンは出さない -->
       <template v-else>
-        <h3 class="text-base font-bold text-red-600 dark:text-red-400 mb-3">
+        <v-card-title class="text-error">
           {{ t('past.error.title') }}
-        </h3>
-        <p class="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line mb-5">
+        </v-card-title>
+        <v-card-text class="whitespace-pre-line">
           {{ errorMessage }}
-        </p>
-        <div class="flex justify-end">
-          <v-btn variant="outlined" @click="emit('cancel')">
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="emit('cancel')">
             {{ t('past.error.close') }}
           </v-btn>
-        </div>
+        </v-card-actions>
       </template>
 
     </v-card>
