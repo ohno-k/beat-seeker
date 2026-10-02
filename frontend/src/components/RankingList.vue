@@ -560,25 +560,25 @@ const tierChangeStats = computed(() => {
 async function fetchBeatRanking() {
     // 前作の表示中は仮想プレイヤー（TOP ランカー／アリーナ）を取得しない（アーカイブに無いため）。
     const past = isPastVersion.value;
+    const version = selectedVersion.value;
     const [rankRes, topRes, arenaRes] = await Promise.all([
         fetch(`${API_BASE}/api/scores/ranking${versionQuery.value}`),
         past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/ranking/top-rankers`),
         past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/ranking/arena-top-rankers`),
     ]);
+    if (version !== selectedVersion.value) return;
     if (!rankRes.ok) throw new Error('beat');
-    beatRanking.value = await rankRes.json();
-    if (topRes && topRes.ok) {
-        const raw: TopRankerEntry[] = await topRes.json();
-        topRankers.value = raw.filter(r => r.beatPt > 0);
-    } else if (past) {
-        topRankers.value = [];
-    }
-    if (arenaRes && arenaRes.ok) {
-        const raw: ArenaTopRankerEntry[] = await arenaRes.json();
-        arenaTopRankers.value = raw.filter(r => r.beatPt > 0);
-    } else if (past) {
-        arenaTopRankers.value = [];
-    }
+    const ranking = await rankRes.json();
+    const top: TopRankerEntry[] | null = topRes && topRes.ok ? await topRes.json() : null;
+    const arena: ArenaTopRankerEntry[] | null = arenaRes && arenaRes.ok ? await arenaRes.json() : null;
+    // 待っている間に作品を切り替えていたら捨てる（今作は応答に約 9 秒かかり、その間に前作へ切り替えると
+    // 先に届いた前作の表示を遅れて届いた今作が上書きしていた）
+    if (version !== selectedVersion.value) return;
+    beatRanking.value = ranking;
+    if (top) topRankers.value = top.filter(r => r.beatPt > 0);
+    else if (past) topRankers.value = [];
+    if (arena) arenaTopRankers.value = arena.filter(r => r.beatPt > 0);
+    else if (past) arenaTopRankers.value = [];
 }
 
 /** 【関数の役割】 AVERAGE ランキング（Lv11/Lv12 ANOTHER/LEGGENDARIA 全曲の平均順位）を取得する。 */
@@ -591,25 +591,24 @@ async function fetchAverageRanking() {
 /** 【関数の役割】 Rate-PT ランキング本体・都道府県 TOP ランカー（Rate 版）・アリーナ仮想プレイヤー（Rate 版）を並列取得する。 */
 async function fetchRateRanking() {
     const past = isPastVersion.value;
+    const version = selectedVersion.value;
     const [rankRes, topRes, arenaRes] = await Promise.all([
         fetch(`${API_BASE}/api/scores/rate-ranking${versionQuery.value}`),
         past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/rate-ranking/top-rankers`),
         past ? Promise.resolve<Response | null>(null) : fetch(`${API_BASE}/api/scores/rate-ranking/arena-top-rankers`),
     ]);
+    if (version !== selectedVersion.value) return;
     if (!rankRes.ok) throw new Error('rate');
-    rateRanking.value = await rankRes.json();
-    if (topRes && topRes.ok) {
-        const raw: RateTopRankerEntry[] = await topRes.json();
-        rateTopRankers.value = raw.filter(r => r.ratePt > 0);
-    } else if (past) {
-        rateTopRankers.value = [];
-    }
-    if (arenaRes && arenaRes.ok) {
-        const raw: ArenaRateTopRankerEntry[] = await arenaRes.json();
-        arenaRateTopRankers.value = raw.filter(r => r.ratePt > 0);
-    } else if (past) {
-        arenaRateTopRankers.value = [];
-    }
+    const ranking = await rankRes.json();
+    const top: RateTopRankerEntry[] | null = topRes && topRes.ok ? await topRes.json() : null;
+    const arena: ArenaRateTopRankerEntry[] | null = arenaRes && arenaRes.ok ? await arenaRes.json() : null;
+    // 待っている間に作品を切り替えていたら捨てる（fetchBeatRanking と同じ）
+    if (version !== selectedVersion.value) return;
+    rateRanking.value = ranking;
+    if (top) rateTopRankers.value = top.filter(r => r.ratePt > 0);
+    else if (past) rateTopRankers.value = [];
+    if (arena) arenaRateTopRankers.value = arena.filter(r => r.ratePt > 0);
+    else if (past) arenaRateTopRankers.value = [];
 }
 
 
@@ -685,6 +684,7 @@ async function fetchSimulationData() {
 // 初回マウントで Beat-PT ランキングを取得。
 // 散布図（BEAT × RATE）を表示するために、RATE 表示が有効ならマウント時に Rate も並行取得する。
 onMounted(async () => {
+    const version = selectedVersion.value;
     try {
         const tasks: Promise<unknown>[] = [fetchBeatRanking()];
         if (showRateTier.value) {
@@ -697,9 +697,10 @@ onMounted(async () => {
         await Promise.all(tasks);
     } catch (e) {
         console.error(e);
-        error.value = t('ranking.error');
+        // 読み込み中に作品を切り替えていたら、表示中の作品の読み込み（watch(selectedVersion)）に任せる
+        if (version === selectedVersion.value) error.value = t('ranking.error');
     } finally {
-        isLoading.value = false;
+        if (version === selectedVersion.value) isLoading.value = false;
     }
 });
 
