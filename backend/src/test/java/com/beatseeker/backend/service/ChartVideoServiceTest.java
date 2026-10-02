@@ -27,6 +27,41 @@ class ChartVideoServiceTest {
     }
 
     @Test
+    void searchQuery_dropsYouTubeOperators() {
+        // 「-rebuild-」のままだと rebuild を含む動画が除外される（2026-10-03 AA -rebuild- が無印 AA だらけになった）
+        assertThat(ChartVideoService.searchQuery("AA -rebuild-", "D.J.Amuro")).isEqualTo("AA rebuild D.J.Amuro beatmania IIDX");
+        assertThat(ChartVideoService.searchQuery("《PL|RAYER》", "BlackLolita")).isEqualTo("《PL RAYER》 BlackLolita beatmania IIDX");
+        assertThat(ChartVideoService.searchQuery("-65℃", null)).isEqualTo("65℃ beatmania IIDX");
+    }
+
+    @Test
+    void rank_shorterTitle_dropsVideosOfTheLongerSong() {
+        // 「AA」の検索結果（本番の候補）。「AA -rebuild-」の動画は別の曲なので下げる
+        List<Candidate> searched = List.of(
+                new Candidate("2rCcNpfmhK4", "Beatmania IIDX 11 IIDX RED - AA [ANOTHER]", "Ko Ramdeo", 126),
+                new Candidate("xBpgjlG8FKg", "【beatmania IIDX】AA -rebuild- / D.J.Amuro", "zakuroiidx", 130),
+                new Candidate("EF1yW1ne1FE", "【beatmania IIDX】AA / D.J.Amuro", "牙", 132));
+        List<String> longer = ChartVideoService.longerTitles("AA", List.of("AA", "AA -rebuild-", "GENE"));
+        assertThat(longer).containsExactly("aarebuild");
+
+        List<Candidate> ranked = ChartVideoService.rank(searched, "AA", 120.0, longer);
+        assertThat(ranked).extracting(Candidate::id).last().isEqualTo("xBpgjlG8FKg");
+
+        // 「AA -rebuild-」側は曲名を含む動画が先頭
+        List<Candidate> rebuild = ChartVideoService.rank(searched, "AA -rebuild-", 120.0, List.of());
+        assertThat(rebuild.get(0).id()).isEqualTo("xBpgjlG8FKg");
+    }
+
+    @Test
+    void rank_notOriginalWordInSongTitleIsNotPenalized() {
+        List<Candidate> searched = List.of(
+                new Candidate("other000001", "beatmania IIDX 別の曲", "x", 150),
+                new Candidate("right000001", "【IIDX】Abyss -The Heavens Remix- SPA", "y", 150));
+        List<Candidate> ranked = ChartVideoService.rank(searched, "Abyss -The Heavens Remix-", 140.0);
+        assertThat(ranked.get(0).id()).isEqualTo("right000001");
+    }
+
+    @Test
     void rank_withoutChartLength_keepsAllWithDuration() {
         List<Candidate> searched = List.of(
                 new Candidate("a0000000001", "GENE", "x", 120),

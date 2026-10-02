@@ -791,6 +791,19 @@ async function nextVideo() {
   }
 }
 
+/** 管理者: その曲の動画を検索し直す（候補が全部外れているとき。検索 1 回分の割り当てを使う） */
+async function researchVideo() {
+  if (!confirm('この曲の動画を検索し直します（今日の検索回数を 1 回使います）。よろしいですか？')) return;
+  pause();
+  try {
+    const data = await postVideo('research', { textage: props.textage });
+    if (data) await applyVideoInfo(data);
+    loadQueue();
+  } catch (e) {
+    videoError.value = (e as Error).message;
+  }
+}
+
 async function setManualVideo() {
   if (!manualUrl.value.trim()) return;
   pause();
@@ -1185,6 +1198,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                 <input v-model="manualUrl" type="text" placeholder="YouTube の URL（この曲の動画を指定）"
                   class="flex-1 min-w-0 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5" />
                 <button type="button" class="video-btn" @click="setManualVideo">指定</button>
+                <button type="button" class="video-btn" title="候補が全部外れているとき" @click="researchVideo">再検索</button>
               </div>
             </div>
           </template>

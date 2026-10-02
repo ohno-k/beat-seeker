@@ -24,6 +24,7 @@ import java.util.function.Supplier;
  *  - POST /api/analysis/chart-video/manual {textage, url} … 動画を URL で指定（管理者）
  *  - GET  /api/analysis/chart-video/queue … ずれ合わせの進み具合と次に合わせる譜面（管理者）
  *  - POST /api/analysis/chart-video/skip {textage} … 埋め作業で譜面を飛ばす（管理者）
+ *  - POST /api/analysis/chart-video/research {textage} … 曲の動画を検索し直す（管理者）
  *
  * 失敗は {@code {"error": 文言}} とステータス。
  */
@@ -78,6 +79,14 @@ public class ChartVideoController {
         User user = userOf(auth);
         if (user == null || !adminAuthService.isAdmin(user)) return error(403, "管理者のみ使えます");
         return run(() -> service.queue(30));
+    }
+
+    /** その曲の動画を検索し直す（管理者）。 */
+    @PostMapping("/api/analysis/chart-video/research")
+    public ResponseEntity<Map<String, Object>> research(@RequestBody TextageRequest req, Authentication auth) {
+        User user = userOf(auth);
+        if (user == null || !adminAuthService.isAdmin(user)) return error(403, "管理者のみ使えます");
+        return run(() -> service.research(req.textage()));
     }
 
     /** 埋め作業で譜面を飛ばす（次の未調整の一覧から外す）。 */

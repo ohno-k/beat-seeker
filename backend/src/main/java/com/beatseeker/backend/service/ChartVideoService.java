@@ -156,6 +156,14 @@ public class ChartVideoService {
         return toMap(textage.trim(), video);
     }
 
+    /** 【メソッドの役割】 その曲の動画を検索し直す（管理者。保存済みの候補が全部外れているとき。検索 1 回分の割り当てを使う）。 */
+    public Map<String, Object> research(String textage) {
+        SongDefinition chart = chartOf(textage);
+        if (apiKey.isEmpty()) return Map.of("status", "disabled");
+        SongVideo video = searchAndSave(chart, videoRepo.findById(chart.getTitle()).orElse(null), true);
+        return toMap(textage.trim(), video);
+    }
+
     /** 【メソッドの役割】 動画を URL・ID で指定する（管理者）。長さ・題名は API キーがあれば取り直す。 */
     public Map<String, Object> setManual(String textage, String urlOrId, Long userId) {
         SongDefinition chart = chartOf(textage);
@@ -375,10 +383,15 @@ public class ChartVideoService {
 
     /** 検索して上位の候補を保存する（1 曲 1 回。同時に同じ曲を検索しないよう直列）。 */
     private SongVideo searchAndSave(SongDefinition chart, SongVideo existing) {
+        return searchAndSave(chart, existing, false);
+    }
+
+    /** @param force 保存済みでも検索し直す（管理者の再検索） */
+    private SongVideo searchAndSave(SongDefinition chart, SongVideo existing, boolean force) {
         synchronized (searchLock) {
             // 待っている間にほかの要求が検索し終えていればそれを使う
             Optional<SongVideo> again = videoRepo.findById(chart.getTitle());
-            if (again.isPresent() && (existing == null || again.get().getSearchedAt() != null
+            if (!force && again.isPresent() && (existing == null || again.get().getSearchedAt() != null
                     && !again.get().getSearchedAt().equals(existing.getSearchedAt()))) {
                 return again.get();
             }
@@ -395,7 +408,9 @@ public class ChartVideoService {
             Double chartSec = chartSeconds(chart.getTextage());
             List<Candidate> ranked;
             try {
-                ranked = rank(fetchDetails(searchIds(chart)), chart.getTitle(), chartSec);
+                List<String> longer = longerTitles(chart.getTitle(),
+                        songDefRepo.findByRevision("active").stream().map(SongDefinition::getTitle).collect(java.util.stream.Collectors.toSet()));
+                ranked = rank(fetchDetails(searchIds(chart)), chart.getTitle(), chartSec, longer);
             } catch (QuotaExceeded e) {
                 exhaustedDay = today;
                 throw new VideoException(429, "今日の動画検索の上限に達しました。明日の夕方以降にもう一度お試しください");
@@ -460,11 +475,17 @@ public class ChartVideoService {
      * 【メソッドの役割】 候補を良い順に並べる（長さが合わないものは除く）。
      *
      * 長さ: 譜面より 3 秒以上短い・譜面より 4 分以上長い動画は除く。プレー動画は前後に選曲・リザルトが入るので、
-     * 20 秒までの超過は減点しない。題名: 曲名を含む +3、beatmania / IIDX を含む +1、原曲でない語 -4。
-     * 同点は検索順（YouTube の関連度）。
+     * 20 秒までの超過は減点しない。題名: 曲名を含む +3、beatmania / IIDX を含む +1、
+     * 原曲でない語 -4（曲名自体に含まれる語は除く。「〜 Remix-」の曲で正しい動画まで下げないため）、
+     * この曲名を含む別の曲名（{@code longerTitles}）を含む -6。同点は検索順（YouTube の関連度）。
      */
     static List<Candidate> rank(List<Candidate> details, String songTitle, Double chartSec) {
+        return rank(details, songTitle, chartSec, List.of());
+    }
+
+    static List<Candidate> rank(List<Candidate> details, String songTitle, Double chartSec, List<String> longerTitles) {
         String song = normalize(songTitle);
+        List<String> notOriginal = NOT_ORIGINAL.stream().map(ChartVideoService::normalize).filter(w -> !song.contains(w)).toList();
         List<Candidate> pool = new ArrayList<>();
         List<Double> scores = new ArrayList<>();
         for (int i = 0; i < details.size(); i++) {
@@ -479,9 +500,15 @@ public class ChartVideoService {
             String t = normalize(c.title());
             if (!song.isEmpty() && t.contains(song)) score += 3;
             if (t.contains("iidx") || t.contains("beatmania")) score += 1;
-            for (String w : NOT_ORIGINAL) {
-                if (t.contains(normalize(w))) {
+            for (String w : notOriginal) {
+                if (t.contains(w)) {
                     score -= 4;
+                    break;
+                }
+            }
+            for (String longer : longerTitles) {
+                if (t.contains(longer)) {
+                    score -= 6;
                     break;
                 }
             }
@@ -494,6 +521,30 @@ public class ChartVideoService {
         List<Candidate> out = new ArrayList<>();
         for (int i : order) out.add(pool.get(i));
         return out;
+    }
+
+    /**
+     * 検索語（曲名 アーティスト beatmania IIDX）。YouTube の検索演算子になる記号は空白に置き換える
+     * — 語の頭の「-」は除外（「AA -rebuild-」で rebuild を含む動画が全部消えた）、「|」は OR、「"」は完全一致。
+     */
+    static String searchQuery(String title, String artist) {
+        String q = (title == null ? "" : title) + " " + (artist == null ? "" : artist) + " beatmania IIDX";
+        return q.replaceAll("[-|\"]", " ").replaceAll("\\s+", " ").trim();
+    }
+
+    /**
+     * この曲名を含む、より長い別の曲名（正規化済み）。「AA」に対する「AA -rebuild-」など。
+     * その曲名を含む候補は別の曲の動画なので下げる。
+     */
+    static List<String> longerTitles(String songTitle, java.util.Collection<String> allTitles) {
+        String song = normalize(songTitle);
+        if (song.isEmpty()) return List.of();
+        Set<String> out = new java.util.LinkedHashSet<>();
+        for (String t : allTitles) {
+            String n = normalize(t);
+            if (n.length() > song.length() && n.contains(song)) out.add(n);
+        }
+        return new ArrayList<>(out);
     }
 
     /** 比べるための正規化（全角半角・大文字小文字・空白と記号の差を無くす）。 */
@@ -528,9 +579,9 @@ public class ChartVideoService {
 
     /** search.list（100 単位）: 埋め込み可の動画を最大 15 本。 */
     private List<String> searchIds(SongDefinition chart) throws Exception {
-        String q = chart.getTitle() + " " + (chart.getArtist() == null ? "" : chart.getArtist()) + " beatmania IIDX";
+        String q = searchQuery(chart.getTitle(), chart.getArtist());
         JsonNode root = call("search?part=snippet&type=video&maxResults=15&videoEmbeddable=true&regionCode=JP"
-                + "&relevanceLanguage=ja&q=" + URLEncoder.encode(q.trim(), StandardCharsets.UTF_8));
+                + "&relevanceLanguage=ja&q=" + URLEncoder.encode(q, StandardCharsets.UTF_8));
         List<String> ids = new ArrayList<>();
         for (JsonNode item : root.path("items")) {
             String id = item.path("id").path("videoId").asText("");
