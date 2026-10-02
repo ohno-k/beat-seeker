@@ -28,11 +28,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -232,6 +235,85 @@ public class ChartVideoService {
         }
         m.put("offsetSec", offset);
         m.put("offsetSource", source);
+        // ずれが無ければ、同じチャンネルの動画で保存されたずれの中央値を初期値の目安に（同じ投稿者は動画の作りが揃っていることが多い）
+        if (offset == null && video.getChannelTitle() != null) {
+            List<Double> same = offsetRepo.findOffsetsByChannel(video.getChannelTitle());
+            if (same.size() >= ESTIMATE_MIN_SAMPLES) {
+                m.put("offsetEstimate", median(same));
+                m.put("estimateSamples", same.size());
+            }
+        }
+        return m;
+    }
+
+    /** ずれの初期値を推定するのに必要な、同じチャンネルの保存済みのずれの数。 */
+    static final int ESTIMATE_MIN_SAMPLES = 2;
+
+    static double median(List<Double> xs) {
+        List<Double> s = new ArrayList<>(xs);
+        s.sort(null);
+        int n = s.size();
+        return n % 2 == 1 ? s.get(n / 2) : (s.get(n / 2 - 1) + s.get(n / 2)) / 2;
+    }
+
+    // ── 管理者の埋め作業 ─────────────────────────────────────────
+
+    /**
+     * 【メソッドの役割】 譜面分析ページの対象（active の ANOTHER / LEGGENDARIA で textage あり）について、
+     * ずれ合わせの進み具合と、次に合わせる譜面を返す（管理者用）。
+     *
+     * 次に合わせる譜面: 動画はあるがずれが無い譜面（同じ曲の別譜面のずれも無い）→ 動画をまだ検索していない譜面
+     * の順で、それぞれレベルの高い順・曲名順（譜面分析ページの一覧と同じ並び）に最大 {@code limit} 件。
+     *
+     * @return total（対象の譜面数）・done（この譜面のずれあり）・borrowed（同じ曲の別譜面のずれを使用）・
+     *         waiting（動画あり・ずれ無し）・unsearched（動画を未検索）・notFound（動画が見つからなかった）・next（textage の並び）
+     */
+    public Map<String, Object> queue(int limit) {
+        List<SongDefinition> charts = new ArrayList<>(songDefRepo.findByRevision("active").stream()
+                .filter(sd -> ("4".equals(sd.getDifficulty()) || "10".equals(sd.getDifficulty()))
+                        && sd.getTextage() != null && !sd.getTextage().isBlank())
+                .toList());
+        charts.sort(Comparator.<SongDefinition>comparingInt(sd -> sd.getLevel() == null ? 0 : -sd.getLevel())
+                .thenComparing(SongDefinition::getTitle, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(SongDefinition::getDifficulty));
+        Map<String, SongVideo> videos = new HashMap<>();
+        for (SongVideo v : videoRepo.findAll()) videos.put(v.getTitle(), v);
+        Map<String, ChartVideoOffset> offsets = new HashMap<>();
+        Set<String> songsWithOffset = new HashSet<>();
+        for (ChartVideoOffset o : offsetRepo.findAll()) {
+            offsets.put(o.getTextage(), o);
+            songsWithOffset.add(o.getTitle() + "\0" + o.getVideoId());
+        }
+
+        int done = 0, borrowed = 0, notFound = 0;
+        List<String> waiting = new ArrayList<>();
+        List<String> unsearched = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (SongDefinition sd : charts) {
+            String key = sd.getTextage().trim();
+            if (!seen.add(key)) continue;
+            SongVideo v = videos.get(sd.getTitle());
+            if (v == null) {
+                unsearched.add(key);
+            } else if (v.getVideoId() == null) {
+                notFound++;
+            } else {
+                ChartVideoOffset own = offsets.get(key);
+                if (own != null && v.getVideoId().equals(own.getVideoId())) done++;
+                else if (songsWithOffset.contains(sd.getTitle() + "\0" + v.getVideoId())) borrowed++;
+                else waiting.add(key);
+            }
+        }
+        List<String> next = new ArrayList<>(waiting);
+        next.addAll(unsearched);
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("total", seen.size());
+        m.put("done", done);
+        m.put("borrowed", borrowed);
+        m.put("waiting", waiting.size());
+        m.put("unsearched", unsearched.size());
+        m.put("notFound", notFound);
+        m.put("next", next.subList(0, Math.min(limit, next.size())));
         return m;
     }
 

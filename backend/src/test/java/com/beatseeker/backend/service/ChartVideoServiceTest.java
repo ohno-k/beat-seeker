@@ -58,6 +58,12 @@ class ChartVideoServiceTest {
     }
 
     @Test
+    void median_oddAndEven() {
+        assertThat(ChartVideoService.median(List.of(6.4, 10.0, 6.1))).isEqualTo(6.4);
+        assertThat(ChartVideoService.median(List.of(-1.03, 0.03))).isCloseTo(-0.5, org.assertj.core.data.Offset.offset(1e-9));
+    }
+
+    @Test
     void chartSeconds_followsBpmChanges() {
         // 1 小節 = 384 tick。BPM150 で 1 小節 = 1.6 秒、BPM300 で 0.8 秒
         assertThat(ChartVideoService.chartSeconds(List.of(new double[]{0, 150}), 384 * 10)).isEqualTo(16.0);

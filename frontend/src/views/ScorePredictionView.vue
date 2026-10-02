@@ -155,6 +155,17 @@ function pickRandom() {
   selectEntry(pool[Math.floor(Math.random() * pool.length)]);
 }
 
+/** 譜面再生（管理者の埋め作業）から次の譜面へ。画面の位置は譜面再生側が合わせるので、上へは戻さない。 */
+function openFromPlayer(textage: string) {
+  const entry = targetEntries.value.find(s => s.textage === textage);
+  if (entry) {
+    selectEntry(entry);
+  } else {
+    const path = textageToPath(textage);
+    if (path) router.push(path);
+  }
+}
+
 /** textage から譜面を探して選ぶ（類似譜面の曲名から移動するとき）。 */
 function goToChart(textage: string) {
   const entry = targetEntries.value.find(s => s.textage === textage);
@@ -943,7 +954,8 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
           </template>
 
           <!-- ─── 譜面再生（データは「再生する」を押したときに取得。曲を替えたら作り直す）─── -->
-          <ChartPlayer v-if="selectedEntry.textage" :key="selectedEntry.textage" :textage="selectedEntry.textage" />
+          <ChartPlayer v-if="selectedEntry.textage" :key="selectedEntry.textage" :textage="selectedEntry.textage"
+            @go="openFromPlayer" />
 
           <!-- ─── 類似譜面 ─── -->
           <section class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">

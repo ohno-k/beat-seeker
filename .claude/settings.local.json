@@ -73,7 +73,13 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/BPIManager/BPIManager2/master/src/pages/api/v2/songs/index.ts\" -o bpim/songs-index.ts)",
       "Bash(curl -s \"https://raw.githubusercontent.com/BPIManager/BPIManager2/master/src/pages/api/v1/songs/index.ts\")",
       "Bash(curl -s \"https://bpi2.poyashi.me/api/v1/songs\" -o bpim/songs-all.json -w \"HTTP %{http_code} %{size_download}B %{time_total}s\\\\n\")",
-      "Bash(node inject.js)"
+      "Bash(node inject.js)",
+      "Bash(node /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/rt.cjs components/SongPickerModal.vue /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/picker.html 'import { mdiClose } from '\\\\''@mdi/js'\\\\'';')",
+      "Bash(node /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/rt.cjs views/ResetPasswordView.vue /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/reset.html)",
+      "Bash(node /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/rep.js views/StrategyCardView.vue /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/sc.txt)",
+      "Bash(awk '/<style/,/<\\\\/style>/' views/WrappedView.vue)",
+      "Bash(node \"C:/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/pd.cjs\")",
+      "Bash(node __TRACKED_VAR__/rep.cjs views/SkillTreeView.vue __TRACKED_VAR__/skill.txt)"
     ]
   }
 }

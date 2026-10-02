@@ -1,3 +1,11 @@
+<script lang="ts">
+/**
+ * 管理者の埋め作業で「次へ」を押して開いた譜面は、譜面再生を開いて動画と一緒に流し始める。
+ * 親は譜面ごとにこのコンポーネントを作り直すので、インスタンスをまたいでモジュールの変数で渡す。
+ */
+let autoStartNext = false;
+</script>
+
 <script setup lang="ts">
 /**
  * ChartPlayer.vue
@@ -34,6 +42,8 @@ import RandomPanel from './RandomPanel.vue';
 const props = defineProps<{
   textage: string;
 }>();
+/** go = 管理者の埋め作業で次の譜面へ移る（親がその譜面を選ぶ） */
+const emit = defineEmits<{ (e: 'go', textage: string): void }>();
 
 // ── 読み込み ──────────────────────────────────────────────
 const opened = ref(false);    // 譜面再生のカードを開いたか（RANDOM の評価はデータだけあれば出す）
@@ -77,7 +87,10 @@ async function open() {
   await nextTick(); // canvas を表示してから大きさを測る
   setupCanvas();
   seek(LEAD_IN);
-  if (settings.value.video) loadVideo();
+  if (settings.value.video) {
+    loadVideo();
+    loadQueue();
+  }
 }
 
 const playerCardRef = ref<HTMLDivElement | null>(null);
@@ -415,6 +428,9 @@ interface VideoInfo {
   offsetSec?: number | null;
   /** chart = この譜面で保存されたずれ、song = 同じ曲の別譜面のずれを借りている */
   offsetSource?: 'chart' | 'song' | null;
+  /** ずれが無いとき、同じチャンネルの動画で保存されたずれの中央値（初期値の目安）と、その数 */
+  offsetEstimate?: number;
+  estimateSamples?: number;
 }
 const { isLoggedIn, authHeaders } = useAuth();
 const { isAdmin } = useAdmin();
@@ -428,6 +444,8 @@ let yt: YTPlayer | null = null;
 const offset = ref(0);
 /** ±ボタンや合わせ操作でずれを変えたか（保存ボタンを出す） */
 const offsetTouched = ref(false);
+/** ずれが未保存で、同じチャンネルからの推定値を初期値にしている */
+const usingEstimate = ref(false);
 const offsetSaving = ref(false);
 const offsetMessage = ref('');
 /** 「リズムに合わせて叩く」の打鍵の差（秒） */
@@ -469,7 +487,8 @@ async function loadVideo() {
 async function applyVideoInfo(data: VideoInfo) {
   const prevId = videoInfo.value?.videoId;
   videoInfo.value = data;
-  offset.value = data.offsetSec ?? 0;
+  usingEstimate.value = data.offsetSec == null && data.offsetEstimate != null;
+  offset.value = data.offsetSec ?? data.offsetEstimate ?? 0;
   offsetTouched.value = false;
   offsetMessage.value = '';
   taps.value = [];
@@ -530,6 +549,7 @@ function setVideoOn(on: boolean) {
   settings.value.video = on;
   if (on) {
     loadVideo();
+    loadQueue();
   } else {
     destroyVideo();
     videoInfo.value = null;
@@ -663,8 +683,11 @@ const offsetStatus = computed(() => {
   if (offsetTouched.value) return '調整中（未保存）';
   if (v?.offsetSource === 'chart') return '合わせ済み';
   if (v?.offsetSource === 'song') return '同じ曲の別譜面のずれを使用中';
+  if (usingEstimate.value) return `推定値（同じチャンネルの ${v?.estimateSamples} 譜面から。要確認）`;
   return '未調整';
 });
+/** 保存ボタンを出すか（調整した、または推定値のまま確定したい） */
+const canSaveOffset = computed(() => offsetTouched.value || usingEstimate.value);
 
 async function postVideo(path: string, body: object): Promise<VideoInfo | null> {
   const res = await fetch(`${API_BASE}/api/analysis/chart-video/${path}`, {
@@ -677,22 +700,71 @@ async function postVideo(path: string, body: object): Promise<VideoInfo | null> 
   return data as VideoInfo;
 }
 
-async function saveOffset() {
+/** @returns 保存できたか */
+async function saveOffset(): Promise<boolean> {
   const v = videoInfo.value;
-  if (!v?.videoId) return;
+  if (!v?.videoId) return false;
   offsetSaving.value = true;
   offsetMessage.value = '';
   try {
     const data = await postVideo('offset', { textage: props.textage, videoId: v.videoId, offsetSec: offset.value });
     if (data) videoInfo.value = data;
     offsetTouched.value = false;
+    usingEstimate.value = false;
     offsetMessage.value = '保存しました。この譜面を開く全員の再生に使われます';
+    loadQueue();
+    return true;
   } catch (e) {
     offsetMessage.value = (e as Error).message;
+    return false;
   } finally {
     offsetSaving.value = false;
   }
 }
+
+// ── 管理者の埋め作業（ずれ合わせの進み具合と、次の未調整の譜面へ） ──
+interface QueueInfo {
+  total: number; done: number; borrowed: number; waiting: number; unsearched: number; notFound: number;
+  /** 次に合わせる譜面（動画あり・ずれ無し → 動画未検索の順） */
+  next: string[];
+}
+const queueInfo = ref<QueueInfo | null>(null);
+const nextTextage = computed(() => queueInfo.value?.next.find(t => t !== props.textage) ?? null);
+const queueProgress = computed(() => {
+  const q = queueInfo.value;
+  return q && q.total > 0 ? Math.round(((q.done + q.borrowed) / q.total) * 1000) / 10 : 0;
+});
+
+async function loadQueue() {
+  if (!isAdmin.value) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/analysis/chart-video/queue`, { headers: authHeaders() });
+    if (res.ok) queueInfo.value = await res.json();
+  } catch { /* 進み具合が出ないだけ */ }
+}
+
+/** 次の未調整の譜面を開き、動画と一緒に流し始める */
+function goNext() {
+  const t = nextTextage.value;
+  if (!t) return;
+  pause();
+  autoStartNext = true;
+  emit('go', t);
+}
+
+async function saveAndNext() {
+  if (await saveOffset()) goNext();
+}
+
+onMounted(async () => {
+  if (!autoStartNext) return;
+  autoStartNext = false;
+  settings.value.video = true;
+  await open();
+  if (!timeline.value) return;
+  playerCardRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  play();
+});
 
 async function nextVideo() {
   pause();
@@ -1059,10 +1131,10 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                     {{ fmtOffset(tapSuggestion) }} 秒ずらす
                   </button>
                 </div>
-                <div v-if="offsetTouched || offsetMessage" class="sync-row">
-                  <button v-if="offsetTouched && isLoggedIn" type="button" class="video-btn primary" :disabled="offsetSaving"
+                <div v-if="canSaveOffset || offsetMessage" class="sync-row">
+                  <button v-if="canSaveOffset && isLoggedIn" type="button" class="video-btn primary" :disabled="offsetSaving"
                     @click="saveOffset">このずれを保存（全員に共有）</button>
-                  <span v-else-if="offsetTouched" class="text-slate-400 dark:text-slate-500">ログインすると保存して全員に共有できます</span>
+                  <span v-else-if="canSaveOffset" class="text-slate-400 dark:text-slate-500">ログインすると保存して全員に共有できます</span>
                   <span v-if="offsetMessage" class="text-slate-500 dark:text-slate-400">{{ offsetMessage }}</span>
                 </div>
                 <p class="text-[11px] text-slate-400 dark:text-slate-500">
@@ -1072,10 +1144,32 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
               </div>
             </template>
 
-            <div v-if="isAdmin" class="sync-row mt-2">
-              <input v-model="manualUrl" type="text" placeholder="YouTube の URL（管理者: 動画を指定）"
-                class="flex-1 min-w-0 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5" />
-              <button type="button" class="video-btn" @click="setManualVideo">指定</button>
+            <!-- 管理者の埋め作業 -->
+            <div v-if="isAdmin" class="admin-box">
+              <div class="sync-row">
+                <span class="font-bold">埋め作業（管理者）</span>
+                <span v-if="queueInfo" class="tabular-nums">
+                  {{ queueInfo.done + queueInfo.borrowed }} / {{ queueInfo.total }} 譜面（{{ queueProgress }}%）
+                </span>
+              </div>
+              <div v-if="queueInfo" class="queue-bar"><div :style="{ width: `${queueProgress}%` }"></div></div>
+              <div v-if="queueInfo" class="text-slate-400 dark:text-slate-500 tabular-nums">
+                合わせ済み {{ queueInfo.done }}・別譜面のずれを使用 {{ queueInfo.borrowed }}・未調整 {{ queueInfo.waiting }}・
+                動画未検索 {{ queueInfo.unsearched }}・動画なし {{ queueInfo.notFound }}
+              </div>
+              <div class="sync-row">
+                <button v-if="videoInfo?.status === 'ok'" type="button" class="video-btn primary"
+                  :disabled="offsetSaving || !canSaveOffset || !nextTextage" @click="saveAndNext">保存して次へ</button>
+                <button type="button" class="video-btn" :disabled="!nextTextage" @click="goNext">保存せず次の未調整へ</button>
+              </div>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500">
+                次は「動画あり・ずれ未調整」の譜面から、レベルの高い順に開いて自動で再生します。それが尽きると動画未検索の譜面に進み、開くたびに検索します（1 日 90 回まで）。
+              </p>
+              <div class="sync-row">
+                <input v-model="manualUrl" type="text" placeholder="YouTube の URL（この曲の動画を指定）"
+                  class="flex-1 min-w-0 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5" />
+                <button type="button" class="video-btn" @click="setManualVideo">指定</button>
+              </div>
             </div>
           </template>
         </div>
@@ -1495,6 +1589,22 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 .video-btn.primary:hover:not(:disabled) { background: rgb(59 130 246); }
 .dark .video-btn:not(.primary) { color: rgb(147 197 253); border-color: rgb(30 64 175); }
 .dark .video-btn:not(.primary):hover:not(:disabled) { background: rgb(30 41 59); }
+
+.admin-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgb(253 230 138);
+  background: rgb(255 251 235);
+  color: rgb(71 85 105);
+}
+.dark .admin-box { border-color: rgb(120 53 15); background: rgb(41 37 36 / 0.6); color: rgb(203 213 225); }
+.queue-bar { height: 0.35rem; border-radius: 9999px; background: rgb(226 232 240); overflow: hidden; }
+.queue-bar > div { height: 100%; background: rgb(16 185 129); }
+.dark .queue-bar { background: rgb(51 65 85); }
 
 .pc-only { display: none; }
 @media (hover: hover) and (pointer: fine) {
