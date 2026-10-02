@@ -15,6 +15,7 @@
 import { onMounted, onUnmounted, ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
 import { formatJstShortDateTime } from '../utils/jstTime';
+import { mdiClose } from '@mdi/js';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -106,46 +107,37 @@ const notificationIconClass = (type: string) => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] mt-2 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+  <v-card v-if="isOpen" class="fixed top-16 right-2 w-80 max-w-[calc(100vw-1rem)] mt-2 shadow-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
     <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
       <h4 class="text-sm font-bold text-slate-800 dark:text-white">通知</h4>
       <div class="flex items-center gap-2">
-        <button v-if="activeTab === 'app' && unreadAppCount > 0" @click="handleMarkAllRead" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 transition-colors px-2 py-0.5 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30">
+        <v-btn
+          v-if="activeTab === 'app' && unreadAppCount > 0"
+          variant="text"
+          size="x-small"
+          color="info"
+          class="text-[10px] font-bold px-2"
+          @click="handleMarkAllRead"
+        >
           全て既読
-        </button>
-        <button @click="emit('close')" class="text-slate-400 hover:text-slate-600 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        </v-btn>
+        <v-btn icon variant="text" size="x-small" class="text-slate-400 hover:text-slate-600" @click="emit('close')">
+          <v-icon :icon="mdiClose" size="16" />
+        </v-btn>
       </div>
     </div>
 
     <!-- タブ切替（フレンド申請 / アクティビティ通知） -->
-    <div class="flex border-b border-slate-100 dark:border-slate-700">
-      <button
-        @click="activeTab = 'friend'"
-        class="flex-1 py-2.5 text-xs font-bold transition-colors relative"
-        :class="activeTab === 'friend' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-      >
-        <span class="relative">
-          フレンド申請
-          <span v-if="pendingRequests.length > 0" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white text-[9px] font-bold rounded-full">{{ pendingRequests.length }}</span>
-        </span>
-        <div v-if="activeTab === 'friend'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
-      </button>
-      <button
-        @click="activeTab = 'app'"
-        class="flex-1 py-2.5 text-xs font-bold transition-colors relative"
-        :class="activeTab === 'app' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-      >
-        <span class="relative">
-          アクティビティ
-          <span v-if="unreadAppCount > 0" class="ml-1 inline-flex items-center justify-center w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full">{{ unreadAppCount }}</span>
-        </span>
-        <div v-if="activeTab === 'app'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></div>
-      </button>
-    </div>
+    <v-tabs v-model="activeTab" grow class="border-b border-slate-100 dark:border-slate-700">
+      <v-tab value="friend" class="text-xs font-bold text-none">
+        フレンド申請
+        <v-badge v-if="pendingRequests.length > 0" inline color="info" :content="pendingRequests.length" class="ml-1" />
+      </v-tab>
+      <v-tab value="app" class="text-xs font-bold text-none">
+        アクティビティ
+        <v-badge v-if="unreadAppCount > 0" inline color="error" :content="unreadAppCount" class="ml-1" />
+      </v-tab>
+    </v-tabs>
 
     <div class="max-h-96 overflow-y-auto">
       <!-- フレンド申請タブの中身 -->
@@ -176,14 +168,12 @@ const notificationIconClass = (type: string) => {
                 </div>
               </div>
               <div class="flex gap-2 pl-11">
-                <button @click="handleAccept(req.id)" :disabled="isActionLoading === req.id"
-                  class="flex-1 py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg transition-all">
+                <v-btn color="primary" size="small" class="flex-1 text-[11px]" :disabled="isActionLoading === req.id" @click="handleAccept(req.id)">
                   承認
-                </button>
-                <button @click="handleReject(req.id)" :disabled="isActionLoading === req.id"
-                  class="flex-1 py-1.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-[11px] font-bold rounded-lg transition-all">
+                </v-btn>
+                <v-btn variant="tonal" size="small" class="flex-1 text-[11px]" :disabled="isActionLoading === req.id" @click="handleReject(req.id)">
                   拒否
-                </button>
+                </v-btn>
               </div>
             </div>
           </div>
@@ -221,5 +211,5 @@ const notificationIconClass = (type: string) => {
         </div>
       </template>
     </div>
-  </div>
+  </v-card>
 </template>

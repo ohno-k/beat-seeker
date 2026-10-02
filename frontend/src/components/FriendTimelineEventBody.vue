@@ -97,15 +97,18 @@ const fmtPt = (n: number) => n.toFixed(1);
         </span>
       </li>
     </ul>
-    <button
+    <v-btn
       v-if="sortedUpdatedSongs.length > PREVIEW_SONG_LIMIT"
       type="button"
+      variant="text"
+      color="primary"
+      size="x-small"
       @click="$emit('toggle-songs')"
-      class="mt-1.5 ml-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline focus:outline-none"
+      class="mt-1.5 ml-1 px-1 text-[11px] font-bold"
     >
       <template v-if="expandedSongs">折りたたむ</template>
       <template v-else>ほか {{ sortedUpdatedSongs.length - PREVIEW_SONG_LIMIT }} 譜面を表示</template>
-    </button>
+    </v-btn>
   </template>
 
   <!-- OVERTAKE_SONG: 譜面単位の抜き／抜かれ -->
@@ -116,14 +119,14 @@ const fmtPt = (n: number) => n.toFixed(1);
     </p>
     <p v-else-if="viewerRel === 'OVERTAKE_BY_ME'" class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ asSong.rivalName }}</span>
-      <span v-if="asSong.isVirtual" class="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded ml-1">仮想</span>
+      <v-chip v-if="asSong.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
       のスコアを抜きました
     </p>
     <p v-else class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ entry.displayName }}</span>
       が
       <span class="font-bold">{{ asSong.rivalName }}</span>
-      <span v-if="asSong.isVirtual" class="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded ml-1">仮想</span>
+      <v-chip v-if="asSong.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
       のスコアを抜きました
     </p>
     <div
@@ -174,14 +177,14 @@ const fmtPt = (n: number) => n.toFixed(1);
     </p>
     <p v-else-if="viewerRel === 'OVERTAKE_BY_ME'" class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ asTotal.rivalName }}</span>
-      <span v-if="asTotal.isVirtual" class="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded ml-1">仮想</span>
+      <v-chip v-if="asTotal.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
       を総合 BEAT-PT で抜きました
     </p>
     <p v-else class="text-sm text-slate-700 dark:text-slate-300">
       <span class="font-bold">{{ entry.displayName }}</span>
       が
       <span class="font-bold">{{ asTotal.rivalName }}</span>
-      <span v-if="asTotal.isVirtual" class="text-[10px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded ml-1">仮想</span>
+      <v-chip v-if="asTotal.isVirtual" size="x-small" label color="amber-darken-3" class="ml-1 text-[10px]">仮想</v-chip>
       を総合 BEAT-PT で抜きました
     </p>
     <div

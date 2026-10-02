@@ -5,6 +5,7 @@
  * ページ上部の長い説明文をここへ移した（2026-09-23 ユーザー要望）。判定の数字は
  * utils/roadmapLevels.ts（minPlayedFor・3 分の 2）と必ず揃える。
  */
+import { mdiClose } from '@mdi/js';
 import { formatJstDateTime } from '../utils/jstTime';
 
 defineProps<{
@@ -32,24 +33,20 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
 </script>
 
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-[110] flex items-center justify-center p-4 animate-fade-in">
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="$emit('close')"></div>
-      <div class="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+  <v-dialog
+    :model-value="true"
+    max-width="672"
+    @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+  >
+    <v-card class="max-h-[85vh] bg-white dark:bg-slate-800 rounded-2xl" variant="flat">
         <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">スコアロードマップのルール</h3>
-          <button
-            class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all"
-            aria-label="閉じる"
-            @click="$emit('close')"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <v-btn icon variant="text" size="small" aria-label="閉じる" @click="$emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-7 text-sm text-slate-700 dark:text-slate-300">
+        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 space-y-7 text-sm text-slate-700 dark:text-slate-300">
           <!-- 1. 目標とレベル -->
           <section>
             <h4 class="font-bold text-slate-900 dark:text-white mb-2">1. 目標とレベル</h4>
@@ -130,9 +127,9 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
                 <span class="text-xs text-slate-500">{{ ex.note }}</span>
               </div>
             </div>
-            <p class="mt-3 rounded-md bg-blue-50 dark:bg-blue-900/20 px-3 py-2 text-xs text-slate-700 dark:text-slate-200">
+            <v-alert type="info" :icon="false" class="mt-3 text-xs text-slate-700 dark:text-slate-200">
               <b>一度達成したレベルは、未達成に戻りません。</b>達成後に新しい目標をプレーして 3 分の 2 を下回っても、そのレベルは「達成済み」のままです。気にせず新しい譜面に挑戦してください。
-            </p>
+            </v-alert>
           </section>
 
           <!-- 3. 完全制覇 -->
@@ -185,8 +182,7 @@ const LADDER: boolean[] = [true, true, false, true, true, false, false];
               <li>上部の絞り込み（AA / AAA / MAX-・☆・未達成だけ）は表示を変えるだけで、レベルの番号や判定は変わりません。</li>
             </ul>
           </section>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+        </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>

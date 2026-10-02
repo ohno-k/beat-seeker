@@ -77,55 +77,55 @@ const handleSubmit = async () => {
   <!-- 画面全体: フルビューポートで中央にリセットフォームカードを配置 -->
   <div class="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
     <!-- カード本体: 新パスワード入力 or 成功メッセージを表示 -->
-    <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-8">
+    <v-card class="w-full max-w-md p-8">
       <h1 class="text-xl font-bold text-slate-800 dark:text-white mb-6">パスワードのリセット</h1>
 
       <!-- 成功時: 完了メッセージとトップページ導線 -->
-      <div v-if="successMsg" class="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-md">
-        <p class="text-sm font-bold text-emerald-700 dark:text-emerald-400">{{ successMsg }}</p>
-        <button @click="goToTop" class="mt-3 text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
+      <v-alert v-if="successMsg" type="success" class="mb-4">
+        <p class="text-sm font-bold">{{ successMsg }}</p>
+        <v-btn variant="text" color="primary" size="small" class="mt-3 px-0 text-sm" @click="goToTop">
           トップページへ戻る
-        </button>
-      </div>
+        </v-btn>
+      </v-alert>
 
       <!-- 通常時: パスワード入力フォーム。`prevent` でブラウザ送信をブロックしてJSで処理 -->
       <form v-else @submit.prevent="handleSubmit" class="space-y-4">
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">新しいパスワード</label>
-          <input
+          <v-text-field
             type="password"
             v-model="newPassword"
             placeholder="4文字以上"
             required
             :disabled="!token || isSubmitting"
-            class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100 disabled:opacity-50"
           />
         </div>
         <div>
           <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">新しいパスワード（確認）</label>
-          <input
+          <v-text-field
             type="password"
             v-model="newPasswordConfirm"
             placeholder="もう一度入力"
             required
             :disabled="!token || isSubmitting"
-            class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100 disabled:opacity-50"
           />
         </div>
 
         <!-- エラー表示: クライアント検証失敗 or API エラー時 -->
-        <div v-if="errorMsg" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md">
-          <p class="text-sm font-bold text-red-600 dark:text-red-400">{{ errorMsg }}</p>
-        </div>
+        <v-alert v-if="errorMsg" type="error" class="text-sm font-bold">
+          {{ errorMsg }}
+        </v-alert>
 
-        <button
+        <v-btn
           type="submit"
+          color="primary"
+          block
+          size="large"
           :disabled="!token || isSubmitting"
-          class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-colors disabled:opacity-50"
         >
           {{ isSubmitting ? '処理中...' : 'パスワードを変更する' }}
-        </button>
+        </v-btn>
       </form>
-    </div>
+    </v-card>
   </div>
 </template>

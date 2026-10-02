@@ -31,6 +31,7 @@
  *  - 管理者は userId を渡して他ユーザーを表示できる（`/api/scores/score-roadmap/user-suggest` で部分一致サジェスト）。
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { mdiInformation } from '@mdi/js';
 import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { formatJstDateTime } from '../utils/jstTime';
@@ -366,68 +367,76 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
 
 <template>
   <div class="space-y-6">
-    <div class="rm-card bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
+    <v-card class="rm-card bg-white dark:bg-slate-800 p-6">
       <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
         <div class="flex items-center gap-3">
           <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコアロードマップ（AA・AAA・MAX-）</h2>
-          <button
+          <v-btn
             v-if="isAdmin"
-            class="px-3 py-1 text-xs font-bold rounded border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+            variant="outlined"
+            size="small"
+            class="text-xs text-indigo-700 dark:text-indigo-300"
             @click="showRanking = true"
-          >ランキング</button>
+          >ランキング</v-btn>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span v-if="computedAt" title="全目標の難度と全プレイヤーの分布は 3 時間ごとに作り直します。表示中のユーザーの達成状況は最新のスコアです">難度の集計: {{ formatJstDateTime(computedAt) }}（3 時間ごと）</span>
           <span v-if="serverRefreshing" class="text-blue-600 dark:text-blue-400">集計し直し中…</span>
           <template v-if="isAdmin">
-            <button class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50" :disabled="serverRefreshing" @click="load(true)">今すぐ集計し直す</button>
-            <button class="px-2 py-1 rounded border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 disabled:opacity-50" :disabled="serverRefreshing || refreezing" @click="refreezeLevels">レベル表を作り直す</button>
+            <v-btn variant="outlined" size="small" class="text-xs" :disabled="serverRefreshing" @click="load(true)">今すぐ集計し直す</v-btn>
+            <v-btn variant="outlined" size="small" color="warning" class="text-xs" :disabled="serverRefreshing || refreezing" @click="refreezeLevels">レベル表を作り直す</v-btn>
           </template>
         </div>
       </div>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-5 flex flex-wrap items-center gap-x-2 gap-y-1">
         <span>各譜面の AA・AAA・MAX- を難しさの順にレベル分けしています。各レベルで遊んだ目標の 3 分の 2 を達成するとクリア。</span>
-        <button
-          class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold rounded border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+        <v-btn
+          variant="outlined"
+          color="primary"
+          size="x-small"
+          class="text-xs"
+          :prepend-icon="mdiInformation"
           @click="showRules = true"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
           ルールを見る
-        </button>
+        </v-btn>
       </p>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <v-progress-circular size="32" width="3" />
         <span class="ml-3 text-sm text-slate-500">{{ serverRefreshing ? '初回の集計中です（1〜2 分かかります。次からは待たずに表示されます）…' : '読み込み中...' }}</span>
       </div>
-      <div v-else-if="errorMsg && !charts.length" class="text-red-500 text-sm py-4">{{ errorMsg }}</div>
+      <v-alert v-else-if="errorMsg && !charts.length" type="error" class="text-sm my-4">{{ errorMsg }}</v-alert>
 
       <template v-else>
-        <p v-if="errorMsg" class="text-red-500 text-xs mb-2">{{ errorMsg }}（前回の集計を表示中）</p>
+        <v-alert v-if="errorMsg" type="warning" class="text-xs mb-2">{{ errorMsg }}（前回の集計を表示中）</v-alert>
 
         <!-- 表示フィルタ・ユーザー -->
         <div class="flex flex-wrap items-center gap-3 mb-5 text-sm">
-          <div class="inline-flex rounded border border-slate-300 dark:border-slate-600 overflow-hidden text-xs">
-            <button v-for="f in LINE_FILTERS" :key="f.key" class="px-3 py-1.5"
-              :class="lineFilter === f.key ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'text-slate-600 dark:text-slate-300'"
-              @click="lineFilter = f.key">{{ f.label }}</button>
+          <v-btn-toggle v-model="lineFilter" mandatory class="text-xs">
+            <v-btn v-for="f in LINE_FILTERS" :key="f.key" :value="f.key" size="small" class="px-3 text-xs">{{ f.label }}</v-btn>
+          </v-btn-toggle>
+          <div class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+            <span>表示</span>
+            <v-select
+              v-model="targetKey"
+              :items="TARGETS"
+              item-title="label"
+              item-value="key"
+              aria-label="表示"
+              class="w-36"
+            />
           </div>
-          <label class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
-            表示
-            <select v-model="targetKey" class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900">
-              <option v-for="t in TARGETS" :key="t.key" :value="t.key">{{ t.label }}</option>
-            </select>
-          </label>
           <!-- ユーザー名検索（管理者が他ユーザーを表示する） -->
           <div v-if="isAdmin" class="relative inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
             <label for="roadmap-user" class="shrink-0">ユーザー</label>
-            <input
+            <v-text-field
               id="roadmap-user"
               v-model="userQuery"
               type="text"
               autocomplete="off"
               placeholder="ユーザー名で検索（空欄 = 自分）"
-              class="w-60 px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
+              class="w-60 flex-none"
               role="combobox"
               :aria-expanded="suggestOpen"
               aria-controls="roadmap-user-list"
@@ -435,48 +444,50 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
               @keydown="onUserKeydown"
               @blur="closeSuggestSoon"
             />
-            <button v-if="selectedUserId != null" class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs" @click="resetToSelf">自分に戻す</button>
-            <ul
+            <v-btn v-if="selectedUserId != null" variant="outlined" size="small" class="text-xs" @click="resetToSelf">自分に戻す</v-btn>
+            <v-list
               v-if="suggestOpen && suggestions.length"
               id="roadmap-user-list"
               role="listbox"
-              class="absolute left-14 top-full mt-1 z-20 w-72 max-h-72 overflow-auto rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-lg text-sm"
+              density="compact"
+              class="absolute left-14 top-full mt-1 z-20 w-72 max-h-72 overflow-auto rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 shadow-lg text-sm py-0"
             >
-              <li
+              <v-list-item
                 v-for="(h, hi) in suggestions"
                 :key="h.id"
                 role="option"
                 :aria-selected="hi === suggestIndex"
-                class="px-3 py-1.5 cursor-pointer flex items-center gap-2"
+                min-height="0"
+                class="px-3 py-1.5 cursor-pointer"
                 :class="hi === suggestIndex ? 'bg-blue-50 dark:bg-blue-900/40' : 'hover:bg-slate-50 dark:hover:bg-slate-800'"
                 @mousedown.prevent="chooseUser(h)"
               >
-                <span class="truncate text-slate-800 dark:text-slate-100">{{ h.displayName ?? '(名前なし)' }}</span>
-                <span class="ml-auto font-mono text-xs text-slate-400 shrink-0">{{ h.iidxId }}</span>
-              </li>
-            </ul>
+                <div class="flex items-center gap-2">
+                  <span class="truncate text-slate-800 dark:text-slate-100">{{ h.displayName ?? '(名前なし)' }}</span>
+                  <span class="ml-auto font-mono text-xs text-slate-400 shrink-0">{{ h.iidxId }}</span>
+                </div>
+              </v-list-item>
+            </v-list>
             <span v-if="suggestOpen && !suggestions.length" class="absolute left-14 top-full mt-1 z-20 px-3 py-1.5 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs text-slate-500 shadow">該当するユーザーがいません</span>
           </div>
-          <label class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300 cursor-pointer">
-            <input v-model="onlyOpen" type="checkbox" /> 未達成の目標だけ表示
-          </label>
+          <v-checkbox v-model="onlyOpen" label="未達成の目標だけ表示" class="flex-none text-slate-600 dark:text-slate-300" />
         </div>
 
         <!-- 現在地 -->
         <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">{{ viewingLabel }}</div>
         <div v-if="user && !user.found" class="text-sm text-slate-500 mb-6">このユーザーの ANOTHER / LEGGENDARIA のスコアが見つかりません。</div>
         <div v-else class="grid gap-3 mb-6" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))">
-          <div class="rounded-md p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+          <v-card class="p-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
             <div class="text-xs text-slate-500 dark:text-slate-400">ロードマップ レベル</div>
             <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ formatRoadmapLevel(myLevel) }}<span class="text-sm text-slate-400"> / {{ maxLevelNo }}</span></div>
             <div class="text-xs text-slate-500 dark:text-slate-400">達成 {{ clearedCount }} / {{ levelCount }} レベル（うち完全制覇 {{ completeCount }}）</div>
-          </div>
-          <div class="rounded-md bg-slate-50 dark:bg-slate-900/50 p-4">
+          </v-card>
+          <v-card variant="flat" class="bg-slate-50 dark:bg-slate-900/50 p-4">
             <div class="text-xs text-slate-500 dark:text-slate-400">推定実力（参考）</div>
             <div class="text-2xl font-bold font-mono text-slate-900 dark:text-white">{{ theta != null ? theta.toFixed(2) : '—' }}</div>
             <div v-if="theta != null" class="text-xs text-slate-500 dark:text-slate-400">全 {{ model?.thetas.length }} 人中 上位 {{ shareAtLeast(theta).toFixed(1) }}%</div>
-          </div>
-          <div class="rounded-md bg-slate-50 dark:bg-slate-900/50 p-4">
+          </v-card>
+          <v-card variant="flat" class="bg-slate-50 dark:bg-slate-900/50 p-4">
             <div class="text-xs text-slate-500 dark:text-slate-400">達成譜面（{{ range.label }}・歴代ベスト）</div>
             <div class="font-mono text-slate-900 dark:text-white">
               <span class="text-xs text-slate-500">AA</span> <span class="text-xl font-bold">{{ doneCount.aa }}</span>
@@ -489,7 +500,7 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
               <div class="absolute inset-y-0 left-0 bg-blue-300 dark:bg-blue-700" :style="{ width: `${pct(doneCount.aaa, doneCount.total)}%` }"></div>
               <div class="absolute inset-y-0 left-0 bg-blue-600 dark:bg-blue-400" :style="{ width: `${pct(doneCount.maxMinus, doneCount.total)}%` }"></div>
             </div>
-          </div>
+          </v-card>
         </div>
 
         <!-- 凡例 -->
@@ -501,14 +512,16 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
           <span class="inline-flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400"></span>達成（プレー済みの 3 分の 2）</span>
           <span class="inline-flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full border-2 border-slate-300 dark:border-slate-600"></span>未達成</span>
           <span>曲名の表記: 表記なし = ANOTHER、[L] = LEGGENDARIA</span>
-          <button
-            class="ml-auto px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+          <v-btn
+            variant="outlined"
+            size="x-small"
+            class="ml-auto text-xs text-slate-600 dark:text-slate-300"
             @click="setAllGroups(!allGroupsOpen)"
-          >{{ allGroupsOpen ? 'すべて閉じる' : 'すべて開く' }}</button>
+          >{{ allGroupsOpen ? 'すべて閉じる' : 'すべて開く' }}</v-btn>
         </div>
 
         <!-- レベル一覧（0.02 刻み。0.2 ごとに見出し） -->
-        <div class="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <v-card class="overflow-hidden">
           <template v-for="({ l, shown }, li) in shownLevels" :key="l.no">
             <!-- 難度帯（0.2 ごと）の見出し。押すと帯ごと開閉する -->
             <button
@@ -578,12 +591,15 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
                         <span v-else-if="played(t)" class="inline-block w-2 h-2 rounded-full border border-slate-400"></span>
                         <span v-else class="inline-block w-2 h-0.5 bg-slate-300 dark:bg-slate-600 align-middle"></span>
                       </span>
-                      <span
-                        class="rm-tag text-[10px] font-bold font-mono px-1.5 rounded text-center"
+                      <v-chip
+                        label
+                        size="x-small"
+                        :variant="t.line === 'aa' ? 'outlined' : 'flat'"
+                        class="rm-tag text-[10px] font-bold font-mono px-1.5 h-auto rounded justify-center"
                         :class="t.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
                           : t.line === 'aaa' ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'
                           : 'border border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-300'"
-                      >{{ LINE_LABEL[t.line] }}</span>
+                      >{{ LINE_LABEL[t.line] }}</v-chip>
                       <span class="rm-star font-mono text-xs text-slate-400">☆{{ t.c.level }}</span>
                       <span class="rm-title" :class="achieved(t) ? 'text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'">{{ chartName(t.c) }}</span>
                       <span class="rm-rate font-mono text-xs text-slate-500 text-right" :title="`${LINE_LABEL[t.line]} 率（${t.c.playerCount}人中）`">{{ t.c[t.line].rate.toFixed(0) }}%</span>
@@ -594,9 +610,9 @@ const viewingLabel = computed(() => user.value?.label ?? (user.value ? `ID ${use
               </div>
             </div>
           </template>
-        </div>
+        </v-card>
       </template>
-    </div>
+    </v-card>
 
     <ScoreRoadmapRulesModal
       v-if="showRules"

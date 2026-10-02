@@ -15,6 +15,7 @@
  *  - `TierCommentModal` — 譜面コメント閲覧/投稿モーダル。
  */
 import { ref, computed, onMounted } from 'vue';
+import { mdiMessageOutline } from '@mdi/js';
 import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
@@ -273,7 +274,7 @@ async function fetchCommentStats() {
   <!-- 画面全体: カード型レイアウトで見出し＋表を配置 -->
   <div class="space-y-6">
     <!-- メインカード: 曲別平均スコアレート一覧 -->
-    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
+    <v-card class="p-6">
       <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">曲別平均スコアレート</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
         全プレイヤーの平均スコアレート（ANOTHER+LEGGENDARIA、☆11+☆12）。各プレイヤーの自己歴代ベスト（現行作＋過去作）を1票として集計
@@ -281,19 +282,18 @@ async function fetchCommentStats() {
 
       <!-- ローディング中: 青スピナー -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <v-progress-circular size="32" width="2" />
         <span class="ml-3 text-sm text-slate-500">読み込み中...</span>
       </div>
 
       <!-- エラー時: 赤文字でメッセージ -->
-      <div v-else-if="errorMsg" class="text-red-500 text-sm py-4">{{ errorMsg }}</div>
+      <v-alert v-else-if="errorMsg" type="error" class="text-sm my-4">{{ errorMsg }}</v-alert>
 
       <!-- 通常時: 件数表示＋ソート可能テーブル -->
       <template v-else>
         <p class="text-sm text-slate-500 mb-4">{{ scoreRates.length }}曲</p>
 
-        <div class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700">
-          <table class="w-full text-sm">
+        <v-table class="rounded-md border border-slate-200 dark:border-slate-700 text-sm">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600">
                 <th class="text-left px-3 py-2.5 font-bold text-slate-600 dark:text-slate-300 w-8">#</th>
@@ -336,7 +336,7 @@ async function fetchCommentStats() {
                 <td class="px-3 py-2 text-slate-400 text-xs">{{ getFixedRank(row) }}</td>
                 <td class="px-3 py-2">
                   <span class="font-medium text-slate-800 dark:text-slate-200">{{ row.title }}</span>
-                  <span v-if="row.difficultyName === 'LEGGENDARIA'" class="ml-1 text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1 rounded">[L]</span>
+                  <v-chip v-if="row.difficultyName === 'LEGGENDARIA'" label size="x-small" color="orange" class="ml-1 text-[10px] font-bold px-1">[L]</v-chip>
                 </td>
                 <td class="px-3 py-2 text-center font-mono text-slate-700 dark:text-slate-300">{{ getRank(row) }}</td>
                 <td class="px-3 py-2 text-center font-mono font-bold text-slate-700 dark:text-slate-300">{{ row.avgScoreRate.toFixed(2) }}%</td>
@@ -348,24 +348,25 @@ async function fetchCommentStats() {
                 >{{ row.aaaRate.toFixed(1) }}% <span class="text-slate-400 dark:text-slate-500 font-normal">({{ row.aaaCount }})</span></td>
                 <td class="px-3 py-2 text-center text-slate-500 dark:text-slate-400">{{ row.playerCount }}</td>
                 <td class="px-3 py-2 text-center">
-                  <button
-                    @click="openCommentModal(row)"
-                    class="inline-flex items-center gap-0.5 text-xs hover:bg-blue-50 dark:hover:bg-blue-900/30 px-1.5 py-0.5 rounded transition-colors"
+                  <v-btn
+                    variant="text"
+                    size="x-small"
+                    class="gap-0.5 text-xs px-1.5 min-w-0"
                     :class="getCommentCount(row) > 0 ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-slate-400 dark:text-slate-500'"
+                    @click="openCommentModal(row)"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <v-icon :icon="mdiMessageOutline" size="14" />
                     <span v-if="getCommentCount(row) > 0">{{ getCommentCount(row) }}</span>
-                  </button>
+                  </v-btn>
                 </td>
                 <td class="px-3 py-2 text-center text-xs">
-                  <span v-if="getDraft(row)" class="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 font-bold">{{ getDraft(row) }}</span>
+                  <v-chip v-if="getDraft(row)" label size="x-small" color="purple" class="font-bold">{{ getDraft(row) }}</v-chip>
                 </td>
               </tr>
             </tbody>
-          </table>
-        </div>
+        </v-table>
       </template>
-    </div>
+    </v-card>
   </div>
 
   <!-- 譜面コメントモーダル: 行のコメントアイコンクリックで開く。投稿後は統計を再取得 -->

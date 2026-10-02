@@ -305,72 +305,65 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
 </script>
 
 <template>
-  <Transition
-    enter-active-class="transition ease-out duration-150"
-    enter-from-class="opacity-0"
-    enter-to-class="opacity-100"
-    leave-active-class="transition ease-in duration-100"
-    leave-from-class="opacity-100"
-    leave-to-class="opacity-0"
+  <v-dialog
+    :model-value="isOpen"
+    max-width="576"
+    :aria-label="t('a11y.cmdk.title')"
+    content-class="self-start mt-[14vh]"
+    @update:model-value="(v) => { if (!v) close() }"
   >
-    <div
-      v-if="isOpen"
-      role="dialog"
-      aria-modal="true"
-      :aria-label="t('a11y.cmdk.title')"
-      class="fixed inset-0 z-[120] flex items-start justify-center pt-[14vh] px-4 bg-slate-900/60 backdrop-blur-sm"
-      @click.self="close"
-    >
-      <div
-        class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col animate-scale-pop"
-      >
-        <!-- 検索バー -->
-        <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-          <svg aria-hidden="true" class="h-5 w-5 text-slate-400 dark:text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    <v-card class="overflow-hidden flex flex-col shadow-xl animate-scale-pop">
+      <!-- 検索バー -->
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+        <svg aria-hidden="true" class="h-5 w-5 text-slate-400 dark:text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <v-text-field
+          ref="inputRef"
+          v-model="query"
+          type="text"
+          variant="plain"
+          autofocus
+          :placeholder="t('cmdk.placeholder')"
+          class="flex-1 text-base"
+          @keydown="onInputKeydown"
+        />
+        <v-btn
+          icon
+          variant="text"
+          size="x-small"
+          :aria-label="t('a11y.modal.close')"
+          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+          @click="close"
+        >
+          <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="closeIconPath" />
           </svg>
-          <input
-            ref="inputRef"
-            v-model="query"
-            type="text"
-            :placeholder="t('cmdk.placeholder')"
-            class="flex-1 bg-transparent border-0 outline-none text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
-            @keydown="onInputKeydown"
-          />
-          <button
-            type="button"
-            :aria-label="t('a11y.modal.close')"
-            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-            @click="close"
-          >
-            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="closeIconPath" />
-            </svg>
-          </button>
-        </div>
+        </v-btn>
+      </div>
 
-        <!-- 結果リスト -->
-        <div ref="listRef" class="flex-1 overflow-y-auto max-h-[60vh] py-2">
-          <div v-if="filteredItems.length === 0" class="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
-            {{ t('cmdk.empty') }}
-          </div>
-          <template v-else>
-            <div v-for="g in groupedItems" :key="g.group" class="py-1">
-              <div class="px-4 pt-2 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                {{ groupLabel(g.group) }}
-              </div>
-              <button
-                v-for="(item, i) in g.items"
-                :key="item.id"
-                type="button"
-                :data-cmdk-idx="idxOffset(g.group) + i"
-                @mousemove="selectedIdx = idxOffset(g.group) + i"
-                @click="item.onSelect(); close()"
-                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors"
-                :class="selectedIdx === idxOffset(g.group) + i
-                  ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200'
-                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60'"
-              >
+      <!-- 結果リスト -->
+      <div ref="listRef" class="flex-1 overflow-y-auto max-h-[60vh] py-2">
+        <div v-if="filteredItems.length === 0" class="px-6 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+          {{ t('cmdk.empty') }}
+        </div>
+        <v-list v-else density="compact" class="p-0 bg-transparent">
+          <div v-for="g in groupedItems" :key="g.group" class="py-1">
+            <v-list-subheader class="px-4 pt-2 pb-1 min-h-0 h-auto text-[10px] font-bold text-slate-400 dark:text-slate-500">
+              {{ groupLabel(g.group) }}
+            </v-list-subheader>
+            <v-list-item
+              v-for="(item, i) in g.items"
+              :key="item.id"
+              :data-cmdk-idx="idxOffset(g.group) + i"
+              class="w-full px-4 py-2.5 min-h-0 text-sm transition-colors"
+              :class="selectedIdx === idxOffset(g.group) + i
+                ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200'
+                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60'"
+              @mousemove="selectedIdx = idxOffset(g.group) + i"
+              @click="item.onSelect(); close()"
+            >
+              <div class="flex items-center gap-3">
                 <svg aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.iconPath" />
                 </svg>
@@ -382,31 +375,31 @@ function idxOffset(targetGroup: PaletteItem['group']): number {
                 >
                   ●
                 </span>
-              </button>
-            </div>
-          </template>
-        </div>
-
-        <!-- フッター: ショートカットヒント -->
-        <div class="flex items-center justify-between gap-3 px-4 py-2 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-[11px] text-slate-500 dark:text-slate-400">
-          <div class="flex items-center gap-3">
-            <span class="inline-flex items-center gap-1">
-              <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-[10px]">↑↓</kbd>
-            </span>
-            <span class="inline-flex items-center gap-1">
-              <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-[10px]">Enter</kbd>
-              {{ t('cmdk.kbdEnter') }}
-            </span>
-            <span class="inline-flex items-center gap-1">
-              <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-[10px]">Esc</kbd>
-              {{ t('cmdk.kbdEsc') }}
-            </span>
+              </div>
+            </v-list-item>
           </div>
-          <span class="hidden sm:inline-flex items-center gap-1 font-mono">
-            <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-[10px]">{{ t('cmdk.shortcut.hint') }}</kbd>
+        </v-list>
+      </div>
+
+      <!-- フッター: ショートカットヒント -->
+      <div class="flex items-center justify-between gap-3 px-4 py-2 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 text-[11px] text-slate-500 dark:text-slate-400">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-[10px]">↑↓</kbd>
+          </span>
+          <span class="inline-flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-[10px]">Enter</kbd>
+            {{ t('cmdk.kbdEnter') }}
+          </span>
+          <span class="inline-flex items-center gap-1">
+            <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 font-mono text-[10px]">Esc</kbd>
+            {{ t('cmdk.kbdEsc') }}
           </span>
         </div>
+        <span class="hidden sm:inline-flex items-center gap-1 font-mono">
+          <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-[10px]">{{ t('cmdk.shortcut.hint') }}</kbd>
+        </span>
       </div>
-    </div>
-  </Transition>
+    </v-card>
+  </v-dialog>
 </template>

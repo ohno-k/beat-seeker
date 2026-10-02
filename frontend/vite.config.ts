@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vuetify from 'vite-plugin-vuetify'
 import { writeFileSync } from 'fs'
 import { build } from 'esbuild'
 
@@ -17,6 +18,8 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    // Vuetify のコンポーネント・ディレクティブを使った分だけ自動 import（tree-shaking）
+    vuetify({ autoImport: true }),
     {
       name: 'generate-version-json',
       buildStart() {

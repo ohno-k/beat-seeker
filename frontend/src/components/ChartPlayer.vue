@@ -20,6 +20,7 @@
  *   マウスは canvas の上下ドラッグで前後に送れる
  */
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { mdiFastForward, mdiPause, mdiPlay, mdiRewind, mdiSkipPrevious } from '@mdi/js';
 import { API_BASE } from '../composables/useAuth';
 import {
   formatBpmLabel, buildChartTimeline, assignLanes, randomPattern, rRandomPattern, isValidPattern, MIRROR_PATTERN, OFF_PATTERN,
@@ -604,8 +605,9 @@ function onKeydown(e: KeyboardEvent) {
   else if (e.key === 'ArrowRight') { e.preventDefault(); stepMeasure(1); }
 }
 
-function onSeekInput(e: Event) {
-  seek(Number((e.target as HTMLInputElement).value));
+/** シークバー（v-slider）の値が変わったとき。値は秒。 */
+function onSeekInput(value: number) {
+  seek(Number(value));
 }
 
 function onVisibility() {
@@ -654,21 +656,23 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   <div ref="playerCardRef" class="player-card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
     <div class="player-head">
       <div class="text-xs font-medium text-slate-400 dark:text-slate-500">譜面再生</div>
-      <button v-if="!opened"
+      <v-btn v-if="!opened"
         type="button"
-        class="play-open inline-flex items-center gap-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2"
+        color="primary"
+        size="small"
+        class="play-open text-xs"
+        :prepend-icon="mdiPlay"
         @click="open">
-        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
         譜面を再生する
-      </button>
+      </v-btn>
     </div>
 
     <template v-if="opened">
       <div v-if="loading" class="mt-3 flex items-center justify-center py-10 text-xs text-slate-400 dark:text-slate-500">
-        <div class="w-5 h-5 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <v-progress-circular size="20" width="2" class="mr-2" />
         譜面データを読み込み中…
       </div>
-      <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+      <v-alert v-else-if="error" type="error" class="mt-3 text-xs">{{ error }}</v-alert>
 
       <div v-show="timeline && !loading" class="mt-3">
         <div v-if="hud" class="player-hud text-xs tabular-nums text-slate-500 dark:text-slate-400">
@@ -692,126 +696,122 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
         <!-- 再生操作 -->
         <div class="player-controls mt-3">
           <div class="player-buttons">
-            <button type="button" class="ctrl-btn" title="先頭へ" aria-label="先頭へ" @click="seek(LEAD_IN)">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
-            </button>
-            <button type="button" class="ctrl-btn" title="前の小節 (←)" aria-label="前の小節" @click="stepMeasure(-1)">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6zm.5-6 8.5 6V6z" /></svg>
-            </button>
-            <button type="button" class="ctrl-btn ctrl-main" :title="playing ? '一時停止 (Space)' : '再生 (Space)'"
+            <v-btn type="button" icon variant="tonal" size="small" class="ctrl-btn" title="先頭へ" aria-label="先頭へ" @click="seek(LEAD_IN)">
+              <v-icon :icon="mdiSkipPrevious" />
+            </v-btn>
+            <v-btn type="button" icon variant="tonal" size="small" class="ctrl-btn" title="前の小節 (←)" aria-label="前の小節" @click="stepMeasure(-1)">
+              <v-icon :icon="mdiRewind" />
+            </v-btn>
+            <v-btn type="button" icon color="primary" class="ctrl-btn ctrl-main" :title="playing ? '一時停止 (Space)' : '再生 (Space)'"
               :aria-label="playing ? '一時停止' : '再生'" @click="togglePlay">
-              <svg v-if="!playing" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-              <svg v-else viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6zm8-14v14h4V5z" /></svg>
-            </button>
-            <button type="button" class="ctrl-btn" title="次の小節 (→)" aria-label="次の小節" @click="stepMeasure(1)">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 18l8.5-6L4 6zm9-12v12l8.5-6z" /></svg>
-            </button>
+              <v-icon :icon="playing ? mdiPause : mdiPlay" />
+            </v-btn>
+            <v-btn type="button" icon variant="tonal" size="small" class="ctrl-btn" title="次の小節 (→)" aria-label="次の小節" @click="stepMeasure(1)">
+              <v-icon :icon="mdiFastForward" />
+            </v-btn>
             <span class="ml-auto text-xs tabular-nums text-slate-500 dark:text-slate-400">
               {{ fmtTime(uiTime) }} / {{ fmtTime(totalTime) }}
             </span>
           </div>
-          <input type="range"
-            class="player-seek mt-2 w-full accent-blue-600"
-            :min="LEAD_IN" :max="totalTime" step="0.01"
-            :value="uiTime"
+          <v-slider
+            class="player-seek mt-2 w-full"
+            :min="LEAD_IN" :max="totalTime" :step="0.01"
+            :model-value="uiTime"
             aria-label="再生位置"
-            @input="onSeekInput" />
+            @update:model-value="onSeekInput" />
         </div>
 
         <!-- 設定 -->
         <div class="player-settings mt-3 text-xs text-slate-600 dark:text-slate-300">
-          <label class="setting setting-slider setting-wide">
+          <div class="setting setting-slider setting-wide">
             <span class="setting-label">表示時間</span>
-            <input v-model.number="settings.visibleSec" type="range" min="0.4" max="3" step="0.05" class="setting-range accent-blue-600" />
+            <v-slider v-model="settings.visibleSec" :min="0.4" :max="3" :step="0.05" aria-label="表示時間" class="setting-range" />
             <span class="slider-value tabular-nums whitespace-nowrap">{{ settings.visibleSec.toFixed(2) }}秒<span class="text-slate-400 dark:text-slate-500">（緑数字 約{{ greenNumber }}）</span></span>
-          </label>
-          <label class="setting setting-slider setting-wide">
+          </div>
+          <div class="setting setting-slider setting-wide">
             <span class="setting-label">ノーツの太さ</span>
-            <input v-model.number="settings.noteSize" type="range" min="3" max="16" step="1" class="setting-range accent-blue-600" />
+            <v-slider v-model="settings.noteSize" :min="3" :max="16" :step="1" aria-label="ノーツの太さ" class="setting-range" />
             <span class="slider-value tabular-nums whitespace-nowrap">{{ settings.noteSize }}px</span>
-          </label>
-          <label class="setting">
+          </div>
+          <div class="setting">
             <span class="setting-label">再生速度</span>
-            <select v-model.number="settings.rate"
-              class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-1.5">
-              <option v-for="r in RATES" :key="r" :value="r">×{{ r }}</option>
-            </select>
-          </label>
+            <v-select v-model="settings.rate"
+              :items="RATES.map((r) => ({ title: `×${r}`, value: r }))"
+              aria-label="再生速度"
+              class="w-28 flex-none" />
+          </div>
           <div class="setting">
             <span class="setting-label">スクロール</span>
-            <div class="seg">
-              <button type="button" :class="{ on: settings.mode === 'beat' }" @click="settings.mode = 'beat'">ソフラン再現</button>
-              <button type="button" :class="{ on: settings.mode === 'time' }" @click="settings.mode = 'time'">一定速度</button>
-            </div>
+            <v-btn-toggle v-model="settings.mode" mandatory>
+              <v-btn type="button" value="beat" size="small" class="text-xs">ソフラン再現</v-btn>
+              <v-btn type="button" value="time" size="small" class="text-xs">一定速度</v-btn>
+            </v-btn-toggle>
           </div>
           <div class="setting setting-wide setting-option">
             <span class="setting-label">譜面</span>
             <div class="option-body">
-              <div class="seg">
-                <button v-for="o in OPTIONS" :key="o.value" type="button" :title="o.title"
-                  :class="{ on: settings.option === o.value }" @click="setOption(o.value)">{{ o.label }}</button>
-              </div>
+              <v-btn-toggle :model-value="settings.option" mandatory class="option-toggle">
+                <v-btn v-for="o in OPTIONS" :key="o.value" :value="o.value" type="button" size="small" class="text-xs" :title="o.title"
+                  @click="setOption(o.value)">{{ o.label }}</v-btn>
+              </v-btn-toggle>
               <div v-if="settings.option !== 'off'" class="option-detail">
                 <template v-if="settings.option === 'random'">
-                  <input :value="patternInput" type="text" inputmode="numeric" maxlength="7" aria-label="鍵盤の並び"
-                    class="pattern-input tabular-nums rounded border bg-white dark:bg-slate-700 px-2 py-1.5"
-                    :class="patternInvalid ? 'border-red-400 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'"
+                  <v-text-field :model-value="patternInput" type="text" inputmode="numeric" maxlength="7" aria-label="鍵盤の並び"
+                    class="pattern-input flex-none tabular-nums"
+                    :error="patternInvalid"
                     @input="onPatternInput" />
                   <PatternChips v-if="!patternInvalid" :pattern="shownPattern" />
                 </template>
                 <PatternChips v-else-if="shownPattern" :pattern="shownPattern" />
                 <span v-else class="text-slate-400 dark:text-slate-500">ノーツごとにランダム</span>
-                <button v-if="settings.option !== 'mirror'" type="button" class="reroll" @click="reroll">引き直す</button>
+                <v-btn v-if="settings.option !== 'mirror'" type="button" variant="outlined" color="primary" size="small" class="text-xs" @click="reroll">引き直す</v-btn>
                 <span v-if="patternInvalid" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
               </div>
             </div>
           </div>
           <div class="setting">
             <span class="setting-label">ノーツの色</span>
-            <div class="seg">
-              <button type="button" :class="{ on: settings.noteColor === 'lane' }" @click="settings.noteColor = 'lane'">レーン</button>
-              <button type="button" :class="{ on: settings.noteColor === 'key' }" title="元の白鍵を白、元の黒鍵を青で塗る"
-                @click="settings.noteColor = 'key'">元の鍵盤</button>
-            </div>
+            <v-btn-toggle v-model="settings.noteColor" mandatory>
+              <v-btn type="button" value="lane" size="small" class="text-xs">レーン</v-btn>
+              <v-btn type="button" value="key" size="small" class="text-xs" title="元の白鍵を白、元の黒鍵を青で塗る">元の鍵盤</v-btn>
+            </v-btn-toggle>
           </div>
           <div class="setting setting-wide setting-loop">
             <span class="setting-label">区間リピート</span>
             <div class="loop-body">
-              <label class="loop-point">
+              <div class="loop-point">
                 <span class="loop-tag">A</span>
-                <select v-model.number="loopA" aria-label="区間の開始小節"
-                  class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-1.5 py-1.5">
-                  <option v-for="m in measureOptions" :key="m.index" :value="m.index">小節 {{ m.label }}</option>
-                </select>
-                <button type="button" class="loop-here" title="今の小節を A にする" @click="setLoopPoint('a')">今</button>
-              </label>
-              <label class="loop-point">
-                <span class="loop-tag">B</span>
-                <select v-model.number="loopB" aria-label="区間の終了小節"
-                  class="rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-1.5 py-1.5">
-                  <option v-for="m in measureOptions" :key="m.index" :value="m.index" :disabled="m.index < loopA">小節 {{ m.label }}</option>
-                </select>
-                <button type="button" class="loop-here" title="今の小節を B にする" @click="setLoopPoint('b')">今</button>
-              </label>
-              <div class="seg">
-                <button type="button" :class="{ on: loopOn }" @click="setLoopOn(true)">ON</button>
-                <button type="button" :class="{ on: !loopOn }" @click="setLoopOn(false)">OFF</button>
+                <v-select v-model="loopA" aria-label="区間の開始小節"
+                  :items="measureOptions.map((m) => ({ title: `小節 ${m.label}`, value: m.index }))"
+                  class="loop-select flex-none" />
+                <v-btn type="button" variant="outlined" color="primary" size="small" min-width="0" class="text-xs px-2" title="今の小節を A にする" @click="setLoopPoint('a')">今</v-btn>
               </div>
+              <div class="loop-point">
+                <span class="loop-tag">B</span>
+                <v-select v-model="loopB" aria-label="区間の終了小節"
+                  :items="measureOptions.map((m) => ({ title: `小節 ${m.label}`, value: m.index, props: { disabled: m.index < loopA } }))"
+                  class="loop-select flex-none" />
+                <v-btn type="button" variant="outlined" color="primary" size="small" min-width="0" class="text-xs px-2" title="今の小節を B にする" @click="setLoopPoint('b')">今</v-btn>
+              </div>
+              <v-btn-toggle :model-value="loopOn ? 'on' : 'off'" mandatory>
+                <v-btn type="button" value="on" size="small" class="text-xs" @click="setLoopOn(true)">ON</v-btn>
+                <v-btn type="button" value="off" size="small" class="text-xs" @click="setLoopOn(false)">OFF</v-btn>
+              </v-btn-toggle>
             </div>
           </div>
           <div class="setting">
             <span class="setting-label">サイド</span>
-            <div class="seg">
-              <button type="button" :class="{ on: settings.side === 1 }" @click="settings.side = 1">1P</button>
-              <button type="button" :class="{ on: settings.side === 2 }" @click="settings.side = 2">2P</button>
-            </div>
+            <v-btn-toggle v-model="settings.side" mandatory>
+              <v-btn type="button" :value="1" size="small" class="text-xs">1P</v-btn>
+              <v-btn type="button" :value="2" size="small" class="text-xs">2P</v-btn>
+            </v-btn-toggle>
           </div>
           <div class="setting">
             <span class="setting-label">打鍵音</span>
-            <div class="seg">
-              <button type="button" :class="{ on: settings.sound }" @click="settings.sound = true">ON</button>
-              <button type="button" :class="{ on: !settings.sound }" @click="settings.sound = false">OFF</button>
-            </div>
+            <v-btn-toggle :model-value="settings.sound ? 'on' : 'off'" mandatory>
+              <v-btn type="button" value="on" size="small" class="text-xs" @click="settings.sound = true">ON</v-btn>
+              <v-btn type="button" value="off" size="small" class="text-xs" @click="settings.sound = false">OFF</v-btn>
+            </v-btn-toggle>
           </div>
         </div>
         <p class="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
@@ -823,16 +823,16 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   </div>
 
   <!-- RANDOM の判別・配置評価（譜面再生とは別のカード。データは表示時に読み込み、「この並びで再生」で譜面再生を開いて再生する） -->
-  <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+  <v-card class="bg-white dark:bg-slate-800 p-4">
     <div class="text-xs font-medium text-slate-400 dark:text-slate-500">RANDOM</div>
     <div v-if="loading" class="mt-3 flex items-center justify-center py-6 text-xs text-slate-400 dark:text-slate-500">
-      <div class="w-5 h-5 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+      <v-progress-circular size="20" width="2" class="mr-2" />
       譜面データを読み込み中…
     </div>
-    <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
+    <v-alert v-else-if="error" type="error" class="mt-3 text-xs">{{ error }}</v-alert>
     <RandomPanel v-if="timeline && !loading" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
       @apply="applyAndPlay" />
-  </div>
+  </v-card>
   </div>
 </template>
 
@@ -866,29 +866,9 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   align-items: center;
   gap: 0.5rem;
 }
-.ctrl-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  color: rgb(71 85 105);
-  background: rgb(241 245 249);
-}
-.ctrl-btn:hover { background: rgb(226 232 240); }
-.ctrl-btn svg { width: 1.1rem; height: 1.1rem; }
-.ctrl-main {
-  width: 3rem;
-  height: 3rem;
-  color: white;
-  background: rgb(37 99 235);
-}
-.ctrl-main:hover { background: rgb(59 130 246); }
-.ctrl-main svg { width: 1.4rem; height: 1.4rem; }
-.dark .ctrl-btn:not(.ctrl-main) { color: rgb(203 213 225); background: rgb(51 65 85); }
-.dark .ctrl-btn:not(.ctrl-main):hover { background: rgb(71 85 105); }
-.player-seek { height: 1.5rem; }
+/* 再生操作のボタン（v-btn icon）。大きさは従来の 2.5rem / 3rem に合わせる */
+.ctrl-btn { width: 2.5rem; height: 2.5rem; border-radius: 9999px; }
+.ctrl-main { width: 3rem; height: 3rem; }
 
 .player-settings {
   display: grid;
@@ -907,37 +887,19 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   font-weight: 600;
   color: rgb(100 116 139);
 }
-.setting-range { flex: 1; min-width: 0; height: 1.5rem; }
+.setting-range { flex: 1; min-width: 0; }
 /* スマホ幅では値の表示（「1.20秒（緑数字 約720）」）を次の行へ送り、スライダーに行の幅を全部使わせる */
 .setting-slider { flex-wrap: wrap; row-gap: 0.1rem; }
 /* 幅の狭いスマホでは譜面オプションの見出しを上に置き、5 つのボタンに行の幅を全部使わせる */
 @media (max-width: 419px) {
   .setting-option { flex-wrap: wrap; row-gap: 0.4rem; }
   .setting-option .option-body { flex-basis: 100%; }
-  .setting-option .option-body .seg { max-width: none; }
+  .setting-option .option-body .option-toggle { max-width: none; }
 }
 @media (max-width: 639px) {
-  .setting-slider .setting-range { flex-basis: calc(100% - 5.6rem); height: 2rem; }
+  .setting-slider .setting-range { flex-basis: calc(100% - 5.6rem); }
   .setting-slider .slider-value { flex-basis: 100%; padding-left: 5.6rem; }
 }
-.seg {
-  display: inline-flex;
-  border-radius: 0.375rem;
-  overflow: hidden;
-  border: 1px solid rgb(203 213 225);
-}
-.seg button {
-  padding: 0.4rem 0.75rem;
-  font-weight: 600;
-  color: rgb(71 85 105);
-  background: white;
-}
-.seg button + button { border-left: 1px solid rgb(203 213 225); }
-.seg button.on { color: white; background: rgb(37 99 235); }
-.dark .seg { border-color: rgb(71 85 105); }
-.dark .seg button { color: rgb(203 213 225); background: rgb(51 65 85); }
-.dark .seg button + button { border-left-color: rgb(71 85 105); }
-.dark .seg button.on { color: white; background: rgb(37 99 235); }
 
 .option-body {
   display: flex;
@@ -947,26 +909,17 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   flex: 1;
   min-width: 0;
 }
-.seg button { white-space: nowrap; }
 /* 譜面オプションは 5 つ並ぶので、スマホ幅でも 1 行に収まるよう行いっぱいに等分する */
-.option-body .seg { display: flex; flex: 1 1 16rem; max-width: 20rem; }
-.option-body .seg button { flex: 1 1 0; padding-left: 0.2rem; padding-right: 0.2rem; }
+.option-body .option-toggle { display: flex; flex: 1 1 16rem; max-width: 20rem; }
+.option-body .option-toggle .v-btn { flex: 1 1 0; min-width: 0; padding-left: 0.2rem; padding-right: 0.2rem; }
 .option-detail {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-.pattern-input { width: 5.5rem; letter-spacing: 0.12em; font-weight: 700; }
-.reroll {
-  padding: 0.35rem 0.7rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  color: rgb(37 99 235);
-  border: 1px solid rgb(147 197 253);
-}
-.reroll:hover { background: rgb(239 246 255); }
-.dark .reroll { color: rgb(147 197 253); border-color: rgb(30 64 175); }
-.dark .reroll:hover { background: rgb(30 41 59); }
+.pattern-input { width: 6.5rem; }
+.pattern-input :deep(input) { letter-spacing: 0.12em; font-weight: 700; }
+.loop-select { width: 7.5rem; }
 
 .loop-body {
   display: flex;
@@ -988,14 +941,6 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
   color: white;
   background: rgb(100 116 139);
 }
-.loop-here {
-  padding: 0.3rem 0.5rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  color: rgb(37 99 235);
-  border: 1px solid rgb(147 197 253);
-}
-.dark .loop-here { color: rgb(147 197 253); border-color: rgb(30 64 175); }
 
 .pc-only { display: none; }
 @media (hover: hover) and (pointer: fine) {

@@ -20,6 +20,7 @@ import { useI18n } from '../composables/useI18n';
 import { useToast } from '../composables/useToast';
 import { useModalEscape } from '../composables/useModalEscape';
 import { DAN_RANK_OPTIONS, ARENA_RANKS } from '../composables/constants';
+import { mdiClose } from '@mdi/js';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -151,88 +152,78 @@ const handleUpdate = async () => {
 </script>
 
 <template>
-  <div
-    v-if="isOpen"
-    role="dialog"
-    aria-modal="true"
+  <v-dialog
+    :model-value="isOpen"
+    max-width="448"
     aria-labelledby="profile-edit-title"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
-    @click.self="emit('close')"
+    @update:model-value="(v) => { if (!v) emit('close') }"
   >
-    <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
+    <v-card class="overflow-hidden flex flex-col transition-colors duration-200">
 
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
         <h3 id="profile-edit-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('profile.editTitle') }}</h3>
-        <button type="button" :aria-label="t('a11y.modal.close')" @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <v-btn icon variant="text" size="small" :aria-label="t('a11y.modal.close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="emit('close')">
+          <v-icon :icon="mdiClose" />
+        </v-btn>
       </div>
-      
-      <div class="p-6 overflow-y-auto">
-        <form @submit.prevent="handleUpdate" class="space-y-6">
-          
-          <div v-if="errorMsg" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-md border border-red-200 dark:border-red-800/50 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-            {{ errorMsg }}
-          </div>
 
-          <div v-if="successMsg" class="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm rounded-md border border-emerald-200 dark:border-emerald-800/50 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
+      <v-card-text class="p-6 overflow-y-auto">
+        <form @submit.prevent="handleUpdate" class="space-y-6">
+
+          <v-alert v-if="errorMsg" type="error" class="text-sm border border-red-200 dark:border-red-800/50">
+            {{ errorMsg }}
+          </v-alert>
+
+          <v-alert v-if="successMsg" type="success" class="text-sm border border-emerald-200 dark:border-emerald-800/50">
             {{ successMsg }}
-          </div>
+          </v-alert>
 
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.displayName') }}</label>
-              <input type="text" v-model="displayName" required
-                class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
+              <v-text-field v-model="displayName" type="text" required />
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.danRank') }}</label>
-                <select v-model="danRank" 
-                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option v-for="rank in danRankOptions" :key="rank.value" :value="rank.value">{{ t(rank.labelKey) }}</option>
-                </select>
+                <v-select
+                  v-model="danRank"
+                  :items="danRankOptions.map((rank) => ({ title: t(rank.labelKey), value: rank.value }))"
+                  item-title="title"
+                  item-value="value"
+                />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.arenaRank') }}</label>
-                <select v-model="arenaRank" 
-                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option v-for="rank in arenaRanks" :key="rank" :value="rank">{{ rank }}</option>
-                </select>
+                <v-select v-model="arenaRank" :items="[...arenaRanks]" />
               </div>
             </div>
 
             <div class="grid grid-cols-1">
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.playSide') }}</label>
-                <div class="flex gap-4 py-2.5">
-                  <label class="flex items-center gap-2 cursor-pointer group">
-                    <input type="radio" v-model="playSide" value="1P" class="h-4 w-4 text-blue-600 border-slate-300" />
-                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 transition-colors">1P</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer group">
-                    <input type="radio" v-model="playSide" value="2P" class="h-4 w-4 text-blue-600 border-slate-300" />
-                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 transition-colors">2P</span>
-                  </label>
-                </div>
+                <v-radio-group v-model="playSide" inline class="py-1">
+                  <v-radio value="1P" class="mr-4">
+                    <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">1P</span></template>
+                  </v-radio>
+                  <v-radio value="2P">
+                    <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">2P</span></template>
+                  </v-radio>
+                </v-radio-group>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.privacySetting') }}</label>
-                <select v-model="privacyLevel" 
-                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 transition-colors text-slate-800 dark:text-slate-100 cursor-pointer appearance-none">
-                  <option :value="0">{{ t('profile.privacyPublic') }}</option>
-                  <option :value="1">{{ t('profile.privacyFriendsOnly') }}</option>
-                  <option :value="2">{{ t('profile.privacyPrivate') }}</option>
-                </select>
+                <v-select
+                  v-model="privacyLevel"
+                  :items="[
+                    { title: t('profile.privacyPublic'), value: 0 },
+                    { title: t('profile.privacyFriendsOnly'), value: 1 },
+                    { title: t('profile.privacyPrivate'), value: 2 },
+                  ]"
+                  item-title="title"
+                  item-value="value"
+                />
               </div>
             </div>
           </div>
@@ -241,34 +232,30 @@ const handleUpdate = async () => {
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <div class="flex items-center gap-2">
               <h4 class="text-sm font-bold text-slate-400">{{ t('profile.emailSection') }}</h4>
-              <span v-if="!user?.email" class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded border border-amber-200 dark:border-amber-800/50">{{ t('profile.emailNotRegistered') }}</span>
+              <v-chip v-if="!user?.email" label variant="outlined" class="h-auto text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800/50">{{ t('profile.emailNotRegistered') }}</v-chip>
             </div>
             <div>
-              <input type="email" v-model="email" :placeholder="t('profile.emailNotRegistered')"
-                class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100 placeholder-slate-400" />
+              <v-text-field v-model="email" type="email" :placeholder="t('profile.emailNotRegistered')" />
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 ml-1">{{ t('profile.emailHint') }}</p>
             </div>
           </div>
 
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <h4 class="text-sm font-bold text-slate-400">{{ t('profile.passwordChange') }}</h4>
-            
+
             <div>
               <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.currentPassword') }}</label>
-              <input type="password" v-model="currentPassword" :placeholder="t('profile.currentPasswordPlaceholder')"
-                class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
+              <v-text-field v-model="currentPassword" type="password" :placeholder="t('profile.currentPasswordPlaceholder')" />
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.newPassword') }}</label>
-                <input type="password" v-model="newPassword" :placeholder="t('profile.newPasswordPlaceholder')"
-                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
+                <v-text-field v-model="newPassword" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
               </div>
               <div>
                 <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">{{ t('profile.confirmNewPassword') }}</label>
-                <input type="password" v-model="newPasswordConfirm" :placeholder="t('profile.newPasswordPlaceholder')"
-                  class="w-full px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 transition-colors text-slate-800 dark:text-slate-100" />
+                <v-text-field v-model="newPasswordConfirm" type="password" :placeholder="t('profile.newPasswordPlaceholder')" />
               </div>
             </div>
           </div>
@@ -276,32 +263,33 @@ const handleUpdate = async () => {
           <!-- 表示設定（RateTier トグル / サポーター金縁トグル） -->
           <div class="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
             <h4 class="text-sm font-bold text-slate-400">{{ t('profile.displaySettings') }}</h4>
-            <label class="flex items-center justify-between cursor-pointer group">
+            <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('profile.showRateTier') }}</p>
                 <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ t('profile.showRateTierHint') }}</p>
               </div>
-              <div class="relative inline-flex items-center ml-4 shrink-0">
-                <input type="checkbox" :checked="showRateTier" @change="setRateTier(($event.target as HTMLInputElement).checked)" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-              </div>
-            </label>
+              <v-switch
+                :model-value="showRateTier"
+                color="success"
+                class="ml-4 shrink-0 flex-none"
+                :aria-label="t('profile.showRateTier')"
+                @update:model-value="(v) => setRateTier(!!v)"
+              />
+            </div>
           </div>
 
           <div class="pt-4 flex gap-3">
-            <button type="button" @click="emit('close')"
-              class="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md transition-colors">
+            <v-btn type="button" variant="tonal" size="large" class="flex-1" @click="emit('close')">
               {{ t('common.cancel') }}
-            </button>
-            <button type="submit" :disabled="isSubmitting"
-              class="flex-[2] py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-md transition-all flex items-center justify-center gap-2">
-              <span v-if="isSubmitting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            </v-btn>
+            <v-btn type="submit" color="primary" size="large" class="flex-[2]" :disabled="isSubmitting">
+              <v-progress-circular v-if="isSubmitting" size="16" width="2" color="white" class="mr-2" />
               {{ isSubmitting ? t('profile.saving') : t('profile.saveChanges') }}
-            </button>
+            </v-btn>
           </div>
-          
+
         </form>
-      </div>
-    </div>
-  </div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>

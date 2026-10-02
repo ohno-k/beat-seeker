@@ -15,6 +15,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useSupportChat, type SupportMessageDto } from '../composables/useSupportChat';
 import { useToast } from '../composables/useToast';
 import { formatJstTime } from '../utils/jstTime';
+import { mdiClose, mdiMessageProcessingOutline } from '@mdi/js';
 
 const { fetchMyChat, sendMyChat, markMyChatRead } = useSupportChat();
 const toast = useToast();
@@ -106,38 +107,37 @@ onBeforeUnmount(() => {
 <template>
   <div class="support-chat-widget">
     <!-- フローティングボタン -->
-    <button
-      type="button"
+    <v-btn
+      icon
+      color="primary"
       @click="toggleOpen"
-      class="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white"
+      class="fixed bottom-4 right-4 z-40 w-14 h-14 shadow-lg overflow-visible"
       :aria-label="isOpen ? 'お問い合わせを閉じる' : '運営へお問い合わせ'"
     >
-      <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 3v-3z" />
-      </svg>
-      <span v-else class="text-xl leading-none">✕</span>
+      <v-icon v-if="!isOpen" :icon="mdiMessageProcessingOutline" />
+      <v-icon v-else :icon="mdiClose" />
       <!-- 未読バッジ -->
       <span
         v-if="unreadCount > 0 && !isOpen"
         class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900 text-white text-[10px] font-bold flex items-center justify-center"
       >{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
-    </button>
+    </v-btn>
 
     <!-- チャットパネル -->
     <transition name="chat-pop">
-      <div
+      <v-card
         v-if="isOpen"
         class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
       >
         <!-- ヘッダ -->
         <div class="px-4 py-3 bg-blue-600 dark:bg-blue-500 text-white flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 3v-3z" />
-            </svg>
+            <v-icon :icon="mdiMessageProcessingOutline" size="20" />
             <p class="font-bold text-sm">運営へお問い合わせ</p>
           </div>
-          <button type="button" @click="toggleOpen" class="text-white/80 hover:text-white text-lg leading-none" aria-label="閉じる">✕</button>
+          <v-btn icon variant="text" size="small" @click="toggleOpen" class="text-white/80 hover:text-white -my-2 -mr-2" aria-label="閉じる">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
         <!-- 案内文 -->
@@ -172,22 +172,26 @@ onBeforeUnmount(() => {
         <!-- 入力 -->
         <div class="p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div class="flex items-end gap-2">
-            <textarea
+            <v-textarea
               v-model="draft"
               @keydown="onKeydown"
               rows="1"
+              auto-grow
+              max-rows="4"
+              no-resize
               placeholder="メッセージを入力 (Enterで送信)"
-              class="flex-1 resize-none max-h-24 px-3 py-2 text-[13px] rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-            ></textarea>
-            <button
-              type="button"
+              class="flex-1 text-[13px]"
+            />
+            <v-btn
+              color="primary"
               @click="handleSend"
               :disabled="isSending || !draft.trim()"
-              class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-            >送信</button>
+              :loading="isSending"
+              class="shrink-0 text-xs"
+            >送信</v-btn>
           </div>
         </div>
-      </div>
+      </v-card>
     </transition>
   </div>
 </template>

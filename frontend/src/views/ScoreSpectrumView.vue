@@ -19,6 +19,7 @@
  *  - 集計はサーバーがバックグラウンドで行う。未計算時は ready=false が返るのでポーリングする。
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { mdiClose } from '@mdi/js';
 import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
 import { useDarkMode } from '../composables/useDarkMode';
@@ -327,17 +328,19 @@ const thresholdLabel = computed(() => {
 
 <template>
   <div class="space-y-6">
-    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6">
+    <v-card class="bg-white dark:bg-slate-800 p-6">
       <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
         <h2 class="text-xl font-bold text-slate-900 dark:text-white">スコア分布</h2>
         <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <span v-if="computedAt">集計: {{ formatJstDateTime(computedAt) }}</span>
           <span v-if="serverRefreshing" class="text-blue-600 dark:text-blue-400">再計算中…</span>
-          <button
-            class="px-2 py-1 rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
+          <v-btn
+            variant="outlined"
+            size="small"
+            class="text-xs"
             :disabled="serverRefreshing"
             @click="load(true)"
-          >再計算</button>
+          >再計算</v-btn>
         </div>
       </div>
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
@@ -346,24 +349,24 @@ const thresholdLabel = computed(() => {
       </p>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <v-progress-circular size="32" width="3" />
         <span class="ml-3 text-sm text-slate-500">{{ serverRefreshing ? 'サーバーで集計中です（1 分前後かかります）…' : '読み込み中...' }}</span>
       </div>
-      <div v-else-if="errorMsg && charts.length === 0" class="text-red-500 text-sm py-4">{{ errorMsg }}</div>
+      <v-alert v-else-if="errorMsg && charts.length === 0" type="error" class="text-sm my-4">{{ errorMsg }}</v-alert>
 
       <template v-else>
-        <p v-if="errorMsg" class="text-red-500 text-xs mb-2">{{ errorMsg }}（前回の集計を表示中）</p>
+        <v-alert v-if="errorMsg" type="warning" class="text-xs mb-2">{{ errorMsg }}（前回の集計を表示中）</v-alert>
 
         <!-- 比較チャート -->
-        <div class="rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-6">
+        <v-card class="p-4 mb-6">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div class="text-sm font-bold text-slate-700 dark:text-slate-200">
               {{ chartMode === 'survival' ? '到達率カーブ（そのスコアレート以上を取った人の割合）' : '分布密度（そのスコアレート帯にいる人の割合）' }}
             </div>
-            <div class="inline-flex rounded border border-slate-300 dark:border-slate-600 overflow-hidden text-xs">
-              <button class="px-2.5 py-1" :class="chartMode === 'survival' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'text-slate-600 dark:text-slate-300'" @click="chartMode = 'survival'">到達率</button>
-              <button class="px-2.5 py-1" :class="chartMode === 'density' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900' : 'text-slate-600 dark:text-slate-300'" @click="chartMode = 'density'">密度</button>
-            </div>
+            <v-btn-toggle v-model="chartMode" mandatory class="text-xs">
+              <v-btn value="survival" size="small" class="text-xs">到達率</v-btn>
+              <v-btn value="density" size="small" class="text-xs">密度</v-btn>
+            </v-btn-toggle>
           </div>
 
           <!-- 凡例（選択中の譜面。× で外す） -->
@@ -372,7 +375,7 @@ const thresholdLabel = computed(() => {
               <span class="inline-block w-3 h-0.5 rounded" :style="{ background: s.color }"></span>
               {{ s.row.title }}<span v-if="s.row.difficultyName === 'LEGGENDARIA'" class="text-orange-500">[L]</span>
               <span class="text-slate-400">({{ s.row.rank }})</span>
-              <button class="text-slate-400 hover:text-red-500" @click="toggleSelect(s.row)">×</button>
+              <v-btn icon variant="text" size="x-small" density="comfortable" class="text-slate-400 hover:text-red-500" aria-label="外す" @click="toggleSelect(s.row)"><v-icon :icon="mdiClose" size="14" /></v-btn>
             </span>
             <span v-if="selectedSeries.length === 0" class="text-slate-400">下の表のチェックで譜面を選ぶと重ねて比較できます（最大 {{ MAX_COMPARE }} 譜面）</span>
           </div>
@@ -414,45 +417,46 @@ const thresholdLabel = computed(() => {
               </div>
             </div>
           </div>
-        </div>
+        </v-card>
 
         <!-- フィルタ・到達ライン -->
         <div class="flex flex-wrap items-center gap-3 mb-4 text-sm">
-          <input v-model="search" type="text" placeholder="曲名で検索..." class="px-3 py-1.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 w-48" />
-          <select v-model="levelFilter" class="px-2 py-1.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
-            <option value="12">☆12</option>
-            <option value="11">☆11</option>
-            <option value="all">☆11+12</option>
-          </select>
-          <label class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
-            人数
-            <input v-model.number="minPlayers" type="number" min="1" class="w-16 px-2 py-1.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900" />
-            人以上
-          </label>
-          <label class="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300 grow min-w-[16rem]">
-            到達ライン
-            <input v-model.number="threshold" type="range" :min="X_MIN" :max="X_MAX" step="1" class="grow accent-blue-600" />
+          <v-text-field v-model="search" type="text" placeholder="曲名で検索..." class="w-48 flex-none" />
+          <v-select
+            v-model="levelFilter"
+            :items="[{ title: '☆12', value: '12' }, { title: '☆11', value: '11' }, { title: '☆11+12', value: 'all' }]"
+            aria-label="レベル"
+            class="w-32 flex-none"
+          />
+          <div class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300">
+            <span>人数</span>
+            <v-text-field v-model.number="minPlayers" type="number" min="1" aria-label="人数" class="w-20 flex-none" />
+            <span>人以上</span>
+          </div>
+          <div class="inline-flex items-center gap-2 text-slate-600 dark:text-slate-300 grow min-w-[16rem]">
+            <span>到達ライン</span>
+            <v-slider v-model="threshold" :min="X_MIN" :max="X_MAX" :step="1" aria-label="到達ライン" class="grow" />
             <span class="font-mono font-bold text-slate-800 dark:text-slate-100 w-32">{{ thresholdLabel }}</span>
-          </label>
+          </div>
         </div>
 
         <p class="text-sm text-slate-500 mb-2">{{ filtered.length }}譜面</p>
 
-        <div class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700">
-          <table class="w-full text-sm">
+        <v-card class="overflow-x-auto">
+          <v-table class="w-full text-sm">
             <thead>
               <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                 <th class="px-2 py-2.5 w-8"></th>
                 <th class="text-left px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('title')">曲名 {{ sortIcon('title') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('rank')">難易度 {{ sortIcon('rank') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('playerCount')">人数 {{ sortIcon('playerCount') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('avgScoreRate')">平均 {{ sortIcon('avgScoreRate') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('aaaRate')">AAA {{ sortIcon('aaaRate') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('maxMinusRate')">MAX- {{ sortIcon('maxMinusRate') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600 bg-blue-50/60 dark:bg-blue-900/20" @click="toggleSort('threshold')" :title="`${thresholdLabel} 以上の割合`">≥{{ bToRate(threshold).toFixed(1) }}% {{ sortIcon('threshold') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('median')" title="半数が到達しているスコアレート">中央値 {{ sortIcon('median') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('top10')" title="上位10%が到達しているスコアレート">上位10% {{ sortIcon('top10') }}</th>
-                <th class="px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('mmPerAaa')" title="AAA 到達者のうち MAX- にも届いた割合。低いほど AAA→MAX- の壁が厚い">MAX-/AAA {{ sortIcon('mmPerAaa') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('rank')">難易度 {{ sortIcon('rank') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('playerCount')">人数 {{ sortIcon('playerCount') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('avgScoreRate')">平均 {{ sortIcon('avgScoreRate') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('aaaRate')">AAA {{ sortIcon('aaaRate') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('maxMinusRate')">MAX- {{ sortIcon('maxMinusRate') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600 bg-blue-50/60 dark:bg-blue-900/20" @click="toggleSort('threshold')" :title="`${thresholdLabel} 以上の割合`">≥{{ bToRate(threshold).toFixed(1) }}% {{ sortIcon('threshold') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('median')" title="半数が到達しているスコアレート">中央値 {{ sortIcon('median') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('top10')" title="上位10%が到達しているスコアレート">上位10% {{ sortIcon('top10') }}</th>
+                <th class="text-center px-2 py-2.5 font-bold cursor-pointer hover:text-blue-600" @click="toggleSort('mmPerAaa')" title="AAA 到達者のうち MAX- にも届いた割合。低いほど AAA→MAX- の壁が厚い">MAX-/AAA {{ sortIcon('mmPerAaa') }}</th>
                 <th class="text-left px-2 py-2.5 font-bold min-w-[16rem]">
                   <div class="relative h-4 text-[10px] font-normal text-slate-400">
                     <span v-for="g in GRADE_LINES" :key="g.label" class="absolute -translate-x-1/2" :style="{ left: `${bToPct(g.b)}%` }">{{ g.label }}</span>
@@ -467,18 +471,18 @@ const thresholdLabel = computed(() => {
                 class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30"
               >
                 <td class="px-2 py-1.5 text-center">
-                  <input
-                    type="checkbox"
-                    class="cursor-pointer"
-                    :checked="selectedKeys.includes(r.key)"
+                  <v-checkbox-btn
+                    density="compact"
+                    class="justify-center"
+                    :model-value="selectedKeys.includes(r.key)"
                     :disabled="!selectedKeys.includes(r.key) && selectedKeys.length >= MAX_COMPARE"
-                    :style="selectedKeys.includes(r.key) ? { accentColor: seriesColors[slotOf.get(r.key) ?? 0] } : {}"
-                    @change="toggleSelect(r)"
+                    :color="selectedKeys.includes(r.key) ? seriesColors[slotOf.get(r.key) ?? 0] : undefined"
+                    @update:model-value="toggleSelect(r)"
                   />
                 </td>
                 <td class="px-2 py-1.5">
                   <span class="font-medium text-slate-800 dark:text-slate-200">{{ r.title }}</span>
-                  <span v-if="r.difficultyName === 'LEGGENDARIA'" class="ml-1 text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1 rounded">[L]</span>
+                  <v-chip v-if="r.difficultyName === 'LEGGENDARIA'" label size="x-small" variant="flat" class="ml-1 h-auto text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-1 rounded">[L]</v-chip>
                 </td>
                 <td class="px-2 py-1.5 text-center font-mono text-slate-700 dark:text-slate-300">{{ r.rank }}</td>
                 <td class="px-2 py-1.5 text-center text-slate-500 dark:text-slate-400">{{ r.playerCount }}</td>
@@ -513,14 +517,14 @@ const thresholdLabel = computed(() => {
                 </td>
               </tr>
             </tbody>
-          </table>
-        </div>
+          </v-table>
+        </v-card>
         <div v-if="visibleCount < filtered.length" class="text-center mt-3">
-          <button class="px-4 py-1.5 text-sm rounded border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300" @click="visibleCount += 200">
+          <v-btn variant="outlined" class="text-sm text-slate-600 dark:text-slate-300" @click="visibleCount += 200">
             さらに表示（残り {{ filtered.length - visibleCount }}）
-          </button>
+          </v-btn>
         </div>
       </template>
-    </div>
+    </v-card>
   </div>
 </template>

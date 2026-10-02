@@ -13,6 +13,7 @@
  */
 import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { mdiCloudUploadOutline, mdiClipboardCheckOutline } from '@mdi/js';
 
 const { t } = useI18n();
 
@@ -138,30 +139,22 @@ const handleTextSubmit = async () => {
 
 <template>
   <div class="w-full max-w-2xl mx-auto flex flex-col items-center">
-    
+
     <!-- タブ切替（テキスト貼り付け / ファイルドロップ） -->
-    <div class="flex w-full mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-md transition-colors duration-200">
-      <button 
-        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="activeTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        @click="activeTab = 'text'"
-      >
+    <v-tabs v-model="activeTab" grow class="w-full mb-4">
+      <v-tab value="text" class="text-sm font-medium">
         {{ t('upload.textTab') }}
-      </button>
-      <button 
-        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="activeTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        @click="activeTab = 'file'"
-      >
+      </v-tab>
+      <v-tab value="file" class="text-sm font-medium">
         {{ t('upload.fileTab') }}
-      </button>
-    </div>
+      </v-tab>
+    </v-tabs>
 
     <!-- タブ内容（2 つを絶対配置して fade でクロスフェード） -->
     <div class="w-full relative min-h-[300px]">
         <!-- ファイルアップロード領域（D&D + クリックで選択） -->
         <transition name="fade">
-            <div 
+            <div
             v-if="activeTab === 'file'"
             class="absolute inset-0 w-full h-full p-12 border-2 border-dashed rounded-md transition-all duration-200 flex flex-col items-center justify-center cursor-pointer bg-white dark:bg-slate-800"
             :class="{
@@ -174,9 +167,7 @@ const handleTextSubmit = async () => {
             @click="triggerFileInput"
             >
             <div class="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 p-4 rounded-full mb-4 transition-colors duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
+                <v-icon :icon="mdiCloudUploadOutline" size="32" />
             </div>
             <h3 class="text-xl font-bold text-slate-700 dark:text-slate-200 mb-2">
                 {{ t('upload.drop') }}
@@ -185,18 +176,20 @@ const handleTextSubmit = async () => {
                 {{ t('upload.dropOrClick') }}<br/>
                 {{ t('upload.csvSupport') }}
             </p>
-            
-            <button 
-                class="px-6 py-2.5 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+
+            <v-btn
+                color="primary"
+                size="large"
+                class="px-6 font-medium"
                 @click.stop="triggerFileInput"
             >
                 {{ t('upload.select') }}
-            </button>
-            <input 
-                type="file" 
-                ref="fileInput" 
-                accept=".csv,text/csv" 
-                class="hidden" 
+            </v-btn>
+            <input
+                type="file"
+                ref="fileInput"
+                accept=".csv,text/csv"
+                class="hidden"
                 @change="handleFileSelect"
             />
             </div>
@@ -204,9 +197,9 @@ const handleTextSubmit = async () => {
 
         <!-- テキスト貼り付け領域（空ならクリップボード自動読み込み） -->
         <transition name="fade">
-            <div 
+            <v-card
             v-if="activeTab === 'text'"
-            class="absolute inset-0 w-full h-full p-6 border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 flex flex-col transition-colors duration-200"
+            class="absolute inset-0 w-full h-full p-6 flex flex-col"
             >
             <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">
                 {{ t('upload.pasteTitle') }}
@@ -214,32 +207,31 @@ const handleTextSubmit = async () => {
             <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">
                 <a href="https://p.eagate.573.jp/game/2dx/34/djdata/score_download.html?style=SP" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ t('upload.officialSiteLinkText') }}</a>{{ t('upload.officialSiteManualHint') }}
             </p>
-            
-            <textarea
+
+            <v-textarea
                 v-model="pastedCsvText"
-                class="flex-1 w-full p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 resize-none font-mono text-sm mb-4 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-colors duration-200"
+                no-resize
+                rows="4"
+                class="flex-1 w-full font-mono text-sm mb-4"
                 :placeholder="t('upload.textareaPlaceholder')"
-            ></textarea>
-            
-            <button 
-                class="w-full py-3 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2"
+            />
+
+            <v-btn
+                block
+                size="large"
+                class="font-medium bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white"
                 :class="{'opacity-75 cursor-wait': isLoadingFromClipboard}"
                 @click="handleTextSubmit"
                 :disabled="isLoadingFromClipboard"
             >
-                <svg v-if="!isLoadingFromClipboard" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-                <svg v-else class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <v-icon v-if="!isLoadingFromClipboard" :icon="mdiClipboardCheckOutline" size="20" class="mr-2" />
+                <v-progress-circular v-else size="20" width="2" color="white" class="mr-2" />
                 {{ pastedCsvText.trim() ? t('upload.load') : t('upload.loadFromClipboard') }}
-            </button>
+            </v-btn>
             <p v-if="!pastedCsvText.trim()" class="text-xs text-slate-400 dark:text-slate-500 text-center mt-3">
                 {{ t('upload.clipboardAutoLoad') }}
             </p>
-            </div>
+            </v-card>
         </transition>
     </div>
   </div>

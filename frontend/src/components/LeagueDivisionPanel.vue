@@ -89,8 +89,9 @@ const countdown = computed(() => {
 
 <template>
   <!-- 開催中: 最上部で目立たせる（枠・背景・バッジ・カウントダウン）。パネル全体がリーグ画面への導線。 -->
-  <button
+  <v-card
     v-if="visible && isLive"
+    tag="button"
     type="button"
     @click="emit('open-league')"
     :aria-label="`${divisionLabel} — ${t('dashboard.leagueLive.view')}`"
@@ -99,13 +100,13 @@ const countdown = computed(() => {
     <DivisionIcon :tier="myTier ?? 10" :size="60" class="shrink-0" />
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white">
+        <v-chip size="x-small" variant="flat" class="gap-1.5 rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold tracking-wider text-white">
           <span class="relative flex h-1.5 w-1.5">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
             <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-white"></span>
           </span>
           {{ t('dashboard.leagueLive.badge') }}
-        </span>
+        </v-chip>
         <span class="text-[10px] font-bold text-slate-400">{{ t('dashboard.currentDivision') }}</span>
         <span v-if="groupLabel" class="text-[10px] font-bold text-indigo-600 dark:text-indigo-300">{{ groupLabel }}</span>
       </div>
@@ -121,11 +122,12 @@ const countdown = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </span>
-  </button>
+  </v-card>
 
   <!-- 非開催（週の合間・次週から参加）: 控えめな DIVISION 表示。こちらもリーグ画面へ飛べる。 -->
-  <button
+  <v-card
     v-else-if="visible"
+    tag="button"
     type="button"
     @click="emit('open-league')"
     :aria-label="`${divisionLabel} — ${t('dashboard.leagueLive.view')}`"
@@ -143,5 +145,5 @@ const countdown = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </span>
-  </button>
+  </v-card>
 </template>

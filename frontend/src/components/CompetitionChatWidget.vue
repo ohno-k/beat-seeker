@@ -13,6 +13,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useCompetitionTl, type ChatMessageDto } from '../composables/useCompetitionTl';
 import { useToast } from '../composables/useToast';
 import { formatJstTime } from '../utils/jstTime';
+import { mdiClose } from '@mdi/js';
 
 const props = defineProps<{ token: string }>();
 
@@ -112,26 +113,27 @@ watch(() => props.token, () => {
 <template>
   <div class="competition-chat-widget">
     <!-- フローティングボタン -->
-    <button
-      type="button"
+    <v-btn
+      icon
+      color="primary"
       @click="toggleOpen"
-      class="fixed bottom-4 right-4 z-40 w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-colors bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white"
+      class="fixed bottom-4 right-4 z-40 w-14 h-14 text-2xl overflow-visible"
       :aria-label="isOpen ? 'チャットを閉じる' : '運営チャットを開く'"
     >
       <span v-if="!isOpen">💬</span>
-      <span v-else>✕</span>
+      <v-icon v-else :icon="mdiClose" />
       <!-- 未読バッジ -->
       <span
         v-if="hasUnread && !isOpen"
         class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900"
       ></span>
-    </button>
+    </v-btn>
 
     <!-- チャットパネル -->
     <transition name="chat-pop">
-      <div
+      <v-card
         v-if="isOpen"
-        class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col rounded-md shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+        class="fixed bottom-20 right-4 z-40 w-[92vw] max-w-[360px] h-[70vh] max-h-[520px] flex flex-col shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
       >
         <!-- ヘッダ -->
         <div class="px-4 py-3 bg-blue-700 dark:bg-blue-600 text-white flex items-center justify-between">
@@ -139,7 +141,9 @@ watch(() => props.token, () => {
             <span class="text-lg">💬</span>
             <p class="font-bold text-sm">運営チャット</p>
           </div>
-          <button type="button" @click="toggleOpen" class="text-white/80 hover:text-white text-lg leading-none" aria-label="閉じる">✕</button>
+          <v-btn icon variant="text" size="small" @click="toggleOpen" class="text-white/80 hover:text-white -my-2 -mr-2" aria-label="閉じる">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
         <!-- 案内文 -->
@@ -174,22 +178,26 @@ watch(() => props.token, () => {
         <!-- 入力 -->
         <div class="p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div class="flex items-end gap-2">
-            <textarea
+            <v-textarea
               v-model="draft"
               @keydown="onKeydown"
               rows="1"
+              auto-grow
+              max-rows="4"
+              no-resize
               placeholder="メッセージを入力 (Enterで送信)"
-              class="flex-1 resize-none max-h-24 px-3 py-2 text-[13px] rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-            ></textarea>
-            <button
-              type="button"
+              class="flex-1 text-[13px]"
+            />
+            <v-btn
+              color="primary"
               @click="handleSend"
               :disabled="isSending || !draft.trim()"
-              class="shrink-0 px-3 py-2 rounded-md text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-            >送信</button>
+              :loading="isSending"
+              class="shrink-0 text-xs"
+            >送信</v-btn>
           </div>
         </div>
-      </div>
+      </v-card>
     </transition>
   </div>
 </template>

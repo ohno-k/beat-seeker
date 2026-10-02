@@ -135,7 +135,7 @@ const levelLabel = (l: number) => `☆${l}`;
 </script>
 
 <template>
-  <section class="ranking text-xs text-slate-600 dark:text-slate-300">
+  <v-card tag="section" class="ranking text-xs text-slate-600 dark:text-slate-300">
     <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
       各譜面で、選んだ並びが RANDOM の 5,040 通り中の何位か（1P 基準・配置評価と同じ基準）を一覧にします。順位が小さいほど当たりです。
     </p>
@@ -144,13 +144,13 @@ const levelLabel = (l: number) => `☆${l}`;
     <div class="controls mt-3">
       <div class="control">
         <span class="control-label">並び</span>
-        <div class="seg">
-          <button v-for="m in MODES" :key="m.value" type="button" :class="{ on: mode === m.value }" @click="mode = m.value">{{ m.label }}</button>
-        </div>
+        <v-btn-toggle v-model="mode" mandatory>
+          <v-btn v-for="m in MODES" :key="m.value" :value="m.value" type="button" size="small" class="text-xs">{{ m.label }}</v-btn>
+        </v-btn-toggle>
         <template v-if="mode === 'free'">
-          <input :value="freeInput" type="text" inputmode="numeric" maxlength="7" placeholder="例: 2461357" aria-label="並び"
-            class="free-input tabular-nums rounded border bg-white dark:bg-slate-700 px-2 py-1.5"
-            :class="freeInput && !freePattern ? 'border-red-400 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'"
+          <v-text-field :model-value="freeInput" type="text" inputmode="numeric" maxlength="7" placeholder="例: 2461357" aria-label="並び"
+            class="free-input flex-none tabular-nums"
+            :error="!!freeInput && !freePattern"
             @input="onFreeInput" />
           <PatternChips v-if="freePattern" :pattern="freePattern" small />
           <span v-else-if="freeInput" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
@@ -158,18 +158,18 @@ const levelLabel = (l: number) => `☆${l}`;
       </div>
       <div class="control">
         <span class="control-label">レベル</span>
-        <div class="seg">
-          <button type="button" :class="{ on: level === 'all' }" @click="level = 'all'">すべて</button>
-          <button type="button" :class="{ on: level === 12 }" @click="level = 12">☆12</button>
-          <button type="button" :class="{ on: level === 11 }" @click="level = 11">☆11</button>
-          <button type="button" :class="{ on: level === 'low' }" @click="level = 'low'">☆10以下</button>
-        </div>
-        <input v-model="query" type="search" placeholder="曲名で絞り込み" aria-label="曲名で絞り込み" autocomplete="off"
-          class="search rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1.5" />
+        <v-btn-toggle v-model="level" mandatory>
+          <v-btn type="button" value="all" size="small" class="text-xs">すべて</v-btn>
+          <v-btn type="button" :value="12" size="small" class="text-xs">☆12</v-btn>
+          <v-btn type="button" :value="11" size="small" class="text-xs">☆11</v-btn>
+          <v-btn type="button" value="low" size="small" class="text-xs">☆10以下</v-btn>
+        </v-btn-toggle>
+        <v-text-field v-model="query" type="search" placeholder="曲名で絞り込み" aria-label="曲名で絞り込み" autocomplete="off"
+          class="search" />
       </div>
     </div>
 
-    <p v-if="loadError" class="mt-3 text-red-600 dark:text-red-400">{{ loadError }}</p>
+    <v-alert v-if="loadError" type="error" class="mt-3 text-xs">{{ loadError }}</v-alert>
     <p v-else-if="!summary" class="mt-3 text-slate-400">読み込み中…</p>
     <template v-else>
       <div class="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
@@ -180,7 +180,7 @@ const levelLabel = (l: number) => `☆${l}`;
           <span class="tabular-nums">上位 5% に入る譜面 <b class="text-amber-600 dark:text-amber-400">{{ topCount }}</b></span>
           <span v-if="query.trim() && rows.length === 0" class="text-red-500 dark:text-red-400">
             曲名「{{ query.trim() }}」に一致する譜面がありません
-            <button type="button" class="ml-1 underline font-semibold" @click="query = ''">絞り込みを解除</button>
+            <v-btn type="button" variant="text" size="x-small" class="ml-1 underline text-xs" @click="query = ''">絞り込みを解除</v-btn>
           </span>
         </template>
       </div>
@@ -189,17 +189,17 @@ const levelLabel = (l: number) => `☆${l}`;
         <li v-for="(v, n) in shown" :key="v.row.x" :class="{ top: v.rank <= TOP5 }">
           <span class="pos tabular-nums">{{ n + 1 }}</span>
           <span class="lv tabular-nums" :class="v.row.d === '10' ? 'leg' : 'ano'">{{ levelLabel(v.row.l) }} {{ diffLabel(v.row.d) }}</span>
-          <button type="button" class="title" :title="`${v.row.t} を譜面分析で開く`" @click="emit('open', v.row.x)">{{ v.row.t }}</button>
+          <v-btn type="button" variant="text" size="small" density="compact" class="title text-xs" :title="`${v.row.t} を譜面分析で開く`" @click="emit('open', v.row.x)"><span class="title-text">{{ v.row.t }}</span></v-btn>
           <PatternChips v-if="mode === 'rran'" :pattern="v.pattern" small class="chips" />
           <span class="rank tabular-nums">
-            <span v-if="v.rank <= TOP5" class="top-badge">上位5%</span>
+            <v-chip v-if="v.rank <= TOP5" size="x-small" variant="flat" class="top-badge">上位5%</v-chip>
             {{ v.rankTo ? `${v.rank}〜${v.rankTo}` : v.rank }}位
             <span class="pct">（{{ percent(v.rank) }}%）</span>
           </span>
         </li>
       </ol>
-      <button v-if="rows.length > limit" type="button" class="more mt-2 text-blue-600 dark:text-blue-400 font-semibold"
-        @click="limit += PAGE">さらに表示（残り {{ rows.length - limit }}）</button>
+      <v-btn v-if="rows.length > limit" type="button" variant="text" color="primary" size="small" class="more mt-2 text-xs"
+        @click="limit += PAGE">さらに表示（残り {{ rows.length - limit }}）</v-btn>
 
       <p class="mt-4 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
         {{ summary.generatedAt }} 時点の評価基準で計算した {{ summary.charts.length }} 譜面（textage の譜面データが手元にある ANOTHER / LEGGENDARIA）。
@@ -207,32 +207,18 @@ const levelLabel = (l: number) => `☆${l}`;
         曲名を押すと譜面分析タブでその譜面を開きます（配置評価で細かい内訳を確認できます）。
       </p>
     </template>
-  </section>
+  </v-card>
 </template>
 
 <style scoped>
-.ranking {
-  border: 1px solid rgb(226 232 240);
-  border-radius: 0.375rem;
-  background: white;
-  padding: 0.9rem;
-}
-.dark .ranking { border-color: rgb(51 65 85); background: rgb(30 41 59); }
+.ranking { padding: 0.9rem; }
 
 .controls { display: flex; flex-direction: column; gap: 0.5rem; }
 .control { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; }
 .control-label { flex: none; width: 3.5rem; font-weight: 600; color: rgb(100 116 139); }
-.free-input { width: 6rem; letter-spacing: 0.1em; font-weight: 700; }
+.free-input { width: 7rem; }
+.free-input :deep(input) { letter-spacing: 0.1em; font-weight: 700; }
 .search { flex: 1 1 10rem; min-width: 0; max-width: 16rem; }
-
-.seg { display: inline-flex; border-radius: 0.375rem; overflow: hidden; border: 1px solid rgb(203 213 225); }
-.seg button { padding: 0.35rem 0.6rem; font-weight: 600; white-space: nowrap; color: rgb(71 85 105); background: white; }
-.seg button + button { border-left: 1px solid rgb(203 213 225); }
-.seg button.on { color: white; background: rgb(37 99 235); }
-.dark .seg { border-color: rgb(71 85 105); }
-.dark .seg button { color: rgb(203 213 225); background: rgb(51 65 85); }
-.dark .seg button + button { border-left-color: rgb(71 85 105); }
-.dark .seg button.on { color: white; background: rgb(37 99 235); }
 
 .rank-list { display: flex; flex-direction: column; gap: 2px; }
 .rank-list li {
@@ -255,13 +241,16 @@ const levelLabel = (l: number) => `☆${l}`;
 .dark .lv.leg { color: rgb(192 132 252); }
 .title {
   min-width: 0;
+  height: auto;
+  padding: 0;
+  justify-content: flex-start;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   text-align: left;
   font-weight: 600;
   color: rgb(30 41 59);
 }
+.title :deep(.v-btn__content) { min-width: 0; max-width: 100%; }
+.title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title:hover { color: rgb(37 99 235); text-decoration: underline; }
 .dark .title { color: rgb(226 232 240); }
 .dark .title:hover { color: rgb(96 165 250); }

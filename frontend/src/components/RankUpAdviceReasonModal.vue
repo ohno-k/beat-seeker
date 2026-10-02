@@ -26,6 +26,7 @@ import {
 import type { FillRecommendationItem } from '../types/fillRecommendation';
 import { isRoughAccuracy } from '../types/fillRecommendation';
 import InformalRankBadge from './InformalRankBadge.vue';
+import { mdiClose } from '@mdi/js';
 
 const props = withDefaults(defineProps<{
   item: FillRecommendationItem;
@@ -387,41 +388,38 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 animate-fade-in"
-      @click.self="emit('close')"
-    >
-      <div
-        class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-none sm:rounded-md shadow-xl flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border border-slate-200 dark:border-slate-800"
-        role="dialog"
-        aria-modal="true"
+  <v-dialog
+    :model-value="true"
+    @update:model-value="(v: boolean) => { if (!v) emit('close') }"
+    max-width="672"
+    :fullscreen="$vuetify.display.xs"
+  >
+      <v-card
+        class="bg-white dark:bg-slate-900 w-full flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border-slate-200 dark:border-slate-800"
       >
         <!-- ヘッダー -->
         <div class="relative px-4 sm:px-6 py-3 sm:py-4 shrink-0 bg-blue-700 dark:bg-blue-600">
-          <button
-            type="button"
+          <v-btn
+            icon
+            variant="text"
+            size="small"
             @click="emit('close')"
-            class="absolute top-2 right-2 p-2 group z-50"
+            class="absolute top-1 right-1 z-50 text-white/70 hover:text-white"
             :aria-label="t('common.close')"
           >
-            <div class="text-white/70 group-hover:text-white bg-white/10 group-hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition-colors">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-          </button>
+            <v-icon :icon="mdiClose" size="18" />
+          </v-btn>
           <div class="pr-10">
             <p class="text-[10px] sm:text-xs font-bold text-white/80">{{ t('adviceReason.title') }}</p>
             <h2 class="text-base sm:text-lg font-bold text-white tracking-tight leading-tight truncate">{{ item.title }}</h2>
             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
+              <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-white/20 text-white">
                 {{ diffShort(item.difficultyName) }} {{ item.difficultyLevel }}
-              </span>
+              </v-chip>
               <InformalRankBadge :rank="item.informalRank" size="xs" />
-              <span v-if="item.unplayed" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white text-blue-700">
+              <v-chip v-if="item.unplayed" size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-white text-blue-700">
                 {{ t('advice.unplayedTag') }}
-              </span>
+              </v-chip>
               <span class="text-[10px] font-bold text-white/80">
                 {{ t('advice.supportHint', { n: item.supportCount, acc: accuracyLabel() }) }}
               </span>
@@ -433,7 +431,7 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
         <div class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900 p-3 sm:p-4 space-y-3">
 
           <!-- 1. 式の分解 -->
-          <section class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-2">{{ t('adviceReason.formulaLabel') }}</p>
             <div class="flex items-stretch justify-between gap-1 sm:gap-2 tabular-nums">
               <div class="flex-1 min-w-0 rounded-md bg-slate-50 dark:bg-slate-700/40 px-2 py-2 text-center">
@@ -458,10 +456,10 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
               {{ t('adviceReason.targetSentence', { target: label(item.targetScore), score: item.targetScore.toLocaleString(), rate: rateOf(item.targetScore) }) }}
               <template v-if="item.targetLabel"> {{ t('adviceReason.targetIsBorder', { label: item.targetLabel }) }}</template>
             </p>
-          </section>
+          </v-card>
 
           <!-- 2. 図 -->
-          <section class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1">{{ t('adviceReason.chartLabel') }}</p>
             <div ref="chartWrap" class="w-full">
             <svg :viewBox="`0 0 ${W} ${H}`" :width="W" :height="H" class="block max-w-full h-auto select-none" role="img" :aria-label="t('adviceReason.chartLabel')">
@@ -541,10 +539,10 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
               </span>
             </div>
             <p class="mt-2 text-[10px] text-slate-400 dark:text-slate-500 leading-snug">{{ t('adviceReason.chartHint') }}</p>
-          </section>
+          </v-card>
 
           <!-- 3. 手順 -->
-          <section class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
             <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-2">{{ t('adviceReason.stepsLabel') }}</p>
             <ol class="space-y-2.5">
               <!-- Step 1: 実力の推定 -->
@@ -594,10 +592,10 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
                 </div>
               </li>
             </ol>
-          </section>
+          </v-card>
 
           <!-- 4. 推定に使った譜面 -->
-          <section class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <v-card tag="section" class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
             <div class="flex items-baseline justify-between mb-2">
               <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ t('adviceReason.refsLabel') }}</p>
               <span v-if="!isRough && !refsLoading && !refsError" class="text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -607,7 +605,8 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
             <p v-if="isRough" class="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
               {{ t(item.accuracy === 'BASE' ? 'adviceReason.refsRoughBase' : 'adviceReason.refsRoughRank') }}
             </p>
-            <div v-else-if="refsLoading" class="text-center py-4 text-xs text-slate-400 dark:text-slate-500">
+            <div v-else-if="refsLoading" class="flex items-center justify-center gap-2 py-4 text-xs text-slate-400 dark:text-slate-500">
+              <v-progress-circular size="16" width="2" />
               {{ t('potentialDetails.loadingRefs') }}
             </div>
             <div v-else-if="refsError" class="text-center py-4 text-xs text-rose-500">{{ refsError }}</div>
@@ -638,10 +637,9 @@ watch(() => `${props.item.title}\0${props.item.difficultyName}\0${props.viewUser
                 {{ t('adviceReason.refsMore', { n: hiddenRefCount }) }}
               </li>
             </ul>
-          </section>
+          </v-card>
 
         </div>
-      </div>
-    </div>
-  </Teleport>
+      </v-card>
+  </v-dialog>
 </template>

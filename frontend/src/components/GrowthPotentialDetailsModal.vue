@@ -17,6 +17,7 @@ import { API_BASE, useAuth } from '../composables/useAuth';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useI18n } from '../composables/useI18n';
 import { getDifficultyCode } from '../composables/useGameData';
+import { mdiClose } from '@mdi/js';
 
 ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
 
@@ -427,33 +428,33 @@ const accentClasses = computed(() => props.mode === 'strength'
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 animate-fade-in"
-      @click.self="emit('close')"
-    >
-      <div class="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-none sm:rounded-md shadow-xl flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border border-slate-200 dark:border-slate-800">
+  <v-dialog
+    :model-value="true"
+    @update:model-value="(v: boolean) => { if (!v) emit('close') }"
+    max-width="1024"
+    :fullscreen="$vuetify.display.xs"
+  >
+      <v-card class="bg-white dark:bg-slate-900 w-full flex flex-col overflow-hidden h-full sm:h-auto sm:max-h-[92vh] border-slate-200 dark:border-slate-800">
 
         <!-- ヘッダー -->
         <div class="relative px-4 sm:px-6 py-3 sm:py-4 shrink-0" :class="accentClasses.headerBg">
-          <button
+          <v-btn
+            icon
+            variant="text"
+            size="small"
             @click="emit('close')"
-            class="absolute top-2 right-2 p-2 group z-50"
+            class="absolute top-1 right-1 z-50 text-white/70 hover:text-white"
             aria-label="Close"
           >
-            <div class="text-white/70 group-hover:text-white bg-white/10 group-hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition-colors">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-          </button>
+            <v-icon :icon="mdiClose" size="18" />
+          </v-btn>
           <div class="pr-10">
             <p class="text-[10px] sm:text-xs font-bold text-white/80">{{ t('potentialDetails.title') }}</p>
             <h2 class="text-base sm:text-lg font-bold text-white tracking-tight leading-tight truncate">{{ targetTitle }}</h2>
             <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white">
+              <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-white/20 text-white">
                 {{ diffShort(targetDifficultyName) }} {{ targetDifficultyLevel }}
-              </span>
+              </v-chip>
               <span v-if="targetSupportCount != null" class="text-[10px] font-bold text-white/80">
                 {{ t('potentialDetails.supportCountLabel', { count: targetSupportCount }) }}
               </span>
@@ -486,7 +487,7 @@ const accentClasses = computed(() => props.mode === 'strength'
               </div>
 
               <div v-if="isLoadingRefs" class="flex flex-col items-center justify-center py-12 gap-3">
-                <div class="w-8 h-8 border-4 rounded-full animate-spin" :class="accentClasses.spinnerBorder"></div>
+                <v-progress-circular size="32" width="4" :color="mode === 'strength' ? '#059669' : '#0891b2'" />
                 <p class="text-xs font-bold text-slate-500">{{ t('potentialDetails.loadingRefs') }}</p>
               </div>
 
@@ -505,25 +506,26 @@ const accentClasses = computed(() => props.mode === 'strength'
                   v-for="r in visibleRefs"
                   :key="`${r.title}_${r.difficultyName}`"
                 >
-                  <button
+                  <v-card
+                    tag="button"
                     type="button"
                     @click="pickRef(r)"
-                    class="w-full text-left p-2.5 rounded-md border-2 transition-colors active:scale-[0.99]"
+                    class="block w-full text-left p-2.5 rounded-md border-2 transition-colors active:scale-[0.99]"
                     :class="selectedRef && selectedRef.title === r.title && selectedRef.difficultyName === r.difficultyName
                       ? accentClasses.activeBg
                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'"
                   >
                     <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ r.title }}</p>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="diffBadgeClass(r.difficultyName)">
+                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="diffBadgeClass(r.difficultyName)">
                         {{ diffShort(r.difficultyName) }} {{ r.difficultyLevel }}
-                      </span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="accentClasses.pillBg">
+                      </v-chip>
+                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="accentClasses.pillBg">
                         |r| {{ Math.abs(r.r).toFixed(3) }}
-                      </span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                      </v-chip>
+                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                         n={{ r.n }}
-                      </span>
+                      </v-chip>
                     </div>
                     <div class="flex items-center justify-between gap-2 mt-1.5">
                       <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">
@@ -538,7 +540,7 @@ const accentClasses = computed(() => props.mode === 'strength'
                       {{ t('potentialDetails.singlePred') }}: {{ Math.round(r.predScore).toLocaleString() }}
                       <template v-if="r.notesB"> ({{ ((r.predScore / (r.notesB * 2)) * 100).toFixed(2) }}%)</template>
                     </p>
-                  </button>
+                  </v-card>
                 </li>
               </ul>
             </div>
@@ -555,26 +557,26 @@ const accentClasses = computed(() => props.mode === 'strength'
               </div>
 
               <template v-else>
-                <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+                <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-3 sm:p-4">
                   <!-- メタ情報: 選択中の A と相関係数 -->
                   <div class="mb-3">
                     <p class="font-bold text-slate-900 dark:text-white text-sm leading-tight truncate">{{ selectedRef.title }}</p>
                     <div class="flex flex-wrap items-center gap-1.5 mt-1">
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="diffBadgeClass(selectedRef.difficultyName)">
+                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="diffBadgeClass(selectedRef.difficultyName)">
                         {{ diffShort(selectedRef.difficultyName) }} {{ selectedRef.difficultyLevel }}
-                      </span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="accentClasses.pillBg">
+                      </v-chip>
+                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold" :class="accentClasses.pillBg">
                         r = {{ selectedRef.r.toFixed(3) }}
-                      </span>
-                      <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                      </v-chip>
+                      <v-chip size="x-small" label variant="flat" class="px-1.5 text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                         n = {{ selectedRef.n }}
-                      </span>
+                      </v-chip>
                     </div>
                   </div>
 
                   <!-- 散布図本体 / ローディング / エラー -->
                   <div v-if="isLoadingScatter" class="flex flex-col items-center justify-center py-12 gap-3">
-                    <div class="w-8 h-8 border-4 rounded-full animate-spin" :class="accentClasses.spinnerBorder"></div>
+                    <v-progress-circular size="32" width="4" :color="mode === 'strength' ? '#059669' : '#0891b2'" />
                     <p class="text-xs font-bold text-slate-500">{{ t('potentialDetails.loadingScatter') }}</p>
                   </div>
                   <div v-else-if="scatterError" class="text-center py-12">
@@ -589,14 +591,13 @@ const accentClasses = computed(() => props.mode === 'strength'
                       <Scatter :data="chartData" :options="chartOptions" />
                     </div>
                   </template>
-                </div>
+                </v-card>
               </template>
             </div>
 
           </div>
         </div>
 
-      </div>
-    </div>
-  </Teleport>
+      </v-card>
+  </v-dialog>
 </template>

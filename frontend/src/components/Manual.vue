@@ -60,10 +60,10 @@ onMounted(() => {
 <template>
   <div class="space-y-12 pb-20 animate-fade-in text-slate-900 dark:text-white">
     <!-- ヘッダー -->
-    <section class="bg-white dark:bg-slate-800 rounded-md p-8 sm:p-10 border border-slate-200 dark:border-slate-700">
-      <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4 border border-blue-100 dark:border-blue-800/50">
+    <v-card tag="section" class="p-8 sm:p-10">
+      <v-chip label variant="outlined" class="h-auto px-3 py-1 text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4 border-blue-100 dark:border-blue-800/50">
         USER MANUAL
-      </span>
+      </v-chip>
       <h1 class="text-3xl sm:text-4xl font-bold mb-4 leading-tight">
         beat-seeker 使い方ガイド
       </h1>
@@ -72,10 +72,10 @@ onMounted(() => {
         まずは <a href="#getting-started" @click.prevent="scrollToSection('getting-started')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">スコアを取り込む</a>
         から始めるのがおすすめです。
       </p>
-    </section>
+    </v-card>
 
     <!-- 目次 -->
-    <nav class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-8 border border-slate-200 dark:border-slate-700">
+    <v-card tag="nav" class="p-6 sm:p-8">
       <h2 class="text-xl font-bold mb-4 flex items-center gap-3">
         <span class="w-1.5 h-6 bg-blue-600 dark:bg-blue-500 rounded-full"></span>
         目次
@@ -92,10 +92,10 @@ onMounted(() => {
           </a>
         </li>
       </ul>
-    </nav>
+    </v-card>
 
     <!-- 1. はじめに -->
-    <section id="getting-started" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="getting-started" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">01</span>
         はじめに — スコアを取り込む
@@ -121,13 +121,13 @@ onMounted(() => {
         サイドバーの「カメラで曲検索」から、ゲーム画面の写真をアップロードすると曲名を OCR で識別し、その場でスコアを記録できます。試験運用中の機能のため精度に揺らぎがあります。
       </p>
 
-      <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md text-sm text-amber-800 dark:text-amber-300">
+      <v-alert type="warning" :icon="false" density="default" class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-sm text-amber-800 dark:text-amber-300">
         <strong>💡 アップロードを繰り返すと自動で差分を検出します</strong>。新規追加された曲・スコアが更新された曲だけがアップロード結果に表示され、過去のアップロード履歴は <a href="#history" @click.prevent="scrollToSection('history')" class="font-bold underline">成長記録</a> に保存されます。
-      </div>
-    </section>
+      </v-alert>
+    </v-card>
 
     <!-- 2. ダッシュボード -->
-    <section id="dashboard" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="dashboard" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">02</span>
         ダッシュボード
@@ -142,10 +142,10 @@ onMounted(() => {
         <li><strong>フレンド申請バナー:</strong> 他人のダッシュボード閲覧中は、フレンド申請ボタンが上部に表示されます (既にフレンドの場合は出ません)。</li>
       </ul>
       <p class="text-sm text-slate-500 dark:text-slate-400">対象スコア: 集計は ANOTHER / LEGGENDARIA 譜面が中心です。BEGINNER / NORMAL / HYPER は表示はされますが Beat-Tier 計算には入りません。</p>
-    </section>
+    </v-card>
 
     <!-- 3. スコア一覧 -->
-    <section id="scores" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="scores" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">03</span>
         スコア一覧
@@ -159,10 +159,10 @@ onMounted(() => {
         <li><strong>インライン編集:</strong> スコア値・ミスカウントは行をクリックして直接書き換えられます (オンラインデータが間違っていた時の手修正用)。</li>
         <li><strong>合計ポイント表示:</strong> フィルタ後の合計ポイントが即時反映されるので、「☆12 だけで何 PT 取れているか」のような分析が可能です。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 4. プロフィール -->
-    <section id="profile" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="profile" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">04</span>
         プロフィール
@@ -177,10 +177,10 @@ onMounted(() => {
         <li><strong>サポーター表示:</strong> Ko-fi 経由でサポートしてくださった方は、ランキング上でサポーターバッジを表示できます。</li>
         <li><strong>公開共有リンクの管理:</strong> ダッシュボード / スコア一覧 / 成長記録 / プロフィールの各スコープで共有 URL を発行・無効化できます。詳細は <a href="#share" @click.prevent="scrollToSection('share')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">公開共有リンク</a> を参照。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 5. ランキング -->
-    <section id="ranking" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="ranking" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">05</span>
         ランキング
@@ -193,10 +193,10 @@ onMounted(() => {
         <li><strong>各行のクリック:</strong> ユーザー行をクリックするとそのユーザーのダッシュボードに遷移します (公開設定の範囲で閲覧可能)。</li>
         <li><strong>段位・サポーター表示:</strong> 行の右側に、各ユーザーの公式段位・ARENA 段位・サポーターバッジが表示されます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 6. フレンド -->
-    <section id="friends" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="friends" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">06</span>
         フレンド
@@ -210,10 +210,10 @@ onMounted(() => {
         <li><strong>受理 / 拒否:</strong> 受信申請カードで承認・拒否を選択できます。</li>
         <li><strong>フレンド一覧:</strong> Beat-PT 順で並びます。各行をクリックすると、相手のダッシュボード (フレンド閲覧モード) に遷移します。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 7. 成長記録 -->
-    <section id="history" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="history" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">07</span>
         成長記録 (アップロード履歴)
@@ -226,10 +226,10 @@ onMounted(() => {
         <li><strong>期間絞り込み:</strong> 日付フィルタで「直近 1 ヶ月」「半年」など期間を指定できます。</li>
         <li><strong>フレンドの履歴閲覧:</strong> フレンドモードで他ユーザーを開いた状態で成長記録に切り替えると、相手の推移を同じ画面で見られます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 8. ARENA -->
-    <section id="arena" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="arena" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">08</span>
         ARENA モード
@@ -243,10 +243,10 @@ onMounted(() => {
         <li><strong>ALL / Online / Local:</strong> オンラインアリーナと店内対戦を分けて分析できます。</li>
         <li><strong>勝敗ハイライト:</strong> 各試合の 1 位は金、2 位は銀で着色され、MAX 譜面のグレード (MAX- / MAX) も併記されます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 9. 選曲アシスト -->
-    <section id="arcade-assist" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="arcade-assist" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">09</span>
         選曲アシスト
@@ -262,10 +262,10 @@ onMounted(() => {
         <li><strong>得意ランキング (Strength):</strong> 平均よりも明らかに高得点を出している譜面を抽出し、得意傾向を可視化します。</li>
       </ul>
       <p class="text-sm text-slate-500 dark:text-slate-400">Lv11 / Lv12 タブで対象帯を切り替え、各モードで上位 50 曲まで表示されます。</p>
-    </section>
+    </v-card>
 
     <!-- 10. 投票所 -->
-    <section id="tier-voting" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="tier-voting" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">10</span>
         投票所 (難易度表投票)
@@ -280,10 +280,10 @@ onMounted(() => {
         <li><strong>並び替え:</strong> 検索 + 最新コメントの新しい順 / 投票が活発な順などで並び替え可能です。</li>
       </ul>
       <p class="text-sm text-slate-500 dark:text-slate-400">投票結果は管理者が定期的に集計し、難易度表本体に反映していきます。改訂履歴は <a href="#changelog" @click.prevent="scrollToSection('changelog')" class="text-blue-600 dark:text-blue-400 font-bold hover:underline">更新履歴</a> から参照できます。</p>
-    </section>
+    </v-card>
 
     <!-- 11. ティア別平均 -->
-    <section id="song-avg" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="song-avg" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">11</span>
         ティア別平均
@@ -297,10 +297,10 @@ onMounted(() => {
         <li><strong>レベル絞り込み:</strong> Lv11 / Lv12 を切り替えて表示できます。</li>
         <li><strong>列ソート:</strong> 平均スコア / 自スコア / 差分 / 順位など各列でソートできます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 12. 難易度表 -->
-    <section id="diff-table" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="diff-table" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">12</span>
         難易度表
@@ -313,16 +313,16 @@ onMounted(() => {
         <li><strong>アコーディオン開閉:</strong> ランクのバーをクリックして、その帯の曲リストを開閉できます。</li>
         <li><strong>ログイン誘導:</strong> 未ログインでも閲覧可能ですが、ログインするとクリア状況に応じた色分けが行われます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 13. 譜面分析 (サポーター限定) -->
-    <section id="score-prediction" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
+    <v-card tag="section" id="score-prediction" class="p-6 sm:p-10 border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3 flex-wrap">
         <span class="text-blue-500 font-mono text-base">13</span>
         譜面分析 (スコア予測)
-        <span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+        <v-chip label variant="outlined" class="ml-1 h-auto text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700">
           サポーター限定
-        </span>
+        </v-chip>
       </h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
         Lv11 / Lv12 の ANOTHER / LEGGENDARIA 譜面について、過去の類似譜面のスコアから「あなたが出せそうなスコア」を予測する画面です。
@@ -333,19 +333,19 @@ onMounted(() => {
         <li><strong>URL での共有:</strong> 各譜面の分析結果は <code>/chart/&lt;version&gt;/&lt;slug&gt;/&lt;diff&gt;</code> という安定した URL を持ちます。SNS シェアや外部サイトからのリンクに使えます。</li>
         <li><strong>他ユーザーの予測閲覧:</strong> フレンドや TOP ランカーを閲覧中の場合、相手の予測値も同じ画面に並べて確認できます。</li>
       </ul>
-      <div class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md text-sm text-amber-800 dark:text-amber-300">
+      <v-alert type="warning" :icon="false" density="default" class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-sm text-amber-800 dark:text-amber-300">
         この機能は <strong>Ko-fi 経由でサポートしてくださったサポーター限定</strong>です。サイドバー下部の Ko-fi ボタンから支援できます。
-      </div>
-    </section>
+      </v-alert>
+    </v-card>
 
     <!-- 14. スコアペア散布図 (サポーター限定) -->
-    <section id="score-scatter" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
+    <v-card tag="section" id="score-scatter" class="p-6 sm:p-10 border-2 border-amber-200 dark:border-amber-800/50 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3 flex-wrap">
         <span class="text-blue-500 font-mono text-base">14</span>
         スコアペア散布図
-        <span class="ml-1 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+        <v-chip label variant="outlined" class="ml-1 h-auto text-[10px] font-bold px-2 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700">
           サポーター限定
-        </span>
+        </v-chip>
       </h2>
       <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
         2 つの譜面を指定し、両方をプレイしている全ユーザーのスコアペアを散布図でプロットする分析画面です。譜面間の相関を可視化し、自分の位置や得意 / 苦手の偏りを確認できます。
@@ -356,13 +356,13 @@ onMounted(() => {
         <li><strong>DJ LEVEL グリッド:</strong> A / AA / AAA / MAX- / MAX のグレード境界が補助線として描画されます。</li>
         <li><strong>ホバー詳細:</strong> 点にマウスを乗せると、ユーザー名と両譜面のスコア / スコアレートが表示されます。</li>
       </ul>
-      <div class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md text-sm text-amber-800 dark:text-amber-300">
+      <v-alert type="warning" :icon="false" density="default" class="mt-2 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 text-sm text-amber-800 dark:text-amber-300">
         この機能は <strong>Ko-fi 経由でサポートしてくださったサポーター限定</strong>です。サイドバー下部の Ko-fi ボタンから支援できます。
-      </div>
-    </section>
+      </v-alert>
+    </v-card>
 
     <!-- 15. 譜面一覧 -->
-    <section id="chart-list" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="chart-list" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">15</span>
         譜面一覧
@@ -376,10 +376,10 @@ onMounted(() => {
         <li><strong>ソート:</strong> タイトル / レベル / ノーツ数 / BPM 順で並び替えできます。</li>
         <li><strong>textage プレビュー:</strong> 各行から textage.cc の譜面プレビューに直接ジャンプできます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 16. 公開共有リンク -->
-    <section id="share" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="share" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">16</span>
         公開共有リンク
@@ -393,10 +393,10 @@ onMounted(() => {
         <li><strong>無効化:</strong> プロフィールから個別の共有リンクを無効化できます。一度無効化したトークンは <code>410 Gone</code> の専用ページに切り替わります。</li>
         <li><strong>SEO 除外:</strong> 共有ページには noindex メタタグが付与され、検索エンジンにインデックスされません。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 17. 更新履歴 -->
-    <section id="changelog" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="changelog" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">17</span>
         更新履歴
@@ -408,10 +408,10 @@ onMounted(() => {
         <li><strong>アプリ更新タブ:</strong> 機能追加・改善・バグ修正をバージョン単位で時系列表示します。</li>
         <li><strong>難易度改訂タブ:</strong> 管理者が難易度表を適用するたびに自動記録される改訂履歴（新規追加・既存変更・表から除外）を版数ごとに表示します。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 18. その他 -->
-    <section id="misc" class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 space-y-5">
+    <v-card tag="section" id="misc" class="p-6 sm:p-10 space-y-5">
       <h2 class="text-2xl font-bold flex items-center gap-3">
         <span class="text-blue-500 font-mono text-base">18</span>
         その他の便利機能
@@ -424,7 +424,7 @@ onMounted(() => {
         <li><strong>段位クイズ:</strong> サイドバーの段位クイズウィジェットから、Beat-Tier 段位の判定問題に挑戦できます。</li>
         <li><strong>コマンドパレット (Ctrl/⌘ + K):</strong> 画面内のどこからでも、曲・タブ・ユーザーを横断検索できる呼び出しメニューを開けます。</li>
       </ul>
-    </section>
+    </v-card>
 
     <!-- 末尾アンカー -->
     <section class="text-center text-sm text-slate-500 dark:text-slate-400 pt-4">

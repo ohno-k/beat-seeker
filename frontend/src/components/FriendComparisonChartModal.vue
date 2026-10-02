@@ -34,6 +34,7 @@ import { useI18n } from '../composables/useI18n';
 import type { Friend } from '../composables/useFriends';
 import type { ScoreRecord } from '../utils/scoreData';
 import { formatJst, toJstDate } from '../utils/jstTime';
+import { mdiArrowExpandAll, mdiClose } from '@mdi/js';
 
 ChartJS.register(LinearScale, CategoryScale, TimeScale, PointElement, LineElement, Filler, Tooltip, Legend, zoomPlugin);
 
@@ -610,10 +611,8 @@ watch(
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4">
-      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')"></div>
-      <div class="relative z-10 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] flex flex-col">
+  <v-dialog :model-value="isOpen" @update:model-value="(v) => { if (!v) emit('close') }" max-width="768">
+      <v-card class="bg-white dark:bg-slate-800 max-h-[95vh] sm:max-h-[90vh]">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <div class="min-w-0">
             <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
@@ -627,48 +626,39 @@ watch(
             </p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button v-if="snapshots.length > 0" type="button" @click="resetZoom"
-              class="px-2 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold flex items-center gap-1 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 4l-7 7M4 20l7-7" />
-              </svg>
+            <v-btn v-if="snapshots.length > 0" type="button" @click="resetZoom"
+              variant="tonal" size="small" :prepend-icon="mdiArrowExpandAll" class="text-xs">
               リセット
-            </button>
-            <button @click="emit('close')" aria-label="閉じる" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors">×</button>
+            </v-btn>
+            <v-btn icon variant="text" size="small" @click="emit('close')" aria-label="閉じる" class="text-slate-500 dark:text-slate-400">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
         </div>
-        <div class="flex-1 overflow-auto p-3 sm:p-4">
+        <v-card-text class="flex-1 overflow-auto p-3 sm:p-4">
           <div v-if="isLoading" class="py-12 flex flex-col items-center justify-center">
-            <div class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
+            <v-progress-circular size="32" width="4" color="indigo" />
             <p class="mt-3 text-xs text-slate-500 dark:text-slate-400 font-bold">履歴を再構築中...</p>
           </div>
           <div v-else-if="errorMsg" class="py-8 text-center text-red-500 dark:text-red-400 font-bold">{{ errorMsg }}</div>
           <div v-else-if="snapshots.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">表示できる履歴がありません</div>
           <div v-else>
-            <div v-if="friendHistoryUnavailable" class="mb-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-lg text-[11px] sm:text-xs text-amber-700 dark:text-amber-300 font-bold leading-relaxed">
+            <v-alert v-if="friendHistoryUnavailable" type="warning" :icon="false" class="mb-3 text-[11px] sm:text-xs font-bold leading-relaxed">
               <p v-if="virtualArea">バーチャルライバルは履歴がないため、相手のスコアは現在値で固定して変遷を再構築しています。</p>
               <p v-else>このフレンドは履歴を非公開にしているため、相手のスコアは現在値で固定して変遷を再構築しています。</p>
-            </div>
+            </v-alert>
             <div class="flex items-center justify-between gap-2 mb-3">
               <!-- 件数 / 割合 トグル -->
-              <div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-xs font-bold shrink-0">
-                <button
-                  type="button"
-                  @click="setDisplayMode('count')"
-                  :class="displayMode === 'count'
-                    ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
-                    : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'"
-                  class="px-3 py-1.5 transition-colors"
-                >件数</button>
-                <button
-                  type="button"
-                  @click="setDisplayMode('ratio')"
-                  :class="displayMode === 'ratio'
-                    ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
-                    : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'"
-                  class="px-3 py-1.5 transition-colors border-l border-slate-200 dark:border-slate-700"
-                >割合</button>
-              </div>
+              <v-btn-toggle
+                :model-value="displayMode"
+                @update:model-value="setDisplayMode"
+                mandatory
+                color="indigo"
+                class="shrink-0 text-xs"
+              >
+                <v-btn value="count" size="small" class="text-xs">件数</v-btn>
+                <v-btn value="ratio" size="small" class="text-xs">割合</v-btn>
+              </v-btn-toggle>
               <!-- 割合モード時の凡例代わり注釈。狭い画面では非表示にして崩れを防ぐ。 -->
               <div v-if="displayMode === 'ratio'" class="hidden sm:flex items-center gap-3 text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold flex-wrap justify-end">
                 <span class="inline-flex items-center gap-1">
@@ -693,8 +683,7 @@ watch(
             </div>
             <p class="mt-2 text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 text-center">マウスホイールでズーム / ドラッグでパン</p>
           </div>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+        </v-card-text>
+      </v-card>
+  </v-dialog>
 </template>

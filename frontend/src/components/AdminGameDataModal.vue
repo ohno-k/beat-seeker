@@ -1,69 +1,63 @@
 <template>
-  <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm" @click.self="$emit('close')">
-      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[90vh] animate-fade-in border border-slate-200 dark:border-slate-800">
-        
+    <v-dialog
+      :model-value="isOpen"
+      max-width="768"
+      @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+    >
+      <v-card class="bg-white dark:bg-slate-900 w-full shadow-xl flex flex-col overflow-hidden max-h-[90vh] border-slate-200 dark:border-slate-800">
+
         <!-- Header -->
         <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
+            <v-icon :icon="mdiMusic" size="24" class="text-indigo-500" />
             ゲームデータ管理
           </h2>
           <div class="flex items-center gap-2">
             <!-- Apply buttons (楽曲と難易度表で独立に適用) -->
-            <button
-              @click="handleApplyDraftSongs"
+            <v-btn
+              color="success"
+              size="small"
+              class="text-sm"
               :disabled="isApplyingSongs || isApplyingDiff || draftSongs.length === 0"
-              class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              @click="handleApplyDraftSongs"
             >
-              <svg v-if="isApplyingSongs" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <v-progress-circular v-if="isApplyingSongs" size="16" width="2" color="white" class="mr-1" />
               {{ isApplyingSongs ? '適用中...' : '楽曲を適用' }}
-            </button>
-            <button
-              @click="handleApplyDraftDiffTable"
+            </v-btn>
+            <v-btn
+              color="success"
+              size="small"
+              class="text-sm"
               :disabled="isApplyingSongs || isApplyingDiff || savedDiffChanges.length === 0"
-              class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold flex items-center gap-1 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              @click="handleApplyDraftDiffTable"
             >
-              <svg v-if="isApplyingDiff" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <v-progress-circular v-if="isApplyingDiff" size="16" width="2" color="white" class="mr-1" />
               {{ isApplyingDiff ? '適用中...' : '難易度表を適用' }}
-            </button>
-            <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
+            </v-btn>
+            <v-btn icon variant="text" size="small" class="text-slate-400 -mr-2" aria-label="close" @click="$emit('close')">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
         </div>
 
         <!-- Draft status -->
-        <div v-if="hasDraftSongs || hasDraftDiffTable" class="px-5 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800/50 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.27 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <span>未適用のドラフトがあります</span>
-          <span v-if="hasDraftSongs" class="px-1.5 py-0.5 bg-amber-200 dark:bg-amber-800/50 rounded text-xs font-bold">楽曲 {{ draftSongs.length }}件</span>
-          <span v-if="hasDraftDiffTable" class="px-1.5 py-0.5 bg-amber-200 dark:bg-amber-800/50 rounded text-xs font-bold">難易度表</span>
-        </div>
+        <v-alert v-if="hasDraftSongs || hasDraftDiffTable" type="warning" rounded="0" class="shrink-0 px-5 py-2 text-sm">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span>未適用のドラフトがあります</span>
+            <v-chip v-if="hasDraftSongs" label size="x-small" variant="flat" class="px-1.5 bg-amber-200 dark:bg-amber-800/50 text-amber-800 dark:text-amber-300 text-xs font-bold">楽曲 {{ draftSongs.length }}件</v-chip>
+            <v-chip v-if="hasDraftDiffTable" label size="x-small" variant="flat" class="px-1.5 bg-amber-200 dark:bg-amber-800/50 text-amber-800 dark:text-amber-300 text-xs font-bold">難易度表</v-chip>
+          </div>
+        </v-alert>
 
         <!-- Tab bar -->
-        <div class="flex border-b border-slate-200 dark:border-slate-800 shrink-0">
-          <button 
-            @click="activeTab = 'songs'" 
-            class="flex-1 py-3 text-sm font-bold transition-colors"
-            :class="activeTab === 'songs' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-          >楽曲追加</button>
-          <button 
-            @click="activeTab = 'difficulty'" 
-            class="flex-1 py-3 text-sm font-bold transition-colors"
-            :class="activeTab === 'difficulty' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-          >難易度表</button>
-        </div>
+        <v-tabs v-model="activeTab" grow color="indigo" class="border-b border-slate-200 dark:border-slate-800 shrink-0">
+          <v-tab value="songs" class="text-sm font-bold">楽曲追加</v-tab>
+          <v-tab value="difficulty" class="text-sm font-bold">難易度表</v-tab>
+        </v-tabs>
 
         <!-- Status messages -->
-        <div v-if="errorMsg" class="mx-5 mt-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded-md border border-red-200 dark:border-red-800 text-sm">{{ errorMsg }}</div>
-        <div v-if="successMsg" class="mx-5 mt-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded-md border border-green-200 dark:border-green-800 text-sm">{{ successMsg }}</div>
+        <v-alert v-if="errorMsg" type="error" class="mx-5 mt-4 text-sm shrink-0">{{ errorMsg }}</v-alert>
+        <v-alert v-if="successMsg" type="success" class="mx-5 mt-4 text-sm shrink-0">{{ successMsg }}</v-alert>
 
         <!-- Tab content -->
         <div class="flex-1 overflow-y-auto p-5">
@@ -71,37 +65,38 @@
           <!-- Songs Tab -->
           <div v-if="activeTab === 'songs'">
             <!-- 楽曲・譜面の自動同期（bemaniwiki 新曲リスト / 旧曲リスト、textage 譜面） -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div class="flex items-center gap-2">
                   <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300">楽曲・譜面の自動同期</h3>
-                  <div class="inline-flex rounded-lg border border-slate-300 dark:border-slate-600 overflow-hidden text-xs font-bold">
-                    <button
+                  <v-btn-toggle v-model="wikiSyncSource" mandatory color="indigo" :disabled="isWikiSyncing">
+                    <v-btn
                       v-for="opt in wikiSyncSourceOptions"
                       :key="opt.value"
-                      @click="wikiSyncSource = opt.value"
-                      :disabled="isWikiSyncing"
-                      class="px-2.5 py-1 transition-colors disabled:cursor-not-allowed"
-                      :class="wikiSyncSource === opt.value
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'"
-                    >{{ opt.label }}</button>
-                  </div>
+                      :value="opt.value"
+                      size="x-small"
+                      class="px-2.5 text-xs"
+                    >{{ opt.label }}</v-btn>
+                  </v-btn-toggle>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button
+                  <v-btn
+                    variant="outlined"
+                    size="small"
+                    class="text-xs whitespace-nowrap"
+                    :disabled="isWikiSyncing"
                     @click="handleWikiSync(true)"
+                  >差分を確認</v-btn>
+                  <v-btn
+                    color="indigo"
+                    size="small"
+                    class="text-xs whitespace-nowrap"
                     :disabled="isWikiSyncing"
-                    class="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-                  >差分を確認</button>
-                  <button
                     @click="handleWikiSync(false)"
-                    :disabled="isWikiSyncing"
-                    class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap"
                   >
-                    <svg v-if="isWikiSyncing" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <v-progress-circular v-if="isWikiSyncing" size="14" width="2" color="white" class="mr-1" />
                     {{ isWikiSyncing ? '同期中...' : '今すぐ同期' }}
-                  </button>
+                  </v-btn>
                 </div>
               </div>
               <p v-if="wikiSyncSource === 'new'" class="text-xs text-slate-500 dark:text-slate-400 mb-2">
@@ -124,12 +119,16 @@
                 <div class="font-bold" :class="wikiSyncResultShown.status === 'SUCCESS' ? 'text-emerald-700 dark:text-emerald-400' : wikiSyncResultShown.status === 'NEEDS_REVIEW' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-700 dark:text-slate-300'">
                   {{ wikiSyncResultShown.message }}
                 </div>
-                <details v-for="sec in wikiSyncSections" :key="sec.key" class="text-slate-600 dark:text-slate-300">
-                  <summary class="cursor-pointer select-none">{{ sec.label }} {{ sec.items.length }}件</summary>
-                  <ul class="mt-1 ml-4 list-disc space-y-0.5 max-h-40 overflow-y-auto">
-                    <li v-for="(item, i) in sec.items" :key="i" class="break-all">{{ item }}</li>
-                  </ul>
-                </details>
+                <v-expansion-panels v-if="wikiSyncSections.length > 0" multiple variant="accordion" class="text-slate-600 dark:text-slate-300">
+                  <v-expansion-panel v-for="sec in wikiSyncSections" :key="sec.key">
+                    <v-expansion-panel-title class="text-xs min-h-0 py-1.5">{{ sec.label }} {{ sec.items.length }}件</v-expansion-panel-title>
+                    <v-expansion-panel-text>
+                      <ul class="ml-4 list-disc space-y-0.5 max-h-40 overflow-y-auto text-xs">
+                        <li v-for="(item, i) in sec.items" :key="i" class="break-all">{{ item }}</li>
+                      </ul>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
               </div>
               <div v-if="wikiSyncRunsShown.length > 0" class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
                 <div class="font-bold">最近の実行（{{ wikiSyncSourceLabel }}）</div>
@@ -141,118 +140,130 @@
                   <span v-else class="break-all">{{ r.errorMessage }}</span>
                 </div>
               </div>
-            </div>
+            </v-card>
 
             <!-- Edit existing active song -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">既存曲を編集</h3>
-              <input
+              <v-text-field
                 v-model="activeSearchQuery"
                 :disabled="isEditingExistingSong"
                 type="text"
                 placeholder="曲名で検索..."
-                class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50"
+                color="indigo"
+                class="w-full text-sm"
               />
               <div v-if="filteredActiveSongs.length > 0 && !isEditingExistingSong" class="mt-2 max-h-48 overflow-y-auto space-y-1">
-                <button
+                <v-card
                   v-for="g in filteredActiveSongs"
                   :key="g.title"
-                  @click="handleBeginEditActiveSong(g)"
                   :disabled="isPreparingEdit"
-                  class="w-full text-left px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  class="w-full text-left px-3 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                  @click="handleBeginEditActiveSong(g)"
                 >
                   <div class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ g.title }}</div>
                   <div class="text-xs text-slate-500 dark:text-slate-400">
                     {{ g.artist }} / {{ g.genre }} / {{ g.difficulties.join(', ') }}
                   </div>
-                </button>
+                </v-card>
               </div>
               <div v-else-if="activeSearchQuery && !isEditingExistingSong" class="mt-2 text-xs text-slate-400 dark:text-slate-500">
                 該当する楽曲が見つかりません
               </div>
-              <div v-if="isPreparingEdit" class="mt-2 text-xs text-slate-500 dark:text-slate-400">編集用ドラフトを準備中...</div>
-            </div>
+              <div v-if="isPreparingEdit" class="mt-2 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                <v-progress-circular size="14" width="2" />
+                編集用ドラフトを準備中...
+              </div>
+            </v-card>
 
             <!-- Add Song Form -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
-              <div v-if="isEditingExistingSong" class="flex items-center justify-between mb-3 p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800/50">
-                <div class="text-sm text-indigo-700 dark:text-indigo-400">
-                  <span class="font-bold">編集中:</span> {{ editingSongTitle }}
+            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
+              <v-alert v-if="isEditingExistingSong" type="info" :icon="false" color="indigo" class="mb-3 p-2">
+                <div class="flex items-center justify-between">
+                  <div class="text-sm text-indigo-700 dark:text-indigo-400">
+                    <span class="font-bold">編集中:</span> {{ editingSongTitle }}
+                  </div>
+                  <v-btn variant="outlined" size="x-small" class="text-xs" @click="cancelEditExistingSong">
+                    キャンセル
+                  </v-btn>
                 </div>
-                <button @click="cancelEditExistingSong" class="text-xs px-2 py-1 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  キャンセル
-                </button>
-              </div>
+              </v-alert>
               <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 mb-3">{{ isEditingExistingSong ? '楽曲情報の編集' : '新曲追加' }}</h3>
-              
+
               <!-- Basic info -->
               <div class="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">曲名 *</label>
-                  <input v-model="form.title" type="text" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="曲名" />
+                  <v-text-field v-model="form.title" type="text" color="indigo" class="w-full text-sm" placeholder="曲名" />
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">アーティスト</label>
-                  <input v-model="form.artist" type="text" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="アーティスト名" />
+                  <v-text-field v-model="form.artist" type="text" color="indigo" class="w-full text-sm" placeholder="アーティスト名" />
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">ジャンル</label>
-                  <input v-model="form.genre" type="text" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="ジャンル" />
+                  <v-text-field v-model="form.genre" type="text" color="indigo" class="w-full text-sm" placeholder="ジャンル" />
                 </div>
                 <div>
                   <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">BPM</label>
-                  <input v-model="form.bpm" type="text" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="150 / 130-180" />
+                  <v-text-field v-model="form.bpm" type="text" color="indigo" class="w-full text-sm" placeholder="150 / 130-180" />
                 </div>
               </div>
 
               <!-- Per-difficulty fields -->
               <div class="space-y-2 mb-3">
-                <div v-for="diff in difficultyDefs" :key="diff.code" 
+                <div v-for="diff in difficultyDefs" :key="diff.code"
                   class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-700"
                   :class="diff.bgClass"
                 >
-                  <span class="w-20 text-xs font-bold shrink-0 text-center py-1 rounded" :class="diff.labelClass">{{ diff.label }}</span>
+                  <v-chip label variant="flat" class="w-20 justify-center text-xs font-bold shrink-0" :class="diff.labelClass">{{ diff.label }}</v-chip>
                   <div class="flex items-center gap-1.5 flex-1">
                     <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">ノーツ</label>
-                    <input v-model.number="form[diff.notesKey]" type="number" min="0" class="w-20 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" placeholder="0" />
+                    <v-text-field v-model.number="form[diff.notesKey]" type="number" min="0" density="compact" class="w-24 flex-none text-xs" placeholder="0" />
                     <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">☆</label>
-                    <input v-model.number="form[diff.levelKey]" type="number" min="1" max="12" class="w-14 px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" placeholder="0" />
+                    <v-text-field v-model.number="form[diff.levelKey]" type="number" min="1" max="12" density="compact" class="w-20 flex-none text-xs" placeholder="0" />
                   </div>
                 </div>
               </div>
 
               <!-- Extra fields for ANOTHER/LEGGENDARIA -->
-              <details class="mb-3">
-                <summary class="text-xs font-bold text-slate-500 dark:text-slate-400 cursor-pointer hover:text-indigo-500">詳細フィールド (ANOTHER/LEGG用)</summary>
-                <div class="grid grid-cols-4 gap-2 mt-2">
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">WR</label>
-                    <input v-model.number="form.wr" type="number" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" />
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">AVG</label>
-                    <input v-model.number="form.avg" type="number" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" />
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">coef</label>
-                    <input v-model.number="form.coef" type="number" step="0.01" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" />
-                  </div>
-                  <div>
-                    <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">textage</label>
-                    <input v-model="form.textage" type="text" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-xs text-slate-800 dark:text-white" />
-                  </div>
-                </div>
-              </details>
+              <v-expansion-panels variant="accordion" class="mb-3">
+                <v-expansion-panel>
+                  <v-expansion-panel-title class="text-xs font-bold text-slate-500 dark:text-slate-400 min-h-0 py-2">詳細フィールド (ANOTHER/LEGG用)</v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <div class="grid grid-cols-4 gap-2">
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">WR</label>
+                        <v-text-field v-model.number="form.wr" type="number" class="w-full text-xs" />
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">AVG</label>
+                        <v-text-field v-model.number="form.avg" type="number" class="w-full text-xs" />
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">coef</label>
+                        <v-text-field v-model.number="form.coef" type="number" step="0.01" class="w-full text-xs" />
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-0.5">textage</label>
+                        <v-text-field v-model="form.textage" type="text" class="w-full text-xs" />
+                      </div>
+                    </div>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
 
-              <button
-                @click="isEditingExistingSong ? handleUpdateEditingSong() : handleAddSong()"
+              <v-btn
+                color="indigo"
+                block
+                class="text-sm"
                 :disabled="isSubmitting || !form.title"
-                class="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                @click="isEditingExistingSong ? handleUpdateEditingSong() : handleAddSong()"
               >
-                <svg v-if="isSubmitting" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <v-progress-circular v-if="isSubmitting" size="16" width="2" color="white" class="mr-2" />
                 {{ isEditingExistingSong ? 'ドラフトを更新' : 'ドラフトに追加' }}
-              </button>
-            </div>
+              </v-btn>
+            </v-card>
 
             <!-- Draft songs list -->
             <div v-if="draftSongs.length > 0">
@@ -261,8 +272,8 @@
                 <span class="text-xs font-normal text-slate-500 dark:text-slate-400">({{ draftSongs.length }}件)</span>
               </h3>
               <div class="space-y-1">
-                <div v-for="song in groupedDraftSongs" :key="song.title" 
-                  class="flex items-center justify-between bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700"
+                <v-card v-for="song in groupedDraftSongs" :key="song.title"
+                  class="flex items-center justify-between p-3"
                 >
                   <div class="flex-1 min-w-0">
                     <div class="font-bold text-sm text-slate-800 dark:text-white truncate">{{ song.title }}</div>
@@ -270,16 +281,19 @@
                       {{ song.artist }} / {{ song.genre }} / {{ song.difficulties.join(', ') }}
                     </div>
                   </div>
-                  <button 
-                    @click="handleDeleteDraftSong(song.ids)" 
-                    class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1"
+                  <v-btn
+                    icon
+                    variant="text"
+                    size="small"
+                    color="error"
+                    class="ml-2 shrink-0"
                     title="削除"
+                    aria-label="削除"
+                    @click="handleDeleteDraftSong(song.ids)"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
+                    <v-icon :icon="mdiDelete" size="18" />
+                  </v-btn>
+                </v-card>
               </div>
             </div>
             <div v-else class="text-center text-sm text-slate-400 dark:text-slate-500 py-8">
@@ -292,31 +306,33 @@
             <div class="mb-3 flex items-center justify-between gap-2">
               <h3 class="font-bold text-sm text-slate-700 dark:text-slate-300 shrink-0">難易度表 GUI 編集</h3>
               <div class="flex items-center gap-2">
-                <button
-                  @click="generateDraftFromVotes"
+                <v-btn
+                  color="warning"
+                  size="small"
+                  class="text-sm whitespace-nowrap"
                   :disabled="isGeneratingDraft"
-                  class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
+                  @click="generateDraftFromVotes"
                 >
-                  <svg v-if="isGeneratingDraft" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <v-progress-circular v-if="isGeneratingDraft" size="14" width="2" color="white" class="mr-1" />
                   投票から生成
-                </button>
-                <button
-                  @click="handleSaveDiffTable"
+                </v-btn>
+                <v-btn
+                  color="indigo"
+                  size="small"
+                  class="text-sm whitespace-nowrap"
                   :disabled="isSavingDiff || pendingDiffChanges.length === 0"
-                  class="px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
+                  @click="handleSaveDiffTable"
                 >
-                  <svg v-if="isSavingDiff" class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <v-progress-circular v-if="isSavingDiff" size="14" width="2" color="white" class="mr-1" />
                   下書き保存 ({{ pendingDiffChanges.length }}件)
-                </button>
+                </v-btn>
               </div>
             </div>
 
             <!-- Difficulty table profiles (named draft snapshots) -->
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h4 class="text-xs font-bold text-slate-500 mb-2 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
+                <v-icon :icon="mdiArchiveOutline" size="14" />
                 プロファイル（下書きを名前付きで保存）
               </h4>
               <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-2 leading-snug">
@@ -324,112 +340,136 @@
               </p>
               <!-- Save-as form -->
               <div class="flex items-center gap-2 mb-3">
-                <input
+                <v-text-field
                   v-model="newProfileName"
                   type="text"
                   maxlength="60"
                   placeholder="プロファイル名（例: 強G案）"
+                  color="indigo"
+                  class="flex-1 min-w-0 text-sm"
                   @keyup.enter="handleSaveProfile()"
-                  class="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
-                <button
-                  @click="handleSaveProfile()"
+                <v-btn
+                  color="indigo"
+                  class="text-sm whitespace-nowrap"
                   :disabled="isProfileBusy || !newProfileName.trim()"
-                  class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap transition-colors"
+                  @click="handleSaveProfile()"
                 >
                   現在の内容を保存
-                </button>
+                </v-btn>
               </div>
               <!-- Profile list -->
               <div v-if="diffProfiles.length > 0" class="space-y-1">
-                <div
+                <v-card
                   v-for="p in diffProfiles"
                   :key="p.name"
-                  class="flex items-center justify-between bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 min-w-0"
+                  class="flex items-center justify-between p-2.5 min-w-0"
                 >
                   <div class="min-w-0 flex-1 mr-2">
                     <div class="text-sm font-bold text-slate-800 dark:text-white truncate" :title="p.name">{{ p.name }}</div>
                     <div class="text-xs text-slate-500 dark:text-slate-400">{{ p.songCount }} 曲</div>
                   </div>
                   <div class="flex items-center gap-1.5 shrink-0">
-                    <button
-                      @click="handleLoadProfile(p.name)"
+                    <v-btn
+                      variant="tonal"
+                      color="indigo"
+                      size="x-small"
+                      class="px-2.5 text-xs"
                       :disabled="isProfileBusy"
-                      class="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded text-xs font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       title="このプロファイルを下書きに読み込む"
+                      @click="handleLoadProfile(p.name)"
                     >
                       読み込み
-                    </button>
-                    <button
-                      @click="handleSaveProfile(p.name)"
+                    </v-btn>
+                    <v-btn
+                      variant="tonal"
+                      size="x-small"
+                      class="px-2.5 text-xs"
                       :disabled="isProfileBusy"
-                      class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       title="現在の内容でこのプロファイルを上書き"
+                      @click="handleSaveProfile(p.name)"
                     >
                       上書き
-                    </button>
-                    <button
-                      @click="handleDeleteProfile(p.name)"
+                    </v-btn>
+                    <v-btn
+                      icon
+                      variant="text"
+                      size="x-small"
+                      color="error"
                       :disabled="isProfileBusy"
-                      class="p-1 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       title="削除"
+                      aria-label="削除"
+                      @click="handleDeleteProfile(p.name)"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                    </button>
+                      <v-icon :icon="mdiDelete" size="16" />
+                    </v-btn>
                   </div>
-                </div>
+                </v-card>
               </div>
               <div v-else class="text-xs text-slate-400 dark:text-slate-500 py-2 text-center">
                 保存されたプロファイルはありません
               </div>
-            </div>
+            </v-card>
 
             <!-- Level filter checkboxes -->
             <div class="mb-3 flex items-center gap-4">
-              <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                <input v-model="showLv12" type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer" />
-                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆12</span>
-              </label>
-              <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                <input v-model="showLv11" type="checkbox" class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-indigo-500 focus:ring-indigo-500 cursor-pointer" />
-                <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆11</span>
-              </label>
+              <v-checkbox v-model="showLv12" color="indigo" class="flex-none">
+                <template #label>
+                  <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆12</span>
+                </template>
+              </v-checkbox>
+              <v-checkbox v-model="showLv11" color="indigo" class="flex-none">
+                <template #label>
+                  <span class="text-sm font-bold text-slate-700 dark:text-slate-300">☆11</span>
+                </template>
+              </v-checkbox>
             </div>
 
-            <div class="bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700 p-4 mb-4">
+            <v-card variant="flat" class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 mb-4">
               <h4 class="text-xs font-bold text-slate-500 mb-2">楽曲のランク移動</h4>
               <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <select v-model="diffEditSongTitle" class="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white">
-                  <option value="">曲名を選択...</option>
-                  <option v-for="song in effectiveSongsList" :key="song.title" :value="song.title">
-                    {{ song.title.length > 40 ? song.title.substring(0, 37) + '...' : song.title }} (現在: {{ song.rank }})
-                  </option>
-                </select>
-                <select v-model="diffEditNewRank" class="sm:w-40 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-800 dark:text-white">
-                  <option value="">移動先...</option>
-                  <option v-for="r in availableRanks" :key="r" :value="r">
-                    {{ r }}
-                  </option>
-                </select>
-                <button @click="handleAddDiffChange" :disabled="!diffEditSongTitle || !diffEditNewRank" class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold disabled:opacity-50 transition-colors whitespace-nowrap">
+                <v-select
+                  v-model="diffEditSongTitle"
+                  :items="[
+                    { title: '曲名を選択...', value: '' },
+                    ...effectiveSongsList.map(song => ({
+                      title: `${song.title.length > 40 ? song.title.substring(0, 37) + '...' : song.title} (現在: ${song.rank})`,
+                      value: song.title,
+                    })),
+                  ]"
+                  item-title="title"
+                  item-value="value"
+                  color="indigo"
+                  class="flex-1 min-w-0 text-sm"
+                />
+                <v-select
+                  v-model="diffEditNewRank"
+                  :items="[{ title: '移動先...', value: '' }, ...availableRanks.map(r => ({ title: r, value: r }))]"
+                  item-title="title"
+                  item-value="value"
+                  color="indigo"
+                  class="sm:w-40 sm:flex-none text-sm"
+                />
+                <v-btn variant="tonal" color="indigo" class="text-sm whitespace-nowrap" :disabled="!diffEditSongTitle || !diffEditNewRank" @click="handleAddDiffChange">
                   追加
-                </button>
+                </v-btn>
               </div>
-            </div>
+            </v-card>
 
             <!-- Saved draft changes (applied to draft, not yet published) -->
             <div v-if="savedDiffChanges.length > 0" class="mb-3 space-y-2">
               <div v-if="hasSavedPromotionsOrDemotions" class="flex justify-end">
-                <button
-                  @click="handleRevertAllPromotionsDemotions"
+                <v-btn
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  class="text-xs"
                   :disabled="isSavingDiff"
-                  class="px-3 py-1 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800/50 rounded-lg text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   title="新規配置（Uncategorized との相互移動）はそのまま残し、昇格・降格のみを取り消します"
+                  @click="handleRevertAllPromotionsDemotions"
                 >
                   昇格・降格を一括取り消し
-                </button>
+                </v-btn>
               </div>
               <div v-if="savedPromotions.length > 0">
                 <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">▲ 昇格 ({{ savedPromotions.length }}件)</h4>
@@ -441,11 +481,9 @@
                       <span class="text-slate-400">→</span>
                       <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ change.newRank }}</span>
                     </div>
-                    <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                    </button>
+                    <v-btn icon variant="text" size="x-small" color="error" class="ml-2 shrink-0" :disabled="isSavingDiff" title="取り消す" aria-label="取り消す" @click="handleRevertSavedChange(change)">
+                      <v-icon :icon="mdiDelete" size="16" />
+                    </v-btn>
                   </div>
                 </div>
               </div>
@@ -459,11 +497,9 @@
                       <span class="text-slate-400">→</span>
                       <span class="text-red-600 dark:text-red-400 font-bold">{{ change.newRank }}</span>
                     </div>
-                    <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                    </button>
+                    <v-btn icon variant="text" size="x-small" color="error" class="ml-2 shrink-0" :disabled="isSavingDiff" title="取り消す" aria-label="取り消す" @click="handleRevertSavedChange(change)">
+                      <v-icon :icon="mdiDelete" size="16" />
+                    </v-btn>
                   </div>
                 </div>
               </div>
@@ -477,11 +513,9 @@
                       <span class="text-slate-400">→</span>
                       <span class="text-blue-600 dark:text-blue-400 font-bold">{{ change.newRank }}</span>
                     </div>
-                    <button @click="handleRevertSavedChange(change)" :disabled="isSavingDiff" class="ml-2 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors shrink-0 p-1 disabled:opacity-40" title="取り消す">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                    </button>
+                    <v-btn icon variant="text" size="x-small" color="error" class="ml-2 shrink-0" :disabled="isSavingDiff" title="取り消す" aria-label="取り消す" @click="handleRevertSavedChange(change)">
+                      <v-icon :icon="mdiDelete" size="16" />
+                    </v-btn>
                   </div>
                 </div>
               </div>
@@ -498,11 +532,9 @@
                         <span class="text-slate-400">→</span>
                         <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ change.newRank }}</span>
                      </div>
-                     <button @click="handleRemoveDiffChange(change.title)" class="text-red-400 hover:text-red-600 dark:hover:text-red-300 p-1" title="元に戻す">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
-                     </button>
+                     <v-btn icon variant="text" size="x-small" color="error" title="元に戻す" aria-label="元に戻す" @click="handleRemoveDiffChange(change.title)">
+                        <v-icon :icon="mdiDelete" size="16" />
+                     </v-btn>
                   </div>
                </div>
             </div>
@@ -511,13 +543,14 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </v-card>
+    </v-dialog>
 
-    <!-- Comment tooltip -->
+  <Teleport to="body">
+    <!-- Comment tooltip（v-dialog より前面に出すため z-index を v-dialog（2400 台）より上にしている） -->
     <div
       v-if="isOpen && tooltipSongKey && (tooltipComments.length > 0 || tooltipLoading)"
-      class="fixed z-[200] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-xl p-3 w-80 overflow-y-auto pointer-events-none"
+      class="fixed z-[3000] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-xl p-3 w-80 overflow-y-auto pointer-events-none"
       :style="{ top: tooltipPosition.top + 'px', left: tooltipPosition.left + 'px', maxHeight: tooltipPosition.maxHeight + 'px' }"
     >
       <div v-if="tooltipLoading" class="text-xs text-slate-400 text-center py-2">読み込み中...</div>
@@ -553,6 +586,7 @@ import { useGameData } from '../composables/useGameData';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 import { jstParts } from '../utils/jstTime';
+import { mdiArchiveOutline, mdiClose, mdiDelete, mdiMusic } from '@mdi/js';
 
 const props = defineProps<{
   isOpen: boolean;

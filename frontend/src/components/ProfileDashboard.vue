@@ -2,12 +2,12 @@
   <div class="w-full space-y-6 animate-fade-in">
 
     <!-- 成長軌跡 -->
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
       <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('dashboard.title') }}</h2>
       <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">{{ t('dashboard.subtitle') }}</p>
 
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-12">
-        <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <v-progress-circular size="40" width="4" class="mb-4" />
         <p class="text-slate-500 dark:text-slate-400 font-medium">{{ t('dashboard.loading') }}</p>
       </div>
 
@@ -23,34 +23,34 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.summary') }}</h3>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-            <div class="stat-card border-blue-100 dark:border-slate-600 bg-blue-50/50 dark:bg-slate-700/50">
+            <v-card class="stat-card border-blue-100 dark:border-slate-600 bg-blue-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-blue-500 dark:text-blue-400 mb-1">{{ t('dashboard.snapshot') }}</span>
               <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ historyData.length }}</span>
-            </div>
-            <div class="stat-card border-violet-100 dark:border-slate-600 bg-violet-50/50 dark:bg-slate-700/50">
+            </v-card>
+            <v-card class="stat-card border-violet-100 dark:border-slate-600 bg-violet-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-violet-500 dark:text-violet-400 mb-1">{{ t('dashboard.latestBeatPt') }}</span>
               <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ latestBeatPt.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
-            </div>
-            <div class="stat-card border-amber-100 dark:border-slate-600 bg-amber-50/50 dark:bg-slate-700/50">
+            </v-card>
+            <v-card class="stat-card border-amber-100 dark:border-slate-600 bg-amber-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-amber-500 dark:text-amber-400 mb-1">{{ t('dashboard.totalExScore') }}</span>
               <span class="text-lg font-bold text-slate-700 dark:text-slate-200">{{ latestTotalScore.toLocaleString() }}</span>
-            </div>
-            <div class="stat-card border-yellow-100 dark:border-slate-600 bg-yellow-50/50 dark:bg-slate-700/50">
+            </v-card>
+            <v-card class="stat-card border-yellow-100 dark:border-slate-600 bg-yellow-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-yellow-600 dark:text-yellow-400 mb-1">{{ t('dashboard.latestAaa') }}</span>
               <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ latestAaaCount }}</span>
-            </div>
-            <div class="stat-card border-emerald-100 dark:border-slate-600 bg-emerald-50/50 dark:bg-slate-700/50">
+            </v-card>
+            <v-card class="stat-card border-emerald-100 dark:border-slate-600 bg-emerald-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-emerald-500 dark:text-emerald-400 mb-1">{{ t('dashboard.latestFc') }}</span>
               <span class="text-2xl font-bold text-slate-700 dark:text-slate-200">{{ latestFcCount }}</span>
-            </div>
-            <div class="stat-card border-purple-100 dark:border-slate-600 bg-purple-50/50 dark:bg-slate-700/50">
+            </v-card>
+            <v-card class="stat-card border-purple-100 dark:border-slate-600 bg-purple-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-purple-500 dark:text-purple-400 mb-1">{{ t('dashboard.avgIncrease') }}</span>
               <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ avgBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
-            </div>
-            <div class="stat-card border-indigo-100 dark:border-slate-600 bg-indigo-50/50 dark:bg-slate-700/50">
+            </v-card>
+            <v-card class="stat-card border-indigo-100 dark:border-slate-600 bg-indigo-50/50 dark:bg-slate-700/50">
               <span class="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 mb-1">{{ t('dashboard.maxIncrease') }}</span>
               <span class="text-xl font-bold text-slate-700 dark:text-slate-200">{{ maxBeatPtIncrease.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }}</span>
-            </div>
+            </v-card>
           </div>
         </div>
 
@@ -61,38 +61,38 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.trends') }}</h3>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div class="chart-card lg:col-span-2">
+            <v-card class="chart-card lg:col-span-2">
               <h4 class="chart-title">{{ t('dashboard.beatPtTrend') }}</h4>
               <div class="h-56"><LineChart v-if="beatPtChartData" :data="beatPtChartData" :options="lineOpts" /></div>
-            </div>
-            <div class="chart-card lg:col-span-2">
+            </v-card>
+            <v-card class="chart-card lg:col-span-2">
               <h4 class="chart-title">{{ t('dashboard.increaseTrend') }}</h4>
               <div class="h-44"><BarChart v-if="uploadIncreaseChartData" :data="uploadIncreaseChartData" :options="barOpts" /></div>
-            </div>
-            <div class="chart-card">
+            </v-card>
+            <v-card class="chart-card">
               <h4 class="chart-title">{{ t('dashboard.scoreTrend') }}</h4>
               <div class="h-44"><LineChart v-if="scoreChartData" :data="scoreChartData" :options="lineOpts" /></div>
-            </div>
-            <div class="chart-card">
+            </v-card>
+            <v-card class="chart-card">
               <h4 class="chart-title">{{ t('dashboard.djLevelTrend') }}</h4>
               <div class="h-44"><LineChart v-if="djLevelTrendData" :data="djLevelTrendData" :options="lineOpts" /></div>
-            </div>
-            <div class="chart-card lg:col-span-2">
+            </v-card>
+            <v-card class="chart-card lg:col-span-2">
               <h4 class="chart-title">{{ t('dashboard.clearTypeTrend') }}</h4>
               <div class="h-44"><LineChart v-if="clearChartData" :data="clearChartData" :options="lineOpts" /></div>
-            </div>
+            </v-card>
           </div>
         </div>
       </div>
-    </div>
+    </v-card>
 
     <!-- スコア分析 -->
-    <div v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">
             {{ t('dashboard.analysis') }}
-            <span v-if="showAllTime" class="ml-1.5 align-middle px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span>
+            <v-chip v-if="showAllTime" size="x-small" label color="amber-darken-3" class="ml-1.5 align-middle text-[9px]">{{ t('past.tierBadge') }}</v-chip>
           </h2>
           <p class="text-sm text-slate-500 dark:text-slate-400">{{ t('dashboard.analysisHint', { n: myScoresActive.length }) }}</p>
         </div>
@@ -106,34 +106,37 @@
       <div class="flex flex-wrap items-center gap-x-5 gap-y-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-700">
         <div class="flex items-center gap-3">
           <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('dashboard.targetLevel') }}</span>
-          <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <button
+          <v-btn-toggle v-model="selectedAnalysisLevel" mandatory>
+            <v-btn
               v-for="lvl in ['ALL', '11', '12']" :key="lvl"
-              @click="selectedAnalysisLevel = lvl as 'ALL' | '11' | '12'"
-              class="px-3 py-1 text-xs font-bold rounded-md transition-all"
-              :class="selectedAnalysisLevel === lvl
-                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'"
-            >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</button>
-          </div>
+              :value="lvl"
+              size="small"
+              class="px-3 text-xs"
+            >{{ lvl === 'ALL' ? t('common.all') : `☆${lvl}` }}</v-btn>
+          </v-btn-toggle>
         </div>
 
         <!-- 過去作のスコアが現行を上回っている譜面を、そのスコアで集計し直すトグル -->
-        <label
+        <div
           v-if="canUseAllTime && hasPastImports"
-          class="flex items-center gap-2 cursor-pointer group whitespace-nowrap"
+          class="flex items-center gap-2 whitespace-nowrap"
           :title="t('past.toggleHint')"
         >
-          <div class="relative inline-flex items-center">
-            <input type="checkbox" :checked="showAllTime" @change="toggleAllTime" class="sr-only peer">
-            <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
-          </div>
-          <span
-            class="text-xs font-bold transition-colors"
-            :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'"
-          >{{ t('past.toggle') }}</span>
-          <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
-        </label>
+          <v-switch
+            :model-value="showAllTime"
+            @update:model-value="toggleAllTime"
+            color="amber"
+            class="flex-none [&_.v-label]:opacity-100"
+          >
+            <template #label>
+              <span
+                class="ml-2 text-xs font-bold transition-colors"
+                :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'"
+              >{{ t('past.toggle') }}</span>
+            </template>
+          </v-switch>
+          <v-progress-circular v-if="isLoadingPast" size="12" width="2" color="amber" />
+        </div>
 
         <!-- 集計値と「成長軌跡」がずれる理由を明示する -->
         <p v-if="showAllTime" class="text-[11px] text-amber-600 dark:text-amber-400 basis-full">
@@ -149,22 +152,22 @@
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.clearStatus') }}</h3>
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div class="chart-card">
+            <v-card class="chart-card">
               <h4 class="chart-title">{{ t('dashboard.clearTypeDist') }}</h4>
               <div class="h-52"><DoughnutChart v-if="clearTypeDoughnut" :data="clearTypeDoughnut" :options="doughnutOpts" /></div>
-            </div>
-            <div class="chart-card">
+            </v-card>
+            <v-card class="chart-card">
               <h4 class="chart-title">{{ t('dashboard.djLevelDist') }}</h4>
               <div class="h-52"><BarChart v-if="djLevelCurrentData" :data="djLevelCurrentData" :options="barOpts" /></div>
-            </div>
-            <div class="chart-card lg:col-span-2">
+            </v-card>
+            <v-card class="chart-card lg:col-span-2">
               <h4 class="chart-title">{{ t('dashboard.scoreRateDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="scoreRateHistData" :data="scoreRateHistData" :options="scoreRateHistOpts" /></div>
-            </div>
-            <div class="chart-card lg:col-span-2">
+            </v-card>
+            <v-card class="chart-card lg:col-span-2">
               <h4 class="chart-title">{{ t('dashboard.songRankDist') }} <span class="text-[10px] font-normal text-slate-400 ml-2">{{ t('dashboard.clickForList') }}</span></h4>
               <div class="h-44"><BarChart v-if="songRankDistData" :data="songRankDistData" :options="songRankBarOpts" /></div>
-            </div>
+            </v-card>
           </div>
         </div>
 
@@ -174,8 +177,7 @@
             <div class="w-1 h-5 bg-amber-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.informalClearStatus') }}</h3>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+          <v-table class="w-full text-sm bg-transparent [&_th]:font-bold">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-bold">
                   <th class="pb-3 pl-2 text-left text-slate-400">{{ t('dashboard.rank') }}</th>
@@ -201,16 +203,19 @@
                   <td class="py-2 text-center text-slate-500 dark:text-slate-400">{{ row.total }}</td>
                   <td class="py-2 pr-2">
                     <div class="flex items-center justify-end gap-2">
-                      <div class="w-16 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-emerald-500 rounded-full transition-all" :style="{ width: `${Math.round((row.fc + row.exh + row.hard + row.clear + row.easy) / row.total * 100)}%` }"></div>
-                      </div>
+                      <v-progress-linear
+                        :model-value="Math.round((row.fc + row.exh + row.hard + row.clear + row.easy) / row.total * 100)"
+                        color="success"
+                        height="6"
+                        rounded
+                        class="w-16 flex-none"
+                      />
                       <span class="text-xs font-bold text-slate-500 dark:text-slate-400 tabular-nums w-9 text-right">{{ Math.round((row.fc + row.exh + row.hard + row.clear + row.easy) / row.total * 100) }}%</span>
                     </div>
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
+          </v-table>
         </div>
 
         <!-- BEAT-PT上位100曲の難易度分布 -->
@@ -219,14 +224,14 @@
             <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top100Dist') }}</h3>
           </div>
-          <div class="chart-card">
+          <v-card class="chart-card">
             <h4 class="chart-title">{{ t('dashboard.top100CountByType') }}</h4>
             <p class="text-[11px] text-slate-400 dark:text-slate-500 -mt-1 mb-1">{{ t('dashboard.top100Border') }}</p>
             <!-- 21本×2行ラベル(☆難易度+ボーダー%)。狭幅では下段%が潰れるので横スクロール+最小幅でバー幅を確保する -->
             <div class="overflow-x-auto">
               <div class="h-44 min-w-[700px]"><BarChart v-if="top100DiffHistData" :data="top100DiffHistData" :options="top100DiffBarOpts" /></div>
             </div>
-          </div>
+          </v-card>
         </div>
 
         <!-- BEAT-PT上位10曲 -->
@@ -235,8 +240,7 @@
             <div class="w-1 h-5 bg-violet-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top10') }}</h3>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+          <v-table class="w-full text-sm bg-transparent [&_th]:font-bold">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-400">
                   <th class="pb-3 pl-2 text-left w-6">#</th>
@@ -254,12 +258,15 @@
                     <div class="flex items-center gap-1.5">
                       <span class="font-bold text-slate-700 dark:text-slate-200 truncate max-w-[200px] sm:max-w-xs">{{ s.title }}</span>
                       <!-- この行の EX が過去作由来なら、どの作品のスコアかをバッジで示す -->
-                      <span
+                      <v-chip
                         v-if="s.allTimeVersion"
-                        class="shrink-0 px-1 py-0.5 text-[9px] font-bold rounded border"
+                        size="x-small"
+                        label
+                        variant="outlined"
+                        class="shrink-0 px-1 text-[9px] font-bold"
                         :class="versionBadgeClass(s.allTimeVersion)"
                         :title="versionName(s.allTimeVersion)"
-                      >{{ versionShort(s.allTimeVersion) }}</span>
+                      >{{ versionShort(s.allTimeVersion) }}</v-chip>
                     </div>
                     <div class="text-xs text-slate-400">{{ s.difficultyName }}</div>
                   </td>
@@ -269,29 +276,25 @@
                   <td class="py-2 pr-2 text-right font-bold text-violet-600 dark:text-violet-400 tabular-nums">{{ s.beatPt.toFixed(2) }}</td>
                 </tr>
               </tbody>
-            </table>
-          </div>
+          </v-table>
         </div>
       </div>
-    </div>
+    </v-card>
 
     <!-- Score Rate Band Modal -->
-    <Teleport to="body">
-      <div v-if="histModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="histModalOpen = false">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-        <div class="relative bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+    <v-dialog v-model="histModalOpen" max-width="672">
+        <v-card class="bg-white dark:bg-slate-800 max-h-[80vh]">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
             <div>
               <h3 class="font-bold text-slate-800 dark:text-slate-100">{{ histModalLabel }}</h3>
               <p class="text-xs text-slate-400 mt-0.5">{{ histModalSongs.length }} 曲</p>
             </div>
-            <button @click="histModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
+            <v-btn icon variant="text" size="small" aria-label="閉じる" @click="histModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
-          <div class="overflow-y-auto flex-1">
-            <table class="w-full text-sm">
-              <thead class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+          <v-table fixed-header class="w-full text-sm flex-1 min-h-0 flex flex-col [&_th]:font-bold">
+              <thead class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                 <tr class="text-xs font-bold text-slate-400">
                   <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
                   <th class="pb-3 pt-3 text-center w-14">☆</th>
@@ -324,41 +327,35 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+          </v-table>
+        </v-card>
+    </v-dialog>
 
     <!-- Single-Song Tier Modal -->
-    <Teleport to="body">
-      <div v-if="tierModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="tierModalOpen = false">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-        <div class="relative bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-2xl max-h-[80vh] flex flex-col">
-          <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+    <v-dialog v-model="tierModalOpen" max-width="672">
+        <v-card class="bg-white dark:bg-slate-800 max-h-[80vh]">
+          <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
             <div class="min-w-0">
               <h3 class="font-bold text-slate-800 dark:text-slate-100 truncate">{{ tierModalLabel }}</h3>
               <p class="text-xs text-slate-400 mt-0.5">{{ tierModalSongs.length }} 曲</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <label class="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:inline">{{ t('dashboard.targetRank') }}</label>
-              <select v-model="tierTargetKey"
-                class="text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-lg px-2 py-1.5 max-w-[9rem] focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <template v-for="g in tierTargetGroups" :key="g.name">
-                  <optgroup v-if="g.items.length > 1" :label="g.name">
-                    <option v-for="b in g.items" :key="b.key" :value="b.key">{{ b.label }}</option>
-                  </optgroup>
-                  <option v-else :value="g.items[0].key">{{ g.items[0].label }}</option>
-                </template>
-              </select>
-              <button @click="tierModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 hidden sm:inline">{{ t('dashboard.targetRank') }}</span>
+              <v-select
+                v-model="tierTargetKey"
+                :items="tierTargetGroups.flatMap(g => g.items.length > 1
+                  ? [{ type: 'subheader', title: g.name }, ...g.items.map(b => ({ title: b.label, value: b.key }))]
+                  : [{ title: g.items[0].label, value: g.items[0].key }])"
+                :aria-label="t('dashboard.targetRank')"
+                class="text-xs font-bold w-[9rem] max-w-[9rem]"
+              />
+              <v-btn icon variant="text" size="small" aria-label="閉じる" @click="tierModalOpen = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <v-icon :icon="mdiClose" />
+              </v-btn>
             </div>
           </div>
-          <div class="overflow-y-auto flex-1">
-            <table class="w-full text-sm">
-              <thead class="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
+          <v-table fixed-header class="w-full text-sm flex-1 min-h-0 flex flex-col [&_th]:font-bold">
+              <thead class="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700">
                 <tr class="text-xs font-bold text-slate-400">
                   <th class="pb-3 pt-3 pl-6 text-left">{{ t('table.colTitle') }}</th>
                   <th class="pb-3 pt-3 text-center w-14">☆</th>
@@ -394,14 +391,12 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+          </v-table>
+        </v-card>
+    </v-dialog>
 
     <!-- URL 共有 -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -411,19 +406,20 @@
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
         ログインしていない人に向けて、ダッシュボードやスコア一覧を期間限定で公開できます。
       </p>
-      <button
+      <v-btn
         type="button"
+        color="primary"
         @click="isShareModalOpen = true"
-        class="px-6 py-2.5 rounded-md font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all"
+        class="px-6 text-sm"
       >
         共有 URL を管理
-      </button>
-    </div>
+      </v-btn>
+    </v-card>
 
     <ShareTokenModal :is-open="isShareModalOpen" @close="isShareModalOpen = false" />
 
     <!-- 外部連携トークン -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
@@ -433,19 +429,20 @@
       <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
         iidx-memo など連携先アプリの設定欄に貼り付けて使うトークンを発行・管理できます。
       </p>
-      <button
+      <v-btn
         type="button"
+        color="primary"
         @click="isIntegrationModalOpen = true"
-        class="px-6 py-2.5 rounded-md font-bold text-sm bg-blue-600 hover:bg-blue-700 text-white active:scale-95 transition-all"
+        class="px-6 text-sm"
       >
         連携トークンを管理
-      </button>
-    </div>
+      </v-btn>
+    </v-card>
 
     <IntegrationTokenModal :is-open="isIntegrationModalOpen" @close="isIntegrationModalOpen = false" />
 
     <!-- 通知設定 -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -458,43 +455,39 @@
       </p>
       <!-- サーバー側で Push が無効（VAPID 鍵未設定など）なら、誰が何をしても通知は届かない。
            「許可済みなのに来ない」を利用者側の問題と誤解させないよう明示する。 -->
-      <p v-if="pushStatus && !pushStatus.serverEnabled"
-         class="text-sm text-red-600 dark:text-red-400 mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md px-3 py-2">
+      <v-alert v-if="pushStatus && !pushStatus.serverEnabled" type="error" class="text-sm mb-4">
         {{ t('dashboard.pushServerDisabled') }}
-      </p>
+      </v-alert>
       <!-- 許可はしているが購読がサーバーに無い状態（購読失効・管理者リセット後など）。
            このときボタンを押せば復旧できる。 -->
-      <p v-else-if="notificationStatus === 'granted' && pushStatus && !pushStatus.subscribed"
-         class="text-sm text-amber-600 dark:text-amber-400 mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
+      <v-alert v-else-if="notificationStatus === 'granted' && pushStatus && !pushStatus.subscribed" type="warning" class="text-sm mb-4">
         {{ t('dashboard.pushNotSubscribed') }}
-      </p>
+      </v-alert>
       <div class="flex items-center gap-4 flex-wrap">
-        <button
+        <v-btn
           @click="handleEnableNotifications"
-          :disabled="isSubscribing || isPushReady"
-          class="px-6 py-2.5 rounded-md font-bold text-sm transition-all duration-200 flex items-center gap-2"
-          :class="isPushReady
-            ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default'
-            : 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95 disabled:opacity-50'"
+          :disabled="isSubscribing"
+          :readonly="isPushReady"
+          :loading="isSubscribing"
+          :color="isPushReady ? 'success' : 'primary'"
+          :variant="isPushReady ? 'tonal' : 'flat'"
+          :prepend-icon="isPushReady ? mdiCheck : undefined"
+          class="px-6 text-sm"
+          :class="{ 'cursor-default': isPushReady }"
         >
-          <span v-if="isSubscribing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-          <span v-else-if="isPushReady">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-            </svg>
-          </span>
           {{ isPushReady
               ? t('dashboard.notificationsEnabled')
               : notificationStatus === 'granted' ? t('dashboard.notificationsReregister') : t('dashboard.enableNotifications') }}
-        </button>
-        <button v-if="notificationStatus === 'granted'"
+        </v-btn>
+        <v-btn v-if="notificationStatus === 'granted'"
           @click="handleTestNotification"
           :disabled="isTesting"
-          class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+          variant="tonal"
+          class="text-sm"
         >
           <span v-if="isTesting">{{ t('dashboard.sending') }}</span>
           <span v-else>{{ t('dashboard.testNotification') }}</span>
-        </button>
+        </v-btn>
         <span class="text-xs text-slate-400 dark:text-slate-500">
           {{ t('dashboard.currentStatus') }}: {{ notificationStatus === 'granted' ? t('dashboard.statusGranted') : notificationStatus === 'denied' ? t('dashboard.statusDenied') : t('dashboard.statusDefault') }}
         </span>
@@ -502,31 +495,25 @@
 
       <!-- 通知の種類ごとの設定。リーグは週次で複数の通知が出るので個別に切れるようにしている。 -->
       <div v-if="pushStatus" class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700">
-        <label class="flex items-start gap-3 cursor-pointer">
-          <button
-            type="button"
-            role="switch"
-            :aria-checked="pushStatus.leagueNotifications"
-            @click="handleToggleLeagueNotifications"
-            class="mt-0.5 relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors"
-            :class="pushStatus.leagueNotifications ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-600'"
-          >
-            <span
-              class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform mt-0.5"
-              :class="pushStatus.leagueNotifications ? 'translate-x-4' : 'translate-x-0.5'"
-            ></span>
-          </button>
-          <span class="min-w-0">
-            <span class="block text-sm font-bold text-slate-700 dark:text-slate-200">
-              {{ t('dashboard.leagueNotifications') }}
+        <v-switch
+          :model-value="pushStatus.leagueNotifications"
+          @update:model-value="handleToggleLeagueNotifications"
+          color="indigo"
+          class="[&_.v-label]:opacity-100"
+        >
+          <template #label>
+            <span class="min-w-0 ml-2">
+              <span class="block text-sm font-bold text-slate-700 dark:text-slate-200">
+                {{ t('dashboard.leagueNotifications') }}
+              </span>
+              <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {{ t('dashboard.leagueNotificationsHint') }}
+              </span>
             </span>
-            <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {{ t('dashboard.leagueNotificationsHint') }}
-            </span>
-          </span>
-        </label>
+          </template>
+        </v-switch>
       </div>
-    </div>
+    </v-card>
 
     <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う。
          作品ラベルのクリックは、その作品のスコア一覧ページへの遷移として App.vue へ中継する -->
@@ -567,6 +554,7 @@ import { usePastScores, chartKey } from '../composables/usePastScores';
 import { CLEAR_TYPE_RANK } from '../composables/constants';
 import { versionBadgeClass, versionName, versionShort } from '../utils/iidxVersions';
 import { jstParts, toJstDate, toJstDateKey } from '../utils/jstTime';
+import { mdiCheck, mdiClose } from '@mdi/js';
 import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
 import PastScoreManager from './PastScoreManager.vue';

@@ -18,6 +18,7 @@
 import { ref, computed } from 'vue';
 import { useFriends } from '../composables/useFriends';
 import { useModalEscape } from '../composables/useModalEscape';
+import { mdiCheck } from '@mdi/js';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -87,15 +88,13 @@ const handleEnableNotifications = async () => {
 </script>
 
 <template>
-  <div
-    v-if="isOpen"
-    role="dialog"
-    aria-modal="true"
+  <v-dialog
+    :model-value="isOpen"
+    max-width="512"
     aria-labelledby="onboarding-title"
-    class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
-    @click.self="emit('close')"
+    @update:model-value="(v) => { if (!v) emit('close') }"
   >
-    <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-lg overflow-hidden flex flex-col transition-all duration-300 scale-in-center">
+    <v-card class="overflow-hidden flex flex-col transition-all duration-300 scale-in-center">
 
       <div class="p-8 text-center border-b border-slate-100 dark:border-slate-700">
         <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/50 rounded-md flex items-center justify-center mx-auto mb-6 text-blue-600 dark:text-blue-400">
@@ -107,9 +106,9 @@ const handleEnableNotifications = async () => {
         <p class="text-slate-500 dark:text-slate-400 font-medium">beat-seekerを最大限に活用するための設定です。</p>
       </div>
 
-      <div class="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+      <v-card-text class="p-8 space-y-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
         <!-- ステップ 1: スコアを取り込む（最重要。アプリの価値体験の起点） -->
-        <div class="bg-blue-50 dark:bg-blue-950/40 p-6 rounded-md border-2 border-blue-200 dark:border-blue-800/60 transition-colors ring-1 ring-blue-100 dark:ring-blue-900/30">
+        <v-card class="bg-blue-50 dark:bg-blue-950/40 p-6 border-2 border-blue-200 dark:border-blue-800/60 transition-colors ring-1 ring-blue-100 dark:ring-blue-900/30">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-md flex items-center justify-center shrink-0 text-white">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,25 +118,22 @@ const handleEnableNotifications = async () => {
             <div class="flex-1">
               <div class="flex items-center gap-2 mb-1">
                 <h3 class="font-bold text-slate-800 dark:text-slate-100 italic">1. スコアを取り込む</h3>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-600 text-white">まずはここから</span>
+                <v-chip label variant="flat" color="primary" class="h-auto px-2 py-0.5 text-[10px] font-bold">まずはここから</v-chip>
               </div>
               <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
                 CSV / ブックマークレット / OCR のいずれかで過去のプレイ履歴を取り込みます。
                 1 件でも取り込めば BEAT-TIER や成長記録など、すべての機能が動き始めます。
               </p>
 
-              <button
-                @click="emit('open-upload')"
-                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold text-sm transition-all active:scale-95"
-              >
+              <v-btn color="primary" block class="text-sm active:scale-95" @click="emit('open-upload')">
                 スコアを取り込む
-              </button>
+              </v-btn>
             </div>
           </div>
-        </div>
+        </v-card>
 
         <!-- ステップ 2: PWA としてホーム画面にインストール -->
-        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
+        <v-card class="bg-slate-50 dark:bg-slate-900/50 p-6 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-md flex items-center justify-center shrink-0 text-indigo-600 dark:text-indigo-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,11 +145,11 @@ const handleEnableNotifications = async () => {
               <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
                 ホーム画面に追加すると、Webブラウザの枠がなくなり、フルスクリーンで快適にスコア管理ができます。
               </p>
-              
+
               <div v-if="deferredPrompt">
-                <button @click="handleInstall" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-bold text-sm transition-all active:scale-95">
+                <v-btn block class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95" @click="handleInstall">
                   インストールする
-                </button>
+                </v-btn>
               </div>
               <div v-else-if="isIOS" class="p-3 bg-white dark:bg-slate-800 rounded-md border border-indigo-100 dark:border-indigo-900/50 text-xs">
                 <p class="text-indigo-600 dark:text-indigo-400 font-bold mb-1 flex items-center gap-1">
@@ -169,10 +165,10 @@ const handleEnableNotifications = async () => {
               </div>
             </div>
           </div>
-        </div>
+        </v-card>
 
         <!-- ステップ 3: プッシュ通知を有効化 -->
-        <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
+        <v-card class="bg-slate-50 dark:bg-slate-900/50 p-6 transition-colors">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-md flex items-center justify-center shrink-0 text-emerald-600 dark:text-emerald-400">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,39 +180,36 @@ const handleEnableNotifications = async () => {
               <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
                 ライバル申請が届いた際にリアルタイムで通知を受け取れます。※後からオフにすることも可能です。
               </p>
-              
-              <button 
-                @click="handleEnableNotifications"
-                :disabled="isSubscribing || notificationStatus === 'granted'"
-                class="w-full py-2.5 rounded-md font-bold text-sm transition-all active:scale-95 flex items-center justify-center gap-2"
-                :class="notificationStatus === 'granted' 
-                  ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default' 
+
+              <v-btn
+                block
+                class="text-sm active:scale-95"
+                :class="notificationStatus === 'granted'
+                  ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 cursor-default opacity-100'
                   : 'bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50'"
+                :disabled="isSubscribing || notificationStatus === 'granted'"
+                @click="handleEnableNotifications"
               >
-                <span v-if="isSubscribing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                <span v-else-if="notificationStatus === 'granted'">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </span>
+                <v-progress-circular v-if="isSubscribing" size="16" width="2" color="white" class="mr-2" />
+                <v-icon v-else-if="notificationStatus === 'granted'" :icon="mdiCheck" size="16" class="mr-2" />
                 {{ notificationStatus === 'granted' ? '設定済み' : '通知を有効にする' }}
-              </button>
+              </v-btn>
             </div>
           </div>
-        </div>
-      </div>
+        </v-card>
+      </v-card-text>
 
-      <div class="p-8 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex gap-4">
-        <button @click="emit('close')" class="flex-1 py-3 px-6 rounded-md font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+      <v-card-actions class="p-8 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700 flex gap-4">
+        <v-btn variant="text" size="large" class="flex-1 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200" @click="emit('close')">
           後でする
-        </button>
-        <button @click="emit('close')" class="flex-1 py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold transition-all active:scale-95">
+        </v-btn>
+        <v-btn color="primary" size="large" class="flex-1 active:scale-95" @click="emit('close')">
           はじめる！
-        </button>
-      </div>
+        </v-btn>
+      </v-card-actions>
 
-    </div>
-  </div>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>

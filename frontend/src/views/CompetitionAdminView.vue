@@ -44,6 +44,7 @@ import {
 import { formatJstDateTime, formatJstShortDateTime } from '../utils/jstTime';
 import SongPickerModal from '../components/SongPickerModal.vue';
 import SongSelect from '../components/SongSelect.vue';
+import { mdiChevronRight, mdiClose, mdiPencil, mdiRefresh } from '@mdi/js';
 
 const { user } = useAuth();
 const toast = useToast();
@@ -1932,10 +1933,10 @@ const statusColor = (s: string) => ({
 <template>
   <div class="competition-admin-view bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8">
     <!-- 権限が無いユーザー向けの注意書き (4 ID 以外がこの URL に直接来た場合) -->
-    <div v-if="!isOrganizer" class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-md p-6 text-center">
+    <v-alert v-if="!isOrganizer" type="error" :icon="false" class="max-w-2xl mx-auto p-6 text-center">
       <p class="text-lg font-bold text-rose-700 dark:text-rose-300">大会管理画面</p>
       <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">主催権限がありません。サイドバーから他のページへ戻ってください。</p>
-    </div>
+    </v-alert>
 
     <template v-else>
       <!-- ────────── 一覧モード ────────── -->
@@ -1946,192 +1947,202 @@ const statusColor = (s: string) => ({
         </div>
 
         <!-- 新規作成カード -->
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-5 space-y-3">
+        <v-card class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-5 space-y-3">
           <p class="text-sm font-bold">新規大会を作成</p>
           <!-- フォーマット選択 (ラジオ) -->
           <div>
             <p class="text-[10px] font-mono text-slate-400 mb-2">フォーマット</p>
-            <div class="flex flex-wrap gap-2">
-              <label
-                class="flex-1 min-w-[180px] cursor-pointer px-3 py-2 rounded-md border-2 transition-colors"
-                :class="createFormat === 'team5'
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'"
-              >
-                <input type="radio" v-model="createFormat" value="team5" class="sr-only" :disabled="isCreating" />
-                <p class="text-sm font-bold">団体戦 (5 チーム)</p>
-                <p class="text-[11px] text-slate-500 mt-0.5">5 チーム × 4 名の総当たり、10 matchup × 3 戦</p>
-              </label>
-              <label
-                class="flex-1 min-w-[180px] cursor-pointer px-3 py-2 rounded-md border-2 transition-colors"
-                :class="createFormat === 'individual4'
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'"
-              >
-                <input type="radio" v-model="createFormat" value="individual4" class="sr-only" :disabled="isCreating" />
-                <p class="text-sm font-bold">個人戦 (4 人対戦)</p>
-                <p class="text-[11px] text-slate-500 mt-0.5">12 or 16 名・各人 6 or 5 試合の予選 + 上位 4 名ずつの決勝</p>
-              </label>
-            </div>
+            <v-radio-group v-model="createFormat" :disabled="isCreating" inline>
+              <v-radio value="team5" class="flex-1 min-w-[180px] mr-4">
+                <template #label>
+                  <div>
+                    <p class="text-sm font-bold">団体戦 (5 チーム)</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">5 チーム × 4 名の総当たり、10 matchup × 3 戦</p>
+                  </div>
+                </template>
+              </v-radio>
+              <v-radio value="individual4" class="flex-1 min-w-[180px]">
+                <template #label>
+                  <div>
+                    <p class="text-sm font-bold">個人戦 (4 人対戦)</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">12 or 16 名・各人 6 or 5 試合の予選 + 上位 4 名ずつの決勝</p>
+                  </div>
+                </template>
+              </v-radio>
+            </v-radio-group>
           </div>
           <div class="flex flex-col sm:flex-row gap-2">
-            <input
+            <v-text-field
               v-model="createName"
               type="text"
               placeholder="大会名 (例: BPL 模擬戦 2026 春)"
-              class="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md outline-none focus:border-blue-400"
+              class="flex-1"
               :disabled="isCreating"
               @keydown.enter="handleCreate"
             />
-            <button
-              type="button"
+            <v-btn
+              color="primary"
               @click="handleCreate"
               :disabled="isCreating || !createName.trim()"
-              class="px-6 py-2.5 rounded-md font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
+              :loading="isCreating"
+              class="px-6"
             >
               {{ isCreating ? '作成中…' : '作成' }}
-            </button>
+            </v-btn>
           </div>
-        </div>
+        </v-card>
 
         <!-- 一覧 -->
-        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden">
+        <v-card class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <p class="text-sm font-bold">既存大会</p>
-            <button type="button" @click="fetchCompetitions" class="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">再読込</button>
+            <v-btn variant="text" size="small" @click="fetchCompetitions" class="text-xs text-slate-500">再読込</v-btn>
           </div>
-          <div v-if="isLoading && competitions.length === 0" class="px-5 py-8 text-center text-slate-400 text-sm">読み込み中…</div>
+          <div v-if="isLoading && competitions.length === 0" class="px-5 py-8 text-center text-slate-400 text-sm">
+            <v-progress-circular size="20" width="2" class="mr-2" />読み込み中…
+          </div>
           <div v-else-if="competitions.length === 0" class="px-5 py-8 text-center text-slate-400 text-sm">大会はまだありません</div>
-          <ul v-else class="divide-y divide-slate-200 dark:divide-slate-700">
-            <li v-for="c in competitions" :key="c.id" class="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer" @click="handleOpenCompetition(c.id)">
-              <div class="flex-1 min-w-0">
-                <p class="font-bold truncate">{{ c.name }}</p>
-                <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · 作成 {{ formatAdminDateTime(c.createdAt) }}</p>
+          <v-list v-else class="py-0 bg-transparent">
+            <v-list-item v-for="c in competitions" :key="c.id" class="px-5 py-3 border-b border-slate-200 dark:border-slate-700" @click="handleOpenCompetition(c.id)">
+              <div class="flex items-center gap-3">
+                <div class="flex-1 min-w-0">
+                  <p class="font-bold truncate">{{ c.name }}</p>
+                  <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · 作成 {{ formatAdminDateTime(c.createdAt) }}</p>
+                </div>
+                <v-chip
+                  size="small"
+                  label
+                  class="text-[10px] font-bold"
+                  :class="c.format === 'individual4'
+                    ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                    : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'"
+                >{{ c.format === 'individual4' ? '個人戦' : '団体戦' }}</v-chip>
+                <v-chip size="small" label class="text-[10px] font-bold" :class="statusColor(c.status)">{{ statusLabel(c.status) }}</v-chip>
+                <v-icon :icon="mdiChevronRight" size="16" class="text-slate-400" />
               </div>
-              <span
-                class="text-[10px] font-bold px-2 py-0.5 rounded"
-                :class="c.format === 'individual4'
-                  ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
-                  : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'"
-              >{{ c.format === 'individual4' ? '個人戦' : '団体戦' }}</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded" :class="statusColor(c.status)">{{ statusLabel(c.status) }}</span>
-              <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </li>
-          </ul>
-        </div>
+            </v-list-item>
+          </v-list>
+        </v-card>
       </div>
 
       <!-- ────────── 詳細モード ────────── -->
       <div v-else class="max-w-6xl mx-auto space-y-6">
         <!-- ヘッダ -->
         <div class="flex flex-wrap items-center gap-3">
-          <button type="button" @click="backToList" class="px-3 py-1.5 rounded-md text-sm font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">
+          <v-btn variant="tonal" @click="backToList" class="text-sm">
             ← 一覧へ
-          </button>
+          </v-btn>
           <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">{{ currentCompetition.name }}</h1>
-          <span
-            class="text-[10px] font-bold px-2 py-0.5 rounded"
+          <v-chip
+            size="small"
+            label
+            class="text-[10px] font-bold"
             :class="currentCompetition.format === 'individual4'
               ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
               : 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'"
-          >{{ currentCompetition.format === 'individual4' ? '個人戦' : '団体戦' }}</span>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded" :class="statusColor(currentCompetition.status)">{{ statusLabel(currentCompetition.status) }}</span>
+          >{{ currentCompetition.format === 'individual4' ? '個人戦' : '団体戦' }}</v-chip>
+          <v-chip size="small" label class="text-[10px] font-bold" :class="statusColor(currentCompetition.status)">{{ statusLabel(currentCompetition.status) }}</v-chip>
           <p class="text-xs text-slate-500 font-mono">ID #{{ currentCompetition.id }}</p>
 
           <!-- team5 用 Open ボタン -->
-          <button
+          <v-btn
             v-if="currentCompetition.status === 'draft' && currentCompetition.format !== 'individual4'"
-            type="button"
+            color="success"
             @click="handleOpenStatus"
-            class="ml-auto px-5 py-2 rounded-md text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
+            class="ml-auto px-5 text-sm"
           >
             ▶ Open に遷移
-          </button>
+          </v-btn>
           <!-- individual4 用 Open ボタン (12 or 16 名揃った時のみ active) -->
-          <button
+          <v-btn
             v-else-if="currentCompetition.status === 'draft' && currentCompetition.format === 'individual4'"
-            type="button"
+            color="success"
             @click="handleOpenIndividualStatus"
             :disabled="!canOpenIndividual"
-            class="ml-auto px-5 py-2 rounded-md text-sm font-bold transition-all"
-            :class="canOpenIndividual
-              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-              : 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'"
+            class="ml-auto px-5 text-sm"
             :title="canOpenIndividual ? '予選試合表を自動生成して open に遷移します' : '参加者を 12 名または 16 名 ちょうど登録してください'"
           >
             ▶ Open に遷移 ({{ individualParticipantCount }} / 12 or 16)
-          </button>
+          </v-btn>
 
           <!-- サマリーボタン (団体戦 + open 以降のみ)。試合別 / 選手別の全結果一覧を別タブで開く。 -->
-          <button
+          <v-btn
             v-if="currentCompetition.format !== 'individual4' && currentCompetition.status !== 'draft'"
-            type="button"
+            variant="tonal"
+            color="indigo"
             @click="openSummary"
-            class="ml-auto px-3 py-2 rounded-md text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+            class="ml-auto text-xs"
             title="試合別 / 選手別のスコア・勝敗をまとめたページを別タブで開きます"
           >
             📊 サマリー
-          </button>
+          </v-btn>
 
           <!-- 削除ボタン (常時表示。2 段階確認付き) -->
-          <button
-            type="button"
+          <v-btn
+            variant="tonal"
+            color="error"
             @click="handleDeleteCompetition(currentCompetition.id, currentCompetition.name)"
             :class="(currentCompetition.status !== 'draft' && currentCompetition.format === 'individual4') ? 'ml-auto' : ''"
-            class="px-3 py-2 rounded-md text-xs font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+            class="text-xs"
           >
             🗑 大会を削除
-          </button>
+          </v-btn>
         </div>
 
         <!-- ────────── team5 専用セクション群 ────────── -->
         <template v-if="currentCompetition.format !== 'individual4'">
         <!-- 5 チームグリッド -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div
+          <v-card
             v-for="team in currentCompetition.teams"
             :key="team.id"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden"
           >
             <!-- チームヘッダ -->
             <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
               <div v-if="editingTeamId === team.id" class="flex items-center gap-2">
-                <input
+                <v-text-field
                   v-model="editingTeamName"
                   type="text"
-                  class="flex-1 px-2 py-1 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                  class="flex-1 text-sm"
                   @keydown.enter="commitRenameTeam(team)"
                   @keydown.esc="cancelRenameTeam"
                 />
-                <button type="button" @click="commitRenameTeam(team)" class="text-xs font-bold text-blue-600 dark:text-blue-400">保存</button>
-                <button type="button" @click="cancelRenameTeam" class="text-xs text-slate-500">×</button>
+                <v-btn variant="text" color="primary" size="small" @click="commitRenameTeam(team)" class="text-xs">保存</v-btn>
+                <v-btn icon variant="text" size="small" @click="cancelRenameTeam" class="text-slate-500" aria-label="キャンセル"><v-icon :icon="mdiClose" size="16" /></v-btn>
               </div>
               <div v-else class="flex items-center gap-2">
                 <p class="flex-1 font-bold truncate" :class="teamColorClass(team.teamName)">{{ team.teamName }}</p>
-                <button
+                <v-btn
                   v-if="currentCompetition.status === 'draft'"
-                  type="button"
+                  icon
+                  variant="text"
+                  size="x-small"
                   @click="beginRenameTeam(team)"
-                  class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  class="text-slate-400"
                   title="チーム名を編集"
+                  aria-label="チーム名を編集"
                 >
-                  ✎
-                </button>
+                  <v-icon :icon="mdiPencil" size="14" />
+                </v-btn>
               </div>
               <!-- TL 専用 URL -->
               <div class="mt-2 flex items-center gap-2 text-[10px] font-mono text-slate-400">
                 <span class="truncate">TL: {{ buildTlUrl(team.tlToken) }}</span>
-                <button
-                  type="button"
+                <v-btn
+                  variant="tonal"
+                  size="x-small"
                   @click="copyToClipboard(buildTlUrl(team.tlToken), 'TL URL')"
-                  class="shrink-0 px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
-                >コピー</button>
-                <button
-                  type="button"
+                  class="shrink-0 text-[10px]"
+                >コピー</v-btn>
+                <v-btn
+                  variant="tonal"
+                  color="warning"
+                  size="x-small"
                   @click="handleRegenerateTlToken(team)"
-                  class="shrink-0 px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                  class="shrink-0 text-[10px]"
                   title="トークンを再発行 (誤公開時のリカバリ)"
-                >再発行</button>
+                >再発行</v-btn>
               </div>
             </div>
 
@@ -2146,72 +2157,84 @@ const statusColor = (s: string) => ({
                   <div class="flex-1 min-w-0">
                     <!-- DJ NAME 編集中 -->
                     <div v-if="editingMemberId === m.id" class="flex items-center gap-1.5">
-                      <input
+                      <v-text-field
                         v-model="editingMemberName"
                         type="text"
                         maxlength="50"
                         @keyup.enter="commitEditMember(m)"
                         @keyup.esc="cancelEditMember"
-                        class="flex-1 min-w-0 px-2 py-1 text-sm font-bold rounded-lg bg-white dark:bg-slate-900 border border-blue-400 outline-none"
+                        class="flex-1 min-w-0 text-sm font-bold"
                       />
-                      <button
-                        type="button"
+                      <v-btn
+                        color="primary"
+                        size="x-small"
                         @click="commitEditMember(m)"
-                        class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-blue-600 text-white hover:bg-blue-700"
-                      >保存</button>
-                      <button
-                        type="button"
+                        class="shrink-0 text-[10px]"
+                      >保存</v-btn>
+                      <v-btn
+                        variant="tonal"
+                        size="x-small"
                         @click="cancelEditMember"
-                        class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600"
-                      >取消</button>
+                        class="shrink-0 text-[10px]"
+                      >取消</v-btn>
                     </div>
                     <!-- 通常表示 -->
                     <div v-else class="flex items-center gap-1.5">
                       <p class="font-bold truncate">{{ m.displayName }}</p>
-                      <button
-                        type="button"
+                      <v-btn
+                        icon
+                        variant="text"
+                        size="x-small"
                         @click="beginEditMember(m)"
-                        class="shrink-0 text-slate-400 hover:text-blue-500 dark:hover:text-blue-300"
+                        class="shrink-0 text-slate-400"
                         title="DJ NAME を変更"
-                      >✎</button>
-                      <span
+                        aria-label="DJ NAME を変更"
+                      ><v-icon :icon="mdiPencil" size="14" /></v-btn>
+                      <v-chip
                         v-if="m.isTl"
-                        class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-                      >TL</span>
+                        size="x-small"
+                        label
+                        class="text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                      >TL</v-chip>
                     </div>
                     <div class="mt-0.5 flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
                       <span class="truncate">{{ buildPlayerUrl(m.inviteToken) }}</span>
                     </div>
                   </div>
-                  <button
-                    type="button"
+                  <v-btn
+                    variant="tonal"
+                    size="x-small"
                     @click="copyToClipboard(buildPlayerUrl(m.inviteToken), '参加者 URL')"
-                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
-                  >URL</button>
-                  <button
-                    type="button"
+                    class="shrink-0 text-[10px]"
+                  >URL</v-btn>
+                  <v-btn
+                    variant="tonal"
+                    color="warning"
+                    size="x-small"
                     @click="handleRegenerateParticipantToken(m)"
-                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                    class="shrink-0 text-[10px]"
                     title="招待 URL を再発行 (誤公開時)"
-                  >再発行</button>
-                  <button
-                    type="button"
+                  >再発行</v-btn>
+                  <v-btn
+                    variant="tonal"
+                    size="x-small"
+                    :color="m.isTl ? 'warning' : undefined"
                     @click="handleToggleTl(m)"
-                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold"
-                    :class="m.isTl
-                      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-300'
-                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'"
+                    class="shrink-0 text-[10px]"
+                    :class="m.isTl ? '' : 'text-slate-500 dark:text-slate-400'"
                     :title="m.isTl ? 'TL を解除' : 'TL に設定'"
                   >
                     {{ m.isTl ? 'TL ✓' : 'TL' }}
-                  </button>
-                  <button
+                  </v-btn>
+                  <v-btn
                     v-if="currentCompetition.status === 'draft'"
-                    type="button"
+                    variant="tonal"
+                    color="error"
+                    size="x-small"
                     @click="handleDeleteParticipant(m)"
-                    class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300"
+                    class="shrink-0 text-[10px]"
                     title="削除"
-                  >×</button>
+                  >×</v-btn>
                 </div>
               </li>
             </ul>
@@ -2225,30 +2248,32 @@ const statusColor = (s: string) => ({
               class="px-4 py-3 border-t border-slate-100 dark:border-slate-700/60"
             >
               <div v-if="addingForTeamId === team.id" class="space-y-2">
-                <input
+                <v-text-field
                   v-model="addingDisplayName"
                   type="text"
                   placeholder="表示名 (DJ 名)"
-                  class="w-full px-3 py-1.5 text-sm rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                  class="w-full text-sm"
                   @keydown.enter="commitAddParticipant"
                 />
-                <label class="flex items-center gap-2 text-xs text-slate-500">
-                  <input type="checkbox" v-model="addingIsTl" class="rounded" />
-                  TL (チームリーダー) として登録
-                </label>
+                <v-checkbox
+                  v-model="addingIsTl"
+                  label="TL (チームリーダー) として登録"
+                  class="text-xs text-slate-500"
+                />
                 <div class="flex gap-2">
-                  <button type="button" @click="commitAddParticipant" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700">追加</button>
-                  <button type="button" @click="cancelAddParticipant" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                  <v-btn color="primary" size="small" @click="commitAddParticipant" class="flex-1 text-xs">追加</v-btn>
+                  <v-btn variant="tonal" size="small" @click="cancelAddParticipant" class="text-xs">×</v-btn>
                 </div>
               </div>
-              <button
+              <v-btn
                 v-else
-                type="button"
+                variant="outlined"
+                block
                 @click="beginAddParticipant(team.id)"
-                class="w-full px-3 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 border border-dashed border-slate-300 dark:border-slate-600 hover:border-blue-400 transition-colors"
+                class="text-xs text-slate-400 border border-dashed border-slate-300 dark:border-slate-600"
               >
                 + 参加者を追加 (残り {{ remainingSlotsOf(team.id) }} 名)
-              </button>
+              </v-btn>
             </div>
 
             <!-- 満員表示 (open 前後共通) -->
@@ -2258,25 +2283,27 @@ const statusColor = (s: string) => ({
             >
               満員 4 / 4
             </div>
-          </div>
+          </v-card>
         </div>
 
         <!-- 順位表 + 決勝生成ボタン (open 以降のみ表示) -->
-        <section
+        <v-card
           v-if="standings && standings.rows.length > 0"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-slate-500">
               順位表 ({{ standings.prelimRecordedCount }} / {{ standings.prelimMatchupCount }} matchup 記録済)
             </h2>
-            <button
-              type="button"
+            <v-btn
+              variant="tonal"
+              size="x-small"
               @click="refreshStandings"
-              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-            >🔄 再計算</button>
+              class="text-[10px]"
+            >🔄 再計算</v-btn>
           </div>
-          <table class="w-full text-sm">
+          <v-table class="text-sm bg-transparent [&_td]:h-auto [&_th]:h-auto">
             <thead>
               <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                 <th class="text-left py-1 px-2">順位</th>
@@ -2317,7 +2344,7 @@ const statusColor = (s: string) => ({
                 </td>
               </tr>
             </tbody>
-          </table>
+          </v-table>
           <!-- 決勝生成ボタン -->
           <div class="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-700/40">
             <p class="text-[11px] text-slate-500">
@@ -2325,32 +2352,29 @@ const statusColor = (s: string) => ({
               <span v-else-if="standings.allPrelimRecorded">予選全結果記録済。TOP2 で決勝を生成できます。</span>
               <span v-else>予選 {{ standings.prelimMatchupCount - standings.prelimRecordedCount }} 試合の結果記録待ち</span>
             </p>
-            <button
+            <v-btn
               v-if="!standings.finalsExists"
-              type="button"
+              color="warning"
               @click="handleGenerateFinals"
               :disabled="!standings.allPrelimRecorded"
-              class="px-4 py-2 rounded-md text-xs font-bold transition-all"
-              :class="standings.allPrelimRecorded
-                ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                : 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'"
+              class="text-xs"
             >
               🏆 決勝を生成
-            </button>
+            </v-btn>
           </div>
-        </section>
+        </v-card>
 
         <!-- 途中経過マトリクス: 5×5 で各 matchup の row 視点の総合ポイントを表示 -->
-        <section
+        <v-card
           v-if="standings && currentCompetition.teams && currentCompetition.teams.length > 0"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <h2 class="text-sm font-bold text-slate-500">途中経過</h2>
           <p class="text-[11px] text-slate-500">
             セル「自軍戦pt ○/×/△ 相手戦pt」: ○=行チームが勝ち / ×=負け / △=引分。「?」 = 未記録、「-」 = 同チーム同士。合計列は勝ち点合計 (matchup 勝点のみ)。
           </p>
-          <div class="overflow-x-auto">
-            <table class="text-xs border-collapse">
+          <v-table class="text-xs bg-transparent [&_table]:w-auto [&_td]:h-auto [&_th]:h-auto">
               <thead>
                 <tr>
                   <th class="py-1 px-2 text-[10px] font-mono text-slate-400"></th>
@@ -2408,27 +2432,28 @@ const statusColor = (s: string) => ({
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </section>
+          </v-table>
+        </v-card>
 
         <!--
           個人成績: 選手ごとに「曲単位の勝敗」と「獲得pt」を集計。行を開くと 1 曲ずつの詳細スコアが出る。
           集計は結果記録済みのスコアからクライアント側で導出するので、結果を保存すれば即座に反映される。
         -->
-        <section
+        <v-card
           v-if="currentCompetition.status !== 'draft' && personalStats.length > 0"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-slate-500">
               個人成績 ({{ personalRecordedSongCount }} 曲 記録済)
             </h2>
-            <button
-              type="button"
+            <v-btn
+              variant="tonal"
+              size="x-small"
               @click="toggleAllPersonalDetails"
-              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-            >{{ allPersonalExpanded ? '▲ すべて閉じる' : '▼ すべて開く' }}</button>
+              class="text-[10px]"
+            >{{ allPersonalExpanded ? '▲ すべて閉じる' : '▼ すべて開く' }}</v-btn>
           </div>
           <p class="text-[11px] text-slate-500">
             曲単位の勝敗と獲得pt (予選 + 決勝の合計)。1 戦 = 2 曲制で<b>両者が両曲を叩く</b>ため、1 戦につき 2 曲ぶん記録されます。
@@ -2436,8 +2461,7 @@ const statusColor = (s: string) => ({
             獲得pt = 勝った曲数 × その戦の 1 曲あたりpt (予選: 先鋒2 / 中堅3 / 大将4)。
             選手行をクリックすると 1 曲ごとの詳細スコアを開けます。
           </p>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+          <v-table class="text-sm bg-transparent [&_td]:h-auto [&_th]:h-auto">
               <thead>
                 <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                   <th class="text-left py-1 px-2">順位</th>
@@ -2482,7 +2506,7 @@ const statusColor = (s: string) => ({
                       <p v-if="row.songs.length === 0" class="text-[11px] text-slate-500 px-2 py-1">
                         まだ起用されていません。
                       </p>
-                      <table v-else class="w-full text-xs">
+                      <v-table v-else density="compact" class="text-xs bg-transparent [&_td]:h-auto [&_th]:h-auto">
                         <thead>
                           <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                             <th class="text-left py-1 px-2">試合</th>
@@ -2531,57 +2555,59 @@ const statusColor = (s: string) => ({
                             </td>
                           </tr>
                         </tbody>
-                      </table>
+                      </v-table>
                     </td>
                   </tr>
                 </template>
               </tbody>
-            </table>
-          </div>
-        </section>
+          </v-table>
+        </v-card>
 
         <!-- 起用クローズ日時 (JST): 手動ロックの代替。設定時刻を過ぎると TL 起用編集のみ締切 (プレイヤー自選曲提出は対象外)。 -->
-        <section
+        <v-card
           v-if="currentCompetition.status !== 'draft'"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-slate-500">
               起用クローズ日時 (JST)
             </h2>
-            <span
-              class="text-[11px] font-bold px-2 py-0.5 rounded"
+            <v-chip
+              size="small"
+              label
+              class="text-[11px] font-bold"
               :class="currentCompetition.lineupClosed
                 ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
                 : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'"
             >
               {{ currentCompetition.lineupClosed ? '🔒 起用クローズ済み' : '✏ 起用受付中' }}
-            </span>
+            </v-chip>
           </div>
           <p class="text-[11px] text-slate-500">
             設定した日時を過ぎると、<b>TL の起用編集 (選手の割り当て) のみ</b>が自動的に締め切られます (手動ロックは廃止)。
             プレイヤーの自選曲提出は締め切られません。日時はあなたの端末のローカル時刻 = JST 想定で扱われます。
           </p>
           <div class="flex items-center gap-2 flex-wrap">
-            <input
+            <v-text-field
               type="datetime-local"
               v-model="deadlineInput"
               :disabled="currentCompetition.status === 'finished'"
-              class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+              class="flex-1 min-w-[200px] text-sm"
             />
-            <button
-              type="button"
+            <v-btn
+              color="success"
               @click="handleSaveDeadline"
               :disabled="isSavingDeadline || currentCompetition.status === 'finished'"
-              class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
-            >保存</button>
-            <button
+              class="shrink-0 text-xs"
+            >保存</v-btn>
+            <v-btn
               v-if="currentCompetition.deadlineAt"
-              type="button"
+              variant="tonal"
               @click="handleClearDeadline"
               :disabled="isSavingDeadline || currentCompetition.status === 'finished'"
-              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
-            >締切解除</button>
+              class="shrink-0 text-xs"
+            >締切解除</v-btn>
           </div>
           <p v-if="currentCompetition.deadlineAt" class="text-[10px] font-mono text-slate-400">
             現在の設定: {{ formatAdminDateTime(currentCompetition.deadlineAt) }}
@@ -2589,50 +2615,53 @@ const statusColor = (s: string) => ({
           <p v-else class="text-[10px] font-mono text-slate-400">
             未設定 (締め切らない)。日時を入れて「保存」すると有効になります。
           </p>
-        </section>
+        </v-card>
 
         <!-- 起用公開日時 (JST): この時刻を過ぎるとオーダー(起用)が対戦相手・観戦URL・選手URLに自動公開される。起用クローズ日時とは独立。 -->
-        <section
+        <v-card
           v-if="currentCompetition.status !== 'draft'"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-slate-500">
               起用公開日時 (JST)
             </h2>
-            <span
-              class="text-[11px] font-bold px-2 py-0.5 rounded"
+            <v-chip
+              size="small"
+              label
+              class="text-[11px] font-bold"
               :class="currentCompetition.lineupPublished
                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300'"
             >
               {{ currentCompetition.lineupPublished ? '📢 オーダー公開済み' : '🕒 公開前' }}
-            </span>
+            </v-chip>
           </div>
           <p class="text-[11px] text-slate-500">
             設定した日時を過ぎると、<b>オーダー (起用) が対戦相手・観戦 URL・選手 URL に自動公開</b>されます。
             起用クローズ日時とは独立に設定できます (例: クローズ後しばらくしてから公開)。日時はあなたの端末のローカル時刻 = JST 想定で扱われます。
           </p>
           <div class="flex items-center gap-2 flex-wrap">
-            <input
+            <v-text-field
               type="datetime-local"
               v-model="lineupPublishInput"
               :disabled="currentCompetition.status === 'finished'"
-              class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+              class="flex-1 min-w-[200px] text-sm"
             />
-            <button
-              type="button"
+            <v-btn
+              color="success"
               @click="handleSaveLineupPublishAt"
               :disabled="isSavingLineupPublish || currentCompetition.status === 'finished'"
-              class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
-            >保存</button>
-            <button
+              class="shrink-0 text-xs"
+            >保存</v-btn>
+            <v-btn
               v-if="currentCompetition.lineupPublishAt"
-              type="button"
+              variant="tonal"
               @click="handleClearLineupPublishAt"
               :disabled="isSavingLineupPublish || currentCompetition.status === 'finished'"
-              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
-            >公開日時解除</button>
+              class="shrink-0 text-xs"
+            >公開日時解除</v-btn>
           </div>
           <p v-if="currentCompetition.lineupPublishAt" class="text-[10px] font-mono text-slate-400">
             現在の設定: {{ formatAdminDateTime(currentCompetition.lineupPublishAt) }}
@@ -2640,35 +2669,40 @@ const statusColor = (s: string) => ({
           <p v-else class="text-[10px] font-mono text-slate-400">
             未設定 (自動公開しない)。日時を入れて「保存」すると有効になります。
           </p>
-        </section>
+        </v-card>
 
         <!--
           決勝のスケジュール (JST)。決勝は予選終了後に生成されるため、予選のクローズ/公開日時とは別枠。
           どちらも未設定の間は「決勝の起用は編集可 & 非公開」= 決勝生成直後の状態。
         -->
-        <section
+        <v-card
           v-if="finalsGenerated"
-          class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-md p-4 space-y-4"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 p-4 space-y-4"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-amber-600 dark:text-amber-300">🏆 決勝のスケジュール (JST)</h2>
             <div class="flex items-center gap-2 flex-wrap">
-              <span
-                class="text-[11px] font-bold px-2 py-0.5 rounded"
+              <v-chip
+                size="small"
+                label
+                class="text-[11px] font-bold"
                 :class="currentCompetition.finalsLineupClosed
                   ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
                   : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'"
               >
                 {{ currentCompetition.finalsLineupClosed ? '🔒 決勝の起用クローズ済み' : '✏ 決勝の起用受付中' }}
-              </span>
-              <span
-                class="text-[11px] font-bold px-2 py-0.5 rounded"
+              </v-chip>
+              <v-chip
+                size="small"
+                label
+                class="text-[11px] font-bold"
                 :class="currentCompetition.finalsLineupPublished
                   ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                   : 'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300'"
               >
                 {{ currentCompetition.finalsLineupPublished ? '📢 決勝のオーダー公開済み' : '🕒 決勝のオーダー非公開' }}
-              </span>
+              </v-chip>
             </div>
           </div>
           <p class="text-[11px] text-slate-500">
@@ -2679,25 +2713,25 @@ const statusColor = (s: string) => ({
           <div class="space-y-2">
             <p class="text-[11px] font-bold text-slate-500">決勝の起用クローズ日時</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <input
+              <v-text-field
                 type="datetime-local"
                 v-model="finalsDeadlineInput"
                 :disabled="currentCompetition.status === 'finished'"
-                class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+                class="flex-1 min-w-[200px] text-sm"
               />
-              <button
-                type="button"
+              <v-btn
+                color="success"
                 @click="handleSaveFinalsDeadline"
                 :disabled="isSavingFinalsDeadline || currentCompetition.status === 'finished'"
-                class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
-              >保存</button>
-              <button
+                class="shrink-0 text-xs"
+              >保存</v-btn>
+              <v-btn
                 v-if="currentCompetition.finalsDeadlineAt"
-                type="button"
+                variant="tonal"
                 @click="handleClearFinalsDeadline"
                 :disabled="isSavingFinalsDeadline || currentCompetition.status === 'finished'"
-                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
-              >締切解除</button>
+                class="shrink-0 text-xs"
+              >締切解除</v-btn>
             </div>
             <p class="text-[10px] font-mono text-slate-400">
               {{ currentCompetition.finalsDeadlineAt
@@ -2709,25 +2743,25 @@ const statusColor = (s: string) => ({
           <div class="space-y-2">
             <p class="text-[11px] font-bold text-slate-500">決勝の起用公開日時</p>
             <div class="flex items-center gap-2 flex-wrap">
-              <input
+              <v-text-field
                 type="datetime-local"
                 v-model="finalsPublishInput"
                 :disabled="currentCompetition.status === 'finished'"
-                class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50"
+                class="flex-1 min-w-[200px] text-sm"
               />
-              <button
-                type="button"
+              <v-btn
+                color="success"
                 @click="handleSaveFinalsPublishAt"
                 :disabled="isSavingFinalsPublish || currentCompetition.status === 'finished'"
-                class="shrink-0 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:bg-slate-300"
-              >保存</button>
-              <button
+                class="shrink-0 text-xs"
+              >保存</v-btn>
+              <v-btn
                 v-if="currentCompetition.finalsLineupPublishAt"
-                type="button"
+                variant="tonal"
                 @click="handleClearFinalsPublishAt"
                 :disabled="isSavingFinalsPublish || currentCompetition.status === 'finished'"
-                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-50"
-              >公開日時解除</button>
+                class="shrink-0 text-xs"
+              >公開日時解除</v-btn>
             </div>
             <p class="text-[10px] font-mono text-slate-400">
               {{ currentCompetition.finalsLineupPublishAt
@@ -2735,7 +2769,7 @@ const statusColor = (s: string) => ({
                 : '未設定 (決勝の起用は非公開のまま)' }}
             </p>
           </div>
-        </section>
+        </v-card>
 
         <!-- 対戦表: 全 30 試合に対する運営ジャンル指定 (open 以降のみ表示) -->
         <section
@@ -2771,12 +2805,13 @@ const statusColor = (s: string) => ({
                   <span class="text-slate-400 mx-1.5">vs</span>
                   <span :class="teamColorClassById(mu.teamBId)">{{ teamNameOf(mu.teamBId) }}</span>
                 </p>
-                <button
-                  type="button"
+                <v-btn
+                  color="primary"
+                  size="small"
                   @click="handleConfigureMatchup(mu.id, true)"
                   :disabled="currentCompetition.status === 'finished'"
-                  class="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-                >＋ この対戦を設定</button>
+                  class="shrink-0 text-[11px]"
+                >＋ この対戦を設定</v-btn>
               </div>
             </div>
           </div>
@@ -2786,10 +2821,10 @@ const statusColor = (s: string) => ({
           </p>
 
           <!-- 設定済み (実施順): 従来の対戦表 UI -->
-          <div
+          <v-card
             v-for="mu in configuredMatchups"
             :key="mu.id"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden"
           >
             <!--
               総合 (先鋒〜大将の全戦合計)。戦ポイント = 勝ち曲数 × 戦の配点 (予選 先鋒2/中堅3/大将4)
@@ -2811,18 +2846,24 @@ const statusColor = (s: string) => ({
                   <span class="text-[10px] font-normal text-slate-400 ml-1">pt</span>
                 </span>
                 <!-- 勝敗は全戦記録済みで確定。途中は「途中経過」バッジに留める。 -->
-                <span
+                <v-chip
                   v-if="matchupTotals[mu.id].winner === 'a' || matchupTotals[mu.id].winner === 'b'"
-                  class="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                >○ {{ teamNameOf(matchupTotals[mu.id].winner === 'a' ? mu.teamAId : mu.teamBId) }} 勝ち</span>
-                <span
+                  size="small"
+                  label
+                  class="text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                >○ {{ teamNameOf(matchupTotals[mu.id].winner === 'a' ? mu.teamAId : mu.teamBId) }} 勝ち</v-chip>
+                <v-chip
                   v-else-if="matchupTotals[mu.id].winner === 'draw'"
-                  class="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-                >△ 引分</span>
-                <span
+                  size="small"
+                  label
+                  class="text-[11px] font-bold bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                >△ 引分</v-chip>
+                <v-chip
                   v-else
-                  class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-                >途中経過</span>
+                  size="small"
+                  label
+                  class="text-[11px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                >途中経過</v-chip>
                 <span class="text-[10px] font-mono text-slate-400">
                   曲数 {{ matchupTotals[mu.id].aSongs }} - {{ matchupTotals[mu.id].bSongs }}
                   ・ {{ matchupTotals[mu.id].recorded }}/{{ matchupTotals[mu.id].total }} 戦記録済み
@@ -2840,29 +2881,31 @@ const statusColor = (s: string) => ({
                   <span :class="teamColorClassById(mu.teamAId)">{{ teamNameOf(mu.teamAId) }}</span>
                   <span class="text-slate-400 mx-2">vs</span>
                   <span :class="teamColorClassById(mu.teamBId)">{{ teamNameOf(mu.teamBId) }}</span>
-                  <span v-if="mu.isFinals" class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500 text-white">
+                  <v-chip v-if="mu.isFinals" size="small" label class="ml-2 text-[10px] font-bold bg-amber-500 text-white">
                     🏆 FINALS
-                  </span>
+                  </v-chip>
                 </p>
                 <div class="flex items-center gap-2">
                   <p class="text-[10px] font-mono text-slate-400">
                     {{ mu.isFinals ? 'FINALS' : '予選第 ' + mu.matchupOrder + ' 試合' }}
                   </p>
-                  <button
-                    type="button"
+                  <v-btn
+                    variant="tonal"
+                    size="x-small"
                     @click="handleSwapMatchupSides(mu.id)"
                     :disabled="currentCompetition.status === 'finished'"
-                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-blue-100 hover:text-blue-600 dark:hover:bg-blue-900/40 dark:hover:text-blue-300 disabled:opacity-50"
+                    class="text-[10px] text-slate-500"
                     title="対戦の左右 (A側/B側) を入れ替える"
-                  >⇄ 左右入替</button>
-                  <button
+                  >⇄ 左右入替</v-btn>
+                  <v-btn
                     v-if="!mu.isFinals"
-                    type="button"
+                    variant="tonal"
+                    size="x-small"
                     @click="handleConfigureMatchup(mu.id, false)"
                     :disabled="currentCompetition.status === 'finished'"
-                    class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/40 dark:hover:text-rose-300 disabled:opacity-50"
+                    class="text-[10px] text-slate-500"
                     title="この対戦を未設定に戻す"
-                  >設定解除</button>
+                  >設定解除</v-btn>
                 </div>
               </div>
               <!-- 起用公開は起用公開日時 (lineupPublishAt) 到達で自動公開。手動公開は廃止。 -->
@@ -2900,18 +2943,24 @@ const statusColor = (s: string) => ({
                       :title="pickLabel(match.id, 'a')"
                     >🎵 {{ pickLabel(match.id, 'a') }}</p>
                     <!-- StrategyCard の意思決定状況 (TL が「発動する / 発動しない」を選択) -->
-                    <span
+                    <v-chip
                       v-if="strategyStatusOf(match, 'a') === 'use'"
-                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-fuchsia-600 text-white"
-                    >⚡ 発動予定</span>
-                    <span
+                      size="x-small"
+                      label
+                      class="mt-0.5 text-[9px] font-bold bg-fuchsia-600 text-white"
+                    >⚡ 発動予定</v-chip>
+                    <v-chip
                       v-else-if="strategyStatusOf(match, 'a') === 'skip'"
-                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500"
-                    >✓ 発動しない</span>
-                    <span
+                      size="x-small"
+                      label
+                      class="mt-0.5 text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500"
+                    >✓ 発動しない</v-chip>
+                    <v-chip
                       v-else-if="strategyStatusOf(match, 'a') === 'undecided'"
-                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-                    >⚠ 未決定</span>
+                      size="x-small"
+                      label
+                      class="mt-0.5 text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                    >⚠ 未決定</v-chip>
                   </div>
 
                   <!-- B 側プレイヤー (起用は公開状態に関係なく管理者には常に表示) -->
@@ -2927,33 +2976,37 @@ const statusColor = (s: string) => ({
                       :title="pickLabel(match.id, 'b')"
                     >🎵 {{ pickLabel(match.id, 'b') }}</p>
                     <!-- StrategyCard の意思決定状況 (TL が「発動する / 発動しない」を選択) -->
-                    <span
+                    <v-chip
                       v-if="strategyStatusOf(match, 'b') === 'use'"
-                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-fuchsia-600 text-white"
-                    >⚡ 発動予定</span>
-                    <span
+                      size="x-small"
+                      label
+                      class="mt-0.5 text-[9px] font-bold bg-fuchsia-600 text-white"
+                    >⚡ 発動予定</v-chip>
+                    <v-chip
                       v-else-if="strategyStatusOf(match, 'b') === 'skip'"
-                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-500"
-                    >✓ 発動しない</span>
-                    <span
+                      size="x-small"
+                      label
+                      class="mt-0.5 text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-500"
+                    >✓ 発動しない</v-chip>
+                    <v-chip
                       v-else-if="strategyStatusOf(match, 'b') === 'undecided'"
-                      class="inline-block mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-                    >⚠ 未決定</span>
+                      size="x-small"
+                      label
+                      class="mt-0.5 text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                    >⚠ 未決定</v-chip>
                   </div>
 
                   <!-- ジャンル指定セレクタ -->
                   <div>
                     <p class="text-[10px] font-mono text-slate-400 mb-1">指定ジャンル</p>
-                    <select
-                      :value="match.requiredGenre ?? ''"
-                      @change="handleGenreChange(match, ($event.target as HTMLSelectElement).value)"
+                    <v-select
+                      :model-value="match.requiredGenre ?? ''"
+                      :items="[{ title: '未指定', value: '' }, ...genresForKind(match.matchKind).map(g => ({ title: g, value: g }))]"
+                      @update:model-value="(v: string | null) => handleGenreChange(match, v ?? '')"
                       :disabled="currentCompetition.status === 'finished'"
-                      class="w-full px-2 py-1.5 rounded-lg text-sm bg-white dark:bg-slate-800 border outline-none focus:border-blue-400 disabled:opacity-50"
+                      class="w-full text-sm"
                       :class="genreSelectClass(match.requiredGenre)"
-                    >
-                      <option value="">未指定</option>
-                      <option v-for="g in genresForKind(match.matchKind)" :key="g" :value="g">{{ g }}</option>
-                    </select>
+                    />
                   </div>
                 </div>
 
@@ -2976,10 +3029,10 @@ const statusColor = (s: string) => ({
                       <span v-if="match.song2ScoreA !== null && match.song2ScoreB !== null" class="text-slate-500">
                         | 2曲目: {{ match.song2ScoreA }} - {{ match.song2ScoreB }}
                       </span>
-                      <button type="button" @click="beginResultEdit(match)" class="ml-auto px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">
+                      <v-btn color="primary" size="x-small" @click="beginResultEdit(match)" class="ml-auto text-[10px]">
                         {{ match.aSongsWon !== null ? '編集' : '記録' }}
-                      </button>
-                      <button v-if="match.aSongsWon !== null" type="button" @click="handleClearResult(match.id)" class="px-2 py-1 rounded bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
+                      </v-btn>
+                      <v-btn v-if="match.aSongsWon !== null" variant="tonal" color="error" size="x-small" @click="handleClearResult(match.id)" class="text-[10px]">クリア</v-btn>
                     </div>
                   </template>
                   <!-- 編集モード: 2 曲 × (管理番号 + A スコア + B スコア) -->
@@ -2999,19 +3052,19 @@ const statusColor = (s: string) => ({
                           :badge-class="autoSongSourceClass(editingAutoSongs?.song1)"
                           @select="(s) => handleSongSelected(1, s)"
                         />
-                        <input
+                        <v-text-field
                           v-model.number="resultDraft.song1ScoreA"
                           type="number"
                           min="0"
                           placeholder="A スコア"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                          class="text-xs tabular-nums"
                         />
-                        <input
+                        <v-text-field
                           v-model.number="resultDraft.song1ScoreB"
                           type="number"
                           min="0"
                           placeholder="B スコア"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                          class="text-xs tabular-nums"
                         />
                       </div>
                       <!-- Song 2 (B 側演奏曲) -->
@@ -3024,19 +3077,19 @@ const statusColor = (s: string) => ({
                           :badge-class="autoSongSourceClass(editingAutoSongs?.song2)"
                           @select="(s) => handleSongSelected(2, s)"
                         />
-                        <input
+                        <v-text-field
                           v-model.number="resultDraft.song2ScoreA"
                           type="number"
                           min="0"
                           placeholder="A スコア"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                          class="text-xs tabular-nums"
                         />
-                        <input
+                        <v-text-field
                           v-model.number="resultDraft.song2ScoreB"
                           type="number"
                           min="0"
                           placeholder="B スコア"
-                          class="px-2 py-1 rounded bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 text-xs tabular-nums"
+                          class="text-xs tabular-nums"
                         />
                       </div>
                     </div>
@@ -3046,18 +3099,20 @@ const statusColor = (s: string) => ({
                     -->
                     <p v-if="manualOverride.song1 || manualOverride.song2" class="mt-2 flex items-center gap-2 flex-wrap text-sky-700 dark:text-sky-300">
                       <span>✎ 手動指定中の枠があります (自動導出より優先されます)</span>
-                      <button
+                      <v-btn
                         v-if="manualOverride.song1"
-                        type="button"
+                        variant="tonal"
+                        size="x-small"
                         @click="clearSongOverride(1)"
-                        class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                      >1 曲目を自動に戻す</button>
-                      <button
+                        class="text-[10px]"
+                      >1 曲目を自動に戻す</v-btn>
+                      <v-btn
                         v-if="manualOverride.song2"
-                        type="button"
+                        variant="tonal"
+                        size="x-small"
                         @click="clearSongOverride(2)"
-                        class="px-2 py-0.5 rounded bg-slate-200 text-slate-600 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                      >2 曲目を自動に戻す</button>
+                        class="text-[10px]"
+                      >2 曲目を自動に戻す</v-btn>
                     </p>
                     <!-- 自動決定できなかった枠の注意書き (提出状況未取得 / 自選曲未提出) -->
                     <p
@@ -3066,7 +3121,7 @@ const statusColor = (s: string) => ({
                       class="mt-2 text-amber-600 dark:text-amber-300"
                     >
                       ⚠ 自選曲 / 抽選曲を取得できない枠があります (提出状況の読込失敗、または自選曲未提出)。
-                      <button type="button" @click="handleRefreshAll" :disabled="isRefreshingAll" class="underline hover:no-underline disabled:opacity-50">🔄 最新の状況に更新</button>
+                      <v-btn variant="text" size="x-small" @click="handleRefreshAll" :disabled="isRefreshingAll" class="underline hover:no-underline text-[10px] px-1">🔄 最新の状況に更新</v-btn>
                     </p>
                     <!-- 勝敗プレビュー -->
                     <div class="mt-2 flex items-center gap-2 flex-wrap">
@@ -3074,8 +3129,10 @@ const statusColor = (s: string) => ({
                       <span class="font-bold tabular-nums text-sm">
                         A {{ draftWinnerPreview.a }} - {{ draftWinnerPreview.b }} B
                       </span>
-                      <span
-                        class="text-[10px] font-bold px-2 py-0.5 rounded"
+                      <v-chip
+                        size="small"
+                        label
+                        class="text-[10px] font-bold"
                         :class="draftWinnerPreview.verdict === 'A 勝ち'
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
                           : draftWinnerPreview.verdict === 'B 勝ち'
@@ -3083,9 +3140,9 @@ const statusColor = (s: string) => ({
                             : draftWinnerPreview.verdict === '引分'
                               ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
                               : 'bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400'"
-                      >{{ draftWinnerPreview.verdict }}</span>
-                      <button type="button" @click="handleSaveResult(match.id)" class="ml-auto px-3 py-1 rounded bg-emerald-500 text-white hover:bg-emerald-600 font-bold">保存</button>
-                      <button type="button" @click="cancelResultEdit" class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                      >{{ draftWinnerPreview.verdict }}</v-chip>
+                      <v-btn color="success" size="small" @click="handleSaveResult(match.id)" class="ml-auto text-[10px]">保存</v-btn>
+                      <v-btn variant="tonal" size="small" @click="cancelResultEdit" class="text-[10px]">×</v-btn>
                     </div>
                   </template>
                 </div>
@@ -3100,57 +3157,59 @@ const statusColor = (s: string) => ({
                   <span v-else-if="!canReveal(match.id)" class="text-slate-400 italic">
                     {{ revealMatchOf(match.id) === null ? '試合データ未取得' : '両側の自選曲提出待ち' }}
                   </span>
-                  <button
+                  <v-btn
                     v-else
-                    type="button"
+                    color="primary"
+                    size="x-small"
                     @click="handleOpenReveal(match.id)"
-                    class="ml-auto px-3 py-1 rounded bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold transition-all"
+                    class="ml-auto text-[10px]"
                     title="新規タブで Song Reveal を開く"
                   >
                     ▶ REVEAL を再生
-                  </button>
+                  </v-btn>
                 </div>
 
                 <!-- 自選曲公開トグル群 (試合直前に公開する想定) -->
                 <div class="flex items-center gap-2 flex-wrap text-[10px] font-mono">
                   <span class="text-slate-400">選曲公開:</span>
-                  <button
-                    type="button"
+                  <v-btn
+                    size="x-small"
                     @click="handlePublishPick(match.id, 'a', !match.pickPublishedA)"
-                    class="px-2 py-1 rounded transition-colors"
+                    class="text-[10px] font-normal"
                     :class="match.pickPublishedA
                       ? 'bg-fuchsia-500 text-white hover:bg-fuchsia-600'
                       : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
                   >
                     A 側 {{ match.pickPublishedA ? '✓ 公開中' : '未公開' }}
-                  </button>
-                  <button
-                    type="button"
+                  </v-btn>
+                  <v-btn
+                    size="x-small"
                     @click="handlePublishPick(match.id, 'b', !match.pickPublishedB)"
-                    class="px-2 py-1 rounded transition-colors"
+                    class="text-[10px] font-normal"
                     :class="match.pickPublishedB
                       ? 'bg-fuchsia-500 text-white hover:bg-fuchsia-600'
                       : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
                   >
                     B 側 {{ match.pickPublishedB ? '✓ 公開中' : '未公開' }}
-                  </button>
-                  <button
-                    type="button"
+                  </v-btn>
+                  <v-btn
+                    size="x-small"
                     @click="handlePublishPick(match.id, 'both', !(match.pickPublishedA && match.pickPublishedB))"
-                    class="px-2 py-1 rounded bg-violet-500 text-white hover:bg-violet-600 ml-auto"
+                    class="text-[10px] font-normal bg-violet-500 text-white hover:bg-violet-600 ml-auto"
                   >
                     {{ match.pickPublishedA && match.pickPublishedB ? '両方解除' : '両方公開' }}
-                  </button>
+                  </v-btn>
                 </div>
               </li>
             </ul>
-          </div>
+          </v-card>
         </section>
 
         <!-- 観戦用 対戦表 URL: open 以降。ログイン不要で対戦表を一覧公開する。 -->
-        <section
+        <v-card
           v-if="currentCompetition.status !== 'draft'"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-slate-500">
@@ -3161,56 +3220,61 @@ const statusColor = (s: string) => ({
             </p>
           </div>
           <div v-if="spectatorUrl" class="flex items-center gap-2">
-            <input
-              :value="spectatorUrl"
+            <v-text-field
+              :model-value="spectatorUrl"
               readonly
-              class="flex-1 min-w-0 px-3 py-2 text-xs font-mono rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600"
+              class="flex-1 min-w-0 text-xs font-mono"
             />
-            <button
-              type="button"
+            <v-btn
+              variant="tonal"
               @click="copyToClipboard(spectatorUrl, '観戦用 URL')"
-              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-            >コピー</button>
-            <button
-              type="button"
+              class="shrink-0 text-xs"
+            >コピー</v-btn>
+            <v-btn
+              variant="tonal"
+              color="warning"
               @click="handleGenerateSpectatorToken"
               :disabled="isGeneratingSpectatorToken"
-              class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
-            >再発行</button>
+              class="shrink-0 text-xs"
+            >再発行</v-btn>
           </div>
           <div v-else class="flex items-center justify-between gap-2">
             <p class="text-[11px] text-slate-500">まだ発行されていません。</p>
-            <button
-              type="button"
+            <v-btn
+              color="success"
               @click="handleGenerateSpectatorToken"
               :disabled="isGeneratingSpectatorToken"
-              class="px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
-            >▶ 観戦用 URL を発行</button>
+              class="text-xs"
+            >▶ 観戦用 URL を発行</v-btn>
           </div>
           <p class="text-[10px] text-slate-400">
             公開されるのは「<span class="font-bold">起用公開</span>済みのラインアップ・指定ジャンル・記録済みの結果」のみ。
             未公開の起用や自選曲は伏せられます。誤って共有した場合は「再発行」で旧 URL を無効化できます。
           </p>
-        </section>
+        </v-card>
 
         <!-- 運営チャット: TL からの問い合わせ受信・返信 (open 以降) -->
-        <section
+        <v-card
           v-if="currentCompetition.status !== 'draft'"
-          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+          tag="section"
+          class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
         >
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-sm font-bold text-slate-500 flex items-center gap-2">
               運営チャット
-              <span
+              <v-chip
                 v-if="totalChatUnread > 0"
-                class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500 text-white tracking-normal"
-              >未読 {{ totalChatUnread }}</span>
+                size="x-small"
+                label
+                class="text-[10px] font-bold bg-rose-500 text-white tracking-normal"
+              >未読 {{ totalChatUnread }}</v-chip>
             </h2>
-            <button
-              type="button"
+            <v-btn
+              variant="tonal"
+              size="x-small"
               @click="loadChatThreads"
-              class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-            >再読込</button>
+              class="text-[10px]"
+            >再読込</v-btn>
           </div>
           <p class="text-[11px] text-slate-500">
             各チームの TL から届いたメッセージに返信できます (TL 送信時はあなたのメールにも通知が届きます)。
@@ -3218,27 +3282,32 @@ const statusColor = (s: string) => ({
 
           <div class="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-3">
             <!-- チーム一覧 -->
-            <div class="space-y-1">
-              <button
+            <v-list density="compact" class="space-y-1 py-0 bg-transparent">
+              <v-list-item
                 v-for="th in chatThreads"
                 :key="th.teamId"
-                type="button"
                 @click="handleSelectChatTeam(th.teamId)"
-                class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-left text-sm border transition-colors"
+                :active="selectedChatTeamId === th.teamId"
+                color="primary"
+                class="px-3 py-2 rounded-lg text-sm border"
                 :class="selectedChatTeamId === th.teamId
                   ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600'
-                  : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/60'"
+                  : 'bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-700'"
               >
-                <span class="font-bold truncate" :class="teamColorClass(th.teamName)">{{ th.teamName }}</span>
-                <span class="flex items-center gap-1 shrink-0">
-                  <span class="text-[10px] text-slate-400">{{ th.messages.length }}</span>
-                  <span
-                    v-if="th.unreadCount > 0"
-                    class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500 text-white"
-                  >{{ th.unreadCount }}</span>
-                </span>
-              </button>
-            </div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold truncate" :class="teamColorClass(th.teamName)">{{ th.teamName }}</span>
+                  <span class="flex items-center gap-1 shrink-0">
+                    <span class="text-[10px] text-slate-400">{{ th.messages.length }}</span>
+                    <v-chip
+                      v-if="th.unreadCount > 0"
+                      size="x-small"
+                      label
+                      class="text-[10px] font-bold bg-rose-500 text-white"
+                    >{{ th.unreadCount }}</v-chip>
+                  </span>
+                </div>
+              </v-list-item>
+            </v-list>
 
             <!-- 選択スレッド -->
             <div class="flex flex-col rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden min-h-[260px]">
@@ -3265,19 +3334,23 @@ const statusColor = (s: string) => ({
                 </div>
                 <div class="p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                   <div class="flex items-end gap-2">
-                    <textarea
+                    <v-textarea
                       v-model="chatReplyDraft"
                       @keydown="onChatReplyKeydown"
                       rows="1"
+                      auto-grow
+                      max-rows="4"
+                      no-resize
                       placeholder="返信を入力 (Enterで送信)"
-                      class="flex-1 resize-none max-h-24 px-3 py-2 text-[13px] rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-                    ></textarea>
-                    <button
-                      type="button"
+                      class="flex-1 text-[13px]"
+                    />
+                    <v-btn
+                      color="indigo"
                       @click="handleSendChatReply"
                       :disabled="isSendingChatReply || !chatReplyDraft.trim()"
-                      class="shrink-0 px-3 py-2 rounded-md text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-                    >送信</button>
+                      :loading="isSendingChatReply"
+                      class="shrink-0 text-xs"
+                    >送信</v-btn>
                   </div>
                 </div>
               </template>
@@ -3286,14 +3359,14 @@ const statusColor = (s: string) => ({
               </p>
             </div>
           </div>
-        </section>
+        </v-card>
         </template>
         <!-- ────────── /team5 専用セクション群 ────────── -->
 
         <!-- ────────── individual4 専用セクション群 ────────── -->
         <template v-if="currentCompetition.format === 'individual4'">
           <!-- 参加者リスト (draft 中は追加 UI、open 以降は閲覧のみ) -->
-          <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3">
+          <v-card tag="section" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3">
             <div class="flex items-center justify-between flex-wrap gap-2">
               <h2 class="text-sm font-bold text-slate-500">
                 参加者 ({{ individualParticipantCount }} 名)
@@ -3317,46 +3390,54 @@ const statusColor = (s: string) => ({
                 <span class="w-6 text-[10px] font-mono text-slate-400 tabular-nums text-right">{{ idx + 1 }}</span>
                 <div class="flex-1 min-w-0">
                   <div v-if="editingIndividualParticipantId === p.id" class="flex items-center gap-2">
-                    <input
+                    <v-text-field
                       v-model="editingIndividualName"
                       type="text"
-                      class="flex-1 px-2 py-1 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                      class="flex-1 text-sm"
                       @keydown.enter="commitEditIndividualParticipant(p)"
                       @keydown.esc="cancelEditIndividualParticipant"
                     />
-                    <button type="button" @click="commitEditIndividualParticipant(p)" class="text-xs font-bold text-blue-600 dark:text-blue-400">保存</button>
-                    <button type="button" @click="cancelEditIndividualParticipant" class="text-xs text-slate-500">×</button>
+                    <v-btn variant="text" color="primary" size="small" @click="commitEditIndividualParticipant(p)" class="text-xs">保存</v-btn>
+                    <v-btn icon variant="text" size="small" @click="cancelEditIndividualParticipant" class="text-slate-500" aria-label="キャンセル"><v-icon :icon="mdiClose" size="16" /></v-btn>
                   </div>
                   <div v-else class="flex items-center gap-2">
                     <p class="font-bold truncate">{{ p.displayName }}</p>
-                    <button
+                    <v-btn
                       v-if="currentCompetition.status === 'draft'"
-                      type="button"
+                      icon
+                      variant="text"
+                      size="x-small"
                       @click="beginEditIndividualParticipant(p)"
-                      class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      class="text-slate-400"
                       title="表示名を編集"
-                    >✎</button>
+                      aria-label="表示名を編集"
+                    ><v-icon :icon="mdiPencil" size="14" /></v-btn>
                   </div>
                   <p class="text-[10px] font-mono text-slate-400 truncate">{{ buildPlayerUrl(p.inviteToken) }}</p>
                 </div>
-                <button
-                  type="button"
+                <v-btn
+                  variant="tonal"
+                  size="x-small"
                   @click="copyToClipboard(buildPlayerUrl(p.inviteToken), '参加者 URL')"
-                  class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200"
-                >URL</button>
-                <button
-                  type="button"
+                  class="shrink-0 text-[10px]"
+                >URL</v-btn>
+                <v-btn
+                  variant="tonal"
+                  color="warning"
+                  size="x-small"
                   @click="handleRegenerateIndividualToken(p)"
-                  class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                  class="shrink-0 text-[10px]"
                   title="招待 URL を再発行"
-                >再発行</button>
-                <button
+                >再発行</v-btn>
+                <v-btn
                   v-if="currentCompetition.status === 'draft'"
-                  type="button"
+                  variant="tonal"
+                  color="error"
+                  size="x-small"
                   @click="handleDeleteIndividualParticipant(p)"
-                  class="shrink-0 px-2 py-1 rounded text-[10px] font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300"
+                  class="shrink-0 text-[10px]"
                   title="削除"
-                >×</button>
+                >×</v-btn>
               </li>
             </ul>
 
@@ -3365,27 +3446,29 @@ const statusColor = (s: string) => ({
               v-if="currentCompetition.status === 'draft' && individualParticipantCount < 16"
               class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60"
             >
-              <input
+              <v-text-field
                 v-model="addingIndividualName"
                 type="text"
                 placeholder="新規参加者の表示名"
-                class="flex-1 px-3 py-1.5 text-sm rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+                class="flex-1 text-sm"
                 @keydown.enter="handleAddIndividualParticipant"
                 :disabled="isAddingIndividual"
               />
-              <button
-                type="button"
+              <v-btn
+                color="primary"
                 @click="handleAddIndividualParticipant"
                 :disabled="isAddingIndividual || !addingIndividualName.trim()"
-                class="px-4 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-              >+ 追加</button>
+                :loading="isAddingIndividual"
+                class="text-xs"
+              >+ 追加</v-btn>
             </div>
-          </section>
+          </v-card>
 
           <!-- 抽選番号モード: draft 中、参加者 12 / 16 名揃ったら表示 -->
-          <section
+          <v-card
             v-if="currentCompetition.status === 'draft' && canOpenIndividual"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+            tag="section"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
               <h2 class="text-sm font-bold text-slate-500">
@@ -3399,29 +3482,31 @@ const statusColor = (s: string) => ({
               1 行 1 試合、半角スペースかカンマで区切って 4 つの番号 (1〜{{ individualParticipantCount }}) を入力。
               番号 → 参加者の対応は open 後の「抽選結果割当」フォームから入力します。
             </p>
-            <textarea
+            <v-textarea
               v-model="numberModeText"
               rows="8"
               placeholder="1 2 3 4&#10;5 6 7 8&#10;9 10 11 12&#10;…"
-              class="w-full px-3 py-2 text-sm font-mono rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
+              class="w-full text-sm font-mono"
               :disabled="isOpeningWithNumbers"
             />
             <div class="flex items-center justify-end gap-2">
-              <button
-                type="button"
+              <v-btn
+                color="primary"
                 @click="handleOpenWithNumbers"
                 :disabled="isOpeningWithNumbers || !numberModeText.trim()"
-                class="px-4 py-2 rounded-md text-xs font-bold bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white disabled:bg-slate-300 disabled:cursor-not-allowed"
+                :loading="isOpeningWithNumbers"
+                class="text-xs"
               >
                 ▶ 番号枠で open
-              </button>
+              </v-btn>
             </div>
-          </section>
+          </v-card>
 
           <!-- 抽選結果割当: open 後、未割当スロットがあるとき表示 -->
-          <section
+          <v-card
             v-if="currentCompetition.status !== 'draft' && numbersInUse.length > 0"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+            tag="section"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
               <h2 class="text-sm font-bold text-slate-500">
@@ -3443,40 +3528,37 @@ const statusColor = (s: string) => ({
                 class="flex items-center gap-2 text-sm"
               >
                 <span class="w-10 text-right font-mono font-bold tabular-nums">{{ num }} =</span>
-                <select
+                <v-select
                   v-model="lotteryDraft[num]"
-                  class="flex-1 min-w-0 px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-                >
-                  <option value="">(未選択)</option>
-                  <option
-                    v-for="p in (currentCompetition.participants ?? [])"
-                    :key="p.id"
-                    :value="p.id"
-                  >{{ p.displayName }}</option>
-                </select>
+                  :items="[{ title: '(未選択)', value: '' }, ...(currentCompetition.participants ?? []).map(p => ({ title: p.displayName, value: p.id }))]"
+                  class="flex-1 min-w-0"
+                />
               </div>
             </div>
             <div class="flex items-center justify-end gap-2">
-              <button
-                type="button"
+              <v-btn
+                variant="tonal"
+                size="small"
                 @click="seedLotteryDraft"
-                class="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-              >現在の割当を再読込</button>
-              <button
-                type="button"
+                class="text-[11px]"
+              >現在の割当を再読込</v-btn>
+              <v-btn
+                color="primary"
                 @click="handleAssignLottery"
                 :disabled="isAssigningLottery"
-                class="px-4 py-2 rounded-md text-xs font-bold bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white disabled:bg-slate-300"
+                :loading="isAssigningLottery"
+                class="text-xs"
               >
                 ✓ 適用
-              </button>
+              </v-btn>
             </div>
-          </section>
+          </v-card>
 
           <!-- OBS ブラウザソース URL: open 以降 -->
-          <section
+          <v-card
             v-if="currentCompetition.status !== 'draft'"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+            tag="section"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
               <h2 class="text-sm font-bold text-slate-500">
@@ -3487,55 +3569,57 @@ const statusColor = (s: string) => ({
               </p>
             </div>
             <div v-if="obsUrl" class="flex items-center gap-2">
-              <input
-                :value="obsUrl"
+              <v-text-field
+                :model-value="obsUrl"
                 readonly
-                class="flex-1 min-w-0 px-3 py-2 text-xs font-mono rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600"
+                class="flex-1 min-w-0 text-xs font-mono"
               />
-              <button
-                type="button"
+              <v-btn
+                variant="tonal"
                 @click="copyToClipboard(obsUrl, 'OBS URL')"
-                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-              >コピー</button>
-              <button
-                type="button"
+                class="shrink-0 text-xs"
+              >コピー</v-btn>
+              <v-btn
+                variant="tonal"
+                color="warning"
                 @click="handleGenerateObsToken"
                 :disabled="isGeneratingObsToken"
-                class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300"
-              >再発行</button>
+                class="shrink-0 text-xs"
+              >再発行</v-btn>
             </div>
             <div v-else class="flex items-center justify-between gap-2">
               <p class="text-[11px] text-slate-500">まだ発行されていません。</p>
-              <button
-                type="button"
+              <v-btn
+                color="success"
                 @click="handleGenerateObsToken"
                 :disabled="isGeneratingObsToken"
-                class="px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
-              >▶ OBS URL を発行</button>
+                class="text-xs"
+              >▶ OBS URL を発行</v-btn>
             </div>
             <p v-if="obsUrl" class="text-[10px] text-slate-400">
               背景を半透明黒にしたい場合は URL 末尾に <code class="px-1 bg-slate-100 dark:bg-slate-800 rounded">?bg=dark</code>、
               更新頻度を変えたい場合は <code class="px-1 bg-slate-100 dark:bg-slate-800 rounded">?interval=3000</code> (ms) を付与。
             </p>
-          </section>
+          </v-card>
 
           <!-- 順位表 (open 以降) -->
-          <section
+          <v-card
             v-if="individualStandings && individualStandings.rows.length > 0"
-            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md p-4 space-y-3"
+            tag="section"
+            class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 space-y-3"
           >
             <div class="flex items-center justify-between flex-wrap gap-2">
               <h2 class="text-sm font-bold text-slate-500">
                 順位表 (予選 {{ individualStandings.prelimRecordedCount }} / {{ individualStandings.prelimMatchCount }} 試合記録済)
               </h2>
-              <button
-                type="button"
+              <v-btn
+                variant="tonal"
+                size="x-small"
                 @click="refreshIndividualStandings"
-                class="px-3 py-1 text-[10px] font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
-              >🔄 再計算</button>
+                class="text-[10px]"
+              >🔄 再計算</v-btn>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+            <v-table class="text-sm bg-transparent [&_td]:h-auto [&_th]:h-auto">
                 <thead>
                   <tr class="text-[10px] font-mono text-slate-400 border-b border-slate-200 dark:border-slate-700">
                     <th class="text-left py-1 px-2">順位</th>
@@ -3574,8 +3658,7 @@ const statusColor = (s: string) => ({
                     </td>
                   </tr>
                 </tbody>
-              </table>
-            </div>
+            </v-table>
             <!-- 決勝生成ボタン -->
             <div class="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100 dark:border-slate-700/40">
               <p class="text-[11px] text-slate-500">
@@ -3584,20 +3667,17 @@ const statusColor = (s: string) => ({
                 <span v-else-if="individualStandings.allPrelimRecorded">予選全試合記録済。決勝を生成できます。</span>
                 <span v-else>予選 {{ individualStandings.prelimMatchCount - individualStandings.prelimRecordedCount }} 試合の結果記録待ち</span>
               </p>
-              <button
+              <v-btn
                 v-if="!individualStandings.finalsExists"
-                type="button"
+                color="warning"
                 @click="handleGenerateIndividualFinals"
                 :disabled="!individualStandings.allPrelimRecorded"
-                class="px-4 py-2 rounded-md text-xs font-bold transition-all"
-                :class="individualStandings.allPrelimRecorded
-                  ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                  : 'bg-slate-300 dark:bg-slate-600 text-slate-500 cursor-not-allowed'"
+                class="text-xs"
               >
                 🏆 決勝を生成
-              </button>
+              </v-btn>
             </div>
-          </section>
+          </v-card>
 
           <!-- 予選試合一覧 + 結果入力 (open 以降) -->
           <section
@@ -3610,10 +3690,10 @@ const statusColor = (s: string) => ({
             <p class="text-[11px] text-slate-500">
               IIDX ARENA モードと同じく、4 人が共通の 4 曲をプレイ。曲ごとに 1 位 2pt / 2 位 1pt / 3 位・4 位 0pt。
             </p>
-            <div
+            <v-card
               v-for="m in individualPrelimMatches"
               :key="m.id"
-              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md overflow-x-auto"
+              class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-x-auto"
             >
               <div class="px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between flex-wrap gap-2">
                 <p class="font-bold text-sm">予選 第 {{ m.matchOrder }} 試合</p>
@@ -3625,7 +3705,7 @@ const statusColor = (s: string) => ({
 
               <!-- 表示モード: 4x4 グリッド (プレイヤー × 4 曲) -->
               <template v-if="editingIndividualMatchId !== m.id">
-                <table class="w-full text-xs min-w-[640px]">
+                <v-table class="text-xs bg-transparent [&_table]:min-w-[640px] [&_td]:h-auto [&_th]:h-auto">
                   <thead>
                     <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono text-slate-400">
                       <th class="px-3 py-2 text-left">プレイヤー</th>
@@ -3688,12 +3768,12 @@ const statusColor = (s: string) => ({
                       </td>
                     </tr>
                   </tbody>
-                </table>
+                </v-table>
                 <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/40 flex gap-2 justify-end">
-                  <button type="button" @click="beginEditIndividualResult(m)" class="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                  <v-btn color="primary" size="small" @click="beginEditIndividualResult(m)" class="text-xs">
                     {{ m.resultRecordedAt ? '編集' : '記録' }}
-                  </button>
-                  <button v-if="m.resultRecordedAt" type="button" @click="handleClearIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
+                  </v-btn>
+                  <v-btn v-if="m.resultRecordedAt" variant="tonal" color="error" size="small" @click="handleClearIndividualResult(m.id)" class="text-xs">クリア</v-btn>
                 </div>
               </template>
 
@@ -3703,22 +3783,23 @@ const statusColor = (s: string) => ({
                   <p class="text-[10px] font-mono text-slate-400">
                     順位記録 (4 曲 × 4 人) — セルをクリックすると 1位→2位→3位→4位→未選択 でサイクル
                   </p>
-                  <table class="w-full text-xs min-w-[700px]">
+                  <v-table class="text-xs bg-transparent [&_table]:min-w-[700px] [&_td]:h-auto [&_th]:h-auto">
                     <thead>
                       <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono text-slate-400">
                         <th class="px-2 py-2 text-left">プレイヤー</th>
                         <th v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center min-w-[150px]">
-                          <button
-                            type="button"
+                          <v-btn
+                            block
+                            size="small"
                             @click="openSongPicker(songIdx as 1 | 2 | 3 | 4)"
-                            class="w-full px-2 py-1 rounded font-bold normal-case truncate transition-colors"
+                            class="px-2 normal-case text-[10px] [&_.v-btn\_\_content]:min-w-0 [&_.v-btn\_\_content]:max-w-full"
                             :class="draftSongTitle(songIdx as 1 | 2 | 3 | 4)
                               ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60'
                               : 'bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:border-blue-400'"
                             :title="draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `曲${songIdx} を選択`"
                           >
-                            {{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}
-                          </button>
+                            <span class="block truncate">{{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}</span>
+                          </v-btn>
                         </th>
                         <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-bold">総合順位</th>
                       </tr>
@@ -3730,10 +3811,10 @@ const statusColor = (s: string) => ({
                           <span class="font-bold">{{ m.slots[idx]?.participantName }}</span>
                         </td>
                         <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center">
-                          <button
-                            type="button"
+                          <v-btn
+                            block
                             @click="bumpDraftRank(idx, songIdx)"
-                            class="w-full py-2 rounded font-bold text-sm transition-colors"
+                            class="h-auto py-2 text-sm [&_.v-btn\_\_content]:flex-col"
                             :class="(() => {
                               const r = draftIndividualRanks[idx]?.ranks[songIdx - 1];
                               if (r === 1) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60';
@@ -3753,7 +3834,7 @@ const statusColor = (s: string) => ({
                             >
                               {{ draftIndividualRanks[idx]?.points[songIdx - 1] }}pt
                             </span>
-                          </button>
+                          </v-btn>
                         </td>
                         <td class="px-2 py-2 text-center">
                           <span
@@ -3773,14 +3854,14 @@ const statusColor = (s: string) => ({
                         </td>
                       </tr>
                     </tbody>
-                  </table>
+                  </v-table>
                   <div class="flex gap-2 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/40">
-                    <button type="button" @click="handleSaveIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">保存</button>
-                    <button type="button" @click="cancelEditIndividualResult" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                    <v-btn color="success" size="small" @click="handleSaveIndividualResult(m.id)" class="text-xs">保存</v-btn>
+                    <v-btn variant="tonal" size="small" @click="cancelEditIndividualResult" class="text-xs">×</v-btn>
                   </div>
                 </div>
               </template>
-            </div>
+            </v-card>
           </section>
 
           <!-- 決勝試合一覧 + 結果入力 (生成後) -->
@@ -3794,10 +3875,10 @@ const statusColor = (s: string) => ({
             <p class="text-[11px] text-slate-500">
               バケット内総合ポイントが多い順 = 全体 (バケット-1)×4+順位。同点はタイ扱い。
             </p>
-            <div
+            <v-card
               v-for="m in individualFinalsMatches"
               :key="m.id"
-              class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-md overflow-x-auto"
+              class="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 overflow-x-auto"
             >
               <div class="px-4 py-2 border-b border-amber-200 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-900/20 flex items-center justify-between flex-wrap gap-2">
                 <p class="font-bold text-sm">
@@ -3809,7 +3890,7 @@ const statusColor = (s: string) => ({
                 </p>
               </div>
               <template v-if="editingIndividualMatchId !== m.id">
-                <table class="w-full text-xs min-w-[640px]">
+                <v-table class="text-xs bg-transparent [&_table]:min-w-[640px] [&_td]:h-auto [&_th]:h-auto">
                   <thead>
                     <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono text-slate-400">
                       <th class="px-3 py-2 text-left">プレイヤー</th>
@@ -3872,12 +3953,12 @@ const statusColor = (s: string) => ({
                       </td>
                     </tr>
                   </tbody>
-                </table>
+                </v-table>
                 <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700/40 flex gap-2 justify-end">
-                  <button type="button" @click="beginEditIndividualResult(m)" class="px-3 py-1 text-xs font-bold rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                  <v-btn color="primary" size="small" @click="beginEditIndividualResult(m)" class="text-xs">
                     {{ m.resultRecordedAt ? '編集' : '記録' }}
-                  </button>
-                  <button v-if="m.resultRecordedAt" type="button" @click="handleClearIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300">クリア</button>
+                  </v-btn>
+                  <v-btn v-if="m.resultRecordedAt" variant="tonal" color="error" size="small" @click="handleClearIndividualResult(m.id)" class="text-xs">クリア</v-btn>
                 </div>
               </template>
               <template v-else>
@@ -3885,22 +3966,23 @@ const statusColor = (s: string) => ({
                   <p class="text-[10px] font-mono text-slate-400">
                     順位記録 (4 曲 × 4 人) — セルをクリックすると 1位→2位→3位→4位→未選択 でサイクル
                   </p>
-                  <table class="w-full text-xs min-w-[700px]">
+                  <v-table class="text-xs bg-transparent [&_table]:min-w-[700px] [&_td]:h-auto [&_th]:h-auto">
                     <thead>
                       <tr class="bg-slate-50 dark:bg-slate-900/40 text-[10px] font-mono text-slate-400">
                         <th class="px-2 py-2 text-left">プレイヤー</th>
                         <th v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center min-w-[150px]">
-                          <button
-                            type="button"
+                          <v-btn
+                            block
+                            size="small"
                             @click="openSongPicker(songIdx as 1 | 2 | 3 | 4)"
-                            class="w-full px-2 py-1 rounded font-bold normal-case truncate transition-colors"
+                            class="px-2 normal-case text-[10px] [&_.v-btn\_\_content]:min-w-0 [&_.v-btn\_\_content]:max-w-full"
                             :class="draftSongTitle(songIdx as 1 | 2 | 3 | 4)
                               ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-900/60'
                               : 'bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-600 text-slate-400 hover:border-blue-400'"
                             :title="draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `曲${songIdx} を選択`"
                           >
-                            {{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}
-                          </button>
+                            <span class="block truncate">{{ draftSongTitle(songIdx as 1 | 2 | 3 | 4) || `🎵 曲${songIdx} を選択` }}</span>
+                          </v-btn>
                         </th>
                         <th class="px-2 py-2 text-center text-slate-700 dark:text-slate-200 font-bold">総合順位</th>
                       </tr>
@@ -3912,10 +3994,10 @@ const statusColor = (s: string) => ({
                           <span class="font-bold">{{ m.slots[idx]?.participantName }}</span>
                         </td>
                         <td v-for="songIdx in [1,2,3,4]" :key="songIdx" class="px-2 py-2 text-center">
-                          <button
-                            type="button"
+                          <v-btn
+                            block
                             @click="bumpDraftRank(idx, songIdx)"
-                            class="w-full py-2 rounded font-bold text-sm transition-colors"
+                            class="h-auto py-2 text-sm [&_.v-btn\_\_content]:flex-col"
                             :class="(() => {
                               const r = draftIndividualRanks[idx]?.ranks[songIdx - 1];
                               if (r === 1) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60';
@@ -3935,7 +4017,7 @@ const statusColor = (s: string) => ({
                             >
                               {{ draftIndividualRanks[idx]?.points[songIdx - 1] }}pt
                             </span>
-                          </button>
+                          </v-btn>
                         </td>
                         <td class="px-2 py-2 text-center">
                           <span
@@ -3955,14 +4037,14 @@ const statusColor = (s: string) => ({
                         </td>
                       </tr>
                     </tbody>
-                  </table>
+                  </v-table>
                   <div class="flex gap-2 justify-end pt-2 border-t border-slate-100 dark:border-slate-700/40">
-                    <button type="button" @click="handleSaveIndividualResult(m.id)" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-500 text-white hover:bg-emerald-600">保存</button>
-                    <button type="button" @click="cancelEditIndividualResult" class="px-3 py-1 text-xs font-bold rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">×</button>
+                    <v-btn color="success" size="small" @click="handleSaveIndividualResult(m.id)" class="text-xs">保存</v-btn>
+                    <v-btn variant="tonal" size="small" @click="cancelEditIndividualResult" class="text-xs">×</v-btn>
                   </div>
                 </div>
               </template>
-            </div>
+            </v-card>
           </section>
         </template>
         <!-- ────────── /individual4 専用セクション群 ────────── -->
@@ -3979,32 +4061,22 @@ const statusColor = (s: string) => ({
       そのままだと fixed がビューポートではなく管理画面ブロック基準になり追従しない。
     -->
     <Teleport to="body">
-      <button
+      <v-btn
         v-if="isOrganizer && currentCompetition"
-        type="button"
         aria-label="最新の状況に更新"
         :disabled="isRefreshingAll"
         @click="handleRefreshAll"
         title="提出状況・アサイン・ジャンル・試合結果・順位表・運営チャットをまとめて最新化します"
-        class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] flex items-center gap-1.5 pl-4 pr-5 py-3 rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-60 text-white text-sm font-bold transition-all"
+        color="primary"
+        size="large"
+        rounded="pill"
+        class="fixed z-40 right-4 bottom-[calc(1rem_+_env(safe-area-inset-bottom))] pl-4 pr-5 shadow-lg text-sm"
       >
-        <svg
-          aria-hidden="true"
-          class="h-5 w-5"
-          :class="isRefreshingAll ? 'animate-spin' : ''"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
+        <template #prepend>
+          <v-icon :icon="mdiRefresh" aria-hidden="true" :class="isRefreshingAll ? 'animate-spin' : ''" />
+        </template>
         {{ isRefreshingAll ? '更新中' : '更新' }}
-      </button>
+      </v-btn>
     </Teleport>
 
     <!-- 楽曲選択モーダル (個人戦の試合結果編集中のみアクティブ) -->

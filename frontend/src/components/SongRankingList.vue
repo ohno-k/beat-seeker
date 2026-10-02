@@ -33,40 +33,27 @@ onMounted(() => {
         <span v-if="!isLoading && totalUsers > 0" class="text-xs text-slate-400 dark:text-slate-500">
           {{ t('ranking.totalUserCount', { n: totalUsers }) }}
         </span>
-        <div class="flex gap-1 p-1 bg-slate-100 dark:bg-slate-700/50 rounded-md">
-          <button
-            @click="sortMode = 'most'"
-            class="px-3 py-1 rounded-lg text-xs font-bold transition-all"
-            :class="sortMode === 'most'
-              ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-          >{{ t('ranking.sortMost') }}</button>
-          <button
-            @click="sortMode = 'least'"
-            class="px-3 py-1 rounded-lg text-xs font-bold transition-all"
-            :class="sortMode === 'least'
-              ? 'bg-white dark:bg-slate-600 text-orange-500 dark:text-orange-400'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'"
-          >{{ t('ranking.sortLeast') }}</button>
-        </div>
+        <v-btn-toggle v-model="sortMode" mandatory :color="sortMode === 'most' ? 'primary' : 'orange'">
+          <v-btn value="most" size="small" class="text-xs">{{ t('ranking.sortMost') }}</v-btn>
+          <v-btn value="least" size="small" class="text-xs">{{ t('ranking.sortLeast') }}</v-btn>
+        </v-btn-toggle>
       </div>
     </div>
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-      <div class="w-12 h-12 border-4 border-blue-100 dark:border-slate-700 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
+      <v-progress-circular size="48" width="4" class="mb-4" />
       <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.songRankingAggregating') }}</p>
     </div>
 
-    <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
+    <v-alert v-else-if="error" type="error" class="text-center font-bold">
       {{ error }}
-    </div>
+    </v-alert>
 
     <div v-else-if="ranking.length === 0" class="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-md" >
       <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('ranking.empty') }}</p>
     </div>
 
-    <div v-else class="overflow-x-auto">
-      <table class="w-full">
+    <v-table v-else class="bg-transparent">
         <thead>
           <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
             <th class="pb-4 pl-4 text-xs font-bold text-slate-400 w-14">{{ t('ranking.colRank') }}</th>
@@ -102,26 +89,28 @@ onMounted(() => {
               </span>
               <!-- Mobile: show difficulty/rank inline -->
               <div class="flex items-center gap-2 mt-0.5 sm:hidden">
-                <span
-                  class="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                  :class="entry.difficultyName === 'LEGGENDARIA'
-                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-                    : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'"
+                <v-chip
+                  label
+                  size="x-small"
+                  variant="tonal"
+                  :color="entry.difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
+                  class="text-[10px] font-bold"
                 >
                   {{ entry.difficultyName === 'LEGGENDARIA' ? 'LEGGEN' : 'ANO' }}
-                </span>
+                </v-chip>
                 <span v-if="entry.informalRank" class="text-[10px] font-bold text-slate-400">☆{{ entry.informalRank }}</span>
               </div>
             </td>
             <td class="py-3 px-2 text-center hidden sm:table-cell">
-              <span
-                class="text-xs font-bold px-2 py-1 rounded-lg"
-                :class="entry.difficultyName === 'LEGGENDARIA'
-                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-                  : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'"
+              <v-chip
+                label
+                size="small"
+                variant="tonal"
+                :color="entry.difficultyName === 'LEGGENDARIA' ? 'purple' : 'red'"
+                class="text-xs font-bold"
               >
                 {{ entry.difficultyName === 'LEGGENDARIA' ? 'LEGGEN' : 'ANOTHER' }}
-              </span>
+              </v-chip>
             </td>
             <td class="py-3 px-2 text-center hidden md:table-cell">
               <span v-if="entry.informalRank" class="text-xs font-bold text-slate-600 dark:text-slate-300 tabular-nums">
@@ -145,7 +134,6 @@ onMounted(() => {
             </td>
           </tr>
         </tbody>
-      </table>
-    </div>
+    </v-table>
   </div>
 </template>

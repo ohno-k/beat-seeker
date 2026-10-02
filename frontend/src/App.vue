@@ -23,6 +23,7 @@
  *  - `useAprilFools`: エイプリルフール演出フラグ
  */
 import { ref, nextTick, provide } from 'vue';
+import { mdiClose, mdiMenu } from '@mdi/js';
 import ResetPasswordView from './views/ResetPasswordView.vue';
 import CsvDropzone from './components/CsvDropzone.vue';
 import UnifiedImport from './components/UnifiedImport.vue';
@@ -1943,6 +1944,8 @@ const handleUnifiedClose = async () => {
 </script>
 
 <template>
+  <!-- Vuetify のルート。v-app-bar / v-main のレイアウト系は使わず、従来の sticky ヘッダー + fixed サイドバーの構成をそのまま中に置く -->
+  <v-app>
   <!-- パスワード再設定画面は独立ビューとして丸ごと差し替え、通常 UI は描画しない -->
   <ResetPasswordView v-if="isResetPasswordPage" />
   <!-- OBS ブラウザソース用: ストラテジーカードだけを単独描画。サイドバー等は全部省略。 -->
@@ -2037,12 +2040,13 @@ const handleUnifiedClose = async () => {
     />
 
     <!-- 過去作スコアの取り込み結果。現行作の差分モーダルとは別系統の簡易表示 -->
-    <div
-      v-if="pastImportResult"
-      class="fixed inset-0 z-[120] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
-      @click.self="pastImportResult = null"
+    <v-dialog
+      :model-value="!!pastImportResult"
+      max-width="384"
+      @update:model-value="(v) => { if (!v) pastImportResult = null }"
     >
-      <div class="card w-full max-w-sm p-6">
+      <!-- 閉じるアニメーション中は pastImportResult が null になるので中身を v-if で守る -->
+      <v-card v-if="pastImportResult" class="w-full p-6">
         <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 mb-3">
           {{ t('past.result.title', { name: versionName(pastImportResult.version) }) }}
         </h3>
@@ -2075,10 +2079,10 @@ const handleUnifiedClose = async () => {
           {{ pastImportResult.archivedPt ? t('past.result.archivedNote', { name: versionName(pastImportResult.archivedPt.version) }) : t('past.notRanked') }}
         </p>
         <div class="flex justify-end">
-          <button class="btn-primary" @click="pastImportResult = null">{{ t('common.close') }}</button>
+          <v-btn color="primary" @click="pastImportResult = null">{{ t('common.close') }}</v-btn>
         </div>
-      </div>
-    </div>
+      </v-card>
+    </v-dialog>
 
     <!-- アップデート告知モーダル（ログイン後・未読の告知があれば1回だけ表示） -->
     <LeaguePushPromptModal />
@@ -2101,14 +2105,15 @@ const handleUnifiedClose = async () => {
         <div class="max-w-7xl lg:max-w-none mx-auto lg:mx-0 px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
           <div class="flex items-center gap-4">
             <!-- Hamburger Button -->
-            <button 
-              @click="isSidebarOpen = true" 
-              class="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none lg:hidden"
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="-ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 lg:hidden"
+              @click="isSidebarOpen = true"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+              <v-icon :icon="mdiMenu" />
+            </v-btn>
 
             <div class="flex lg:hidden items-center gap-2 cursor-pointer group" @click="activeTab = 'dashboard'">
               <div class="relative w-8 h-8 bg-blue-700 rounded-md flex items-center justify-center text-white font-bold text-xl group-hover:bg-blue-800 transition-colors overflow-hidden">
@@ -2118,16 +2123,17 @@ const handleUnifiedClose = async () => {
             
             <!-- パンくず: 現在地のみを示す。ナビゲーション操作はサイドバーに一本化。 -->
             <nav v-if="activeTab !== 'share'" class="hidden lg:flex items-center gap-2 ml-4 text-sm" aria-label="現在地">
-              <button
-                type="button"
-                @click="activeTab = 'dashboard'"
-                class="font-medium transition-colors"
+              <v-btn
+                variant="text"
+                size="small"
+                class="h-auto min-w-0 px-1 text-sm font-medium"
                 :class="activeTab === 'dashboard'
                   ? 'text-slate-800 dark:text-slate-100'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100'"
+                @click="activeTab = 'dashboard'"
               >
                 {{ t('nav.dashboard') }}
-              </button>
+              </v-btn>
               <template v-if="activeTabLabel">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -2144,54 +2150,63 @@ const handleUnifiedClose = async () => {
               ヘッダーからそのまま取り込みモーダルを開けるようにしている。
               ブラウザでは isNativeApp が false になり、この導線は出ない (従来どおりサイドバーから)。
             -->
-            <button
+            <v-btn
               v-if="isNativeApp && isLoggedIn"
-              type="button"
-              @click="showUploadArea = true"
-              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0"
+              color="primary"
+              size="small"
+              class="px-2.5 text-xs font-semibold shrink-0"
               :title="t('nav.appCsvImport')"
+              @click="showUploadArea = true"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
+              <template #prepend>
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </template>
               <span class="whitespace-nowrap">{{ t('nav.appCsvImport') }}</span>
-            </button>
+            </v-btn>
 
             <!-- Dark Mode Toggle -->
-            <button @click="toggleDarkMode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none">
+            <v-btn icon variant="text" size="small" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" @click="toggleDarkMode">
               <svg v-if="isDarkMode" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
                 <path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd" />
               </svg>
               <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
                 <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
               </svg>
-            </button>
-            
+            </v-btn>
+
             <!-- Notification Bell -->
             <div v-if="isLoggedIn" class="relative">
-              <button 
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                 @click="isNotificationOpen = !isNotificationOpen"
-                class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none relative"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <span v-if="pendingRequests.length + appUnreadCount > 0" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
-                  {{ pendingRequests.length + appUnreadCount }}
-                </span>
-              </button>
+                <v-badge
+                  :model-value="pendingRequests.length + appUnreadCount > 0"
+                  :content="pendingRequests.length + appUnreadCount"
+                  color="error"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </v-badge>
+              </v-btn>
               <NotificationBox :is-open="isNotificationOpen" @close="isNotificationOpen = false" />
             </div>
-            
+
             <template v-if="!isLoggedIn && !authLoading">
-              <button class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors" @click="isLoginModalOpen = true">
+              <v-btn variant="text" class="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" @click="isLoginModalOpen = true">
                 {{ t('nav.loginRegister') }}
-              </button>
+              </v-btn>
             </template>
             <template v-if="isLoggedIn">
-              <div @click="isSidebarOpen = true" class="w-8 h-8 bg-blue-700 hover:bg-blue-800 rounded-full flex items-center justify-center text-white text-xs font-bold cursor-pointer transition-colors lg:hidden">
+              <v-avatar size="32" class="bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold cursor-pointer transition-colors lg:hidden" @click="isSidebarOpen = true">
                 {{ user?.displayName?.charAt(0) || user?.iidxId?.charAt(0) || 'U' }}
-              </div>
+              </v-avatar>
             </template>
           </div>
         </div>
@@ -2201,13 +2216,14 @@ const handleUnifiedClose = async () => {
       <main class="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <!-- モバイル用パンくず: ハンバーガーで開くサイドバーがあるので、ここでは現在地のみ示す。 -->
         <nav v-if="activeTab !== 'share' && activeTabLabel" class="lg:hidden sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 -mx-4 px-4 mb-6 py-2.5 flex items-center gap-2 text-sm" aria-label="現在地">
-          <button
-            type="button"
+          <v-btn
+            variant="text"
+            size="small"
+            class="h-auto min-w-0 px-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100"
             @click="activeTab = 'dashboard'"
-            class="font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
           >
             {{ t('nav.dashboard') }}
-          </button>
+          </v-btn>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -2215,7 +2231,7 @@ const handleUnifiedClose = async () => {
         </nav>
         <!-- ========== 閲覧中バナー: 他ユーザー/TOPランカー閲覧時に最上部へ固定表示 ========== -->
         <!-- 「自分のデータに戻る」「フレンド申請」「仮想ライバル登録」などの操作ボタンを配置 -->
-        <div v-if="viewingUserId || viewingMode === 'topRanker' || viewingMode === 'arenaTopRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md border border-blue-200 dark:border-blue-800 animate-fade-in shrink-0">
+        <v-card v-if="viewingUserId || viewingMode === 'topRanker' || viewingMode === 'arenaTopRanker'" class="w-full max-w-6xl mx-auto mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-blue-50 dark:bg-blue-900/20 p-4 border-blue-200 dark:border-blue-800 animate-fade-in shrink-0">
           <div class="flex items-center gap-3 w-full justify-center sm:justify-start">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-700 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -2227,121 +2243,145 @@ const handleUnifiedClose = async () => {
             </div>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <button
+            <v-btn
+              variant="outlined"
+              class="px-4 text-sm font-semibold whitespace-nowrap bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600"
               @click="returnToMyData"
-              class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-md border border-slate-300 dark:border-slate-600 transition-colors flex items-center gap-2 whitespace-nowrap"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              {{ t('app.banner.returnButton') }}
-            </button>
-            <template v-if="viewingMode === 'topRanker' && isLoggedIn">
-              <button
-                v-if="virtualRivalRegistered === false"
-                @click="toggleVirtualRival"
-                :disabled="virtualRivalBusy"
-                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm font-semibold rounded-md transition-colors flex items-center gap-2 whitespace-nowrap"
-              >
+              <template #prepend>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                フレンド申請
-              </button>
-              <button
-                v-else-if="virtualRivalRegistered === true"
-                @click="toggleVirtualRival"
+              </template>
+              {{ t('app.banner.returnButton') }}
+            </v-btn>
+            <template v-if="viewingMode === 'topRanker' && isLoggedIn">
+              <v-btn
+                v-if="virtualRivalRegistered === false"
+                color="success"
+                class="px-4 text-sm font-semibold whitespace-nowrap"
                 :disabled="virtualRivalBusy"
-                class="px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 text-emerald-700 dark:text-emerald-400 hover:text-red-700 dark:hover:text-red-400 font-semibold rounded-md border border-emerald-200 dark:border-emerald-800 transition-colors whitespace-nowrap text-sm"
+                @click="toggleVirtualRival"
+              >
+                <template #prepend>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                </template>
+                フレンド申請
+              </v-btn>
+              <v-btn
+                v-else-if="virtualRivalRegistered === true"
+                variant="outlined"
+                class="px-4 text-sm font-semibold whitespace-nowrap bg-emerald-100 dark:bg-emerald-900/30 hover:bg-red-100 dark:hover:bg-red-900/30 text-emerald-700 dark:text-emerald-400 hover:text-red-700 dark:hover:text-red-400 border-emerald-200 dark:border-emerald-800"
+                :disabled="virtualRivalBusy"
                 title="クリックで解除"
-              >ライバル登録済み</button>
+                @click="toggleVirtualRival"
+              >ライバル登録済み</v-btn>
             </template>
             <template v-if="(viewingMode === 'private' || viewingMode === 'public') && isLoggedIn">
-              <button
+              <v-btn
                 v-if="friendStatus === 'none'"
+                color="success"
+                class="px-4 text-sm font-semibold whitespace-nowrap"
                 @click="openFriendRequestModal"
-                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-md transition-colors flex items-center gap-2 whitespace-nowrap"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
+                <template #prepend>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                  </svg>
+                </template>
                 フレンド申請
-              </button>
-              <span
+              </v-btn>
+              <v-chip
                 v-else-if="friendStatus === 'requested'"
-                class="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-semibold rounded-md border border-amber-200 dark:border-amber-800 whitespace-nowrap text-sm"
-              >申請済み</span>
-              <span
+                label
+                variant="outlined"
+                size="default"
+                class="px-4 font-semibold whitespace-nowrap text-sm bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+              >申請済み</v-chip>
+              <v-chip
                 v-else-if="friendStatus === 'friend'"
-                class="px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-semibold rounded-md border border-emerald-200 dark:border-emerald-800 whitespace-nowrap text-sm"
-              >フレンド</span>
-              <span
+                label
+                variant="outlined"
+                size="default"
+                class="px-4 font-semibold whitespace-nowrap text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
+              >フレンド</v-chip>
+              <v-chip
                 v-else-if="friendStatus === 'incoming'"
-                class="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-semibold rounded-md border border-blue-200 dark:border-blue-800 whitespace-nowrap text-sm"
-              >申請受信中</span>
+                label
+                variant="outlined"
+                size="default"
+                class="px-4 font-semibold whitespace-nowrap text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800"
+              >申請受信中</v-chip>
             </template>
           </div>
-        </div>
+        </v-card>
 
         <!-- ========== フレンド申請モーダル: メッセージを添えて申請を送信する ========== -->
-        <div v-if="isFriendRequestModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in" @click.self="isFriendRequestModalOpen = false">
-          <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-700">
+        <v-dialog v-model="isFriendRequestModalOpen" max-width="448">
+          <v-card class="overflow-hidden">
             <div class="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
               <h3 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">{{ viewingUserName }} さんにフレンド申請</h3>
-              <button @click="isFriendRequestModalOpen = false" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <v-btn icon variant="text" size="small" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="isFriendRequestModalOpen = false">
+                <v-icon :icon="mdiClose" />
+              </v-btn>
             </div>
-            <div class="p-6 space-y-4">
-              <label class="block">
+            <v-card-text class="p-6 space-y-4">
+              <div>
                 <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">申請メッセージ (任意)</span>
-                <textarea
+                <v-textarea
                   v-model="friendRequestMessage"
                   maxlength="100"
                   rows="3"
+                  no-resize
+                  color="success"
                   placeholder="よろしくお願いします！"
-                  class="mt-2 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-slate-200 resize-none"
-                ></textarea>
+                  class="mt-2"
+                />
                 <span class="text-xs text-slate-400 mt-1 block text-right">{{ friendRequestMessage.length }} / 100</span>
-              </label>
-              <div v-if="friendRequestError" class="p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-sm">
+              </div>
+              <v-alert v-if="friendRequestError" type="error" class="text-sm">
                 {{ friendRequestError }}
-              </div>
+              </v-alert>
               <div class="flex gap-2 justify-end">
-                <button
+                <v-btn
+                  variant="tonal"
+                  class="px-4 font-semibold"
+                  :disabled="friendRequestSending"
                   @click="isFriendRequestModalOpen = false"
+                >キャンセル</v-btn>
+                <v-btn
+                  color="success"
+                  class="px-4 font-semibold"
                   :disabled="friendRequestSending"
-                  class="px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold rounded-md transition-colors"
-                >キャンセル</button>
-                <button
                   @click="submitFriendRequest"
-                  :disabled="friendRequestSending"
-                  class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold rounded-md transition-colors flex items-center gap-2"
                 >
-                  <span v-if="friendRequestSending" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  <v-progress-circular v-if="friendRequestSending" size="16" width="2" color="white" class="mr-2" />
                   申請を送る
-                </button>
+                </v-btn>
               </div>
-            </div>
-          </div>
-        </div>
-        
+            </v-card-text>
+          </v-card>
+        </v-dialog>
+
         <!-- ========== スコア取り込みモーダル: ブックマークレットコード案内＋ CSV ドロップ ========== -->
-      <div v-if="showUploadArea && isLoggedIn" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="handleUnifiedClose">
-        <div class="w-full max-w-xl bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
+      <v-dialog
+        :model-value="showUploadArea && isLoggedIn"
+        max-width="576"
+        @update:model-value="(v) => { if (!v) handleUnifiedClose() }"
+      >
+        <!-- v-dialog は一度開くと中身を残すので、従来どおり閉じるたびに UnifiedImport を作り直すため v-if を付ける -->
+        <v-card v-if="showUploadArea && isLoggedIn" class="w-full p-6 animate-fade-in">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-bold text-slate-800 dark:text-white">{{ t('app.import.title') }}</h2>
-            <button @click="handleUnifiedClose" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <v-btn icon variant="text" size="small" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="handleUnifiedClose">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
           <UnifiedImport :bookmarklet-code="BOOKMARKLET_CODE" @score-file="handleUnifiedScoreFile" @close="handleUnifiedClose" />
-        </div>
-      </div>
+        </v-card>
+      </v-dialog>
 
       <!-- ============================================================ -->
       <!-- ルータービュー相当: activeTab による条件付き描画ブロック        -->
@@ -2553,7 +2593,7 @@ const handleUnifiedClose = async () => {
             </p>
 
             <!-- PWA インストールバナー: beforeinstallprompt を受けたときだけ出現 -->
-            <div v-if="showInstallBanner" class="mt-8 p-6 bg-blue-700 rounded-md text-white flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
+            <v-card v-if="showInstallBanner" variant="flat" class="mt-8 p-6 bg-blue-700 text-white flex flex-col sm:flex-row items-center gap-4 animate-fade-in">
               <div class="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -2564,33 +2604,32 @@ const handleUnifiedClose = async () => {
                 <p class="text-blue-100 text-sm">{{ t('app.pwa.desc') }}</p>
               </div>
               <div class="flex gap-2">
-                <button @click="showInstallBanner = false" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md text-sm font-semibold transition-colors">{{ t('app.pwa.later') }}</button>
-                <button @click="installApp" class="px-4 py-2 bg-white text-blue-700 hover:bg-blue-50 rounded-md text-sm font-semibold transition-colors">{{ t('app.pwa.install') }}</button>
+                <v-btn class="px-4 text-sm font-semibold bg-white/10 hover:bg-white/20 text-white" @click="showInstallBanner = false">{{ t('app.pwa.later') }}</v-btn>
+                <v-btn class="px-4 text-sm font-semibold bg-white text-blue-700 hover:bg-blue-50" @click="installApp">{{ t('app.pwa.install') }}</v-btn>
               </div>
-            </div>
+            </v-card>
           </div>
 
           <!-- ローディング表示: CSV 解析中 / スコア取得中 / 認証中のいずれかで表示 -->
           <div v-if="isParsing || isFetching || authLoading" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
-            <div class="w-full flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
-              <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mb-4"></div>
+            <v-card class="w-full flex flex-col items-center justify-center p-12">
+              <v-progress-circular size="40" width="4" class="mb-4" />
               <p class="text-slate-600 dark:text-slate-300 font-medium tracking-wide">{{ t('app.loading.data') }}</p>
-            </div>
+            </v-card>
           </div>
 
           <!-- エンプティ状態（未ログインのみ）: CSV ドロップエリアを中央に表示（非公開ユーザー閲覧時は出さない） -->
           <div v-else-if="!scoreData.length && viewingMode !== 'private' && !isLoggedIn" class="w-full max-w-3xl mx-auto animate-fade-in flex flex-col items-center">
             <CsvDropzone @file-dropped="handleFileDropped" class="w-full" />
             <!-- エラーメッセージバナー -->
-            <div
+            <v-alert
               v-if="errorMsg"
-              class="w-full mt-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-md flex items-center gap-3 animate-fade-in"
+              type="error"
+              density="default"
+              class="w-full mt-6 border border-red-200 dark:border-red-800 animate-fade-in"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-              </svg>
               <span class="font-medium text-sm sm:text-base">{{ errorMsg }}</span>
-            </div>
+            </v-alert>
           </div>
 
           <!-- スコア結果表示: dashboard / table タブを v-show で切り替える（マウント状態を維持）。
@@ -2598,9 +2637,9 @@ const handleUnifiedClose = async () => {
                取り込みの案内は上部の帯に縮めて出す。 -->
           <div v-else-if="scoreData.length > 0 || viewingMode === 'private' || isLoggedIn" class="w-full flex flex-col items-center animate-fade-in">
             <!-- 取り込み案内: 自分のダッシュボード／一覧で、まだ現行作のスコアが 1 件もないとき -->
-            <div
+            <v-card
               v-if="isLoggedIn && !viewingUserId && scoreData.length === 0 && (activeTab === 'dashboard' || activeTab === 'table')"
-              class="w-full max-w-6xl mb-4 p-4 sm:p-5 bg-white dark:bg-slate-800 rounded-md border border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"
+              class="w-full max-w-6xl mb-4 p-4 sm:p-5 border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"
             >
               <div class="w-11 h-11 shrink-0 bg-blue-100 dark:bg-blue-900/40 rounded-md flex items-center justify-center text-blue-700 dark:text-blue-400">
                 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -2611,17 +2650,20 @@ const handleUnifiedClose = async () => {
                 <p class="font-bold text-slate-900 dark:text-white">{{ t('empty.title') }}</p>
                 <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">{{ t('empty.desc') }}</p>
               </div>
-              <button
-                type="button"
+              <v-btn
+                color="primary"
+                size="large"
+                class="w-full sm:w-auto px-5 shrink-0"
                 @click="showUploadArea = true"
-                class="w-full sm:w-auto btn-primary px-5 py-2.5 shrink-0"
               >
-                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
+                <template #prepend>
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </template>
                 {{ t('empty.uploadCta') }}
-              </button>
-            </div>
+              </v-btn>
+            </v-card>
 
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center gap-4">
@@ -2675,11 +2717,11 @@ const handleUnifiedClose = async () => {
             <p class="text-xs mt-1 max-w-md">{{ t('landing.copyrightDisclaimer') }}</p>
           </div>
           <div class="flex items-center gap-4 flex-wrap justify-center">
-            <button @click="activeTab = 'about'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('app.footer.desc') }}</button>
-            <button @click="activeTab = 'terms'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.terms') }}</button>
-            <button @click="activeTab = 'privacy-policy'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('privacyPolicy.title') }}</button>
-            <button @click="activeTab = 'contact'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('contactPage.title') }}</button>
-            <button v-if="!viewingUserId" @click="activeTab = 'ranking'" class="text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">{{ t('nav.ranking') }}</button>
+            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'about'">{{ t('app.footer.desc') }}</v-btn>
+            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'terms'">{{ t('nav.terms') }}</v-btn>
+            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'privacy-policy'">{{ t('privacyPolicy.title') }}</v-btn>
+            <v-btn variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'contact'">{{ t('contactPage.title') }}</v-btn>
+            <v-btn v-if="!viewingUserId" variant="text" size="small" class="px-1 min-w-0 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" @click="activeTab = 'ranking'">{{ t('nav.ranking') }}</v-btn>
           </div>
         </div>
       </footer>
@@ -2699,12 +2741,14 @@ const handleUnifiedClose = async () => {
         </svg>
         <span>{{ t('app.update.available') }}</span>
       </div>
-      <button
+      <v-btn
+        color="primary"
+        size="small"
+        class="shrink-0 px-4 text-sm font-semibold"
         @click="reloadPage"
-        class="shrink-0 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-md transition-colors"
       >
         {{ t('app.update.reload') }}
-      </button>
+      </v-btn>
     </div>
   </Teleport>
   <!-- ToastContainer は template 末尾 (v-else の外) に移動済。
@@ -2745,6 +2789,7 @@ const handleUnifiedClose = async () => {
     fixed inset-0 z-50 で App.vue 本体の上に被せ、サイドバー/ヘッダーをスキップした没入レイアウトにする。
   -->
   <WrappedView v-if="$route.path.includes('/wrapped/')" />
+  </v-app>
 </template>
 
 <style scoped>

@@ -26,6 +26,7 @@ import { useAuth, API_BASE } from '../composables/useAuth';
 import { useDarkMode } from '../composables/useDarkMode';
 import { useI18n } from '../composables/useI18n';
 import { formatJst, toJstDate } from '../utils/jstTime';
+import { mdiArrowExpandAll, mdiClose } from '@mdi/js';
 
 ChartJS.register(LinearScale, CategoryScale, TimeScale, PointElement, LineElement, Filler, Tooltip, Legend, zoomPlugin);
 
@@ -413,34 +414,34 @@ watch(() => props.rank, loadHistory);
 </script>
 
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')"></div>
-      <div class="relative z-10 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-3xl max-h-[90vh] flex flex-col">
+  <v-dialog :model-value="true" @update:model-value="(v) => { if (!v) emit('close') }" max-width="768">
+      <v-card class="bg-white dark:bg-slate-800 max-h-[90vh]">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">
             ☆{{ rank }} {{ t('table.growthChartTitle') }}
           </h3>
           <div class="flex items-center gap-2">
-            <button
+            <v-btn
               v-if="series.length > 0"
               type="button"
               @click="resetZoom"
               :title="t('table.resetZoom')"
               :aria-label="t('table.resetZoom')"
-              class="px-2 h-7 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 text-xs font-bold flex items-center gap-1 transition-colors"
+              variant="tonal"
+              size="small"
+              :prepend-icon="mdiArrowExpandAll"
+              class="text-xs"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 4l-7 7M4 20l7-7" />
-              </svg>
               {{ t('table.resetZoom') }}
-            </button>
-            <button @click="emit('close')" :aria-label="t('common.back')" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors">×</button>
+            </v-btn>
+            <v-btn icon variant="text" size="small" @click="emit('close')" :aria-label="t('common.back')" class="text-slate-500 dark:text-slate-400">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
         </div>
-        <div class="flex-1 overflow-auto p-4">
+        <v-card-text class="flex-1 overflow-auto p-4">
           <div v-if="isLoading" class="py-12 flex justify-center">
-            <div class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
+            <v-progress-circular size="32" width="4" color="indigo" />
           </div>
           <div v-else-if="errorMsg" class="py-8 text-center text-red-500 dark:text-red-400">{{ errorMsg }}</div>
           <div v-else-if="series.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">{{ t('history.empty') }}</div>
@@ -450,8 +451,7 @@ watch(() => props.rank, loadHistory);
           <p v-if="series.length > 0" class="mt-2 text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 text-center">
             {{ t('table.zoomHint') }}
           </p>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+        </v-card-text>
+      </v-card>
+  </v-dialog>
 </template>

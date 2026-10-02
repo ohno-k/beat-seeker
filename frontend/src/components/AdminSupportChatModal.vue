@@ -1,38 +1,41 @@
 <template>
-  <Teleport to="body">
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
-      @click.self="$emit('close')"
-    >
-      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl shadow-xl flex flex-col overflow-hidden h-[85vh] animate-fade-in border border-slate-200 dark:border-slate-800">
+  <v-dialog
+    :model-value="isOpen"
+    @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+    max-width="768"
+    :scrollable="false"
+  >
+      <v-card class="w-full rounded-2xl shadow-xl flex flex-col overflow-hidden h-[85vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
 
         <!-- ヘッダ -->
         <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <h2 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 3v-3z" />
-            </svg>
+            <v-icon :icon="mdiMessageProcessingOutline" class="text-blue-600 dark:text-blue-400" />
             お問い合わせ
-            <span
+            <v-chip
               v-if="totalUnread > 0"
-              class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white"
-            >未読 {{ totalUnread }}</span>
+              size="small"
+              label
+              class="text-[11px] font-bold rounded-full bg-rose-500 text-white"
+            >未読 {{ totalUnread }}</v-chip>
           </h2>
           <div class="flex items-center gap-2">
-            <button
-              type="button"
+            <v-btn
+              variant="tonal"
+              size="small"
               @click="loadThreads"
-              class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
-            >再読込</button>
-            <button
+              class="text-xs"
+            >再読込</v-btn>
+            <v-btn
+              icon
+              variant="text"
+              size="small"
               @click="$emit('close')"
-              class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 -mr-2"
+              aria-label="閉じる"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-              </svg>
-            </button>
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
         </div>
 
@@ -41,38 +44,42 @@
 
           <!-- 左: スレッド一覧 -->
           <div class="border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-800 overflow-y-auto bg-slate-50 dark:bg-slate-900/50 max-h-[30vh] sm:max-h-none">
-            <div v-if="loadingThreads" class="p-6 text-center text-xs text-slate-400">読み込み中...</div>
+            <div v-if="loadingThreads" class="p-6 text-center text-xs text-slate-400">
+              <v-progress-circular size="20" width="2" class="mr-1" />読み込み中...
+            </div>
             <p v-else-if="threads.length === 0" class="p-6 text-center text-xs text-slate-400 italic">
               まだお問い合わせはありません。
             </p>
-            <button
-              v-for="th in threads"
-              :key="th.userId"
-              type="button"
-              @click="selectThread(th.userId)"
-              class="w-full text-left px-3 py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors"
-              :class="selectedUserId === th.userId
-                ? 'bg-blue-50 dark:bg-blue-900/30'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800/60'"
-            >
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
-                  {{ (th.displayName || 'U').charAt(0).toUpperCase() }}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center justify-between gap-1">
-                    <span class="font-bold text-sm text-slate-800 dark:text-white truncate">{{ th.displayName || '名無し' }}</span>
-                    <span
-                      v-if="th.unreadCount > 0"
-                      class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-500 text-white"
-                    >{{ th.unreadCount }}</span>
+            <v-list v-else density="compact" class="py-0 bg-transparent">
+              <v-list-item
+                v-for="th in threads"
+                :key="th.userId"
+                @click="selectThread(th.userId)"
+                :active="selectedUserId === th.userId"
+                color="primary"
+                class="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800"
+              >
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                    {{ (th.displayName || 'U').charAt(0).toUpperCase() }}
                   </div>
-                  <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                    <span v-if="th.lastSender === 'admin'" class="text-indigo-400">返信済: </span>{{ th.lastMessageBody }}
-                  </p>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-1">
+                      <span class="font-bold text-sm text-slate-800 dark:text-white truncate">{{ th.displayName || '名無し' }}</span>
+                      <v-chip
+                        v-if="th.unreadCount > 0"
+                        size="x-small"
+                        label
+                        class="shrink-0 text-[10px] font-bold rounded-full bg-rose-500 text-white"
+                      >{{ th.unreadCount }}</v-chip>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      <span v-if="th.lastSender === 'admin'" class="text-indigo-400">返信済: </span>{{ th.lastMessageBody }}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </button>
+              </v-list-item>
+            </v-list>
           </div>
 
           <!-- 右: 選択スレッドの会話 -->
@@ -82,13 +89,15 @@
               <div class="px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex items-center gap-2">
                 <span class="font-bold text-sm text-slate-800 dark:text-white">{{ selectedThread?.displayName || '名無し' }}</span>
                 <span class="text-[11px] text-slate-400 font-mono">{{ selectedThread?.iidxId }}</span>
-                <span v-if="selectedThread?.danRank" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold rounded">{{ selectedThread?.danRank }}</span>
-                <span v-if="selectedThread?.arenaRank" class="px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold rounded">{{ selectedThread?.arenaRank }}</span>
+                <v-chip v-if="selectedThread?.danRank" size="x-small" label class="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold">{{ selectedThread?.danRank }}</v-chip>
+                <v-chip v-if="selectedThread?.arenaRank" size="x-small" label class="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold">{{ selectedThread?.arenaRank }}</v-chip>
               </div>
 
               <!-- メッセージ一覧 -->
               <div ref="listEl" class="flex-1 overflow-y-auto px-4 py-4 space-y-2">
-                <p v-if="loadingMessages" class="text-center text-[11px] text-slate-400 py-8">読み込み中...</p>
+                <p v-if="loadingMessages" class="text-center text-[11px] text-slate-400 py-8">
+                  <v-progress-circular size="20" width="2" class="mr-1" />読み込み中...
+                </p>
                 <p v-else-if="messages.length === 0" class="text-center text-[11px] text-slate-400 italic py-8">
                   まだメッセージはありません。
                 </p>
@@ -112,19 +121,24 @@
               <!-- 返信入力 -->
               <div class="p-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
                 <div class="flex items-end gap-2">
-                  <textarea
+                  <v-textarea
                     v-model="replyDraft"
                     @keydown="onReplyKeydown"
                     rows="1"
+                    auto-grow
+                    max-rows="5"
+                    no-resize
+                    color="indigo"
                     placeholder="返信を入力 (Enterで送信 / Shift+Enterで改行)"
-                    class="flex-1 resize-none max-h-28 px-3 py-2 text-[13px] rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-indigo-400"
-                  ></textarea>
-                  <button
-                    type="button"
+                    class="flex-1 text-[13px]"
+                  />
+                  <v-btn
+                    color="indigo"
                     @click="handleSendReply"
                     :disabled="isSending || !replyDraft.trim()"
-                    class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
-                  >送信</button>
+                    :loading="isSending"
+                    class="shrink-0 text-xs"
+                  >送信</v-btn>
                 </div>
               </div>
             </template>
@@ -134,9 +148,8 @@
             </p>
           </div>
         </div>
-      </div>
-    </div>
-  </Teleport>
+      </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -159,6 +172,7 @@ import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue';
 import { useSupportChat, type SupportThreadDto, type SupportMessageDto } from '../composables/useSupportChat';
 import { useToast } from '../composables/useToast';
 import { formatJstShortDateTime } from '../utils/jstTime';
+import { mdiClose, mdiMessageProcessingOutline } from '@mdi/js';
 
 const props = defineProps<{ isOpen: boolean }>();
 const emit = defineEmits<{

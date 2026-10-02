@@ -1,139 +1,139 @@
 <template>
-  <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[100] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm" @click.self="$emit('close')">
-      <div class="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl shadow-xl flex flex-col overflow-hidden max-h-[85vh] animate-fade-in border border-slate-200 dark:border-slate-800">
+  <v-dialog
+    :model-value="isOpen"
+    max-width="768"
+    @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+  >
+    <v-card class="bg-white dark:bg-slate-900 w-full flex flex-col overflow-hidden max-h-[85vh] shadow-xl border-slate-200 dark:border-slate-800">
 
         <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col gap-4 shrink-0">
           <!-- タイトル行: タイトル + お問い合わせ + 閉じる -->
           <div class="flex items-center justify-between gap-2">
             <h2 class="text-lg sm:text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
+              <v-icon :icon="mdiAccountGroupOutline" size="24" class="text-blue-600 dark:text-blue-400" />
               プレイヤー一覧 (管理者用)
             </h2>
             <div class="flex items-center gap-2">
               <!-- お問い合わせ (チャットへ移動): わかりやすく目立たせる -->
-              <button
-                @click="showSupportModal = true"
-                class="relative px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+              <v-badge
+                :model-value="supportUnread > 0"
+                :content="supportUnread > 99 ? '99+' : supportUnread"
+                color="error"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 3v-3z" />
-                </svg>
-                <span class="hidden sm:inline">お問い合わせ</span>
-                <span
-                  v-if="supportUnread > 0"
-                  class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900 text-white text-[10px] font-bold flex items-center justify-center"
-                >{{ supportUnread > 99 ? '99+' : supportUnread }}</span>
-              </button>
+                <v-btn
+                  color="primary"
+                  class="text-sm"
+                  @click="showSupportModal = true"
+                >
+                  <v-icon :icon="mdiMessageProcessingOutline" size="16" />
+                  <span class="hidden sm:inline ml-1.5">お問い合わせ</span>
+                </v-btn>
+              </v-badge>
 
-              <button @click="$emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-2 -mr-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </button>
+              <v-btn icon variant="text" size="small" class="text-slate-400 -mr-1" aria-label="close" @click="$emit('close')">
+                <v-icon :icon="mdiClose" />
+              </v-btn>
             </div>
           </div>
 
           <!-- 管理ツール: 6 ボタンを均一サイズ + アイコン付きで折り返し配置 -->
-          <div class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-2.5">
+          <v-card variant="flat" class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-2.5">
             <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 px-0.5">データ管理ツール</p>
             <div class="flex flex-wrap gap-2">
               <!-- データ管理 -->
-              <div class="relative group">
-                <button
-                  @click="showGameDataModal = true"
+              <div>
+                <v-btn
                   class="admin-tool-btn bg-teal-100 hover:bg-teal-200 text-teal-700 dark:bg-teal-900/50 dark:hover:bg-teal-800/80 dark:text-teal-300"
+                  @click="showGameDataModal = true"
                 >
                   <span aria-hidden="true">🗂️</span>
                   データ管理
-                </button>
-                <div class="admin-tooltip">楽曲・難易度表のドラフト追加や公開を行います</div>
+                </v-btn>
+                <v-tooltip activator="parent" location="bottom" max-width="220">楽曲・難易度表のドラフト追加や公開を行います</v-tooltip>
               </div>
 
               <!-- 全ユーザー再集計 -->
-              <div class="relative group">
-                <button
-                  @click="handleRecalculateAll"
+              <div>
+                <v-btn
                   :disabled="isRecalculating"
                   class="admin-tool-btn bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:hover:bg-indigo-800/80 dark:text-indigo-300"
+                  @click="handleRecalculateAll"
                 >
-                  <svg v-if="isRecalculating" class="animate-spin h-4 w-4 text-indigo-700 dark:text-indigo-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <v-progress-circular v-if="isRecalculating" size="16" width="2" color="indigo" />
                   <span v-else aria-hidden="true">🔄</span>
                   {{ isRecalculating ? '集計中...' : '全ユーザー再集計' }}
-                </button>
-                <div class="admin-tooltip">全ユーザーのBEAT-PTとRate-PTを現在の難易度表で再計算します。難易度表更新後に実行してください</div>
+                </v-btn>
+                <v-tooltip activator="parent" location="bottom" max-width="220">全ユーザーのBEAT-PTとRate-PTを現在の難易度表で再計算します。難易度表更新後に実行してください</v-tooltip>
               </div>
 
               <!-- 曲別ランクキャッシュ再構築 (AVERAGE-RANKING 用) -->
-              <div class="relative group">
-                <button
-                  @click="handleRecalculateSongRanks"
+              <div>
+                <v-btn
                   :disabled="isRecalculatingSongRanks"
                   class="admin-tool-btn bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/50 dark:hover:bg-purple-800/80 dark:text-purple-300"
+                  @click="handleRecalculateSongRanks"
                 >
-                  <svg v-if="isRecalculatingSongRanks" class="animate-spin h-4 w-4 text-purple-700 dark:text-purple-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <v-progress-circular v-if="isRecalculatingSongRanks" size="16" width="2" color="purple" />
                   <span v-else aria-hidden="true">📊</span>
                   {{ isRecalculatingSongRanks ? '再構築中...' : '曲別ランク再構築' }}
-                </button>
-                <div class="admin-tooltip">user_song_ranks キャッシュ（曲別の全ユーザー順位）を再構築します。AVERAGE ランキングが空になっている場合に実行してください</div>
+                </v-btn>
+                <v-tooltip activator="parent" location="bottom" max-width="220">user_song_ranks キャッシュ（曲別の全ユーザー順位）を再構築します。AVERAGE ランキングが空になっている場合に実行してください</v-tooltip>
               </div>
 
               <!-- 譜面プロファイルDB投入 -->
-              <div class="relative group">
+              <div>
                 <input ref="profileFileInput" type="file" accept=".json" class="hidden" @change="onProfileFileSelected" />
-                <button
-                  @click="handleImportChartProfiles"
+                <v-btn
                   :disabled="isImportingProfiles"
                   class="admin-tool-btn bg-cyan-100 hover:bg-cyan-200 text-cyan-700 dark:bg-cyan-900/50 dark:hover:bg-cyan-800/80 dark:text-cyan-300"
+                  @click="handleImportChartProfiles"
                 >
-                  <svg v-if="isImportingProfiles" class="animate-spin h-4 w-4 text-cyan-700 dark:text-cyan-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <v-progress-circular v-if="isImportingProfiles" size="16" width="2" color="cyan" />
                   <span v-else aria-hidden="true">📁</span>
                   {{ isImportingProfiles ? 'インポート中...' : '譜面プロファイルDB投入' }}
-                </button>
-                <div class="admin-tooltip">JSONファイルを選択して譜面プロファイルをDBに登録します。export_profiles.pyで生成したファイルを使用してください</div>
+                </v-btn>
+                <v-tooltip activator="parent" location="bottom" max-width="220">JSONファイルを選択して譜面プロファイルをDBに登録します。export_profiles.pyで生成したファイルを使用してください</v-tooltip>
               </div>
 
               <!-- Push通知リセット -->
-              <div class="relative group">
-                <button
-                  @click="handleClearPushAll"
+              <div>
+                <v-btn
                   :disabled="isClearingPush"
                   class="admin-tool-btn bg-rose-100 hover:bg-rose-200 text-rose-700 dark:bg-rose-900/50 dark:hover:bg-rose-800/80 dark:text-rose-300"
+                  @click="handleClearPushAll"
                 >
-                  <svg v-if="isClearingPush" class="animate-spin h-4 w-4 text-rose-700 dark:text-rose-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  <v-progress-circular v-if="isClearingPush" size="16" width="2" color="pink" />
                   <span v-else aria-hidden="true">🔔</span>
                   {{ isClearingPush ? '処理中...' : 'Push通知リセット' }}
-                </button>
-                <div class="admin-tooltip">全ユーザーのプッシュ通知設定を削除します。VAPIDキーを変更した際に実行してください</div>
+                </v-btn>
+                <v-tooltip activator="parent" location="bottom" max-width="220">全ユーザーのプッシュ通知設定を削除します。VAPIDキーを変更した際に実行してください</v-tooltip>
               </div>
             </div>
-          </div>
+          </v-card>
         </div>
 
         <div class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900/50">
           <div v-if="loading" class="flex flex-col items-center justify-center p-12">
-            <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <v-progress-circular size="32" width="4" class="mb-4" />
             <p class="text-slate-500 font-medium tracking-wide">ユーザー一覧を取得中...</p>
           </div>
-          <div v-else-if="error" class="bg-red-50 text-red-700 p-4 rounded-md border border-red-200 mb-4">
+          <v-alert v-else-if="error" type="error" class="mb-4">
             {{ error }}
-          </div>
+          </v-alert>
 
-          <div v-if="recalculateError" class="bg-red-50 text-red-700 p-4 rounded-md border border-red-200 mb-4">
+          <v-alert v-if="recalculateError" type="error" class="mb-4">
             {{ recalculateError }}
-          </div>
-          <div v-if="recalculateSuccess" class="bg-green-50 text-green-700 p-4 rounded-md border border-green-200 mb-4">
+          </v-alert>
+          <v-alert v-if="recalculateSuccess" type="success" class="mb-4">
             {{ recalculateSuccess }}
-          </div>
+          </v-alert>
 
           <div v-if="!loading && !error" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div 
-              v-for="u in users" 
-              :key="u.id" 
+            <v-card
+              v-for="u in users"
+              :key="u.id"
+              class="p-4 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group"
               @click="selectUser(u)"
-              class="bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-all group"
             >
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold shrink-0">
@@ -143,18 +143,17 @@
                   <span class="font-bold text-slate-800 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ u.displayName || '名無し' }}</span>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ u.iidxId }}</span>
-                    <span v-if="u.danRank" class="px-1.5 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold rounded">{{ u.danRank }}</span>
-                    <span v-if="u.arenaRank" class="px-1.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold rounded">{{ u.arenaRank }}</span>
+                    <v-chip v-if="u.danRank" label size="x-small" variant="flat" class="px-1.5 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold">{{ u.danRank }}</v-chip>
+                    <v-chip v-if="u.arenaRank" label size="x-small" variant="flat" class="px-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] font-bold">{{ u.arenaRank }}</v-chip>
                   </div>
                 </div>
               </div>
-            </div>
+            </v-card>
           </div>
         </div>
 
-      </div>
-    </div>
-  </Teleport>
+    </v-card>
+  </v-dialog>
   <AdminGameDataModal :isOpen="showGameDataModal" @close="showGameDataModal = false" />
   <AdminSupportChatModal
     :isOpen="showSupportModal"
@@ -185,6 +184,7 @@ import { useGameData } from '../composables/useGameData';
 import { useSupportChat } from '../composables/useSupportChat';
 import AdminGameDataModal from './AdminGameDataModal.vue';
 import AdminSupportChatModal from './AdminSupportChatModal.vue';
+import { mdiAccountGroupOutline, mdiClose, mdiMessageProcessingOutline } from '@mdi/js';
 
 const { songDataBody: songDataRef, diffTableRanks: diffTableRef } = useGameData();
 /** 再集計 API に POST する生データ（body プロパティ付きの曲データ）。 */
@@ -452,41 +452,5 @@ const handleClearPushAll = async () => {
 .admin-tool-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* ツールチップ (ツールバーが上部にあるためボタンの下側に表示) */
-.admin-tooltip {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  width: 220px;
-  padding: 6px 10px;
-  background: #1e293b;
-  color: #e2e8f0;
-  font-size: 12px;
-  font-weight: normal;
-  line-height: 1.5;
-  border-radius: 8px;
-  white-space: normal;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 200;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-.admin-tooltip::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 12px;
-  border: 5px solid transparent;
-  border-bottom-color: #1e293b;
-}
-
-.group:hover .admin-tooltip {
-  opacity: 1;
-  transform: translateY(0);
 }
 </style>

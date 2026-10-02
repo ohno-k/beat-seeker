@@ -33,6 +33,7 @@ import type { PastBest } from '../composables/usePastScores';
 import RankIcon from './RankIcon.vue';
 import DifficultyRankingModal from './DifficultyRankingModal.vue';
 import RankGrowthChartModal from './RankGrowthChartModal.vue';
+import { mdiClose, mdiCheckDecagramOutline, mdiTrendingUp } from '@mdi/js';
 
 const props = defineProps<{
   scores: ScoreRecord[];
@@ -474,28 +475,32 @@ const openGrowth = (data: FolderRow) => {
 </script>
 
 <template>
-  <div class="w-full bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden mt-6 animate-fade-in flex flex-col transition-colors duration-200">
+  <v-card class="w-full bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden mt-6 animate-fade-in flex flex-col transition-colors duration-200">
     <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex max-sm:flex-col sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-800/50 transition-colors duration-200">
       <h3 class="font-bold text-slate-800 dark:text-slate-100 text-lg flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 dark:text-indigo-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
         </svg>
         {{ t('table.unofficialSummary') }}
-        <div class="relative">
-          <button
-            @click.stop="showInfo = !showInfo"
-            :aria-label="t('table.aboutSummary')"
-            :aria-expanded="showInfo"
-            class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px] font-bold flex items-center justify-center transition-colors"
-            :title="t('table.aboutSummary')"
-          >?</button>
-          <div
-            v-if="showInfo"
-            class="absolute z-20 top-7 -left-16 sm:left-0 w-[280px] sm:w-72 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
+        <v-menu v-model="showInfo" :close-on-content-click="false" location="bottom start">
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              icon
+              variant="flat"
+              :aria-label="t('table.aboutSummary')"
+              :title="t('table.aboutSummary')"
+              class="w-5 h-5 min-w-0 bg-slate-200 dark:bg-slate-600 hover:bg-indigo-200 dark:hover:bg-indigo-700 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[10px]"
+            >?</v-btn>
+          </template>
+          <v-card
+            class="w-[280px] sm:w-72 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 shadow-xl p-4 text-xs text-slate-700 dark:text-slate-300 font-normal"
           >
             <div class="flex items-center justify-between mb-2">
                <span class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ t('table.aboutFolderRank') }}</span>
-              <button @click="showInfo = false" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-base leading-none">×</button>
+              <v-btn icon variant="text" size="x-small" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="showInfo = false">
+                <v-icon :icon="mdiClose" size="16" />
+              </v-btn>
             </div>
             <p class="mb-2 text-slate-600 dark:text-slate-400">{{ t('table.folderRankExplanation') }}</p>
             <div class="border-t border-slate-100 dark:border-slate-700 pt-2 mt-2 space-y-1">
@@ -506,37 +511,37 @@ const openGrowth = (data: FolderRow) => {
               <p class="font-bold text-slate-700 dark:text-slate-200 mt-2">{{ t('table.paleIconCriteria') }}</p>
               <p>{{ t('table.paleIconExplanation') }}</p>
             </div>
-            <button
+            <v-btn
+              block
+              color="indigo"
+              size="small"
+              class="mt-3 text-xs"
               @click.stop="showRateTable = true; showInfo = false"
-              class="mt-3 w-full py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-lg transition-colors"
-            >{{ t('table.viewRateTable') }}</button>
-          </div>
-        </div>
+            >{{ t('table.viewRateTable') }}</v-btn>
+          </v-card>
+        </v-menu>
       </h3>
       <!-- 公式難易度での絞り込み（すべて / ☆11 / ☆12） -->
       <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
         <span class="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('table.filterLevelLabel') }}</span>
-        <div
+        <v-btn-toggle
+          v-model="levelFilter"
+          mandatory
+          color="indigo"
           role="group"
           :aria-label="t('table.filterLevelLabel')"
-          class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/50"
         >
-          <button
+          <v-btn
             v-for="opt in levelFilterOptions"
             :key="opt.value"
-            type="button"
-            @click="levelFilter = opt.value"
+            :value="opt.value"
+            size="small"
             :aria-pressed="levelFilter === opt.value"
-            class="px-3 py-1 text-xs font-bold rounded-md whitespace-nowrap transition-colors"
-            :class="levelFilter === opt.value
-              ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-          >{{ opt.label }}</button>
-        </div>
+            class="text-xs whitespace-nowrap"
+          >{{ opt.label }}</v-btn>
+        </v-btn-toggle>
       </div>
     </div>
-    <!-- Click-outside backdrop for info tooltip -->
-    <div v-if="showInfo" class="fixed inset-0 z-10" @click="showInfo = false"></div>
 
     <!-- Difficulty Ranking Modal -->
     <DifficultyRankingModal
@@ -556,20 +561,19 @@ const openGrowth = (data: FolderRow) => {
     />
 
     <!-- Rate Table Modal -->
-    <Teleport to="body">
-      <div v-if="showRateTable" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showRateTable = false"></div>
-        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 w-full max-w-[95vw] max-h-[90vh] flex flex-col">
+    <v-dialog v-model="showRateTable" max-width="95vw" width="auto">
+        <v-card class="bg-white dark:bg-slate-800 shadow-xl border-slate-200 dark:border-slate-700 max-h-[90vh] flex flex-col">
           <!-- Header -->
           <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 shrink-0">
             <div>
               <h3 class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100">{{ t('table.rateTableTitle') }}</h3>
             </div>
-            <button @click="showRateTable = false" aria-label="閉じる" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-500 dark:text-slate-400 font-bold text-sm flex items-center justify-center transition-colors shrink-0 ml-2">×</button>
+            <v-btn icon variant="tonal" size="small" aria-label="閉じる" class="shrink-0 ml-2" @click="showRateTable = false">
+              <v-icon :icon="mdiClose" size="18" />
+            </v-btn>
           </div>
           <!-- Scrollable table -->
-          <div class="overflow-auto flex-1">
-            <table class="text-[10px] sm:text-xs border-collapse">
+          <v-table class="flex-1 min-h-0 bg-transparent text-[10px] sm:text-xs [&_table]:border-collapse" style="--v-table-row-height: auto; --v-table-header-height: auto">
               <thead class="sticky top-0 z-20">
                 <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
                   <th scope="col" class="py-1.5 px-2 text-left font-bold sticky left-0 z-30 bg-slate-100 dark:bg-slate-900 min-w-[80px] sm:min-w-[110px]">{{ t('table.colRank') }}</th>
@@ -582,11 +586,9 @@ const openGrowth = (data: FolderRow) => {
                   <td v-for="(rate, i) in row.rates" :key="i" class="py-1 px-1 sm:px-2 text-center font-mono whitespace-nowrap" :class="rate.color">{{ rate.text }}</td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+          </v-table>
+        </v-card>
+    </v-dialog>
     
     <!-- フォルダ一覧。段組みと列の出し分けはこの要素の幅で決まる（<style> のコンテナクエリ）。 -->
     <div class="udt-list text-slate-700 dark:text-slate-200">
@@ -667,29 +669,31 @@ const openGrowth = (data: FolderRow) => {
 
           <!-- ランキング / 成長記録（横幅があるときは行内、狭いときは開いた中のボタン） -->
           <div class="a-actions items-center justify-end gap-1">
-            <button
-              type="button"
-              @click.stop="openRanking(data)"
+            <v-btn
+              icon
+              variant="outlined"
+              size="x-small"
+              rounded="md"
               :title="t('table.viewDifficultyRanking')"
               :aria-label="t('table.viewDifficultyRanking')"
-              class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 transition-colors"
+              class="w-7 h-7 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-700"
+              @click.stop="openRanking(data)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
-            </button>
-            <button
+              <v-icon :icon="mdiCheckDecagramOutline" size="16" />
+            </v-btn>
+            <v-btn
               v-if="canOpenGrowth(data)"
-              type="button"
-              @click.stop="openGrowth(data)"
+              icon
+              variant="outlined"
+              size="x-small"
+              rounded="md"
               :title="t('table.viewGrowthChart')"
               :aria-label="t('table.viewGrowthChart')"
-              class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-700 transition-colors"
+              class="w-7 h-7 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-700"
+              @click.stop="openGrowth(data)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 17l5-5 4 4 7-7M14 9h6v6" />
-              </svg>
-            </button>
+              <v-icon :icon="mdiTrendingUp" size="16" />
+            </v-btn>
           </div>
 
           <svg xmlns="http://www.w3.org/2000/svg" class="a-chev h-4 w-4 text-slate-400 dark:text-slate-500 transform transition-transform duration-200 group-hover:text-blue-600 dark:group-hover:text-blue-400" :class="{ 'rotate-180 text-blue-600 dark:text-blue-400': expandedRanks.has(data.rank) }" viewBox="0 0 20 20" fill="currentColor">
@@ -720,26 +724,23 @@ const openGrowth = (data: FolderRow) => {
 
             <div class="flex flex-wrap items-center gap-2">
               <div class="panel-actions items-center gap-2">
-                <button type="button" @click="openRanking(data)" class="panel-btn text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50">
+                <v-btn variant="outlined" size="small" class="text-[11px] text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50" @click="openRanking(data)">
                   {{ t('table.difficultyRankingTitle') }}
-                </button>
-                <button v-if="canOpenGrowth(data)" type="button" @click="openGrowth(data)" class="panel-btn text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50">
+                </v-btn>
+                <v-btn v-if="canOpenGrowth(data)" variant="outlined" size="small" class="text-[11px] text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50" @click="openGrowth(data)">
                   {{ t('table.growthChartTitle') }}
-                </button>
+                </v-btn>
               </div>
-              <div role="group" :aria-label="t('report.sortLabel')" class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/50">
-                <button
+              <v-btn-toggle v-model="songSort" mandatory role="group" :aria-label="t('report.sortLabel')">
+                <v-btn
                   v-for="opt in songSortOptions"
                   :key="opt.value"
-                  type="button"
-                  @click="songSort = opt.value"
+                  :value="opt.value"
+                  size="small"
                   :aria-pressed="songSort === opt.value"
-                  class="px-2.5 py-1 text-[11px] font-bold rounded-md whitespace-nowrap transition-colors"
-                  :class="songSort === opt.value
-                    ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                >{{ opt.label }}</button>
-              </div>
+                  class="text-[11px] whitespace-nowrap"
+                >{{ opt.label }}</v-btn>
+              </v-btn-toggle>
             </div>
           </div>
 
@@ -749,7 +750,7 @@ const openGrowth = (data: FolderRow) => {
             <span>{{ t('table.allTimeLegend', { n: data.allTimeCount }) }}</span>
           </p>
 
-          <ul class="song-list card mt-2.5 overflow-hidden transition-colors duration-200">
+          <v-card tag="ul" class="song-list mt-2.5 overflow-hidden bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 transition-colors duration-200">
             <template v-for="(entry, i) in data.songRows" :key="entry.key">
               <li v-if="entry.avgBefore" class="avg-divider text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-900/20 border-b border-b-slate-100 dark:border-b-slate-700/60">
                 <span class="h-px flex-1 bg-blue-200 dark:bg-blue-800"></span>
@@ -789,7 +790,7 @@ const openGrowth = (data: FolderRow) => {
                 </span>
               </li>
             </template>
-          </ul>
+          </v-card>
         </div>
       </div>
 
@@ -797,7 +798,7 @@ const openGrowth = (data: FolderRow) => {
         {{ t('table.noUnofficialData') }}
       </p>
     </div>
-  </div>
+  </v-card>
 </template>
 
 <style scoped>

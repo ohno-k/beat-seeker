@@ -1,39 +1,29 @@
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-[110] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200">
+  <v-dialog
+    :model-value="true"
+    fullscreen
+    @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+  >
+    <v-card rounded="0" class="h-full border-0 bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-200">
       <!-- ヘッダー（タイトル + ×閉じる） -->
       <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 transition-colors duration-200">
         <div>
           <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('beatTierInfo.title') }}</h3>
           <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-0.5">{{ t('beatTierInfo.subtitle') }}</p>
         </div>
-        <button @click="$emit('close')" class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all">
-          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <v-btn icon variant="text" class="text-slate-400 dark:text-slate-500" aria-label="close" @click="$emit('close')">
+          <v-icon :icon="mdiClose" />
+        </v-btn>
       </div>
 
       <!-- 本体スクロール領域 -->
       <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50 transition-colors duration-200">
         <!-- タブ切替（解説 / 対象曲一覧） -->
         <div class="px-8 pt-6 sticky top-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md z-10 transition-colors duration-200">
-          <div class="flex border-b border-slate-200 dark:border-slate-700 gap-8">
-            <button 
-              @click="activeTab = 'about'" 
-              :class="['pb-4 text-sm font-bold transition-all relative', activeTab === 'about' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300']"
-            >
-              {{ t('beatTierInfo.tabAbout') }}
-              <div v-if="activeTab === 'about'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
-            </button>
-            <button 
-              @click="activeTab = 'songs'" 
-              :class="['pb-4 text-sm font-bold transition-all relative', activeTab === 'songs' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300']"
-            >
-              {{ t('beatTierInfo.tabSongs') }}
-              <div v-if="activeTab === 'songs'" class="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 dark:bg-blue-500 rounded-full"></div>
-            </button>
-          </div>
+          <v-tabs v-model="activeTab" class="border-b border-slate-200 dark:border-slate-700">
+            <v-tab value="about" class="text-sm font-bold">{{ t('beatTierInfo.tabAbout') }}</v-tab>
+            <v-tab value="songs" class="text-sm font-bold">{{ t('beatTierInfo.tabSongs') }}</v-tab>
+          </v-tabs>
         </div>
 
         <div class="p-4 sm:p-8">
@@ -69,7 +59,7 @@
                   <span class="w-1.5 h-6 bg-purple-600 dark:bg-purple-500 rounded-full"></span>
                   {{ t('beatTierInfo.rankBoardTitle') }}
                 </h4>
-                <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded transition-colors duration-200">Hierarchy</div>
+                <v-chip label class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Hierarchy</v-chip>
               </div>
 
               <!-- Premium Dark/Light Grid for Ranks -->
@@ -110,14 +100,12 @@
                             <div class="relative transition-all duration-300">
                               <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
                               <!-- Hover Tooltip -->
-                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white p-3 rounded-md text-xs whitespace-nowrap z-30 pointer-events-none transition-all shadow-xl">
+                              <v-tooltip activator="parent" content-class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white p-3 rounded-md text-xs whitespace-nowrap shadow-xl">
                                 <div class="flex flex-col items-center gap-1">
                                   <span class="font-bold text-blue-600 dark:text-blue-400 text-sm">{{ name }} {{ 6 - tier }}</span>
                                   <span class="font-bold text-slate-600 dark:text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
                                 </div>
-                                <!-- Tooltip Arrow -->
-                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-white dark:bg-slate-900 border-r border-b border-slate-200 dark:border-slate-700 rotate-45"></div>
-                              </div>
+                              </v-tooltip>
                             </div>
                             <div class="mt-3 xl:mt-3 ml-0 xl:ml-0 flex flex-col items-center gap-1 min-w-[3rem]">
                               <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ 6 - tier }}</p>
@@ -145,21 +133,17 @@
           <!-- 対象曲一覧タブ（難易度ごとに weight と曲リスト） -->
           <div v-else class="space-y-6 animate-fade-in h-full flex flex-col">
             <div class="flex flex-col sm:flex-row gap-4">
-              <div class="relative flex-1">
-                <input 
-                  v-model="songSearch" 
-                  type="text" 
-                  :placeholder="t('beatTierInfo.songSearchPlaceholder')"
-                  class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md text-sm font-medium focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
-                />
-                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
+              <v-text-field
+                v-model="songSearch"
+                type="text"
+                :placeholder="t('beatTierInfo.songSearchPlaceholder')"
+                :prepend-inner-icon="mdiMagnify"
+                class="flex-1 text-sm"
+              />
             </div>
 
             <div class="space-y-4">
-              <div v-for="group in filteredSongGroups" :key="group.rank" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+              <v-card v-for="group in filteredSongGroups" :key="group.rank" class="overflow-hidden transition-colors duration-200">
                 <div class="px-5 py-3 bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
                   <div class="flex items-center gap-2">
                     <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t('beatTierInfo.unofficialDifficulty') }}</span>
@@ -181,7 +165,7 @@
                     {{ song }}
                   </div>
                 </div>
-              </div>
+              </v-card>
               <div v-if="filteredSongGroups.length === 0" class="py-20 text-center text-slate-400 dark:text-slate-500 font-bold">
                 {{ t('beatTierInfo.noSongsFound') }}
               </div>
@@ -196,8 +180,8 @@
           {{ t('beatTierInfo.footerDesc') }} • {{ todayLabel }}
         </p>
       </div>
-    </div>
-  </Teleport>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
@@ -212,6 +196,7 @@
  *  - close: ×ボタンで閉じる
  */
 import { ref, computed } from 'vue';
+import { mdiClose, mdiMagnify } from '@mdi/js';
 import { useI18n } from '../composables/useI18n';
 import { WEIGHTS, getGroupedRanks } from '../utils/beatTier';
 import { diffTable as diffTableRanksRef } from '../composables/useGameData';

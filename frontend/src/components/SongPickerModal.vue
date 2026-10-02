@@ -9,6 +9,7 @@
  * や祖先要素の transform/filter 等で fixed の包含ブロックがずれるのを回避し、画面全体に
  * オーバーレイされる。
  */
+import { mdiClose } from '@mdi/js';
 import { ref, computed, watch } from 'vue';
 import strategySongs from '../data/strategy_card_songs.json';
 
@@ -87,84 +88,75 @@ const pickSong = (h: Hit) => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      v-if="open"
-      class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      @click.self="emit('close')"
-    >
-      <div class="w-full max-w-3xl bg-white dark:bg-slate-800 rounded-md shadow-xl flex flex-col max-h-[85vh] overflow-hidden">
-        <!-- ヘッダ -->
-        <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <p class="text-sm font-bold">曲を選択</p>
-          <button
-            type="button"
-            @click="emit('close')"
-            class="px-2 py-1 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-200"
-          >×</button>
-        </div>
+  <v-dialog
+    :model-value="open"
+    max-width="768"
+    @update:model-value="(v: boolean) => { if (!v) emit('close') }"
+  >
+    <v-card class="w-full flex flex-col max-h-[85vh] overflow-hidden">
+      <!-- ヘッダ -->
+      <div class="px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+        <p class="text-sm font-bold">曲を選択</p>
+        <v-btn icon variant="text" size="small" aria-label="close" class="text-slate-500" @click="emit('close')">
+          <v-icon :icon="mdiClose" />
+        </v-btn>
+      </div>
 
-        <!-- フィルタ -->
-        <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-700 space-y-2 bg-slate-50 dark:bg-slate-900/40">
-          <!-- Lv -->
-          <div class="flex flex-wrap gap-1 items-center text-xs">
-            <span class="text-[10px] font-mono text-slate-400 w-16">Lv</span>
-            <button
-              type="button"
-              @click="levelFilter = 'ALL'"
-              class="px-2 py-1 rounded font-bold transition-colors"
-              :class="levelFilter === 'ALL'
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'"
-            >全て</button>
-            <button
+      <!-- フィルタ -->
+      <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-700 space-y-2 bg-slate-50 dark:bg-slate-900/40">
+        <!-- Lv -->
+        <div class="flex flex-wrap gap-1 items-center text-xs">
+          <span class="text-[10px] font-mono text-slate-400 w-16">Lv</span>
+          <v-btn-toggle v-model="levelFilter" mandatory class="flex-wrap h-auto">
+            <v-btn value="ALL" size="small" class="text-xs">全て</v-btn>
+            <v-btn
               v-for="lv in ALL_LEVELS"
               :key="lv"
-              type="button"
-              @click="levelFilter = lv"
-              class="px-2 py-1 rounded font-bold transition-colors"
-              :class="levelFilter === lv
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600'"
-            >Lv {{ lv }}</button>
-          </div>
-          <!-- 検索 -->
-          <input
-            v-model="search"
-            type="text"
-            placeholder="曲タイトルで絞り込み (部分一致)"
-            class="w-full px-3 py-1.5 text-sm rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400"
-          />
+              :value="lv"
+              size="small"
+              class="text-xs"
+            >Lv {{ lv }}</v-btn>
+          </v-btn-toggle>
         </div>
+        <!-- 検索 -->
+        <v-text-field
+          v-model="search"
+          type="text"
+          placeholder="曲タイトルで絞り込み (部分一致)"
+          class="w-full text-sm"
+        />
+      </div>
 
-        <!-- リスト -->
-        <div class="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/60">
-          <p
-            v-if="filteredSongs.hits.length === 0"
-            class="px-5 py-10 text-center text-sm text-slate-400 italic"
-          >該当する曲がありません</p>
-          <button
+      <!-- リスト -->
+      <div class="flex-1 overflow-y-auto">
+        <p
+          v-if="filteredSongs.hits.length === 0"
+          class="px-5 py-10 text-center text-sm text-slate-400 italic"
+        >該当する曲がありません</p>
+        <v-list v-else density="compact" class="py-0 divide-y divide-slate-100 dark:divide-slate-700/60">
+          <v-list-item
             v-for="h in filteredSongs.hits"
             :key="`${h.genre}-${h.strategyId}`"
-            type="button"
-            @click="pickSong(h)"
-            class="w-full text-left px-5 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors flex items-baseline gap-3"
+            class="px-5 py-2"
             :class="currentTitle === h.title ? 'bg-blue-50 dark:bg-blue-900/20' : ''"
+            @click="pickSong(h)"
           >
-            <span class="shrink-0 text-[10px] font-mono text-slate-400 tabular-nums w-12 text-right">#{{ h.strategyId }}</span>
-            <span class="flex-1 min-w-0">
-              <p class="font-bold text-sm truncate">{{ h.title }}</p>
-              <p class="text-[10px] font-mono text-slate-400 mt-0.5">
-                {{ h.version }} · {{ h.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }} · Lv {{ h.level }}
-              </p>
-            </span>
-          </button>
-          <p
-            v-if="filteredSongs.overflow"
-            class="px-5 py-3 text-center text-[11px] text-slate-400 italic border-t border-slate-100 dark:border-slate-700/60"
-          >該当多数 ({{ MAX_RESULTS }} 件まで表示)。さらに絞り込んでください。</p>
-        </div>
+            <div class="flex items-baseline gap-3">
+              <span class="shrink-0 text-[10px] font-mono text-slate-400 tabular-nums w-12 text-right">#{{ h.strategyId }}</span>
+              <span class="flex-1 min-w-0">
+                <p class="font-bold text-sm truncate">{{ h.title }}</p>
+                <p class="text-[10px] font-mono text-slate-400 mt-0.5">
+                  {{ h.version }} · {{ h.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }} · Lv {{ h.level }}
+                </p>
+              </span>
+            </div>
+          </v-list-item>
+        </v-list>
+        <p
+          v-if="filteredSongs.overflow"
+          class="px-5 py-3 text-center text-[11px] text-slate-400 italic border-t border-slate-100 dark:border-slate-700/60"
+        >該当多数 ({{ MAX_RESULTS }} 件まで表示)。さらに絞り込んでください。</p>
       </div>
-    </div>
-  </Teleport>
+    </v-card>
+  </v-dialog>
 </template>

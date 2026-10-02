@@ -15,6 +15,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { useLeague } from '../composables/useLeague';
 import DivisionIcon from './DivisionIcon.vue';
+import { mdiClose, mdiCheck, mdiArrowRight } from '@mdi/js';
 
 const emit = defineEmits<{ (e: 'close'): void; (e: 'joined'): void }>();
 
@@ -215,28 +216,29 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
 </script>
 
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-[110] flex items-center justify-center p-4 animate-fade-in">
-      <!-- 背景オーバーレイ（クリックで閉じる） -->
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="$emit('close')"></div>
-
+  <v-dialog
+    :model-value="true"
+    @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+    max-width="672"
+  >
       <!-- 本体パネル -->
-      <div class="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden transition-colors duration-200">
+      <v-card class="max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl overflow-hidden transition-colors duration-200">
         <!-- ヘッダー -->
-        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+        <v-card-title class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('league.infoModal.title') }}</h3>
-          <button
-            class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all"
+          <v-btn
+            icon
+            variant="text"
+            size="small"
+            class="text-slate-400 dark:text-slate-500"
             @click="$emit('close')"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </v-card-title>
 
         <!-- 本文（スクロール領域） -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
 
           <!-- 1. 概要 + 流れ図 -->
           <section>
@@ -620,17 +622,14 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
               </li>
             </ul>
           </section>
-        </div>
+        </v-card-text>
 
         <!-- フッター（参加導線 + 参加締切の注記） -->
         <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700/50 space-y-3">
           <!-- いつから参戦できるか（毎週 月曜 0:00 締切 → 12:00 開始）の注記 -->
-          <p class="flex items-start gap-2 text-xs leading-relaxed text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-lg px-3 py-2">
-            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-            </svg>
-            <span>{{ t('league.infoModal.signupNote') }}</span>
-          </p>
+          <v-alert type="warning" class="text-xs leading-relaxed text-amber-800 dark:text-amber-300 rounded-lg px-3 py-2">
+            {{ t('league.infoModal.signupNote') }}
+          </v-alert>
 
           <div class="flex items-center justify-end gap-2 flex-wrap">
             <span v-if="joinError" class="text-xs text-red-500 mr-auto">{{ joinError }}</span>
@@ -638,37 +637,38 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
             <!-- 参加できない理由（一時措置: 過去作スコアが無い等）。未参加でボタンが無効なときだけ出す。 -->
             <span v-else-if="!joined && joinBlockedText" class="text-xs text-red-500 mr-auto">{{ joinBlockedText }}</span>
 
-            <button
-              class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-semibold transition-colors"
+            <v-btn
+              variant="tonal"
+              class="text-sm font-semibold"
               @click="$emit('close')"
-            >{{ t('league.infoModal.close') }}</button>
+            >{{ t('league.infoModal.close') }}</v-btn>
 
             <!-- 参加済み: 緑のチェック表示 -->
-            <span
+            <v-chip
               v-if="joined"
-              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-bold"
+              size="large"
+              label
+              color="success"
+              variant="tonal"
+              :prepend-icon="mdiCheck"
+              class="text-sm font-bold"
             >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
               {{ t('league.infoModal.joined') }}
-            </span>
+            </v-chip>
 
             <!-- 未参加: 参加ボタン -->
-            <button
+            <v-btn
               v-else
+              color="indigo"
               :disabled="!isLoggedIn || joining || !!joinBlockedText"
-              class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              :prepend-icon="joining ? undefined : mdiArrowRight"
+              class="px-5 text-sm font-bold"
               @click="doJoin"
             >
-              <svg v-if="!joining" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
               {{ joining ? t('league.infoModal.joining') : t('league.infoModal.join') }}
-            </button>
+            </v-btn>
           </div>
         </div>
-      </div>
-    </div>
-  </Teleport>
+      </v-card>
+  </v-dialog>
 </template>

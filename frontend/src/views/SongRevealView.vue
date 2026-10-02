@@ -35,6 +35,7 @@ import { useSe } from '../composables/useSe';
 import { KIND_LABEL_JA, LEVELS_FOR_KIND } from '../composables/competitionMatchKinds';
 import { formatJstDateTime } from '../utils/jstTime';
 import { buildChartIndex, resolveChartByTitle } from '../utils/songTitleMatch';
+import { mdiClose, mdiMagnify, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js';
 
 const { songDataBody, fetchGameData } = useGameData();
 const { competitions, fetchCompetitions, fetchRevealData } = useCompetitionAdmin();
@@ -868,6 +869,8 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
 
 <template>
   <div class="song-reveal-view min-h-screen w-full bg-slate-950 text-white relative overflow-hidden">
+    <!-- このページはアプリのテーマに関係なく常に暗い配色なので、Vuetify 部品も dark テーマで描く。 -->
+    <v-theme-provider theme="dark">
     <!-- 共通の背景 -->
     <div class="absolute inset-0 pointer-events-none">
       <div class="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950"></div>
@@ -881,20 +884,18 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
         @click.stop
         class="flex items-center px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 backdrop-blur shadow-lg"
       >
-        <button
+        <v-btn
           type="button"
+          icon
+          variant="text"
+          size="small"
           @click.stop="se.toggleMuted()"
-          class="text-slate-300 hover:text-white transition-colors"
+          class="text-slate-300 hover:text-white"
           :aria-label="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
           :title="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
         >
-          <svg v-if="!se.muted.value" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9z" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9zM17 9l4 4m0-4l-4 4" />
-          </svg>
-        </button>
+          <v-icon :icon="se.muted.value ? mdiVolumeOff : mdiVolumeHigh" />
+        </v-btn>
       </div>
     </div>
 
@@ -907,140 +908,156 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
           </h1>
           <p class="text-slate-400 mt-2 text-sm tracking-widest uppercase">選曲発表演出 (2 曲対応 / 左右分割)</p>
         </div>
-        <button
+        <v-btn
           type="button"
           @click="openImportModal"
-          class="px-4 py-2 rounded-xl text-xs font-black tracking-widest uppercase bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-500 text-white hover:shadow-lg transition-all"
+          class="px-4 rounded-xl text-xs font-black tracking-widest uppercase bg-gradient-to-r from-violet-500 via-fuchsia-500 to-amber-500 text-white hover:shadow-lg"
           title="主催権限でログイン中の場合のみ動作"
         >
           📥 大会から取り込み
-        </button>
+        </v-btn>
       </div>
 
       <!-- プレイヤー名 (自由入力。REVEAL 時に各半面の上部に表示) -->
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block text-[10px] font-mono text-cyan-300 tracking-[0.3em] mb-1">LEFT PLAYER</label>
-          <input
+          <v-text-field
             v-model="leftPlayer"
             type="text"
             maxlength="40"
             placeholder="プレイヤー名を入力"
-            class="w-full px-4 py-3 bg-slate-900/70 border-2 border-white/10 focus:border-cyan-400 rounded-xl text-white placeholder-slate-500 outline-none transition-colors"
+            density="comfortable"
+            color="cyan-accent-2"
+            bg-color="rgba(15, 23, 42, 0.7)"
+            rounded="xl"
+            class="w-full text-white"
           />
         </div>
         <div>
           <label class="block text-[10px] font-mono text-amber-300 tracking-[0.3em] mb-1">RIGHT PLAYER</label>
-          <input
+          <v-text-field
             v-model="rightPlayer"
             type="text"
             maxlength="40"
             placeholder="プレイヤー名を入力"
-            class="w-full px-4 py-3 bg-slate-900/70 border-2 border-white/10 focus:border-amber-400 rounded-xl text-white placeholder-slate-500 outline-none transition-colors"
+            density="comfortable"
+            color="amber-lighten-1"
+            bg-color="rgba(15, 23, 42, 0.7)"
+            rounded="xl"
+            class="w-full text-white"
           />
         </div>
       </div>
 
       <!-- スロット 2 つ (Left / Right) と Active 切替 -->
       <div class="grid grid-cols-2 gap-3">
-        <button
+        <v-card
+          tag="button"
           type="button"
           @click="activeSide = 'left'"
-          class="text-left rounded-2xl border-2 p-4 transition-all"
+          class="text-left rounded-2xl border-2 p-4 transition-all text-white"
           :class="activeSide === 'left'
             ? 'border-cyan-400 bg-gradient-to-br from-slate-900 to-cyan-950/40 shadow-lg shadow-cyan-500/20'
             : 'border-white/10 bg-slate-900/50 hover:border-white/20'"
         >
           <div class="flex items-center justify-between mb-2">
             <p class="text-[10px] font-mono text-cyan-300 tracking-[0.3em]">LEFT SIDE</p>
-            <span v-if="activeSide === 'left'" class="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded bg-cyan-500/30 text-cyan-200 border border-cyan-400/50">ACTIVE</span>
+            <v-chip v-if="activeSide === 'left'" size="x-small" label variant="outlined" class="text-[9px] font-black tracking-widest uppercase px-2 bg-cyan-500/30 text-cyan-200 border-cyan-400/50">ACTIVE</v-chip>
           </div>
           <div v-if="selectedLeft" class="space-y-1">
             <p class="text-lg font-black truncate">{{ selectedLeft.title }}</p>
             <p class="text-xs text-slate-400 truncate">{{ selectedLeft.artist }}</p>
             <div class="flex items-center gap-2 mt-1">
-              <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase"
+              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase"
                 :class="selectedLeft.difficulty === '10'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-red-500/20 text-red-300 border border-red-500/40'">
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-red-500/20 text-red-300 border-red-500/40'">
                 {{ diffName(selectedLeft.difficulty) }}
-              </span>
-              <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ selectedLeft.level }}</span>
+              </v-chip>
+              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase bg-white/10 border-white/20">Lv{{ selectedLeft.level }}</v-chip>
               <span @click.stop="clearSlot('left')" class="ml-auto text-[10px] text-slate-500 hover:text-rose-400 cursor-pointer">クリア</span>
             </div>
           </div>
           <p v-else class="text-slate-500 text-sm font-mono">未選択</p>
-        </button>
+        </v-card>
 
-        <button
+        <v-card
+          tag="button"
           type="button"
           @click="activeSide = 'right'"
-          class="text-left rounded-2xl border-2 p-4 transition-all"
+          class="text-left rounded-2xl border-2 p-4 transition-all text-white"
           :class="activeSide === 'right'
             ? 'border-amber-400 bg-gradient-to-br from-slate-900 to-amber-950/40 shadow-lg shadow-amber-500/20'
             : 'border-white/10 bg-slate-900/50 hover:border-white/20'"
         >
           <div class="flex items-center justify-between mb-2">
             <p class="text-[10px] font-mono text-amber-300 tracking-[0.3em]">RIGHT SIDE</p>
-            <span v-if="activeSide === 'right'" class="text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded bg-amber-500/30 text-amber-200 border border-amber-400/50">ACTIVE</span>
+            <v-chip v-if="activeSide === 'right'" size="x-small" label variant="outlined" class="text-[9px] font-black tracking-widest uppercase px-2 bg-amber-500/30 text-amber-200 border-amber-400/50">ACTIVE</v-chip>
           </div>
           <div v-if="selectedRight" class="space-y-1">
             <p class="text-lg font-black truncate">{{ selectedRight.title }}</p>
             <p class="text-xs text-slate-400 truncate">{{ selectedRight.artist }}</p>
             <div class="flex items-center gap-2 mt-1">
-              <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase"
+              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase"
                 :class="selectedRight.difficulty === '10'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-red-500/20 text-red-300 border border-red-500/40'">
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-red-500/20 text-red-300 border-red-500/40'">
                 {{ diffName(selectedRight.difficulty) }}
-              </span>
-              <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ selectedRight.level }}</span>
+              </v-chip>
+              <v-chip size="x-small" label variant="outlined" class="px-2 text-[9px] font-black tracking-widest uppercase bg-white/10 border-white/20">Lv{{ selectedRight.level }}</v-chip>
               <span @click.stop="clearSlot('right')" class="ml-auto text-[10px] text-slate-500 hover:text-rose-400 cursor-pointer">クリア</span>
             </div>
           </div>
           <p v-else class="text-slate-500 text-sm font-mono">未選択</p>
-        </button>
+        </v-card>
       </div>
 
       <!-- 検索 -->
-      <div class="relative">
-        <svg class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          v-model="searchQuery"
-          type="text"
-          :placeholder="`${activeSide === 'left' ? 'LEFT' : 'RIGHT'} 側の曲を検索 (タイトル / アーティスト)`"
-          class="w-full pl-12 pr-4 py-4 text-lg bg-slate-900/70 border-2 border-white/10 focus:border-cyan-400 rounded-2xl text-white placeholder-slate-500 outline-none transition-colors"
-        />
-      </div>
+      <v-text-field
+        v-model="searchQuery"
+        type="text"
+        :placeholder="`${activeSide === 'left' ? 'LEFT' : 'RIGHT'} 側の曲を検索 (タイトル / アーティスト)`"
+        :prepend-inner-icon="mdiMagnify"
+        density="default"
+        color="cyan-accent-2"
+        bg-color="rgba(15, 23, 42, 0.7)"
+        rounded="xl"
+        class="w-full text-white [&_input]:text-lg"
+      />
 
       <!-- 検索結果リスト -->
-      <div v-if="searchResults.length > 0" class="bg-slate-900/50 border border-white/10 rounded-2xl overflow-hidden max-h-[45vh] overflow-y-auto custom-scrollbar">
-        <button
-          v-for="(chart, i) in searchResults"
-          :key="`${chart.title}-${chart.difficulty}-${i}`"
-          type="button"
-          @click="selectChart(chart)"
-          class="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-cyan-500/10 transition-colors border-b border-white/5 last:border-b-0"
-        >
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold truncate">{{ chart.title }}</p>
-            <p class="text-[11px] text-slate-400 truncate">{{ chart.artist }}</p>
-          </div>
-          <span
-            class="shrink-0 px-2.5 py-1 rounded text-[9px] font-black tracking-widest uppercase"
-            :class="chart.difficulty === '10'
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-              : 'bg-red-500/20 text-red-300 border border-red-500/40'"
+      <v-card v-if="searchResults.length > 0" class="bg-slate-900/50 border-white/10 rounded-2xl overflow-hidden max-h-[45vh] overflow-y-auto custom-scrollbar">
+        <v-list class="bg-transparent p-0">
+          <v-list-item
+            v-for="(chart, i) in searchResults"
+            :key="`${chart.title}-${chart.difficulty}-${i}`"
+            @click="selectChart(chart)"
+            class="px-4 py-3 text-white hover:bg-cyan-500/10 border-b border-white/5 last:border-b-0"
           >
-            {{ diffName(chart.difficulty) }}
-          </span>
-          <span class="shrink-0 px-2.5 py-1 rounded text-[9px] font-black tracking-widest uppercase bg-white/10 border border-white/20">
-            Lv{{ chart.level }}
-          </span>
-        </button>
-      </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold truncate">{{ chart.title }}</p>
+                <p class="text-[11px] text-slate-400 truncate">{{ chart.artist }}</p>
+              </div>
+              <v-chip
+                size="small"
+                label
+                variant="outlined"
+                class="shrink-0 px-2.5 text-[9px] font-black tracking-widest uppercase"
+                :class="chart.difficulty === '10'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-red-500/20 text-red-300 border-red-500/40'"
+              >
+                {{ diffName(chart.difficulty) }}
+              </v-chip>
+              <v-chip size="small" label variant="outlined" class="shrink-0 px-2.5 text-[9px] font-black tracking-widest uppercase bg-white/10 border-white/20">
+                Lv{{ chart.level }}
+              </v-chip>
+            </div>
+          </v-list-item>
+        </v-list>
+      </v-card>
       <p v-else-if="searchQuery.trim().length > 0" class="text-slate-500 text-sm font-mono text-center py-6">該当する曲が見つかりません</p>
 
       <!-- REVEAL ボタン -->
@@ -1065,32 +1082,37 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
          競技側で組まれた matchups から 1 試合を選ぶと、左右のプレイヤー名 + 自選曲が
          自動的にスロットへ流し込まれる。StrategyCard が使われていた側は
          相手の pick が strategy_card_songs プール内でランダム化される。 -->
-    <div
+    <!-- v-if は残す（直後の REVEAL 領域の v-else がこの v-if と対になっているため）。 -->
+    <v-dialog
       v-if="isImportModalOpen"
-      class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
-      @click.self="closeImportModal"
+      :model-value="true"
+      @update:model-value="(v: boolean) => { if (!v) closeImportModal() }"
+      max-width="768"
+      theme="dark"
     >
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+      <v-card class="bg-slate-900 border-slate-700 rounded-2xl max-h-[85vh] overflow-hidden flex flex-col text-white">
         <!-- ヘッダ -->
-        <div class="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
+        <v-card-title class="px-5 py-3 border-b border-slate-700 flex items-center justify-between">
           <p class="text-sm font-black tracking-widest uppercase text-cyan-300">大会から取り込み</p>
-          <button type="button" @click="closeImportModal" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
-        </div>
+          <v-btn type="button" icon variant="text" size="small" @click="closeImportModal" class="text-slate-400 hover:text-white">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </v-card-title>
 
         <!-- Step 1: 大会選択 -->
         <div v-if="!selectedImportCompetitionId" class="flex-1 overflow-y-auto">
           <p class="px-5 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500">Step 1: 大会を選ぶ</p>
-          <ul v-if="competitions.length > 0" class="divide-y divide-slate-800">
-            <li
+          <v-list v-if="competitions.length > 0" class="bg-transparent p-0 divide-y divide-slate-800">
+            <v-list-item
               v-for="c in competitions"
               :key="c.id"
-              class="px-5 py-3 hover:bg-slate-800 cursor-pointer transition-colors"
+              class="px-5 py-3 hover:bg-slate-800 text-white"
               @click="handleSelectImportCompetition(c.id)"
             >
               <p class="font-bold">{{ c.name }}</p>
               <p class="text-[11px] text-slate-400 font-mono">ID #{{ c.id }} · status: {{ c.status }} · 作成 {{ formatJstDateTime(c.createdAt) }}</p>
-            </li>
-          </ul>
+            </v-list-item>
+          </v-list>
           <p v-else class="px-5 py-8 text-center text-slate-500 text-sm">取り込める大会がありません (主催権限でログインしていることを確認してください)</p>
         </div>
 
@@ -1100,18 +1122,20 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
             <p class="text-[10px] font-mono uppercase tracking-widest text-slate-500">
               Step 2: 試合を選ぶ - <span class="text-cyan-300">{{ importRevealData?.competitionName ?? '...' }}</span>
             </p>
-            <button
+            <v-btn
               type="button"
+              variant="text"
+              size="x-small"
               @click="selectedImportCompetitionId = null; importRevealData = null"
-              class="text-[10px] text-slate-400 hover:text-white"
-            >← 大会を選び直す</button>
+              class="text-[10px] font-normal text-slate-400 hover:text-white"
+            >← 大会を選び直す</v-btn>
           </div>
           <div v-if="isImportLoading" class="px-5 py-8 text-center text-slate-500 text-sm">読み込み中…</div>
-          <ul v-else-if="importRevealData && importRevealData.matches.length > 0" class="flex-1 overflow-y-auto divide-y divide-slate-800">
-            <li
+          <v-list v-else-if="importRevealData && importRevealData.matches.length > 0" class="flex-1 overflow-y-auto bg-transparent p-0 divide-y divide-slate-800">
+            <v-list-item
               v-for="m in importRevealData.matches"
               :key="m.matchId"
-              class="px-5 py-3 hover:bg-slate-800 cursor-pointer transition-colors"
+              class="px-5 py-3 hover:bg-slate-800 text-white"
               :class="(!m.playerAPick || !m.playerBPick) ? 'opacity-50' : ''"
               @click="handleApplyMatchToReveal(m)"
             >
@@ -1137,12 +1161,12 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
                 <span v-if="m.playerBStrategyUsed" class="text-fuchsia-300">⚡ B 発動</span>
                 <span v-if="m.strategyCanceled" class="text-rose-300">相殺 (自選曲のまま)</span>
               </div>
-            </li>
-          </ul>
+            </v-list-item>
+          </v-list>
           <p v-else class="px-5 py-8 text-center text-slate-500 text-sm">この大会には試合がありません</p>
         </div>
-      </div>
-    </div>
+      </v-card>
+    </v-dialog>
 
     <!-- ========== Phase: REVEAL (左右分割) ==========
          画面のどこでもクリックで次の 1 曲ぶんのアニメを進行させる。
@@ -1447,14 +1471,18 @@ const canReveal = computed(() => !!selectedLeft.value && !!selectedRight.value);
         Reset ボタンは主催だけが押せる極小ボタンとして残す。
       -->
       <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-50">
-        <button
+        <v-btn
+          variant="outlined"
+          size="small"
+          rounded="pill"
           @click.stop="reset"
-          class="px-4 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase bg-slate-800/80 hover:bg-slate-700 border border-white/10 text-slate-300 hover:text-white backdrop-blur transition-all"
+          class="px-4 text-[10px] font-bold tracking-widest uppercase bg-slate-800/80 hover:bg-slate-700 border-white/10 text-slate-300 hover:text-white backdrop-blur"
         >
           ◀ Reset
-        </button>
+        </v-btn>
       </div>
     </div>
+    </v-theme-provider>
   </div>
 </template>
 

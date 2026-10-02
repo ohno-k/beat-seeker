@@ -16,6 +16,17 @@
 import { ref } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { useNativeBridge } from '../composables/useNativeBridge';
+import {
+  mdiCheck,
+  mdiCheckCircleOutline,
+  mdiClipboardOutline,
+  mdiClose,
+  mdiCloudDownloadOutline,
+  mdiCloudUploadOutline,
+  mdiContentCopy,
+  mdiInformationOutline,
+  mdiRefresh,
+} from '@mdi/js';
 
 const { t } = useI18n();
 const { isNativeApp, message: nativeMessage, startNativeImport } = useNativeBridge();
@@ -255,69 +266,59 @@ const copyBookmarkletCode = async () => {
   <div class="space-y-4">
 
     <!-- Result messages -->
-    <div v-if="resultError" class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-400">
+    <v-alert v-if="resultError" type="error" class="text-sm">
       {{ resultError }}
-    </div>
-    <div v-if="resultMsg" class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400 font-medium">
+    </v-alert>
+    <v-alert v-if="resultMsg" type="success" class="text-sm font-medium">
       {{ resultMsg }}
-    </div>
+    </v-alert>
 
     <!-- Android アプリ内のみ: ブックマークレット不要の 1 タップ取り込み -->
-    <div v-if="isNativeApp" class="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-md space-y-2">
-      <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">{{ t('import.nativeHint') }}</p>
-      <button
-        @click="handleNativeImport"
-        :disabled="isImporting"
-        class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-      >
-        <svg v-if="!isImporting" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
-        {{ isImporting ? (nativeMessage || t('import.importing')) : t('import.nativeImport') }}
-      </button>
-    </div>
+    <v-alert v-if="isNativeApp" type="info" :icon="false">
+      <div class="space-y-2">
+        <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">{{ t('import.nativeHint') }}</p>
+        <v-btn
+          color="primary"
+          block
+          class="text-sm"
+          :disabled="isImporting"
+          @click="handleNativeImport"
+        >
+          <v-icon v-if="!isImporting" :icon="mdiRefresh" size="16" class="mr-2" />
+          <v-progress-circular v-else size="16" width="2" color="white" class="mr-2" />
+          {{ isImporting ? (nativeMessage || t('import.importing')) : t('import.nativeImport') }}
+        </v-btn>
+      </div>
+    </v-alert>
 
     <!-- ARENA info banner -->
-    <div class="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-md">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
+    <v-alert type="warning" :icon="mdiInformationOutline">
       <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
         {{ t('import.arenaHint') }}
         <button @click="showHelpModal = true" class="font-bold underline underline-offset-2 hover:text-amber-600 dark:hover:text-amber-200 transition-colors">
           {{ t('import.bookmarkletHelp') }}
         </button>
       </p>
-    </div>
+    </v-alert>
 
     <!-- Tab switcher -->
-    <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-md border border-slate-200 dark:border-slate-700">
-      <button
-        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="importTab === 'text' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        @click="importTab = 'text'"
-      >{{ t('import.tabText') }}</button>
-      <button
-        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all"
-        :class="importTab === 'file' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        @click="importTab = 'file'"
-      >{{ t('import.tabFile') }}</button>
-    </div>
+    <v-tabs v-model="importTab" grow>
+      <v-tab value="text" class="text-sm font-medium">{{ t('import.tabText') }}</v-tab>
+      <v-tab value="file" class="text-sm font-medium">{{ t('import.tabFile') }}</v-tab>
+    </v-tabs>
 
     <!-- Text paste tab -->
     <div v-if="importTab === 'text'" class="space-y-2">
       <p class="text-xs text-slate-500 dark:text-slate-400" v-html="t('import.textHint', { link: `<a href='https://p.eagate.573.jp/game/2dx/34/djdata/score_download.html?style=SP' target='_blank' rel='noopener noreferrer' class='text-blue-600 dark:text-blue-400 hover:underline font-medium'>${t('import.textHintLinkText')}</a>` })"></p>
       <!-- 過去作の CSV も同じ入口で受け付ける（作品は自動判定し、過去作は歴代記録へ保存される） -->
       <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.pastCsvHint') }}</p>
-      <textarea
+      <v-textarea
         v-model="pastedText"
-        class="w-full h-24 p-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md text-xs font-mono text-slate-800 dark:text-slate-100 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-400 dark:placeholder-slate-500"
+        no-resize
+        rows="4"
+        class="text-xs font-mono"
         :placeholder="t('import.textareaPlaceholder')"
-      ></textarea>
+      />
     </div>
 
     <!-- File upload tab -->
@@ -334,12 +335,8 @@ const copyBookmarkletCode = async () => {
         @drop="handleDrop"
         @click="fileInput?.click()"
       >
-        <svg v-if="!selectedFile" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <v-icon v-if="!selectedFile" :icon="mdiCloudUploadOutline" size="32" class="text-slate-400 dark:text-slate-500" />
+        <v-icon v-else :icon="mdiCheckCircleOutline" size="32" class="text-green-500" />
         <div class="text-center">
           <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
             {{ selectedFile ? selectedFile.name : t('import.dropPlaceholder') }}
@@ -355,112 +352,90 @@ const copyBookmarkletCode = async () => {
     </div>
 
     <!-- Unified submit button -->
-    <button
-      @click="handleSubmit"
+    <v-btn
+      block
+      class="text-sm bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white"
       :disabled="isImporting || (importTab === 'file' && !selectedFile)"
-      class="w-full py-2.5 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+      @click="handleSubmit"
     >
-      <svg v-if="!isImporting && importTab === 'text' && !pastedText.trim()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-      </svg>
-      <svg v-else-if="!isImporting" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-      </svg>
-      <svg v-else class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>
+      <v-icon v-if="!isImporting && importTab === 'text' && !pastedText.trim()" :icon="mdiClipboardOutline" size="16" class="mr-2" />
+      <v-icon v-else-if="!isImporting" :icon="mdiCloudDownloadOutline" size="16" class="mr-2" />
+      <v-progress-circular v-else size="16" width="2" color="white" class="mr-2" />
       <template v-if="isImporting">{{ t('import.importing') }}</template>
       <template v-else-if="importTab === 'text' && !pastedText.trim()">{{ t('import.loadFromClipboard') }}</template>
       <template v-else>{{ t('import.load') }}</template>
-    </button>
+    </v-btn>
 
   </div>
 
   <!-- Bookmarklet help modal -->
-  <Teleport to="body">
-    <div v-if="showHelpModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showHelpModal = false">
-      <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-md shadow-xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-in">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-base font-bold text-slate-800 dark:text-white">{{ t('import.helpTitle') }}</h3>
-          <button @click="showHelpModal = false" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  <v-dialog v-model="showHelpModal" max-width="512">
+    <v-card class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-slate-800 dark:text-white">{{ t('import.helpTitle') }}</h3>
+        <v-btn icon variant="text" size="small" class="text-slate-400" aria-label="close" @click="showHelpModal = false">
+          <v-icon :icon="mdiClose" />
+        </v-btn>
+      </div>
 
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ t('import.helpDesc') }}</p>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">{{ t('import.helpDesc') }}</p>
 
-        <!-- PC / SP tab switcher -->
-        <div class="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-0.5 w-fit mb-4">
-          <button
-            class="px-4 py-1.5 text-xs font-bold rounded-md transition-all"
-            :class="deviceTab === 'sp' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'"
-            @click="deviceTab = 'sp'"
-          >{{ t('import.deviceSp') }}</button>
-          <button
-            class="px-4 py-1.5 text-xs font-bold rounded-md transition-all"
-            :class="deviceTab === 'pc' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400'"
-            @click="deviceTab = 'pc'"
-          >{{ t('import.devicePc') }}</button>
-        </div>
+      <!-- PC / SP tab switcher -->
+      <v-btn-toggle v-model="deviceTab" mandatory class="mb-4">
+        <v-btn value="sp" size="small" class="px-4 text-xs">{{ t('import.deviceSp') }}</v-btn>
+        <v-btn value="pc" size="small" class="px-4 text-xs">{{ t('import.devicePc') }}</v-btn>
+      </v-btn-toggle>
 
-        <!-- Smartphone instructions -->
-        <div v-if="deviceTab === 'sp'" class="space-y-3">
-          <ol class="text-xs text-slate-700 dark:text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
-            <li>
-              <span class="font-bold">{{ t('import.spStep1Title') }}</span>
-              <ol class="mt-1.5 ml-4 space-y-1 list-[lower-alpha] list-inside text-slate-600 dark:text-slate-400">
-                <li>{{ t('import.spStep1a') }}</li>
-                <li>{{ t('import.spStep1b') }}</li>
-                <li>{{ t('import.spStep1c') }}</li>
-                <li>{{ t('import.spStep1d') }}</li>
-                <li>{{ t('import.spStep1e') }}</li>
-              </ol>
-            </li>
-            <li>{{ t('import.spStep2') }}</li>
-            <li>{{ t('import.spStep3') }}</li>
-            <li>{{ t('import.spStep4') }}</li>
-          </ol>
-          <button
-            @click="copyBookmarkletCode"
-            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all"
-            :class="codeCopied ? 'bg-green-500 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'"
+      <!-- Smartphone instructions -->
+      <div v-if="deviceTab === 'sp'" class="space-y-3">
+        <ol class="text-xs text-slate-700 dark:text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+          <li>
+            <span class="font-bold">{{ t('import.spStep1Title') }}</span>
+            <ol class="mt-1.5 ml-4 space-y-1 list-[lower-alpha] list-inside text-slate-600 dark:text-slate-400">
+              <li>{{ t('import.spStep1a') }}</li>
+              <li>{{ t('import.spStep1b') }}</li>
+              <li>{{ t('import.spStep1c') }}</li>
+              <li>{{ t('import.spStep1d') }}</li>
+              <li>{{ t('import.spStep1e') }}</li>
+            </ol>
+          </li>
+          <li>{{ t('import.spStep2') }}</li>
+          <li>{{ t('import.spStep3') }}</li>
+          <li>{{ t('import.spStep4') }}</li>
+        </ol>
+        <v-btn
+          :color="codeCopied ? 'success' : 'primary'"
+          class="text-sm"
+          :prepend-icon="codeCopied ? mdiCheck : mdiContentCopy"
+          @click="copyBookmarkletCode"
+        >
+          {{ codeCopied ? t('import.copied') : t('import.copyCode') }}
+        </v-btn>
+      </div>
+
+      <!-- PC instructions -->
+      <div v-else class="space-y-3">
+        <ol class="text-xs text-slate-700 dark:text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+          <li>{{ t('import.pcStep1') }}</li>
+          <li>{{ t('import.pcStep2') }}</li>
+          <li>{{ t('import.pcStep3') }}</li>
+        </ol>
+        <div class="flex items-center gap-3 flex-wrap">
+          <!-- ブックマークバーへドラッグして登録する本物のリンクが必要なので、ネイティブの <a> のまま残す -->
+          <a
+            :href="bookmarkletCode"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors text-sm select-none shrink-0"
+            @click.prevent
+            draggable="true"
           >
-            <svg v-if="!codeCopied" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-4 10h6a2 2 0 002-2v-8a2 2 0 00-2-2h-6a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            {{ codeCopied ? t('import.copied') : t('import.copyCode') }}
-          </button>
-        </div>
-
-        <!-- PC instructions -->
-        <div v-else class="space-y-3">
-          <ol class="text-xs text-slate-700 dark:text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
-            <li>{{ t('import.pcStep1') }}</li>
-            <li>{{ t('import.pcStep2') }}</li>
-            <li>{{ t('import.pcStep3') }}</li>
-          </ol>
-          <div class="flex items-center gap-3 flex-wrap">
-            <a
-              :href="bookmarkletCode"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors text-sm select-none shrink-0"
-              @click.prevent
-              draggable="true"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              {{ t('import.bookmarkletName') }}
-            </a>
-            <span class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.dragToRegister') }}</span>
-          </div>
+            {{ t('import.bookmarkletName') }}
+          </a>
+          <span class="text-xs text-slate-500 dark:text-slate-400">{{ t('import.dragToRegister') }}</span>
         </div>
       </div>
-    </div>
-  </Teleport>
+    </v-card>
+  </v-dialog>
 </template>

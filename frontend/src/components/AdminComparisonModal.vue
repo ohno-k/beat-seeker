@@ -20,6 +20,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useScores } from '../composables/useScores';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
+import { mdiClose } from '@mdi/js';
 
 /** 管理者用ユーザー一覧 API のレスポンス要素 (id / displayName / iidxId などの軽量サマリ)。 */
 export interface AdminUserSummary {
@@ -249,9 +250,14 @@ const showLv12 = ref(true);
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-start justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div class="bg-white dark:bg-slate-800 w-full max-w-5xl my-3 sm:my-12 rounded-md shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
+  <v-dialog
+    :model-value="isOpen"
+    persistent
+    max-width="1024"
+    :fullscreen="$vuetify.display.xs"
+    @update:model-value="(v: boolean) => { if (!v) emit('close') }"
+  >
+      <v-card class="bg-white dark:bg-slate-800 w-full shadow-xl overflow-hidden flex flex-col border-slate-200 dark:border-slate-700">
         <!-- ヘッダー -->
         <div class="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
           <div class="min-w-0">
@@ -267,75 +273,55 @@ const showLv12 = ref(true);
               <span class="text-red-500 dark:text-red-400 font-bold">{{ userB.displayName }}</span>
             </p>
           </div>
-          <button @click="emit('close')" class="p-2 shrink-0 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-slate-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <v-btn icon variant="text" class="shrink-0 text-slate-400" aria-label="close" @click="emit('close')">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
         <!-- コンテンツ本体 -->
-        <div class="flex-1 p-3 sm:p-6 space-y-6 sm:space-y-8">
+        <div class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-6 sm:space-y-8">
           <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-            <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <v-progress-circular size="48" width="4" class="mb-4" />
             <p class="text-slate-500 font-bold">データを集計中...</p>
           </div>
 
-          <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 p-6 rounded-md border border-red-100 dark:border-red-900/30 text-center">
-            <p class="text-red-600 dark:text-red-400 font-bold">{{ error }}</p>
-          </div>
+          <v-alert v-else-if="error" type="error" class="text-center">
+            <p class="font-bold">{{ error }}</p>
+          </v-alert>
 
           <div v-else class="space-y-6 sm:space-y-8">
             <!-- フィルタートグル群 -->
             <div class="flex flex-wrap items-center justify-start sm:justify-end gap-x-3 gap-y-2 sm:gap-4">
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    v-model="showLv10Minus"
-                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
-                  />
-                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    v-model="showLv11"
-                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
-                  />
-                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    v-model="showLv12"
-                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
-                  />
-                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
-                </label>
+                <v-checkbox v-model="showLv10Minus" color="indigo" class="flex-none">
+                  <template #label>
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
+                  </template>
+                </v-checkbox>
+                <v-checkbox v-model="showLv11" color="indigo" class="flex-none">
+                  <template #label>
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
+                  </template>
+                </v-checkbox>
+                <v-checkbox v-model="showLv12" color="indigo" class="flex-none">
+                  <template #label>
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
+                  </template>
+                </v-checkbox>
               </div>
-              <span class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-600"></span>
+              <v-divider vertical class="hidden sm:block h-5 self-center" />
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ</span>
-                <button
-                  @click="showBothPlayedOnly = !showBothPlayedOnly"
-                  class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
-                  :class="showBothPlayedOnly ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'"
-                >
-                  <span
-                    class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
-                    :class="showBothPlayedOnly ? 'translate-x-6' : 'translate-x-1'"
-                  ></span>
-                </button>
+                <v-switch v-model="showBothPlayedOnly" class="flex-none shrink-0" aria-label="両者プレイ済みのみ" />
               </div>
             </div>
 
             <!-- サマリーカード -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div v-for="(stats, key) in comparisonStats.summary" :key="key"
+              <v-card v-for="(stats, key) in comparisonStats.summary" :key="key"
                 v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
-                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-md border border-slate-200 dark:border-slate-800 transition-all">
+                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 border-slate-200 dark:border-slate-800 transition-all">
                 <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3">
                   {{ key === 'overall' ? '全体' : key === 'lv10minus' ? 'レベル 10 以下' : key === 'lv11' ? 'レベル 11' : 'レベル 12' }}
                 </h3>
@@ -370,7 +356,7 @@ const showLv12 = ref(true);
                   <div class="h-full bg-red-400" :style="{ width: `${stats.total > 0 ? (stats.loss/stats.total)*100 : 0}%` }"></div>
                 </div>
                 <p class="mt-2 text-[10px] text-right text-slate-400 font-bold">{{ stats.total }} 曲対象</p>
-              </div>
+              </v-card>
             </div>
 
             <!-- 非公式難易度別テーブル -->
@@ -379,8 +365,7 @@ const showLv12 = ref(true);
                 <span class="w-1.5 h-5 sm:h-6 bg-indigo-500 rounded-full"></span>
                 非公式難易度別 勝敗 <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
               </h3>
-              <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 overflow-hidden">
-                <table class="w-full text-left border-collapse table-fixed">
+              <v-table class="cmp-table text-left bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 overflow-hidden">
                   <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
                     <tr>
                       <th class="p-2 sm:p-4 w-14 sm:w-24">ランク</th>
@@ -477,37 +462,40 @@ const showLv12 = ref(true);
                       </tr>
                     </template>
                   </tbody>
-                </table>
-              </div>
+              </v-table>
             </div>
 
             <!-- 注意書き -->
-            <div class="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-100 dark:border-blue-900/30">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <v-alert type="info">
               <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
                 <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較 (A 視点)</p>
                 <p>・A Only: ユーザー A のみプレイ済み / B Only: ユーザー B のみプレイ済み</p>
                 <p>・両者未プレイの楽曲は集計から除外して表示しています。</p>
               </div>
-            </div>
+            </v-alert>
           </div>
         </div>
 
         <!-- フッター -->
         <div class="p-3 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-right">
-          <button @click="emit('close')" class="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-md transition-all active:scale-95 text-base sm:text-lg">
+          <v-btn
+            size="x-large"
+            class="w-full sm:w-auto px-8 sm:px-12 bg-slate-900 hover:bg-black text-white text-base sm:text-lg"
+            @click="emit('close')"
+          >
             閉じる
-          </button>
+          </v-btn>
         </div>
-      </div>
-    </div>
-  </Teleport>
+      </v-card>
+  </v-dialog>
 </template>
 
 <style scoped>
+/* 列幅を固定（旧 <table class="table-fixed">）。v-table は内側に <table> を描くので :deep で当てる */
+.cmp-table :deep(table) {
+  table-layout: fixed;
+}
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }

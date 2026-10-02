@@ -13,6 +13,7 @@
  *   スマホはピンチ。拡大していないときは 1 本指の縦スクロールをページに渡す（touch-action: pan-y）。
  */
 import { computed, ref } from 'vue';
+import { mdiArrowCollapseAll, mdiMagnifyMinusOutline, mdiMagnifyPlusOutline } from '@mdi/js';
 import {
   Chart as ChartJS, LinearScale, PointElement, LineElement, Tooltip, Legend,
 } from 'chart.js';
@@ -448,32 +449,30 @@ const chartOptions = computed(() => {
   <div>
     <div class="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 mb-1">
       <p class="mr-auto text-[10px] text-slate-400 dark:text-slate-500">{{ isTouchDevice ? t('table.judgeScatterZoomHintTouch') : t('table.judgeScatterZoomHintPc') }}</p>
-      <button
+      <v-btn
         v-if="userZoomed"
         type="button"
+        variant="outlined"
+        size="x-small"
+        class="text-[11px] text-slate-600 dark:text-slate-200"
+        :prepend-icon="mdiArrowCollapseAll"
         @click="resetUserZoom"
-        class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-md border transition-colors bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 4l-7 7M4 20l7-7" />
-        </svg>
         {{ t('table.resetZoom') }}
-      </button>
-      <button
+      </v-btn>
+      <v-btn
         v-if="selfPoint"
         type="button"
+        :variant="zoomSelf ? 'flat' : 'outlined'"
+        :color="zoomSelf ? 'success' : undefined"
+        size="x-small"
+        class="text-[11px]"
+        :class="zoomSelf ? '' : 'text-slate-600 dark:text-slate-200'"
+        :prepend-icon="zoomSelf ? mdiMagnifyMinusOutline : mdiMagnifyPlusOutline"
         @click="toggleZoomSelf"
-        class="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-md border transition-colors"
-        :class="zoomSelf
-          ? 'bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700'
-          : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600'"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path v-if="!zoomSelf" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-          <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
-        </svg>
         {{ zoomSelf ? t('table.judgeScatterZoomReset') : t('table.judgeScatterZoomSelf') }}
-      </button>
+      </v-btn>
     </div>
     <div class="h-96 sm:h-[32rem]" @dblclick="resetUserZoom">
       <Scatter ref="chartRef" :data="chartData" :options="chartOptions" :plugins="[tierBandPlugin, touchActionPlugin]" />

@@ -15,6 +15,7 @@ import { useI18n } from '../composables/useI18n';
 import { useLeague, type LadderType, type LeagueRankingDivision } from '../composables/useLeague';
 import { getRankInfo, previousTierFrame } from '../utils/beatTier';
 import RankIcon from './RankIcon.vue';
+import { mdiClose } from '@mdi/js';
 
 const props = withDefaults(defineProps<{
   /** 対象ラダー（現状はスコアリーグのみ運用）。 */
@@ -71,37 +72,37 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
 </script>
 
 <template>
-  <Teleport to="body">
-    <div class="fixed inset-0 z-[110] flex items-center justify-center p-4 animate-fade-in">
-      <!-- 背景オーバーレイ（クリックで閉じる） -->
-      <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="$emit('close')"></div>
-
+  <v-dialog
+    :model-value="true"
+    @update:model-value="(v: boolean) => { if (!v) $emit('close') }"
+    max-width="672"
+  >
       <!-- 本体パネル -->
-      <div class="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden transition-colors duration-200">
+      <v-card class="max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-2xl overflow-hidden transition-colors duration-200">
         <!-- ヘッダー -->
-        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+        <v-card-title class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
           <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">{{ t('league.rankingModal.title') }}</h3>
-          <button
-            class="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all"
+          <v-btn
+            icon
+            variant="text"
+            size="small"
+            class="text-slate-400 dark:text-slate-500"
             @click="$emit('close')"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+            <v-icon :icon="mdiClose" />
+          </v-btn>
+        </v-card-title>
 
         <!-- 本文（スクロール領域） -->
-        <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <v-card-text class="flex-1 overflow-y-auto custom-scrollbar p-6">
           <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ t('league.rankingModal.desc') }}</p>
 
           <div v-if="loading" class="mt-6 text-center text-sm text-slate-400 dark:text-slate-500">
             {{ t('league.rankingModal.loading') }}
           </div>
-          <div v-else-if="error"
-               class="mt-4 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/30 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+          <v-alert v-else-if="error" type="error" class="mt-4 text-sm">
             {{ error }}
-          </div>
+          </v-alert>
           <div v-else-if="isEmpty" class="mt-6 text-center text-sm text-slate-400 dark:text-slate-500">
             {{ t('league.rankingModal.empty') }}
           </div>
@@ -118,8 +119,7 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
                 </template>
               </span>
             </h4>
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
+            <v-table class="text-sm bg-transparent">
                 <thead>
                   <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
                     <th class="py-1.5 pr-2 w-10">{{ t('league.rank') }}</th>
@@ -151,11 +151,14 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
                           v-bind="previousTierFrame(row.previousBeatPt, 'beat')"
                         />
                         <span>{{ row.displayName }}</span>
-                        <span
+                        <v-chip
                           v-if="!row.active"
-                          class="shrink-0 rounded px-1 py-px text-[10px] font-normal leading-tight border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400"
+                          size="x-small"
+                          label
+                          variant="outlined"
+                          class="shrink-0 px-1 text-[10px] font-normal leading-tight text-slate-500 dark:text-slate-400"
                           :title="t('league.rankingModal.inactiveTitle')"
-                        >{{ t('league.rankingModal.inactive') }}</span>
+                        >{{ t('league.rankingModal.inactive') }}</v-chip>
                       </span>
                     </td>
                     <td class="py-1.5 pl-2 text-right tabular-nums font-semibold" :class="ptClass(row.points)">
@@ -163,11 +166,9 @@ const rowClass = (active: boolean) => (active ? '' : 'opacity-50');
                     </td>
                   </tr>
                 </tbody>
-              </table>
-            </div>
+            </v-table>
           </section>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+        </v-card-text>
+      </v-card>
+  </v-dialog>
 </template>

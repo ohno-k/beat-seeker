@@ -412,7 +412,7 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
 
 <template>
   <div class="w-full max-w-6xl mx-auto space-y-6 animate-fade-in">
-    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-md border border-slate-200 dark:border-slate-700">
+    <v-card class="bg-white dark:bg-slate-800 p-6 sm:p-8">
       <!-- ヘッダー -->
       <div class="flex items-center gap-4 mb-6">
         <div class="p-3 rounded-md bg-cyan-100 dark:bg-cyan-900/30">
@@ -434,15 +434,15 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
            B は譜面 A が選択されてから表示する。
            A 未選択時は A を全幅にしてレイアウトの偏りを防ぐ。 -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div v-for="slot in (['A','B'] as const)" :key="slot"
+        <v-card v-for="slot in (['A','B'] as const)" :key="slot"
           v-show="slot === 'A' || selected.A"
-          class="rounded-md border border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-900/40"
+          class="p-4 bg-slate-50 dark:bg-slate-900/40"
           :class="{ 'md:col-span-2': slot === 'A' && !selected.A }">
           <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ slot === 'A' ? t('scatter.chartASlot') : t('scatter.chartBSlot') }}</span>
             <span v-if="slot === 'B' && isAutoPicking"
               class="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 inline-flex items-center gap-1">
-              <span class="w-3 h-3 border-2 border-cyan-200 dark:border-slate-700 border-t-cyan-500 rounded-full animate-spin"></span>
+              <v-progress-circular size="12" width="2" color="cyan" />
               {{ t('scatter.autoPicking') }}
             </span>
             <span v-else-if="slot === 'B' && autoPickedB && selected.B"
@@ -453,32 +453,34 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
 
           <!-- 選択中譜面の表示 -->
           <div v-if="selected[slot]" class="mb-3 flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+            <v-chip label size="x-small" variant="flat" class="px-2 py-0.5 h-auto rounded text-[10px] font-bold"
               :class="diffBadgeClass(selected[slot]!.difficulty)">
               {{ diffLabel(selected[slot]!.difficulty) }}{{ selected[slot]!.level }}
-            </span>
+            </v-chip>
             <span class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate">
               {{ selected[slot]!.title }}
             </span>
           </div>
 
           <!-- 検索ボックス -->
-          <input
+          <v-text-field
             v-model="queries[slot]"
             type="text"
             :placeholder="t('scatter.searchPlaceholder')"
-            class="w-full px-3 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 mb-2"
+            class="w-full text-sm mb-2 bg-white dark:bg-slate-800"
           />
 
           <!-- 候補リスト。Bピッカーは A と相関の高い順に並ぶ -->
-          <ul class="max-h-48 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800">
-            <li v-for="entry in filtered[slot]" :key="`${slot}-${entry.textage}`"
-              @click="pick(slot, entry)"
-              class="px-2 py-1.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40 flex items-center gap-2">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0"
+          <v-list density="compact" class="max-h-48 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800 py-0">
+            <v-list-item v-for="entry in filtered[slot]" :key="`${slot}-${entry.textage}`"
+              min-height="0"
+              class="px-2 py-1.5 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40"
+              @click="pick(slot, entry)">
+              <div class="flex items-center gap-2">
+              <v-chip label size="x-small" variant="flat" class="px-1.5 py-0.5 h-auto rounded text-[10px] font-bold shrink-0"
                 :class="diffBadgeClass(entry.difficulty)">
                 {{ diffLabel(entry.difficulty) }}{{ entry.level }}
-              </span>
+              </v-chip>
               <span class="text-xs text-slate-700 dark:text-slate-200 truncate flex-1">{{ entry.title }}</span>
               <!-- B ピッカーで相関係数があれば表示（自動並び替えの根拠） -->
               <span v-if="slot === 'B' && correlationFor(entry)"
@@ -488,11 +490,12 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
                       : 'text-slate-400'">
                 r={{ correlationFor(entry)!.r.toFixed(2) }}
               </span>
-            </li>
-            <li v-if="filtered[slot].length === 0"
-              class="px-2 py-3 text-center text-xs text-slate-400">{{ t('scatter.noMatches') }}</li>
-          </ul>
-        </div>
+              </div>
+            </v-list-item>
+            <v-list-item v-if="filtered[slot].length === 0" min-height="0"
+              class="px-2 py-3 text-center text-xs text-slate-400">{{ t('scatter.noMatches') }}</v-list-item>
+          </v-list>
+        </v-card>
       </div>
 
       <!-- 結果エリア -->
@@ -503,19 +506,18 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
 
       <div v-else-if="isLoading"
         class="h-64 flex items-center justify-center text-slate-400 dark:text-slate-500">
-        <div class="w-10 h-10 border-4 border-cyan-100 dark:border-slate-700 border-t-cyan-500 rounded-full animate-spin mr-3"></div>
+        <v-progress-circular size="40" width="4" color="cyan" class="mr-3" />
         {{ t('scatter.loading') }}
       </div>
 
-      <div v-else-if="errorMsg"
-        class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
+      <v-alert v-else-if="errorMsg" type="error" class="p-6 text-center font-bold">
         {{ errorMsg }}
-      </div>
+      </v-alert>
 
       <div v-else-if="scatterData">
         <!-- 統計サマリ: n / 相関係数 r / 回帰式 -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-          <div class="rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
+          <v-card class="bg-slate-50 dark:bg-slate-900/40 p-4">
             <div class="text-[10px] font-bold text-slate-400">{{ t('scatter.nLabelAbove') }}</div>
             <div class="text-3xl font-bold text-cyan-600 dark:text-cyan-400 tabular-nums">
               {{ pointsRendered.toLocaleString() }}
@@ -524,8 +526,8 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
             <div v-if="droppedCount > 0" class="text-[10px] text-amber-500 mt-0.5">
               {{ t('scatter.excludedCount', { count: droppedCount }) }}
             </div>
-          </div>
-          <div class="rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
+          </v-card>
+          <v-card class="bg-slate-50 dark:bg-slate-900/40 p-4">
             <div class="text-[10px] font-bold text-slate-400">{{ t('scatter.correlation') }}</div>
             <div class="text-3xl font-bold tabular-nums"
               :class="regression ? (Math.abs(regression.r) >= 0.7 ? 'text-emerald-600 dark:text-emerald-400'
@@ -536,8 +538,8 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
             <div class="text-[10px] text-slate-400 mt-0.5">
               r² = {{ regression ? (regression.r * regression.r).toFixed(3) : '—' }}
             </div>
-          </div>
-          <div class="rounded-md bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 p-4">
+          </v-card>
+          <v-card class="bg-slate-50 dark:bg-slate-900/40 p-4">
             <div class="text-[10px] font-bold text-slate-400">{{ t('scatter.regressionEq') }}</div>
             <div class="text-base font-bold tabular-nums text-red-600 dark:text-red-400 mt-1">
               <template v-if="regression">
@@ -548,11 +550,11 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
               <template v-else>—</template>
             </div>
             <div class="text-[10px] text-slate-400 mt-0.5">{{ t('scatter.regressionAxisHint') }}</div>
-          </div>
+          </v-card>
         </div>
 
         <!-- 散布図 -->
-        <div class="rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-3 sm:p-5">
+        <v-card class="bg-slate-50 dark:bg-slate-900/40 p-3 sm:p-5">
           <div v-if="pointsRendered === 0"
             class="h-72 flex items-center justify-center text-slate-400 text-sm">
             {{ t('scatter.noPointsInA') }}
@@ -560,9 +562,9 @@ const droppedCount = computed(() => (scatterData.value?.n ?? 0) - pointsRendered
           <div v-else class="w-full h-80 sm:h-[28rem]">
             <Scatter :data="chartData" :options="chartOptions" />
           </div>
-        </div>
+        </v-card>
       </div>
-    </div>
+    </v-card>
   </div>
 </template>
 

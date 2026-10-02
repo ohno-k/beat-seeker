@@ -9,6 +9,7 @@
  */
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from '../composables/useI18n';
+import { mdiChevronUp } from '@mdi/js';
 
 const { t } = useI18n();
 
@@ -45,16 +46,16 @@ onBeforeUnmount(() => {
     leave-from-class="opacity-100"
     leave-to-class="opacity-0 translate-y-2"
   >
-    <button
+    <v-btn
       v-if="visible"
-      type="button"
+      icon
+      variant="outlined"
+      rounded="circle"
       :aria-label="t('a11y.backToTop')"
-      class="fixed bottom-20 right-4 z-40 w-11 h-11 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 active:scale-95 transition-all"
+      class="fixedbottom-20 right-4 z-40 w-11 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 active:scale-95"
       @click="scrollToTop"
     >
-      <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-      </svg>
-    </button>
+      <v-icon :icon="mdiChevronUp" size="22" />
+    </v-btn>
   </Transition>
 </template>

@@ -11,6 +11,7 @@
  *
  * 共有先のページ実装は `/share/:token` ルートに用意した ShareView.vue 側。
  */
+import { mdiClose } from '@mdi/js';
 import { ref, watch } from 'vue';
 import { useShareTokens, type ShareTokenInfo, type ShareExpiresIn } from '../composables/useShareTokens';
 import { useToast } from '../composables/useToast';
@@ -148,24 +149,18 @@ const statusLabel = (t: ShareTokenInfo) => {
 </script>
 
 <template>
-  <Teleport to="body">
-  <div
-    v-if="isOpen"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="share-token-title"
-    class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
-    @click.self="emit('close')"
+  <v-dialog
+    :model-value="isOpen"
+    max-width="448"
+    @update:model-value="(v: boolean) => { if (!v) emit('close') }"
   >
-    <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
+    <v-card aria-labelledby="share-token-title" class="w-full overflow-hidden flex flex-col max-h-[90vh] transition-colors duration-200">
 
       <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
         <h3 id="share-token-title" class="text-lg font-bold text-slate-800 dark:text-slate-100">URL共有の管理</h3>
-        <button type="button" aria-label="閉じる" @click="emit('close')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-          <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <v-btn icon variant="text" size="small" aria-label="閉じる" class="text-slate-400" @click="emit('close')">
+          <v-icon :icon="mdiClose" />
+        </v-btn>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-6">
@@ -176,28 +171,16 @@ const statusLabel = (t: ShareTokenInfo) => {
         </p>
 
         <!-- 発行フォーム -->
-        <div class="rounded-md border border-slate-200 dark:border-slate-700 p-5 space-y-5 bg-slate-50/60 dark:bg-slate-800/40">
+        <v-card class="p-5 space-y-5 bg-slate-50/60 dark:bg-slate-800/40">
           <h4 class="text-base font-bold text-slate-700 dark:text-slate-200">新しい共有 URL を発行</h4>
 
           <div>
             <span class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">公開する画面</span>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <label class="flex items-center gap-2 text-sm cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                <input type="checkbox" v-model="scopeDashboard" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                <span class="text-slate-700 dark:text-slate-200">ダッシュボード</span>
-              </label>
-              <label class="flex items-center gap-2 text-sm cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                <input type="checkbox" v-model="scopeScores" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                <span class="text-slate-700 dark:text-slate-200">スコア一覧</span>
-              </label>
-              <label class="flex items-center gap-2 text-sm cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                <input type="checkbox" v-model="scopeHistory" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                <span class="text-slate-700 dark:text-slate-200">成長記録</span>
-              </label>
-              <label class="flex items-center gap-2 text-sm cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                <input type="checkbox" v-model="scopeProfile" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                <span class="text-slate-700 dark:text-slate-200">プロフィール</span>
-              </label>
+              <v-checkbox v-model="scopeDashboard" label="ダッシュボード" class="text-sm" />
+              <v-checkbox v-model="scopeScores" label="スコア一覧" class="text-sm" />
+              <v-checkbox v-model="scopeHistory" label="成長記録" class="text-sm" />
+              <v-checkbox v-model="scopeProfile" label="プロフィール" class="text-sm" />
             </div>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
               プロフィールには成長軌跡とスコア分析のみが含まれます（URL共有・通知設定は公開されません）。
@@ -206,23 +189,26 @@ const statusLabel = (t: ShareTokenInfo) => {
 
           <div>
             <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">有効期限</label>
-            <select v-model="expiresIn"
-              class="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100">
-              <option v-for="opt in expiryOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
+            <v-select
+              v-model="expiresIn"
+              :items="expiryOptions"
+              item-title="label"
+              item-value="value"
+              class="text-sm"
+            />
           </div>
 
           <div v-if="errorMsg" class="text-xs font-bold text-red-600 dark:text-red-400">{{ errorMsg }}</div>
 
-          <button
-            type="button"
-            @click="handleIssue"
+          <v-btn
+            color="primary"
+            block
             :disabled="isLoading"
-            class="w-full px-4 py-2.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors disabled:opacity-50"
+            @click="handleIssue"
           >
             URL を発行
-          </button>
-        </div>
+          </v-btn>
+        </v-card>
 
         <!-- 一覧 -->
         <div class="space-y-3">
@@ -233,9 +219,9 @@ const statusLabel = (t: ShareTokenInfo) => {
           </div>
 
           <ul v-else class="space-y-3">
-            <li v-for="t in tokens" :key="t.id" class="rounded-md border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800/40">
+            <v-card v-for="t in tokens" :key="t.id" tag="li" class="p-4 bg-white dark:bg-slate-800/40">
               <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded" :class="statusLabel(t).cls">{{ statusLabel(t).text }}</span>
+                <v-chip label size="x-small" variant="flat" class="text-[10px] font-bold" :class="statusLabel(t).cls">{{ statusLabel(t).text }}</v-chip>
                 <span class="text-[10px] text-slate-400">発行: {{ formatDateTime(t.createdAt) }}</span>
               </div>
 
@@ -248,29 +234,28 @@ const statusLabel = (t: ShareTokenInfo) => {
               </div>
 
               <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  @click="handleCopy(t)"
-                  class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-                >URL をコピー</button>
-                <button
+                <v-btn variant="tonal" size="small" class="text-xs" @click="handleCopy(t)">URL をコピー</v-btn>
+                <v-btn
                   v-if="t.active"
-                  type="button"
+                  variant="tonal"
+                  color="warning"
+                  size="small"
+                  class="text-xs"
                   @click="handleRevoke(t)"
-                  class="px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-colors"
-                >失効する</button>
-                <button
+                >失効する</v-btn>
+                <v-btn
                   v-else
-                  type="button"
+                  variant="tonal"
+                  color="error"
+                  size="small"
+                  class="text-xs"
                   @click="handleDelete(t)"
-                  class="px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
-                >一覧から削除</button>
+                >一覧から削除</v-btn>
               </div>
-            </li>
+            </v-card>
           </ul>
         </div>
       </div>
-    </div>
-  </div>
-  </Teleport>
+    </v-card>
+  </v-dialog>
 </template>

@@ -103,7 +103,7 @@ function editionLabel(version: number): string {
 <template>
   <div class="space-y-8 animate-fade-in pb-16">
     <!-- ヘッダー部（タイトル + タブ切替ボタン） -->
-    <div class="bg-white dark:bg-slate-800 p-8 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card class="p-8 transition-colors duration-200">
       <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
@@ -116,29 +116,23 @@ function editionLabel(version: number): string {
 
       <!-- タブ切替ボタン（システム更新 / 難易度改訂） -->
       <div class="flex flex-wrap mt-6 gap-2 border-t border-slate-100 dark:border-slate-700 pt-6">
-        <button
-          @click="activeTab = 'changelog'"
-          class="px-5 py-2.5 text-sm font-bold rounded-lg transition-all"
-          :class="activeTab === 'changelog' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
-        >
-          {{ t('changelog.tabSystem') }}
-        </button>
-        <button
-          @click="activeTab = 'difficulty'"
-          class="px-5 py-2.5 text-sm font-bold rounded-lg transition-all"
-          :class="activeTab === 'difficulty' ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'"
-        >
-          {{ t('changelog.tabDifficulty') }}
-        </button>
+        <v-tabs v-model="activeTab">
+          <v-tab value="changelog" class="text-sm font-bold text-none">
+            {{ t('changelog.tabSystem') }}
+          </v-tab>
+          <v-tab value="difficulty" color="#4f46e5" class="text-sm font-bold text-none">
+            {{ t('changelog.tabDifficulty') }}
+          </v-tab>
+        </v-tabs>
       </div>
-    </div>
+    </v-card>
 
     <div v-if="activeTab === 'changelog'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
       <!-- Update Entry: v1.7.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.7.0</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.7.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v170Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.may2026') }}</span>
@@ -155,13 +149,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.6.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.6.0</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.6.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v160Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -179,13 +173,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.5.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.5.0</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.5.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v150Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -203,13 +197,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.4.0 -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.4.0</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.4.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v140Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.april2026') }}</span>
@@ -227,13 +221,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.3.1 (Localization Support) -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.3.1</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.3.1</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v131Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -251,13 +245,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.3.0 (Difficulty Revision) -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.3.0</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.3.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v130Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -276,13 +270,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.2.0 (Notification Tabs & Vote UI) -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.2.0</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.2.0</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v120Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -310,13 +304,13 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
 
       <!-- Update Entry: v1.1.1 (Folder Rank System Redesign) -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">Ver 1.1.1</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">Ver 1.1.1</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.v111Title') }}</h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ t('changelog.march2026') }}</span>
@@ -335,7 +329,7 @@ function editionLabel(version: number): string {
             </ul>
           </div>
         </div>
-      </div>
+      </v-card>
       
       <!-- Older entries can be added here with similar structure -->
     </div>
@@ -343,10 +337,10 @@ function editionLabel(version: number): string {
     <!-- 難易度改訂履歴タブ（JSON からループ描画） -->
     <div v-else-if="activeTab === 'difficulty'" class="space-y-8 animate-in slide-in-from-bottom-4 duration-300">
 
-      <div v-for="rev in revisions" :key="rev.version" class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-card v-for="rev in revisions" :key="rev.version" class="overflow-hidden transition-colors duration-200">
         <div class="px-8 py-5 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded">{{ editionLabel(rev.version) }}</span>
+            <v-chip label variant="flat" class="bg-indigo-600 text-white text-xs font-bold px-3">{{ editionLabel(rev.version) }}</v-chip>
             <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">{{ t('changelog.difficultyRevision') }}<template v-if="rev.appVersion"> ({{ rev.appVersion }})</template></h3>
           </div>
           <span class="text-sm font-bold text-slate-500 dark:text-slate-400">{{ formatDate(rev.date) }}</span>
@@ -366,13 +360,15 @@ function editionLabel(version: number): string {
                 <span class="font-bold text-blue-600 dark:text-blue-400">{{ song.rank }}</span>
               </div>
             </div>
-            <button
+            <v-btn
               v-if="hiddenCount(rev, 'added', rev.added) > 0"
+              variant="text"
+              size="x-small"
+              class="mt-3 ml-2 px-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
               @click="expand(rev, 'added')"
-              class="mt-3 ml-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
             >
               {{ t('changelog.showAll', { n: hiddenCount(rev, 'added', rev.added) }) }}
-            </button>
+            </v-btn>
           </div>
 
           <!-- 変更曲ブロック（from → to で難易度が変動した曲） -->
@@ -392,13 +388,15 @@ function editionLabel(version: number): string {
                 </div>
               </div>
             </div>
-            <button
+            <v-btn
               v-if="hiddenCount(rev, 'changed', rev.changed) > 0"
+              variant="text"
+              size="x-small"
+              class="mt-3 ml-2 px-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
               @click="expand(rev, 'changed')"
-              class="mt-3 ml-2 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
             >
               {{ t('changelog.showAll', { n: hiddenCount(rev, 'changed', rev.changed) }) }}
-            </button>
+            </v-btn>
           </div>
 
           <!-- 除外曲ブロック（数値帯から Uncategorized に戻った／表から消えた曲。rank は除外前の帯） -->
@@ -414,16 +412,18 @@ function editionLabel(version: number): string {
                 <span class="text-slate-400 line-through">{{ song.rank }}</span>
               </div>
             </div>
-            <button
+            <v-btn
               v-if="hiddenCount(rev, 'removed', rev.removed) > 0"
+              variant="text"
+              size="x-small"
+              class="mt-3 ml-2 px-1 text-xs font-bold text-rose-500 dark:text-rose-400 hover:underline"
               @click="expand(rev, 'removed')"
-              class="mt-3 ml-2 text-xs font-bold text-rose-500 dark:text-rose-400 hover:underline"
             >
               {{ t('changelog.showAll', { n: hiddenCount(rev, 'removed', rev.removed) }) }}
-            </button>
+            </v-btn>
           </div>
         </div>
-      </div>
+      </v-card>
 
     </div>
   </div>

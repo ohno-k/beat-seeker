@@ -17,6 +17,7 @@ import { ref, computed } from 'vue';
 import { useGameData } from '../composables/useGameData';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
+import { mdiMagnify } from '@mdi/js';
 
 const { t } = useI18n();
 const { diffTableRanks, extraOfficialLevelRanks } = useGameData();
@@ -131,7 +132,7 @@ function handleSearch() {
 <template>
   <div class="space-y-6 pb-20 animate-fade-in">
     <!-- ヘッダー: タイトル・統計・展開／折りたたみボタン・検索ボックス -->
-    <div class="bg-white dark:bg-slate-800 rounded-md p-6 border border-slate-200 dark:border-slate-700">
+    <v-card class="bg-white dark:bg-slate-800 p-6 border-slate-200 dark:border-slate-700">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-slate-900 dark:text-white">
@@ -142,40 +143,32 @@ function handleSearch() {
           </p>
         </div>
         <div class="flex gap-2 shrink-0">
-          <button
-            @click="expandAll"
-            class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-          >
+          <v-btn size="small" variant="tonal" class="text-xs" @click="expandAll">
             {{ t('diffTable.expandAll') }}
-          </button>
-          <button
-            @click="collapseAll"
-            class="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-          >
+          </v-btn>
+          <v-btn size="small" variant="tonal" class="text-xs" @click="collapseAll">
             {{ t('diffTable.collapseAll') }}
-          </button>
+          </v-btn>
         </div>
       </div>
 
       <!-- 検索ボックス: 入力のたびに handleSearch で該当ランクを展開 -->
-      <div class="mt-4 relative">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          v-model="searchQuery"
-          @input="handleSearch"
-          type="text"
-          :placeholder="t('diffTable.searchPlaceholder')"
-          class="w-full pl-9 pr-4 py-2.5 text-sm rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-        />
-      </div>
-    </div>
+      <v-text-field
+        v-model="searchQuery"
+        type="text"
+        :placeholder="t('diffTable.searchPlaceholder')"
+        :prepend-inner-icon="mdiMagnify"
+        class="mt-4"
+        @update:model-value="handleSearch"
+      />
+    </v-card>
 
     <!-- ログイン促進バナー: 未ログイン時のみ表示 -->
-    <div
+    <v-card
       v-if="!isLoggedIn"
-      class="bg-blue-700 dark:bg-blue-600 rounded-md p-6 text-white"
+      variant="flat"
+      color="primary"
+      class="bg-blue-700 dark:bg-blue-600 p-6 text-white"
     >
       <div class="flex flex-col sm:flex-row items-center gap-4">
         <div class="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center shrink-0">
@@ -188,7 +181,7 @@ function handleSearch() {
           <p class="text-blue-100 text-sm mt-1">{{ t('diffTable.ctaDesc') }}</p>
         </div>
       </div>
-    </div>
+    </v-card>
 
     <!-- ランクリスト: アコーディオン形式でランクごとに曲一覧を展開 -->
     <div v-if="filteredRanks.length === 0" class="text-center py-12 text-slate-400 dark:text-slate-500">
@@ -196,11 +189,11 @@ function handleSearch() {
     </div>
 
     <div v-else class="space-y-3">
-      <div
+      <v-card
         v-for="rankEntry in filteredRanks"
         :key="rankEntry.rank"
-        class="bg-white dark:bg-slate-800 rounded-md border overflow-hidden transition-colors"
-        :class="rankBadgeBg(rankEntry.rank)"
+        class="bg-white dark:bg-slate-800 overflow-hidden transition-colors"
+        :class="[rankBadgeBg(rankEntry.rank), isNumericRank(rankEntry.rank) ? '' : 'border-slate-200 dark:border-slate-700']"
       >
         <!-- ランクヘッダー（クリックで展開／折りたたみトグル） -->
         <button
@@ -237,15 +230,19 @@ function handleSearch() {
               :key="song"
               class="py-1.5 text-sm text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700/50 last:border-0 truncate"
             >
-              <span
+              <v-chip
                 v-if="song.endsWith('[L]')"
-                class="inline-block mr-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-1.5 rounded"
-              >L</span>
+                label
+                size="x-small"
+                variant="tonal"
+                color="purple"
+                class="mr-1.5 text-xs font-bold"
+              >L</v-chip>
               {{ song.endsWith('[L]') ? song.slice(0, -3) : song }}
             </div>
           </div>
         </div>
-      </div>
+      </v-card>
     </div>
   </div>
 </template>

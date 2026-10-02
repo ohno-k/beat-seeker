@@ -23,6 +23,7 @@ import { useScores } from '../composables/useScores';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import type { ScoreData } from '../types/ScoreData';
 import FriendComparisonChartModal from './FriendComparisonChartModal.vue';
+import { mdiClose, mdiChartLine } from '@mdi/js';
 
 /** グラフモーダルが対象とする集計単位の指定。 'rank:12.0' で非公式難易度を指定。 */
 type ChartScope = 'overall' | 'lv10minus' | 'lv11' | 'lv12' | `rank:${string}`;
@@ -357,9 +358,8 @@ const openRankChart = (rank: string, ev: Event) => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-start justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div class="bg-white dark:bg-slate-800 w-full max-w-5xl my-3 sm:my-12 rounded-md shadow-xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
+  <v-dialog :model-value="isOpen" @update:model-value="(v) => { if (!v) emit('close') }" persistent max-width="1024" :fullscreen="$vuetify.display.xs">
+      <v-card class="bg-white dark:bg-slate-800">
         <!-- ヘッダー（タイトル + 相手表示名 + ×ボタン） -->
         <div class="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
           <div class="min-w-0">
@@ -373,23 +373,21 @@ const openRankChart = (rank: string, ev: Event) => {
               vs <span class="text-blue-600 dark:text-blue-400 font-bold">{{ friend.displayName }}</span>
             </p>
           </div>
-          <button @click="emit('close')" class="p-2 shrink-0 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-slate-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <v-btn icon variant="text" @click="emit('close')" aria-label="閉じる" class="shrink-0 text-slate-400 hover:text-slate-600">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
         <!-- コンテンツ本体（ローディング/エラー/本文 を状態で切替） -->
-        <div class="flex-1 p-3 sm:p-6 space-y-6 sm:space-y-8">
+        <v-card-text class="flex-1 p-3 sm:p-6 space-y-6 sm:space-y-8">
           <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-            <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <v-progress-circular size="48" width="4" class="mb-4" />
             <p class="text-slate-500 font-bold">データを集計中...</p>
           </div>
 
-          <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 p-6 rounded-md border border-red-100 dark:border-red-900/30 text-center">
-            <p class="text-red-600 dark:text-red-400 font-bold">{{ error }}</p>
-          </div>
+          <v-alert v-else-if="error" type="error" class="p-6 font-bold">
+            {{ error }}
+          </v-alert>
 
           <div v-else class="space-y-6 sm:space-y-8">
             <!-- フィルタートグル群（レベルチェック + 両者プレイ済み）。狭幅では行ごとに折り返してタップ領域を確保 -->
@@ -397,70 +395,57 @@ const openRankChart = (rank: string, ev: Event) => {
               <!-- レベル選択チェックボックス (ANOTHER/LEGGENDARIA 譜面のみ集計) -->
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    v-model="showLv10Minus"
-                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
-                  />
-                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    v-model="showLv11"
-                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
-                  />
-                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    v-model="showLv12"
-                    class="w-4 h-4 rounded accent-indigo-500 cursor-pointer"
-                  />
-                  <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
-                </label>
+                <v-checkbox v-model="showLv10Minus" color="indigo" class="flex-none [&_.v-label]:opacity-100">
+                  <template #label>
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
+                  </template>
+                </v-checkbox>
+                <v-checkbox v-model="showLv11" color="indigo" class="flex-none [&_.v-label]:opacity-100">
+                  <template #label>
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
+                  </template>
+                </v-checkbox>
+                <v-checkbox v-model="showLv12" color="indigo" class="flex-none [&_.v-label]:opacity-100">
+                  <template #label>
+                    <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
+                  </template>
+                </v-checkbox>
               </div>
               <!-- 仕切り線（狭幅時は折り返しが入るので装飾は sm: 以上のみ） -->
-              <span class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-600"></span>
+              <v-divider vertical class="hidden sm:block h-5 self-center" />
               <!-- 両者プレイ済みのみ表示トグル -->
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">両者プレイ済みのみ</span>
-                <button
-                  @click="showBothPlayedOnly = !showBothPlayedOnly"
-                  class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none shrink-0"
-                  :class="showBothPlayedOnly ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'"
-                >
-                  <span
-                    class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
-                    :class="showBothPlayedOnly ? 'translate-x-6' : 'translate-x-1'"
-                  ></span>
-                </button>
+                <v-switch
+                  v-model="showBothPlayedOnly"
+                  aria-label="両者プレイ済みのみ"
+                  class="flex-none shrink-0"
+                />
               </div>
             </div>
 
             <!-- サマリーカード（overall / lv10minus / lv11 / lv12 の最大 4 カード並び、WIN/DRAW/LOSS の大数字 + 進捗バー）。
                  iPhone は 1 列、Z Fold3 展開時 (sm:) で 2 列、lg 以上で 4 列 -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div v-for="(stats, key) in comparisonStats.summary" :key="key"
+              <v-card v-for="(stats, key) in comparisonStats.summary" :key="key"
                 v-show="key === 'overall' || (key === 'lv10minus' && showLv10Minus) || (key === 'lv11' && showLv11) || (key === 'lv12' && showLv12)"
-                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 rounded-md border border-slate-200 dark:border-slate-800 transition-all">
+                class="bg-slate-100/50 dark:bg-slate-900/50 p-3 sm:p-5 dark:border-slate-800 transition-all">
                 <div class="flex items-center justify-between mb-3">
                   <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500">
                     {{ summaryLabel(key) }}
                   </h3>
-                  <button
+                  <v-btn
+                    icon
+                    variant="text"
+                    size="x-small"
                     type="button"
                     @click="openSummaryChart(key, $event)"
-                    class="p-1 rounded-md text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                    class="text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
                     title="勝敗の変遷をグラフで見る"
                     aria-label="勝敗の変遷をグラフで見る"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l3-3 4 4 5-7" />
-                    </svg>
-                  </button>
+                    <v-icon :icon="mdiChartLine" size="16" />
+                  </v-btn>
                 </div>
                 <div class="font-bold text-center" :class="showBothPlayedOnly ? 'grid grid-cols-3 gap-1' : 'grid grid-cols-5 gap-1'">
                   <div class="flex flex-col">
@@ -493,7 +478,7 @@ const openRankChart = (rank: string, ev: Event) => {
                   <div class="h-full bg-red-400" :style="{ width: `${stats.total > 0 ? (stats.loss/stats.total)*100 : 0}%` }"></div>
                 </div>
                 <p class="mt-2 text-[10px] text-right text-slate-400 font-bold">{{ stats.total }} 曲対象</p>
-              </div>
+              </v-card>
             </div>
 
             <!-- 非公式難易度別テーブル（行クリックで詳細リストを展開） -->
@@ -502,8 +487,8 @@ const openRankChart = (rank: string, ev: Event) => {
                 <span class="w-1.5 h-5 sm:h-6 bg-indigo-500 rounded-full"></span>
                 非公式難易度別 勝敗 <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
               </h3>
-              <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 overflow-hidden">
-                <table class="w-full text-left border-collapse table-fixed">
+              <v-card class="bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 overflow-hidden">
+                <v-table class="w-full text-left bg-transparent [&_table]:border-collapse [&_table]:table-fixed">
                   <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
                     <tr>
                       <!-- ランク列はアイコン2つ + 文字を入れる必要があるので、最低 5em 確保 -->
@@ -527,17 +512,18 @@ const openRankChart = (rank: string, ev: Event) => {
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
                             <span class="text-slate-800 dark:text-slate-200 whitespace-nowrap">{{ rank }}</span>
-                            <button
+                            <v-btn
+                              icon
+                              variant="text"
+                              size="x-small"
                               type="button"
                               @click="openRankChart(rank, $event)"
-                              class="ml-auto p-1 rounded-md text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors shrink-0"
+                              class="ml-auto text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 shrink-0"
                               title="このランクの勝敗の変遷をグラフで見る"
                               aria-label="このランクの勝敗の変遷をグラフで見る"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l3-3 4 4 5-7" />
-                              </svg>
-                            </button>
+                              <v-icon :icon="mdiChartLine" size="16" />
+                            </v-btn>
                           </div>
                         </td>
                         <td class="p-2 sm:p-4 text-center font-bold text-blue-600 dark:text-blue-400">{{ stats.win }}</td>
@@ -618,34 +604,30 @@ const openRankChart = (rank: string, ev: Event) => {
                       </tr>
                     </template>
                   </tbody>
-                </table>
-              </div>
+                </v-table>
+              </v-card>
             </div>
 
             <!-- 注意書き（集計ルールの補足表示） -->
-            <div class="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-100 dark:border-blue-900/30">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
+            <v-alert type="info" class="p-3 sm:p-4">
+              <div class="text-[11px] sm:text-xs font-bold leading-relaxed min-w-0">
                 <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較</p>
                 <p>・YOU Only: 自分のみプレイ済み / FRIEND Only: 相手のみプレイ済み</p>
                 <p>・両者未プレイの楽曲は集計から除外して表示しています。</p>
               </div>
-            </div>
+            </v-alert>
           </div>
-        </div>
+        </v-card-text>
 
         <!-- フッター（閉じるボタン） -->
-        <div class="p-3 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-right">
-          <button @click="emit('close')" class="w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-md transition-all active:scale-95 text-base sm:text-lg">
+        <v-card-actions class="p-3 sm:p-6 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 justify-end">
+          <v-btn @click="emit('close')" size="x-large" class="w-full sm:w-auto px-8 sm:px-12 bg-slate-900 hover:bg-black text-white text-base sm:text-lg">
             閉じる
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+  </v-dialog>
 
   <!-- 勝敗の変遷グラフ（サマリーカード / 非公式難易度行のグラフボタンから開く） -->
   <FriendComparisonChartModal

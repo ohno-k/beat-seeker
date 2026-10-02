@@ -41,6 +41,7 @@ import {
   versionShort,
 } from '../utils/iidxVersions';
 import { toJstDateKey } from '../utils/jstTime';
+import { mdiChevronLeft, mdiMagnify } from '@mdi/js';
 
 const props = defineProps<{
   /** 表示対象の作品バージョン番号（30〜33）。 */
@@ -300,26 +301,31 @@ onMounted(async () => {
   <div class="space-y-6">
     <!-- ヘッダー: 戻る導線 + 作品バッジ + 件数サマリー -->
     <div>
-      <button
-        class="inline-flex items-center gap-1 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      <v-btn
+        variant="text"
+        size="small"
+        class="-ml-2 px-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        :prepend-icon="mdiChevronLeft"
         @click="emit('back')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
         {{ t('past.list.back') }}
-      </button>
+      </v-btn>
 
       <div class="flex flex-wrap items-center gap-2 mt-2">
-        <span
-          class="px-2 py-0.5 text-xs font-bold rounded border"
+        <v-chip
+          label
+          variant="flat"
+          class="px-2 py-0.5 h-auto text-xs font-bold rounded border"
           :class="versionBadgeClass(props.version)"
-        >{{ props.version }}</span>
+        >{{ props.version }}</v-chip>
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ versionName(props.version) }}</h1>
-        <span
+        <v-chip
           v-if="props.version === CURRENT_VERSION"
-          class="px-1.5 py-0.5 text-[10px] rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-        >{{ t('past.manager.current') }}</span>
+          size="x-small"
+          label
+          variant="flat"
+          class="px-1.5 py-0.5 h-auto text-[10px] rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+        >{{ t('past.manager.current') }}</v-chip>
       </div>
 
       <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -328,9 +334,10 @@ onMounted(async () => {
       </p>
     </div>
 
-    <p v-if="errorMsg" class="text-xs text-red-600 dark:text-red-400">{{ errorMsg }}</p>
+    <v-alert v-if="errorMsg" type="error" class="text-xs">{{ errorMsg }}</v-alert>
 
-    <div v-if="isLoading" class="text-sm text-slate-500 dark:text-slate-400 py-12 text-center">
+    <div v-if="isLoading" class="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 py-12 text-center">
+      <v-progress-circular size="20" width="2" />
       {{ t('common.loading') }}
     </div>
 
@@ -340,69 +347,67 @@ onMounted(async () => {
 
     <template v-else>
       <!-- 歴代ベストの件数サマリー。円グラフのスライスと同じ数え方 -->
-      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 rounded-md px-4 py-3">
+      <v-card class="bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800/50 px-4 py-3">
         <p class="text-sm text-amber-700 dark:text-amber-300 font-bold tabular-nums">
           {{ t('past.list.bestCount', { n: allTimeBestCount.toLocaleString(), total: rows.length.toLocaleString() }) }}
         </p>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('past.list.bestCountHint') }}</p>
-      </div>
+      </v-card>
 
       <!-- フィルタ領域: 歴代トグル + 検索 + 難易度 + ★ + 件数 -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4 space-y-3">
+      <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-3">
         <!-- 自己歴代スコアのみ表示するトグル -->
-        <label class="flex items-center gap-2 cursor-pointer group w-fit" :title="t('past.list.onlyBestHint')">
-          <div class="relative inline-flex items-center">
-            <input v-model="onlyAllTimeBest" type="checkbox" class="sr-only peer">
-            <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
-          </div>
-          <span
-            class="text-xs sm:text-sm font-bold transition-colors"
-            :class="onlyAllTimeBest ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'"
-          >{{ t('past.list.onlyBest') }}</span>
-        </label>
+        <v-switch
+          v-model="onlyAllTimeBest"
+          color="#f59e0b"
+          class="w-fit flex-none"
+          :title="t('past.list.onlyBestHint')"
+        >
+          <template #label>
+            <span
+              class="ml-2 text-xs sm:text-sm font-bold transition-colors"
+              :class="onlyAllTimeBest ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'"
+            >{{ t('past.list.onlyBest') }}</span>
+          </template>
+        </v-switch>
 
         <div class="flex flex-wrap gap-3 items-center">
           <!-- 曲名検索 -->
-          <div class="relative flex-1 min-w-[200px]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              v-model="searchQuery"
-              type="text"
-              :placeholder="t('past.list.searchPlaceholder')"
-              class="w-full pl-10 pr-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+          <v-text-field
+            v-model="searchQuery"
+            type="text"
+            :placeholder="t('past.list.searchPlaceholder')"
+            :prepend-inner-icon="mdiMagnify"
+            class="flex-1 min-w-[200px] text-sm"
+          />
 
           <!-- 難易度フィルタ -->
-          <select
+          <v-select
             v-model="selectedDifficulty"
-            class="px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">{{ t('chartList.allDifficulties') }}</option>
-            <option v-for="d in availableDifficulties" :key="d" :value="d">{{ d }}</option>
-          </select>
+            :items="[{ title: t('chartList.allDifficulties'), value: '' }, ...availableDifficulties.map(d => ({ title: d, value: d }))]"
+            item-title="title"
+            item-value="value"
+            class="flex-none min-w-[160px] text-sm"
+          />
 
           <!-- ★レベルフィルタ -->
-          <select
+          <v-select
             v-model="selectedLevel"
-            class="px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">{{ t('chartList.allLevels') }}</option>
-            <option v-for="lv in availableLevels" :key="lv" :value="lv">Lv.{{ lv }}</option>
-          </select>
+            :items="[{ title: t('chartList.allLevels'), value: '' as number | '' }, ...availableLevels.map(lv => ({ title: `Lv.${lv}`, value: lv as number | '' }))]"
+            item-title="title"
+            item-value="value"
+            class="flex-none min-w-[140px] text-sm"
+          />
 
           <span class="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">
             {{ filtered.length.toLocaleString() }} {{ t('chartList.charts') }}
           </span>
         </div>
-      </div>
+      </v-card>
 
       <!-- スコア一覧テーブル。歴代ベストの行はアンバーで強調する -->
-      <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
+      <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
+          <v-table class="w-full text-sm bg-transparent">
             <thead>
               <tr class="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30">
                 <th
@@ -495,10 +500,13 @@ onMounted(async () => {
                   {{ row.title }}
                 </td>
                 <td class="px-3 py-3 text-center">
-                  <span
-                    class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md"
+                  <v-chip
+                    size="x-small"
+                    label
+                    variant="flat"
+                    class="px-2 py-0.5 h-auto text-[10px] font-bold rounded-md"
                     :class="DIFF_STYLE[row.difficultyName] || 'text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700'"
-                  >{{ row.difficultyName }}</span>
+                  >{{ row.difficultyName }}</v-chip>
                 </td>
                 <td class="px-3 py-3 text-center font-bold text-slate-700 dark:text-slate-300 tabular-nums">
                   {{ row.level ?? '—' }}
@@ -521,10 +529,13 @@ onMounted(async () => {
                 </td>
                 <td class="px-4 py-3 text-right whitespace-nowrap">
                   <!-- 歴代ベストの行はバッジ、そうでない行は「あと何点で当時の自分に並ぶか」を出す -->
-                  <span
+                  <v-chip
                     v-if="row.isAllTimeBest"
-                    class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-900/40"
-                  >★ {{ t('past.list.bestBadge') }}</span>
+                    size="x-small"
+                    label
+                    variant="flat"
+                    class="px-2 py-0.5 h-auto text-[10px] font-bold rounded-md text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-900/40"
+                  >★ {{ t('past.list.bestBadge') }}</v-chip>
                   <span v-else class="text-xs tabular-nums text-slate-500 dark:text-slate-400">
                     {{ (row.score - row.bestScore).toLocaleString() }}
                     <span class="text-[10px] text-slate-400 dark:text-slate-500">
@@ -539,30 +550,33 @@ onMounted(async () => {
                 </td>
               </tr>
             </tbody>
-          </table>
-        </div>
+          </v-table>
 
         <!-- ページネーション -->
         <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
-          <button
+          <v-btn
+            variant="outlined"
+            size="small"
             :disabled="currentPage <= 1"
-            class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            class="px-3 text-xs font-bold rounded-lg border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             @click="currentPage--"
           >
             {{ t('chartList.prev') }}
-          </button>
+          </v-btn>
           <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
             {{ currentPage }} / {{ totalPages }}
           </span>
-          <button
+          <v-btn
+            variant="outlined"
+            size="small"
             :disabled="currentPage >= totalPages"
-            class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            class="px-3 text-xs font-bold rounded-lg border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
             @click="currentPage++"
           >
             {{ t('chartList.next') }}
-          </button>
+          </v-btn>
         </div>
-      </div>
+      </v-card>
 
       <p class="text-xs text-slate-500 dark:text-slate-400">{{ t('past.rateNote') }}</p>
       <p v-if="props.version !== CURRENT_VERSION" class="text-xs text-slate-500 dark:text-slate-400">{{ t('past.notRanked') }}</p>

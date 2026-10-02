@@ -229,11 +229,14 @@ onBeforeUnmount(() => {
       <span class="font-bold truncate" :class="props.title ? '' : 'italic text-slate-400 font-normal'">
         {{ props.title ?? '未決定' }}
       </span>
-      <span
+      <v-chip
         v-if="props.badgeLabel"
-        class="ml-auto shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded"
+        label
+        size="x-small"
+        variant="flat"
+        class="ml-auto shrink-0 text-[9px] font-bold px-1.5"
         :class="props.badgeClass"
-      >{{ props.badgeLabel }}</span>
+      >{{ props.badgeLabel }}</v-chip>
       <span class="shrink-0 text-slate-400 text-[9px]">▼</span>
     </button>
 
@@ -246,13 +249,14 @@ onBeforeUnmount(() => {
         class="rounded-md shadow-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden flex flex-col"
       >
         <div class="p-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
-          <input
+          <v-text-field
             ref="searchEl"
             v-model="query"
             type="text"
+            density="compact"
             placeholder="曲名 または 管理番号 (例: 1762) で検索"
+            class="w-full text-xs"
             @keydown="onSearchKeydown"
-            class="w-full px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs"
           />
         </div>
         <ul class="overflow-y-auto text-xs" :style="{ maxHeight: `${PANEL_MAX_HEIGHT - 48}px` }">

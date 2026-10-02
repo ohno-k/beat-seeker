@@ -13,6 +13,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { API_BASE } from '../composables/useAuth';
 import { formatJst, toJstDate } from '../utils/jstTime';
+import { mdiRefresh } from '@mdi/js';
 
 /** アクティビティ 1 件分の型（API レスポンス）。 */
 interface ActivityItem {
@@ -75,7 +76,7 @@ onMounted(fetchFeed);
 </script>
 
 <template>
-  <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+  <v-card class="bg-white dark:bg-slate-800 overflow-hidden transition-colors duration-200">
     <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -83,16 +84,14 @@ onMounted(fetchFeed);
         </svg>
         <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('activity.title') }}</h3>
       </div>
-      <button @click="fetchFeed" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors rounded">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isLoading }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
+      <v-btn icon variant="text" size="small" @click="fetchFeed" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+        <v-icon :icon="mdiRefresh" size="18" :class="{ 'animate-spin': isLoading }" />
+      </v-btn>
     </div>
 
     <div class="divide-y divide-slate-50 dark:divide-slate-700/50">
       <div v-if="isLoading" class="px-5 py-6 text-center">
-        <div class="w-5 h-5 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+        <v-progress-circular size="20" width="2" class="mx-auto" />
       </div>
 
       <div v-else-if="activities.length === 0" class="px-5 py-8 text-center">
@@ -122,5 +121,5 @@ onMounted(fetchFeed);
         </div>
       </div>
     </div>
-  </div>
+  </v-card>
 </template>

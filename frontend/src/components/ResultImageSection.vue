@@ -10,6 +10,7 @@
  * 画像本体は Cloudflare R2 に保存され、ここでは署名付き URL を `<img>` で表示するだけ。
  * 未ログイン時はログインを促すヒントのみ表示する。
  */
+import { mdiChevronLeft, mdiChevronRight, mdiClose, mdiPlus } from '@mdi/js';
 import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { useResultImages, type ResultImageDto } from '../composables/useResultImages';
 import { compressImage } from '../utils/imageCompress';
@@ -145,8 +146,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>
-  <div
-    class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800 transition-colors duration-200 mt-6"
+  <v-card
+    class="overflow-hidden transition-colors duration-200 mt-6"
   >
     <!-- ヘッダ: タイトル + 枚数 + 追加ボタン -->
     <div
@@ -159,22 +160,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         {{ t('resultImage.section') }}
         <span v-if="images.length > 0" class="text-slate-400 dark:text-slate-500 font-bold">{{ images.length }}</span>
       </p>
-      <button
+      <v-btn
         v-if="isLoggedIn"
-        type="button"
-        class="rounded-lg px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 shrink-0"
+        color="primary"
+        size="small"
+        class="text-xs shrink-0"
         :disabled="uploading"
         @click="triggerPick"
       >
-        <svg v-if="!uploading" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-        </svg>
-        <svg v-else class="h-3.5 w-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
+        <template #prepend>
+          <v-icon v-if="!uploading" :icon="mdiPlus" size="14" />
+          <v-progress-circular v-else size="14" width="2" color="current" />
+        </template>
         {{ uploading ? t('resultImage.uploading') : t('resultImage.add') }}
-      </button>
+      </v-btn>
     </div>
 
     <div class="p-4 sm:p-6">
@@ -185,12 +184,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 
       <template v-else>
         <!-- エラー -->
-        <div
+        <v-alert
           v-if="error"
-          class="mb-3 p-3 rounded-md border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/40 text-xs sm:text-sm text-red-700 dark:text-red-300"
+          type="error"
+          class="mb-3 text-xs sm:text-sm"
         >
           {{ error }}
-        </div>
+        </v-alert>
 
         <!-- 読み込み中（初回かつ未取得時） -->
         <p v-if="loading && images.length === 0" class="text-xs sm:text-sm text-slate-400 dark:text-slate-500 text-center py-4">
@@ -219,14 +219,16 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
               class="w-full h-full object-cover cursor-zoom-in transition-opacity duration-200 hover:opacity-90"
               @click="openLightbox(i)"
             />
-            <button
-              type="button"
-              class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/55 hover:bg-red-600 text-white flex items-center justify-center text-sm leading-none transition-colors"
+            <v-btn
+              icon
+              size="x-small"
+              variant="flat"
+              class="absolute top-1 right-1 w-6 h-6 bg-black/55 hover:bg-red-600 text-white"
               :aria-label="t('resultImage.delete')"
               @click.stop="onDelete(img)"
             >
-              ×
-            </button>
+              <v-icon :icon="mdiClose" size="14" />
+            </v-btn>
           </div>
         </div>
       </template>
@@ -241,37 +243,42 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       class="hidden"
       @change="onFilesSelected"
     />
-  </div>
+  </v-card>
 
   <!-- ライトボックス（拡大表示） -->
-  <Teleport to="body">
+  <v-dialog
+    :model-value="lightboxOpen && !!lightboxImage"
+    fullscreen
+    :scrollable="false"
+    @update:model-value="(v: boolean) => { if (!v) closeLightbox() }"
+  >
     <div
-      v-if="lightboxOpen && lightboxImage"
-      class="fixed inset-0 z-[120] flex items-center justify-center bg-black/90 p-4 animate-fade-in"
+      v-if="lightboxImage"
+      class="relative w-full h-full flex items-center justify-center bg-black/90 p-4"
       @click.self="closeLightbox"
     >
       <!-- 閉じる -->
-      <button
-        type="button"
-        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center text-2xl leading-none transition-colors"
+      <v-btn
+        icon
+        variant="flat"
+        class="absolute top-4 right-4 bg-white/15 hover:bg-white/30 text-white"
         aria-label="close"
         @click="closeLightbox"
       >
-        ×
-      </button>
+        <v-icon :icon="mdiClose" />
+      </v-btn>
 
       <!-- 前へ -->
-      <button
+      <v-btn
         v-if="images.length > 1"
-        type="button"
-        class="absolute left-3 sm:left-6 w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
+        icon
+        variant="flat"
+        class="absolute left-3 sm:left-6 bg-white/15 hover:bg-white/30 text-white"
         aria-label="prev"
         @click.stop="showPrev"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-        </svg>
-      </button>
+        <v-icon :icon="mdiChevronLeft" />
+      </v-btn>
 
       <img
         :src="lightboxImage.url"
@@ -281,25 +288,26 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       />
 
       <!-- 次へ -->
-      <button
+      <v-btn
         v-if="images.length > 1"
-        type="button"
-        class="absolute right-3 sm:right-6 w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors"
+        icon
+        variant="flat"
+        class="absolute right-3 sm:right-6 bg-white/15 hover:bg-white/30 text-white"
         aria-label="next"
         @click.stop="showNext"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-        </svg>
-      </button>
+        <v-icon :icon="mdiChevronRight" />
+      </v-btn>
 
       <!-- カウンタ -->
-      <div
+      <v-chip
         v-if="images.length > 1"
-        class="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded bg-white/15 text-white text-xs font-bold tabular-nums"
+        label
+        variant="flat"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/15 text-white text-xs font-bold tabular-nums"
       >
         {{ (lightboxIndex ?? 0) + 1 }} / {{ images.length }}
-      </div>
+      </v-chip>
     </div>
-  </Teleport>
+  </v-dialog>
 </template>

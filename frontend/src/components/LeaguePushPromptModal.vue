@@ -91,14 +91,13 @@ async function enable() {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      v-if="visible"
-      class="fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in"
-      @click.self="close"
-    >
-      <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col">
-        <div class="p-6 text-center">
+  <v-dialog
+    :model-value="visible"
+    @update:model-value="(v: boolean) => { if (!v) close() }"
+    max-width="448"
+  >
+    <v-card class="bg-white dark:bg-slate-800 overflow-hidden flex flex-col">
+        <v-card-text class="p-6 text-center">
           <div class="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -114,27 +113,31 @@ async function enable() {
           <p class="text-xs text-slate-400 dark:text-slate-500 mt-3">
             この案内は 1 回だけ表示されます。あとからプロフィール画面でいつでも設定できます。
           </p>
-        </div>
+        </v-card-text>
 
-        <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex gap-2">
-          <button
+        <v-divider />
+        <v-card-actions class="p-4 flex gap-2">
+          <v-btn
             type="button"
-            class="flex-1 rounded-md px-4 py-2.5 text-sm font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-colors"
+            variant="tonal"
+            height="40"
+            class="flex-1 text-sm"
             @click="close"
           >
             後で
-          </button>
-          <button
+          </v-btn>
+          <v-btn
             type="button"
+            color="indigo"
+            height="40"
             :disabled="isSubscribing"
-            class="flex-1 rounded-md px-4 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            class="flex-1 text-sm"
             @click="enable"
           >
-            <span v-if="isSubscribing" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            <v-progress-circular v-if="isSubscribing" size="16" width="2" color="white" class="mr-2" />
             通知を有効にする
-          </button>
-        </div>
-      </div>
-    </div>
-  </Teleport>
+          </v-btn>
+        </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>

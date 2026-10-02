@@ -14,6 +14,7 @@
  *  - `fuse.js` — 部分一致＋誤字許容のファジー検索
  *  - `songData` — 既存の楽曲一覧（title/artist/genre を含む）
  */
+import { mdiCameraOutline, mdiClose, mdiVideoOutline } from '@mdi/js';
 import { ref, onBeforeUnmount } from 'vue';
 import { createWorker, PSM, type Worker as TesseractWorker } from 'tesseract.js';
 import Fuse from 'fuse.js';
@@ -397,178 +398,170 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 animate-fade-in"
-      @click.self="closeModal"
-    >
-      <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-        <!-- ヘッダ: タイトル + 閉じるボタン -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
-          <div>
-            <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('ocrSearch.title') }}</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('ocrSearch.subtitle') }}</p>
-          </div>
-          <button
-            @click="closeModal"
-            class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            aria-label="close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+  <v-dialog
+    :model-value="true"
+    max-width="512"
+    @update:model-value="(v: boolean) => { if (!v) closeModal() }"
+  >
+    <v-card class="w-full overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- ヘッダ: タイトル + 閉じるボタン -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ t('ocrSearch.title') }}</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('ocrSearch.subtitle') }}</p>
         </div>
-
-        <!-- 本体 -->
-        <div class="p-6 space-y-4 overflow-y-auto">
-          <!-- 初期状態: カメラ起動ボタン -->
-          <div v-if="status === 'idle'" class="flex flex-col items-center py-4 space-y-4">
-            <div class="w-20 h-20 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <p class="text-sm text-slate-500 dark:text-slate-400 text-center">{{ t('ocrSearch.hint') }}</p>
-            <button
-              @click="openCamera"
-              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              {{ t('ocrSearch.openCamera') }}
-            </button>
-          </div>
-
-          <!-- カメラ映像 + シャッターボタン（ready/capturing/initializing 共通） -->
-          <div v-else-if="status === 'initializing' || status === 'ready' || status === 'capturing'" class="space-y-3">
-            <div class="relative aspect-video bg-black rounded-md overflow-hidden">
-              <video
-                ref="videoRef"
-                autoplay
-                playsinline
-                muted
-                class="absolute inset-0 w-full h-full object-cover"
-              />
-              <!-- スキャンエリアのオーバーレイ枠（CROP_*_PCT 定数と同じ位置・サイズに揃える） -->
-              <div class="absolute inset-0 pointer-events-none">
-                <div
-                  class="absolute border-2 border-blue-400 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
-                  :style="{
-                    top: `${CROP_TOP_PCT * 100}%`,
-                    left: `${CROP_LEFT_PCT * 100}%`,
-                    width: `${CROP_WIDTH_PCT * 100}%`,
-                    height: `${CROP_HEIGHT_PCT * 100}%`,
-                  }"
-                ></div>
-              </div>
-              <!-- 状態バッジ -->
-              <div class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold px-2.5 py-1 rounded flex items-center gap-2">
-                {{ status === 'initializing' ? t('ocrSearch.initializing') : (status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.ready')) }}
-              </div>
-            </div>
-
-            <!-- シャッターボタン -->
-            <button
-              @click="captureAndRecognize"
-              :disabled="status !== 'ready'"
-              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <svg v-if="status === 'capturing'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.3" />
-                <path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              {{ status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.capture') }}
-            </button>
-
-            <!-- マッチ失敗メッセージ -->
-            <div
-              v-if="noMatchMessage"
-              class="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md text-sm text-amber-700 dark:text-amber-300 font-medium"
-            >
-              {{ noMatchMessage }}
-            </div>
-
-            <p v-if="recognizedText" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg">
-              {{ t('ocrSearch.recognized', { text: recognizedText }) }}
-            </p>
-          </div>
-
-          <!-- 候補一覧: スコア順でカード表示し、ユーザーにタップで選ばせる -->
-          <div v-else-if="status === 'candidates'" class="space-y-3">
-            <div class="flex items-baseline justify-between">
-              <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('ocrSearch.selectSong') }}</p>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ matchCandidates.length }}</p>
-            </div>
-
-            <p v-if="recognizedText" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg">
-              {{ t('ocrSearch.recognized', { text: recognizedText }) }}
-            </p>
-
-            <div class="space-y-2 max-h-[55vh] overflow-y-auto -mx-1 px-1">
-              <button
-                v-for="(c, i) in matchCandidates"
-                :key="`${c.song.title}|${c.song.artist}|${i}`"
-                @click="pickCandidate(c)"
-                class="w-full text-left p-3 rounded-md border transition-all"
-                :class="i === 0
-                  ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
-                  : 'bg-white dark:bg-slate-700/40 border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-700'"
-              >
-                <div class="flex items-start gap-3">
-                  <div
-                    class="shrink-0 min-w-[3rem] h-8 flex items-center justify-center rounded-lg text-xs font-bold tabular-nums"
-                    :class="i === 0
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
-                  >
-                    {{ c.score }}%
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white break-words leading-tight">{{ c.song.title }}</h4>
-                    <p class="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">{{ c.song.artist }}</p>
-                    <p v-if="c.song.genre" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ c.song.genre }}</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            <button
-              @click="retry"
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-md border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all text-sm"
-            >
-              {{ t('ocrSearch.retry') }}
-            </button>
-          </div>
-
-          <!-- エラー -->
-          <div v-else-if="status === 'error'" class="space-y-3">
-            <div class="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md">
-              <div class="flex items-start gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <p class="text-sm text-red-700 dark:text-red-300 font-medium">{{ errorMessage || t('ocrSearch.cameraError') }}</p>
-              </div>
-            </div>
-            <button
-              @click="retry"
-              class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold rounded-md transition-all"
-            >
-              {{ t('ocrSearch.retry') }}
-            </button>
-          </div>
-
-          <!-- 非表示の作業用キャンバス -->
-          <canvas ref="canvasRef" class="hidden"></canvas>
-        </div>
+        <v-btn
+          icon
+          variant="text"
+          size="small"
+          class="shrink-0 text-slate-400"
+          aria-label="close"
+          @click="closeModal"
+        >
+          <v-icon :icon="mdiClose" />
+        </v-btn>
       </div>
-    </div>
-  </Teleport>
+
+      <!-- 本体 -->
+      <div class="p-6 space-y-4 overflow-y-auto">
+        <!-- 初期状態: カメラ起動ボタン -->
+        <div v-if="status === 'idle'" class="flex flex-col items-center py-4 space-y-4">
+          <div class="w-20 h-20 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <p class="text-sm text-slate-500 dark:text-slate-400 text-center">{{ t('ocrSearch.hint') }}</p>
+          <v-btn
+            color="primary"
+            block
+            size="large"
+            :prepend-icon="mdiVideoOutline"
+            @click="openCamera"
+          >
+            {{ t('ocrSearch.openCamera') }}
+          </v-btn>
+        </div>
+
+        <!-- カメラ映像 + シャッターボタン（ready/capturing/initializing 共通） -->
+        <div v-else-if="status === 'initializing' || status === 'ready' || status === 'capturing'" class="space-y-3">
+          <div class="relative aspect-video bg-black rounded-md overflow-hidden">
+            <video
+              ref="videoRef"
+              autoplay
+              playsinline
+              muted
+              class="absolute inset-0 w-full h-full object-cover"
+            />
+            <!-- スキャンエリアのオーバーレイ枠（CROP_*_PCT 定数と同じ位置・サイズに揃える） -->
+            <div class="absolute inset-0 pointer-events-none">
+              <div
+                class="absolute border-2 border-blue-400 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]"
+                :style="{
+                  top: `${CROP_TOP_PCT * 100}%`,
+                  left: `${CROP_LEFT_PCT * 100}%`,
+                  width: `${CROP_WIDTH_PCT * 100}%`,
+                  height: `${CROP_HEIGHT_PCT * 100}%`,
+                }"
+              ></div>
+            </div>
+            <!-- 状態バッジ -->
+            <v-chip
+              label
+              variant="flat"
+              class="absolute top-2 left-2 bg-black/70 text-white text-[11px] font-bold"
+            >
+              {{ status === 'initializing' ? t('ocrSearch.initializing') : (status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.ready')) }}
+            </v-chip>
+          </div>
+
+          <!-- シャッターボタン -->
+          <v-btn
+            color="primary"
+            block
+            size="large"
+            :disabled="status !== 'ready'"
+            @click="captureAndRecognize"
+          >
+            <template #prepend>
+              <v-progress-circular v-if="status === 'capturing'" size="20" width="2" color="white" />
+              <v-icon v-else :icon="mdiCameraOutline" />
+            </template>
+            {{ status === 'capturing' ? t('ocrSearch.capturing') : t('ocrSearch.capture') }}
+          </v-btn>
+
+          <!-- マッチ失敗メッセージ -->
+          <v-alert
+            v-if="noMatchMessage"
+            type="warning"
+            class="text-sm font-medium"
+          >
+            {{ noMatchMessage }}
+          </v-alert>
+
+          <p v-if="recognizedText" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg">
+            {{ t('ocrSearch.recognized', { text: recognizedText }) }}
+          </p>
+        </div>
+
+        <!-- 候補一覧: スコア順でカード表示し、ユーザーにタップで選ばせる -->
+        <div v-else-if="status === 'candidates'" class="space-y-3">
+          <div class="flex items-baseline justify-between">
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('ocrSearch.selectSong') }}</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">{{ matchCandidates.length }}</p>
+          </div>
+
+          <p v-if="recognizedText" class="text-[11px] font-mono text-slate-500 dark:text-slate-400 break-all bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg">
+            {{ t('ocrSearch.recognized', { text: recognizedText }) }}
+          </p>
+
+          <div class="space-y-2 max-h-[55vh] overflow-y-auto -mx-1 px-1">
+            <v-card
+              v-for="(c, i) in matchCandidates"
+              :key="`${c.song.title}|${c.song.artist}|${i}`"
+              class="w-full text-left p-3 transition-all"
+              :class="i === 0
+                ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40'
+                : 'bg-white dark:bg-slate-700/40 border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-700'"
+              @click="pickCandidate(c)"
+            >
+              <div class="flex items-start gap-3">
+                <div
+                  class="shrink-0 min-w-[3rem] h-8 flex items-center justify-center rounded-lg text-xs font-bold tabular-nums"
+                  :class="i === 0
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'"
+                >
+                  {{ c.score }}%
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-sm font-bold text-slate-900 dark:text-white break-words leading-tight">{{ c.song.title }}</h4>
+                  <p class="text-xs text-slate-600 dark:text-slate-300 truncate mt-0.5">{{ c.song.artist }}</p>
+                  <p v-if="c.song.genre" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ c.song.genre }}</p>
+                </div>
+              </div>
+            </v-card>
+          </div>
+
+          <v-btn variant="outlined" block @click="retry">
+            {{ t('ocrSearch.retry') }}
+          </v-btn>
+        </div>
+
+        <!-- エラー -->
+        <div v-else-if="status === 'error'" class="space-y-3">
+          <v-alert type="error" class="text-sm font-medium">
+            {{ errorMessage || t('ocrSearch.cameraError') }}
+          </v-alert>
+          <v-btn color="primary" block size="large" @click="retry">
+            {{ t('ocrSearch.retry') }}
+          </v-btn>
+        </div>
+
+        <!-- 非表示の作業用キャンバス -->
+        <canvas ref="canvasRef" class="hidden"></canvas>
+      </div>
+    </v-card>
+  </v-dialog>
 </template>

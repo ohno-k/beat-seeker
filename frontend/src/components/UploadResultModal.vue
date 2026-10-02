@@ -1,5 +1,4 @@
 <template>
-  <Teleport to="body">
     <!--
       レスポンシブ指定の注意: src/output.css（古い Tailwind 断片）が本体 CSS より後に読み込まれ、
       flex / block / hidden / flex-col / p-4 / px-3 / text-sm などを再定義している。これらを素のクラスで
@@ -8,8 +7,12 @@
         - 方向の切替は max-sm:flex-col（素の flex-col を置かない）
       で書いている。
     -->
-    <div v-if="isOpen" class="fixed inset-0 z-[110] bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-6 animate-fade-in" @click.self="close">
-      <div id="report-container" class="relative bg-white dark:bg-slate-900 w-full max-w-3xl rounded-md shadow-xl flex flex-col overflow-hidden max-h-[94vh] animate-slide-up border border-slate-200 dark:border-slate-800">
+    <v-dialog
+      :model-value="isOpen"
+      max-width="768"
+      @update:model-value="(v: boolean) => { if (!v) close() }"
+    >
+      <v-card id="report-container" class="relative bg-white dark:bg-slate-900 w-full shadow-xl flex flex-col overflow-hidden max-h-[94vh] border-slate-200 dark:border-slate-800">
 
         <!-- ヘッダー -->
         <div class="shrink-0 flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-800">
@@ -22,11 +25,9 @@
             <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">{{ t('report.title') }}</h2>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">{{ reportDate ? `${dateLabel} ・ ${versionLabel}` : t('report.subtitle') }}</p>
           </div>
-          <button id="modal-close-btn" @click="close" class="shrink-0 w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" :aria-label="t('common.close')">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <v-btn id="modal-close-btn" icon variant="text" size="small" class="shrink-0 text-slate-400" :aria-label="t('common.close')" @click="close">
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
         <!-- スクロール可能な本文領域（ティア / 集計 / フォルダ / リーグ / 更新曲） -->
@@ -35,17 +36,17 @@
 
             <!-- ティアカード: 現在ティア・合計 PT・増分・次ティアまでの進捗を 1 枚に収める。昇格時は金枠 + TIER UP。 -->
             <div class="grid gap-3" :class="tierCards.length > 1 ? 'sm:grid-cols-2' : ''">
-              <div
+              <v-card
                 v-for="c in tierCards"
                 :key="c.key"
-                class="card p-3 sm:p-4"
+                class="p-3 sm:p-4"
                 :class="c.tierUp ? 'ring-1 ring-amber-400 !border-amber-400 dark:!border-amber-500' : ''"
               >
                 <div class="flex items-center justify-between gap-2">
                   <p class="section-label tracking-widest">{{ c.label }}</p>
                   <p v-if="c.tierUp" class="flex items-center gap-1.5 min-w-0">
                     <span class="text-[10px] font-bold text-slate-400 line-through truncate">{{ c.oldTierName }}</span>
-                    <span class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded bg-amber-400 text-amber-950 tracking-wide">{{ t('report.tierUpBadge') }}</span>
+                    <v-chip label size="x-small" variant="flat" class="shrink-0 text-[10px] font-bold px-2 bg-amber-400 text-amber-950 tracking-wide">{{ t('report.tierUpBadge') }}</v-chip>
                   </p>
                 </div>
                 <div class="mt-2 flex items-center gap-3">
@@ -70,24 +71,26 @@
                     <div class="h-full rounded-full" :class="c.barClass" :style="{ width: `${c.progress}%` }"></div>
                   </div>
                 </div>
-              </div>
+              </v-card>
             </div>
 
             <!-- 集計タイル -->
             <div v-if="diffData.updatedSongs.length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <!-- スマホは「値 ラベル」を横に並べて高さを半分にする（素の flex を置くと output.css に負けるので max-sm: で指定） -->
-              <div v-for="s in statTiles" :key="s.key" class="card px-3 py-2 max-sm:flex max-sm:items-baseline max-sm:gap-1.5 min-w-0">
+              <v-card v-for="s in statTiles" :key="s.key" class="px-3 py-2 max-sm:flex max-sm:items-baseline max-sm:gap-1.5 min-w-0">
                 <p class="text-base sm:text-xl font-bold tabular-nums leading-tight shrink-0" :class="s.value > 0 ? s.colorClass : 'text-slate-300 dark:text-slate-600'">{{ s.text }}</p>
                 <p class="section-label truncate">{{ s.label }}</p>
-              </div>
+              </v-card>
             </div>
 
             <!-- フォルダアナウンス（☆11/☆12 フォルダのランクアサイン、ランクアップ、残り数を通知） -->
-            <div v-if="diffData.folderAnnouncements && diffData.folderAnnouncements.length > 0" class="card p-3">
+            <v-card v-if="diffData.folderAnnouncements && diffData.folderAnnouncements.length > 0" class="p-3">
               <p class="section-label mb-2">{{ t('report.folderNews') }}</p>
               <div class="flex flex-wrap gap-1.5">
-                <div v-for="ann in diffData.folderAnnouncements" :key="ann.folder + ann.type"
-                  class="inline-flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-bold"
+                <v-chip v-for="ann in diffData.folderAnnouncements" :key="ann.folder + ann.type"
+                  label
+                  variant="outlined"
+                  class="gap-1.5 px-2 border text-xs font-bold"
                   :class="ann.type === 'rank_assigned'
                     ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300'
                     : ann.type === 'rank_up'
@@ -98,16 +101,16 @@
                   <span v-if="ann.type === 'rank_assigned'">{{ t('report.folderRankAssigned', { rank: ann.newRankName }) }}</span>
                   <span v-else-if="ann.type === 'rank_up'">{{ t('report.folderRankUp', { oldRank: ann.oldRankName, newRank: ann.newRankName }) }}</span>
                   <span v-else-if="ann.type === 'remaining'">{{ t('report.folderRemaining', { n: ann.remaining }) }}</span>
-                </div>
+                </v-chip>
               </div>
-            </div>
+            </v-card>
 
             <!-- リーグモードの進捗（今回の更新に課題曲が含まれたときだけ。アップロード時点の順位・有効曲・見込みPT を保存したもの） -->
-            <div v-if="leagueProgress" class="card p-3">
+            <v-card v-if="leagueProgress" class="p-3">
               <div class="flex items-center gap-2 flex-wrap">
                 <DivisionIcon :tier="leagueProgress.tier" :size="24" class="shrink-0" />
                 <p class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ t('report.league.title') }}</p>
-                <span class="badge">{{ divisionName(leagueProgress.tier) }} / {{ t('league.groupN', { n: leagueProgress.groupIndex + 1 }) }}</span>
+                <v-chip label>{{ divisionName(leagueProgress.tier) }} / {{ t('league.groupN', { n: leagueProgress.groupIndex + 1 }) }}</v-chip>
                 <span v-if="leagueWeekLabel" class="ml-auto text-[11px] font-bold text-slate-400 tabular-nums">{{ leagueWeekLabel }}</span>
               </div>
               <div class="mt-2 grid grid-cols-4 gap-2">
@@ -146,21 +149,21 @@
                     <span class="text-[10px] font-bold text-slate-400 shrink-0 whitespace-nowrap">
                       {{ s.difficultyName }}<template v-if="s.level"> ☆{{ s.level }}</template>
                     </span>
-                    <span v-if="s.updated"
-                          class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-700 text-white whitespace-nowrap tabular-nums">
+                    <v-chip v-if="s.updated"
+                          label size="x-small" variant="flat"
+                          class="shrink-0 text-[10px] font-bold px-1.5 bg-blue-700 text-white whitespace-nowrap tabular-nums">
                       {{ t('report.league.updated') }}<template v-if="s.scoreIncrease > 0"> +{{ s.scoreIncrease }}</template>
-                    </span>
-                    <span class="ml-auto shrink-0 inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap"
+                    </v-chip>
+                    <v-chip label size="x-small" variant="flat"
+                          class="ml-auto shrink-0 gap-1 text-[10px] font-bold px-1.5 whitespace-nowrap"
                           :class="s.justActivated
                             ? 'bg-emerald-500 text-white'
                             : s.valid
                               ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
                               : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'">
-                      <svg v-if="s.valid" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+                      <v-icon v-if="s.valid" :icon="mdiCheck" size="12" />
                       {{ s.justActivated ? t('report.league.activated') : s.valid ? t('report.league.valid') : t('report.league.invalid') }}
-                    </span>
+                    </v-chip>
                   </div>
                   <!-- 自己ベスト vs ライン（+ 未達なら残り EX） -->
                   <div class="mt-0.5 flex items-center gap-x-4 gap-y-0.5 flex-wrap text-[11px]">
@@ -187,33 +190,35 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </v-card>
 
             <!-- 更新曲リスト: 1 曲 1 行の表形式。行を開くと詳細とオプション投票が出る。 -->
             <div>
               <div class="flex items-center gap-2 flex-wrap px-1">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ t('report.updatedSongs') }}</h3>
-                <span class="badge tabular-nums">{{ diffData.updatedSongs.length }}</span>
-                <select
+                <v-chip label class="tabular-nums">{{ diffData.updatedSongs.length }}</v-chip>
+                <v-select
                   v-if="diffData.updatedSongs.length > 1"
                   v-model="listSort"
-                  class="ml-auto text-xs font-semibold rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 pl-2 pr-7 py-1"
+                  :items="sortOptions"
+                  item-title="label"
+                  item-value="value"
+                  class="ml-auto flex-none min-w-[10rem] text-xs font-semibold"
                   :aria-label="t('report.sortLabel')"
-                >
-                  <option v-for="o in sortOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
-                </select>
+                />
               </div>
 
-              <div v-if="filterChips.length > 1" class="mt-2 flex flex-wrap gap-1.5 px-1">
-                <button
-                  v-for="f in filterChips"
-                  :key="f.value"
-                  @click="listFilter = f.value"
-                  class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors tabular-nums"
-                  :class="listFilter === f.value
-                    ? 'bg-blue-700 border-blue-700 text-white dark:bg-blue-600 dark:border-blue-600'
-                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'"
-                >{{ f.label }} <span class="opacity-70">{{ f.count }}</span></button>
+              <div v-if="filterChips.length > 1" class="mt-2 px-1">
+                <v-chip-group v-model="listFilter" mandatory column selected-class="bg-blue-700 border-blue-700 text-white dark:bg-blue-600 dark:border-blue-600">
+                  <v-chip
+                    v-for="f in filterChips"
+                    :key="f.value"
+                    :value="f.value"
+                    variant="outlined"
+                    rounded="pill"
+                    class="px-2.5 text-[11px] font-bold tabular-nums"
+                  >{{ f.label }} <span class="ml-1 opacity-70">{{ f.count }}</span></v-chip>
+                </v-chip-group>
               </div>
 
               <div v-if="diffData.updatedSongs.length === 0" class="mt-2 text-center p-8 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 border-dashed">
@@ -232,7 +237,7 @@
                 </div>
                 <p class="sm:hidden mt-2 px-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">{{ t('report.rowHint') }}</p>
 
-                <ul class="mt-1 card divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+                <v-card tag="ul" class="mt-1 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
                   <li
                     v-for="song in visibleSongs"
                     :key="song.title + song.difficulty"
@@ -266,11 +271,14 @@
                             <span :class="getClearTypeColor(song.newClearType)">{{ clearTypeShort(song.newClearType) }}</span>
                           </span>
                           <!-- 過去作が持っていた歴代ベストを塗り替えたときだけ出す -->
-                          <span
+                          <v-chip
                             v-if="song.allTimeBestUpdated"
-                            class="px-1 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 whitespace-nowrap"
+                            label
+                            size="x-small"
+                            variant="flat"
+                            class="h-4 px-1 text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 whitespace-nowrap"
                             :title="song.allTimeBeatenVersion ? t('report.allTimeBestHint', { version: `${song.allTimeBeatenVersion} ${versionName(song.allTimeBeatenVersion)}` }) : ''"
-                          >★ {{ t('report.stat.allTimeBest') }}<template v-if="allTimeGain(song) > 0"> +{{ allTimeGain(song) }}</template></span>
+                          >★ {{ t('report.stat.allTimeBest') }}<template v-if="allTimeGain(song) > 0"> +{{ allTimeGain(song) }}</template></v-chip>
                           <!-- 元々現行作が歴代ベストだった譜面をさらに伸ばしたとき（上より控えめ） -->
                           <span
                             v-else-if="song.allTimeBestExtended"
@@ -318,9 +326,7 @@
                         <p class="text-[10px] font-bold leading-tight" :class="ptClass(song)">{{ ptSub(song) }}</p>
                       </div>
 
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-400 shrink-0 transition-transform" :class="expandedKey === song.title + song.difficulty ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <v-icon :icon="mdiChevronDown" size="16" class="text-slate-400 shrink-0 transition-transform" :class="expandedKey === song.title + song.difficulty ? 'rotate-180' : ''" />
                     </div>
 
                     <!-- 展開部: 数値の内訳 + オプション投票（正規/MIRROR/RANDOM/R-RAN/S-RAN） -->
@@ -344,14 +350,14 @@
                           <dt class="section-label">{{ t('common.beatPt') }}</dt>
                           <dd>
                             {{ song.newBeatPt.toFixed(1) }}<span v-if="song.beatPtIncrease > 0" class="text-blue-600 dark:text-blue-400"> (+{{ song.beatPtIncrease.toFixed(1) }})</span>
-                            <span v-if="song.isInTop100 !== undefined" class="ml-1 text-[10px] px-1 rounded" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'">{{ song.isInTop100 ? t('report.inTop100') : t('report.outOfRange') }}</span>
+                            <v-chip v-if="song.isInTop100 !== undefined" label size="x-small" variant="flat" class="ml-1 h-4 text-[10px] font-bold px-1" :class="song.isInTop100 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'">{{ song.isInTop100 ? t('report.inTop100') : t('report.outOfRange') }}</v-chip>
                           </dd>
                         </div>
                         <div v-if="showRateTier && song.newRatePt > 0">
                           <dt class="section-label">{{ t('common.ratePt') }}</dt>
                           <dd>
                             {{ song.newRatePt.toFixed(1) }}<span v-if="song.ratePtIncrease > 0" class="text-emerald-600 dark:text-emerald-400"> (+{{ song.ratePtIncrease.toFixed(1) }})</span>
-                            <span v-if="song.isInRateTop100" class="ml-1 text-[10px] px-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ t('report.inTop100') }}</span>
+                            <v-chip v-if="song.isInRateTop100" label size="x-small" variant="flat" class="ml-1 h-4 text-[10px] font-bold px-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ t('report.inTop100') }}</v-chip>
                           </dd>
                         </div>
                       </dl>
@@ -377,40 +383,47 @@
                       <div class="mt-2.5">
                         <p class="section-label mb-1">{{ t('report.vote') }}</p>
                         <div class="flex flex-wrap gap-1">
-                          <button
+                          <v-btn
                             v-for="opt in optionTypes"
                             :key="opt.value"
-                            @click.stop="castVote(song.title, song.difficulty, opt.value)"
-                            :disabled="votingKey === (song.title + song.difficulty)"
-                            class="px-2 py-1 rounded-md text-[10px] font-bold border transition-all disabled:opacity-50 flex items-center gap-0.5"
+                            size="x-small"
+                            variant="outlined"
+                            class="px-2 text-[10px] border"
                             :class="getVoteClass(song.title, song.difficulty, opt.value, opt)"
+                            :disabled="votingKey === (song.title + song.difficulty)"
+                            @click.stop="castVote(song.title, song.difficulty, opt.value)"
                           >
                             {{ opt.icon }} {{ opt.label }}<span v-if="songVotes[song.title + song.difficulty]?.myVotes?.includes(opt.value)"> ✔</span>
-                          </button>
+                          </v-btn>
                         </div>
                       </div>
                     </div>
                   </li>
-                </ul>
+                </v-card>
 
                 <p v-if="filteredSongs.length === 0" class="mt-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400 py-4">{{ t('report.noMatch') }}</p>
 
-                <button
+                <v-btn
                   v-if="filteredSongs.length > visibleSongs.length"
+                  variant="outlined"
+                  block
+                  class="mt-2"
                   @click="visibleCount += PAGE_SIZE"
-                  class="btn-secondary w-full mt-2"
-                >{{ t('report.showMore', { n: filteredSongs.length - visibleSongs.length }) }}</button>
+                >{{ t('report.showMore', { n: filteredSongs.length - visibleSongs.length }) }}</v-btn>
               </template>
             </div>
 
             <!-- スコアロードマップの進捗（今回のアップロードで新しく達成した目標・レベルがあるときだけ。最下部） -->
-            <div v-if="roadmapProgress" class="card p-3">
+            <v-card v-if="roadmapProgress" class="p-3">
               <div class="flex items-center gap-2">
                 <p class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ t('report.roadmap.title') }}</p>
-                <button
-                  class="ml-auto text-[11px] font-bold text-blue-700 dark:text-blue-300 hover:underline shrink-0"
+                <v-btn
+                  variant="text"
+                  size="small"
+                  color="primary"
+                  class="ml-auto text-[11px] shrink-0"
                   @click="$emit('navigate', 'score-roadmap')"
-                >{{ t('report.roadmap.open') }} →</button>
+                >{{ t('report.roadmap.open') }} →</v-btn>
               </div>
 
               <!-- レベルの変化 -->
@@ -419,23 +432,23 @@
                   <span class="text-sm font-bold font-mono text-slate-400">{{ formatRoadmapLevel(roadmapProgress.oldLevel) }}</span>
                   <span class="text-slate-400">→</span>
                   <span class="text-2xl font-bold font-mono text-blue-700 dark:text-blue-300">{{ formatRoadmapLevel(roadmapProgress.newLevel) }}</span>
-                  <span v-if="roadmapProgress.oldLevel != null && roadmapProgress.newLevel != null" class="text-xs font-bold px-1.5 py-0.5 rounded bg-blue-700 text-white">
+                  <v-chip v-if="roadmapProgress.oldLevel != null && roadmapProgress.newLevel != null" label size="small" variant="flat" class="text-xs font-bold px-1.5 bg-blue-700 text-white">
                     {{ roadmapProgress.newLevel > roadmapProgress.oldLevel ? '+' : '' }}{{ roadmapProgress.newLevel - roadmapProgress.oldLevel }}
-                  </span>
+                  </v-chip>
                 </template>
                 <span v-else class="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">{{ formatRoadmapLevel(roadmapProgress.newLevel) }}</span>
                 <span class="text-xs text-slate-400">/ {{ roadmapProgress.maxLevel }}</span>
               </div>
               <div class="mt-1 flex flex-wrap gap-1.5 text-[11px] font-bold">
-                <span v-if="roadmapProgress.newlyCleared > 0" class="px-2 py-0.5 rounded border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-300">
+                <v-chip v-if="roadmapProgress.newlyCleared > 0" label variant="outlined" class="px-2 text-[11px] font-bold border bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-300">
                   {{ t('report.roadmap.newLevels', { n: roadmapProgress.newlyCleared }) }}
-                </span>
-                <span v-if="roadmapProgress.newlyComplete > 0" class="px-2 py-0.5 rounded border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300">
+                </v-chip>
+                <v-chip v-if="roadmapProgress.newlyComplete > 0" label variant="outlined" class="px-2 text-[11px] font-bold border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-300">
                   ★ {{ t('report.roadmap.newComplete', { n: roadmapProgress.newlyComplete }) }}
-                </span>
-                <span v-if="roadmapProgress.next" class="px-2 py-0.5 rounded border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
+                </v-chip>
+                <v-chip v-if="roadmapProgress.next" label variant="outlined" class="px-2 text-[11px] font-bold border bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300">
                   {{ t('report.roadmap.next', { lv: roadmapProgress.next.no, n: roadmapProgress.next.remaining }) }}
-                </span>
+                </v-chip>
               </div>
 
               <!-- 新たに達成した目標（難しいレベル順） -->
@@ -443,53 +456,61 @@
                 <p class="section-label mb-1">{{ t('report.roadmap.newTargets', { n: roadmapProgress.targets.length }) }}</p>
                 <ul class="rounded-md border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
                   <li v-for="tg in roadmapTargetsShown" :key="tg.key" class="px-2.5 py-1.5 flex items-center gap-2 text-xs">
-                    <span
-                      class="text-[10px] font-bold font-mono px-1.5 rounded w-11 text-center shrink-0"
+                    <v-chip
+                      label
+                      size="x-small"
+                      variant="flat"
+                      class="h-4 text-[10px] font-bold font-mono px-1.5 w-11 justify-center shrink-0"
                       :class="tg.line === 'maxMinus' ? 'bg-slate-800 text-white dark:bg-slate-200 dark:text-slate-900'
                         : tg.line === 'aaa' ? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-200'
-                        : 'border border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-300'"
-                    >{{ ROADMAP_LINE_LABEL[tg.line] }}</span>
+                        : 'bg-transparent border border-slate-200 text-slate-500 dark:border-slate-600 dark:text-slate-300'"
+                    >{{ ROADMAP_LINE_LABEL[tg.line] }}</v-chip>
                     <span class="font-mono text-slate-400 shrink-0">☆{{ tg.level }}</span>
                     <span class="min-w-0 font-bold text-slate-800 dark:text-slate-100 break-words">{{ roadmapChartName(tg.title, tg.difficultyName) }}</span>
                     <span class="ml-auto font-mono text-slate-500 shrink-0">Lv.{{ tg.no }}</span>
                   </li>
                 </ul>
-                <button
+                <v-btn
                   v-if="!showAllRoadmapTargets && roadmapProgress.targets.length > ROADMAP_TARGETS_SHOWN"
-                  class="btn-secondary w-full mt-2"
+                  variant="outlined"
+                  block
+                  class="mt-2"
                   @click="showAllRoadmapTargets = true"
-                >{{ t('report.showMore', { n: roadmapProgress.targets.length - ROADMAP_TARGETS_SHOWN }) }}</button>
+                >{{ t('report.showMore', { n: roadmapProgress.targets.length - ROADMAP_TARGETS_SHOWN }) }}</v-btn>
               </div>
-            </div>
+            </v-card>
           </div>
         </div>
 
         <!-- フッター: X シェアボタン + 閉じるボタン -->
         <div id="modal-footer" class="px-4 py-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 flex gap-2">
-          <button @click="openShareOptions" :disabled="isSharing" class="flex-1 min-w-0 py-3 bg-black hover:bg-slate-800 text-white font-bold rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-xs sm:text-sm">
+          <v-btn :disabled="isSharing" height="auto" class="flex-1 min-w-0 py-3 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm whitespace-normal" @click="openShareOptions">
             <template v-if="!isSharing">
-              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 fill-current mr-2 shrink-0" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
               </svg>
               <!-- 狭い画面では「／画像保存」の手前で折り返す（「画像」「保存」で割れないよう後半は nowrap）。 -->
               <span class="min-w-0">{{ t('report.shareX') }}<span class="whitespace-nowrap">{{ t('report.shareXOrSave') }}</span></span>
             </template>
             <template v-else>
-              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
+              <v-progress-circular size="16" width="2" color="white" class="mr-2" />
               {{ t('report.generatingImage') }}
             </template>
-          </button>
-          <button @click="close" class="flex-1 min-w-0 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-md transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm">
+          </v-btn>
+          <v-btn variant="tonal" height="auto" class="flex-1 min-w-0 py-3 text-xs sm:text-sm whitespace-normal" @click="close">
             {{ t('report.backToDashboard') }}
-          </button>
+          </v-btn>
         </div>
+      </v-card>
+    </v-dialog>
 
-        <!-- 画像出力オプション（並び順 / DJ NAME の有無）+ 縮小プレビュー -->
-        <div v-if="isShareOptionsOpen && diffData" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-3" @click.self="isShareOptionsOpen = false">
-          <div class="bg-white dark:bg-slate-800 w-full max-w-2xl max-h-full rounded-md shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+    <!-- 画像出力オプション（並び順 / DJ NAME の有無）+ 縮小プレビュー -->
+    <v-dialog
+      :model-value="isOpen && isShareOptionsOpen && !!diffData"
+      max-width="672"
+      @update:model-value="(v: boolean) => { if (!v) isShareOptionsOpen = false }"
+    >
+          <v-card v-if="diffData" class="bg-white dark:bg-slate-800 w-full max-h-full shadow-xl border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
             <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-700 shrink-0">
               <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ t('report.outputOptions') }}</h3>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ t('report.outputOptionsSub') }}</p>
@@ -507,15 +528,14 @@
               <div class="flex-1 min-w-0 space-y-2">
                 <!-- 載せる曲の選び方（並び順の上位 SHARE_MAX_SONGS 曲 / 自由選択） -->
                 <div role="radiogroup" :aria-label="t('report.outputOptionsSub')" class="grid grid-cols-2 gap-2">
-                  <button
+                  <v-card
                     v-for="opt in shareModeOptions"
                     :key="opt.value"
-                    type="button"
                     role="radio"
                     :aria-checked="shareMode === opt.value"
-                    @click="selectShareMode(opt.value)"
-                    class="min-w-0 flex items-start gap-2 p-2.5 rounded-md border-2 transition-all text-left"
+                    class="min-w-0 flex items-start gap-2 p-2.5 border-2 transition-all text-left"
                     :class="shareMode === opt.value ? SHARE_TONE[opt.tone].box : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50'"
+                    @click="selectShareMode(opt.value)"
                   >
                     <span class="mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0" :class="shareMode === opt.value ? SHARE_TONE[opt.tone].ring : 'border-slate-300 dark:border-slate-600'">
                       <span v-if="shareMode === opt.value" class="w-2 h-2 rounded-full" :class="SHARE_TONE[opt.tone].dot"></span>
@@ -524,7 +544,7 @@
                       <span class="block font-bold text-[13px] leading-5" :class="shareMode === opt.value ? SHARE_TONE[opt.tone].text : 'text-slate-700 dark:text-slate-200'">{{ opt.label }}</span>
                       <span class="block text-[11px] leading-4 text-slate-500 dark:text-slate-400">{{ opt.desc }}</span>
                     </span>
-                  </button>
+                  </v-card>
                 </div>
 
                 <!-- 自由選択: 更新曲の中から最大 SHARE_MAX_SONGS 曲。選んだ順がそのまま画像の並び順になる -->
@@ -534,27 +554,30 @@
                       {{ t('report.pick.selected') }}
                       <span class="ml-1 tabular-nums" :class="isPickFull ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'">{{ customSongs.length }}/{{ SHARE_MAX_SONGS }}</span>
                     </p>
-                    <button
-                      type="button"
-                      @click="customKeys = []"
+                    <v-btn
+                      variant="text"
+                      size="x-small"
+                      class="text-[11px] text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400"
                       :disabled="customSongs.length === 0"
-                      class="text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 disabled:opacity-40 disabled:hover:text-slate-500 transition-colors"
-                    >{{ t('report.pick.clear') }}</button>
+                      @click="customKeys = []"
+                    >{{ t('report.pick.clear') }}</v-btn>
                   </div>
 
                   <!-- 選んだ曲（番号 = 画像での並び順。押すと外れる） -->
                   <ul v-if="customSongs.length > 0" class="flex flex-wrap gap-1 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
                     <li v-for="(song, i) in customSongs" :key="songKey(song)" class="min-w-0 max-w-full">
-                      <button
-                        type="button"
-                        @click="togglePick(song)"
+                      <v-chip
+                        label
+                        size="small"
+                        variant="flat"
                         :title="t('report.pick.remove')"
-                        class="max-w-full inline-flex items-center gap-1 pl-1.5 pr-1 py-0.5 rounded bg-slate-100 dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/30 text-[11px] font-bold text-slate-700 dark:text-slate-200 transition-colors"
+                        class="max-w-full gap-1 pl-1.5 pr-1 bg-slate-100 dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/30 text-[11px] font-bold text-slate-700 dark:text-slate-200"
+                        @click="togglePick(song)"
                       >
                         <span class="tabular-nums text-slate-400 dark:text-slate-500">{{ i + 1 }}</span>
                         <span class="truncate">{{ displayTitle(song) }}</span>
                         <span class="text-slate-400 dark:text-slate-500" aria-hidden="true">×</span>
-                      </button>
+                      </v-chip>
                     </li>
                   </ul>
                   <p v-else class="px-3 py-2 text-[11px] font-bold text-amber-600 dark:text-amber-400 border-b border-slate-200 dark:border-slate-700">{{ t('report.pick.needOne') }}</p>
@@ -562,37 +585,41 @@
                   <!-- 画像の右端の列 -->
                   <div class="flex items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
                     <span class="shrink-0 text-[11px] font-bold text-slate-500 dark:text-slate-400">{{ t('report.pick.column') }}</span>
-                    <div role="group" :aria-label="t('report.pick.column')" class="flex items-center gap-1 p-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50">
-                      <button
+                    <v-btn-toggle
+                      :model-value="shareColumn"
+                      mandatory
+                      density="compact"
+                      :aria-label="t('report.pick.column')"
+                      @update:model-value="(v: ShareColumn) => { customColumn = v }"
+                    >
+                      <v-btn
                         v-for="col in customColumnOptions"
                         :key="col.value"
-                        type="button"
-                        @click="customColumn = col.value"
+                        :value="col.value"
+                        size="x-small"
+                        class="px-2 text-[11px] whitespace-nowrap"
                         :aria-pressed="shareColumn === col.value"
-                        class="px-2 py-0.5 text-[11px] font-bold rounded whitespace-nowrap transition-colors"
-                        :class="shareColumn === col.value
-                          ? 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 shadow-sm'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                      >{{ col.label }}</button>
-                    </div>
+                      >{{ col.label }}</v-btn>
+                    </v-btn-toggle>
                   </div>
 
                   <!-- 候補の絞り込み・並び順 -->
                   <div class="flex items-center gap-2 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
-                    <input
+                    <v-text-field
                       v-model="pickQuery"
                       type="search"
                       :placeholder="t('report.pick.search')"
                       :aria-label="t('report.pick.search')"
-                      class="flex-1 min-w-0 px-2 py-1 text-xs rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
+                      class="flex-1 min-w-0 text-xs"
                     />
-                    <select
+                    <v-select
                       v-model="pickSort"
+                      :items="sortOptions"
+                      item-title="label"
+                      item-value="value"
                       :aria-label="t('report.sortLabel')"
-                      class="shrink-0 px-1.5 py-1 text-xs font-bold rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
-                    >
-                      <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-                    </select>
+                      class="shrink-0 flex-none min-w-[9rem] text-xs font-bold"
+                    />
                   </div>
 
                   <!-- 候補（更新曲）。上限に達したら未選択の行は選べない -->
@@ -602,12 +629,13 @@
                         class="flex items-center gap-2 px-3 py-1.5 select-none transition-colors"
                         :class="!isPicked(song) && isPickFull ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40'"
                       >
-                        <input
-                          type="checkbox"
-                          class="w-4 h-4 shrink-0 accent-blue-700"
-                          :checked="isPicked(song)"
+                        <v-checkbox-btn
+                          density="compact"
+                          color="primary"
+                          class="shrink-0 flex-none"
+                          :model-value="isPicked(song)"
                           :disabled="!isPicked(song) && isPickFull"
-                          @change="togglePick(song)"
+                          @update:model-value="togglePick(song)"
                         />
                         <span class="w-1 self-stretch rounded-full shrink-0" :class="getDifficultyBarClass(song.difficulty)"></span>
                         <span class="min-w-0 flex-1">
@@ -622,19 +650,23 @@
                     </li>
                     <li v-if="pickCandidates.length === 0" class="px-3 py-4 text-center text-xs text-slate-500 dark:text-slate-400">{{ t('report.pick.empty') }}</li>
                   </ul>
-                  <button
+                  <v-btn
                     v-if="pickCandidates.length > pickVisible.length"
-                    type="button"
+                    variant="text"
+                    color="primary"
+                    block
+                    rounded="0"
+                    class="text-[11px] border-t border-slate-200 dark:border-slate-700"
                     @click="pickVisibleCount += PAGE_SIZE"
-                    class="w-full py-1.5 text-[11px] font-bold text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 border-t border-slate-200 dark:border-slate-700 transition-colors"
-                  >{{ t('report.showMore', { n: pickCandidates.length - pickVisible.length }) }}</button>
+                  >{{ t('report.showMore', { n: pickCandidates.length - pickVisible.length }) }}</v-btn>
                   <p v-if="isPickFull" class="px-3 py-1.5 text-[11px] text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700">{{ t('report.pick.full', { max: SHARE_MAX_SONGS }) }}</p>
                 </div>
 
-                <label v-if="canShowOwner" class="flex items-center gap-3 px-4 py-3 rounded-md border border-slate-200 dark:border-slate-700 cursor-pointer select-none">
-                  <input type="checkbox" v-model="showDjName" class="w-4 h-4 accent-blue-700" />
-                  <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('report.showDjName') }}</span>
-                </label>
+                <v-checkbox v-if="canShowOwner" v-model="showDjName" class="px-2 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                  <template #label>
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ t('report.showDjName') }}</span>
+                  </template>
+                </v-checkbox>
               </div>
             </div>
             <!--
@@ -645,68 +677,67 @@
               {{ t(usesShareSheet ? 'report.shareHintMobile' : 'report.shareHintPc') }}
             </p>
             <div class="px-4 py-3 flex gap-2 shrink-0">
-              <button @click="isShareOptionsOpen = false" class="py-2.5 px-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-xs sm:text-sm transition-colors">
+              <v-btn variant="tonal" size="large" class="px-3 text-xs sm:text-sm" @click="isShareOptionsOpen = false">
                 {{ t('common.cancel') }}
-              </button>
-              <button @click="saveShareImage" :disabled="!shareBlob" class="flex-1 min-w-0 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-xs sm:text-sm transition-colors disabled:opacity-60">
+              </v-btn>
+              <v-btn variant="tonal" size="large" class="flex-1 min-w-0 text-xs sm:text-sm" :disabled="!shareBlob" @click="saveShareImage">
                 {{ t('report.saveImage') }}
-              </button>
+              </v-btn>
               <!-- 画像は先回りで生成しておき、click 時は共有だけ行う（ユーザー操作の有効期間内に navigator.share / window.open を呼ぶため） -->
-              <button @click="confirmShare" :disabled="isGeneratingShare || isSharing || !hasShareSongs" class="flex-1 min-w-0 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-xs sm:text-sm transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60">
+              <v-btn size="large" class="flex-1 min-w-0 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm" :disabled="isGeneratingShare || isSharing || !hasShareSongs" @click="confirmShare">
                 <template v-if="isGeneratingShare || isSharing">
-                  <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                  </svg>
+                  <v-progress-circular size="16" width="2" color="white" class="mr-1.5" />
                   {{ t('report.generatingImage') }}
                 </template>
                 <template v-else-if="shareGenError">
                   {{ t('report.regenerateImage') }}
                 </template>
                 <template v-else>
-                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 fill-current mr-1.5" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
                   </svg>
                   {{ t('report.generateAndShare') }}
                 </template>
-              </button>
+              </v-btn>
             </div>
             <p v-if="shareGenError" class="px-4 pb-3 text-xs font-bold text-red-600 dark:text-red-400 shrink-0">{{ t('report.generateError') }}</p>
-          </div>
-        </div>
+          </v-card>
+    </v-dialog>
 
         <!--
           PC ブラウザ（と Web Share が使えないスマホ）向けの案内。画像はコピー済み / ダウンロード済みで、
           X の投稿画面は window.open で開いている。ポップアップブロック等で開かなかった場合のために
           通常のリンク（ユーザーの click で開くのでブロックされない）も置く。
         -->
-        <div v-if="shareFallback" class="absolute inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-3" @click.self="shareFallback = null">
-          <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-md shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+    <v-dialog
+      :model-value="isOpen && !!shareFallback"
+      max-width="448"
+      @update:model-value="(v: boolean) => { if (!v) shareFallback = null }"
+    >
+          <v-card class="bg-white dark:bg-slate-800 w-full shadow-xl border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
             <div class="px-5 py-4">
               <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ t('report.postReadyTitle') }}</h3>
               <p class="text-sm text-slate-700 dark:text-slate-200 mt-2">{{ t(shareFallback === 'copied' ? 'report.fallbackCopied' : 'report.fallbackDownloaded') }}</p>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">{{ t('report.fallbackHint') }}</p>
             </div>
             <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-700 flex gap-2 shrink-0">
-              <button @click="shareFallback = null" class="py-2.5 px-4 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
+              <v-btn variant="tonal" size="large" class="px-4 text-sm" @click="shareFallback = null">
                 {{ t('common.close') }}
-              </button>
-              <button @click="saveShareImage" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold rounded-md text-sm transition-colors">
+              </v-btn>
+              <v-btn variant="tonal" size="large" class="flex-1 text-sm" @click="saveShareImage">
                 {{ t('report.saveImage') }}
-              </button>
-              <a :href="intentUrl" target="_blank" rel="noopener" class="flex-1 py-2.5 bg-black hover:bg-slate-800 text-white font-bold rounded-md text-sm transition-colors flex items-center justify-center gap-1.5">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              </v-btn>
+              <v-btn :href="intentUrl" target="_blank" rel="noopener" size="large" class="flex-1 bg-black hover:bg-slate-800 text-white text-sm">
+                <svg class="w-4 h-4 fill-current mr-1.5" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.005 4.09H5.078z"/>
                 </svg>
                 {{ t('report.openX') }}
-              </a>
+              </v-btn>
             </div>
-          </div>
-        </div>
+          </v-card>
+    </v-dialog>
 
-      </div>
-    </div>
-
+  <Teleport to="body">
     <!-- X シェア用オフスクリーン領域（画面外に置いて html2canvas でキャプチャ。レイアウトは UploadReportShareImage） -->
     <div v-if="isOpen && diffData" class="fixed top-0 -left-[3000px] z-[-1] pointer-events-none" aria-hidden="true">
       <UploadReportShareImage ref="captureImage" v-bind="shareImageProps" />
@@ -778,6 +809,7 @@ import { ignoreOutside, withHtml2canvasTextFix } from '../utils/html2canvasHelpe
 import { jstParts, nowJstParts } from '../utils/jstTime';
 import { canShareImageNatively, copyImageToClipboard, downloadBlob, isIosDevice, xIntentUrl } from '../utils/shareToX';
 import html2canvas from 'html2canvas';
+import { mdiCheck, mdiChevronDown, mdiClose } from '@mdi/js';
 
 const { t } = useI18n();
 

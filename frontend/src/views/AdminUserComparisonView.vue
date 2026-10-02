@@ -255,22 +255,22 @@ onMounted(async () => {
     </header>
 
     <!-- 権限なし時の警告 -->
-    <div v-if="!isAdmin" class="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-md border border-amber-200 dark:border-amber-900/30">
-      <p class="text-amber-700 dark:text-amber-300 font-bold">
+    <v-alert v-if="!isAdmin" type="warning">
+      <p class="font-bold">
         この画面は管理者のみアクセス可能です。
       </p>
-    </div>
+    </v-alert>
 
     <template v-else>
       <!-- ロードエラー -->
-      <div v-if="loadError" class="bg-red-50 dark:bg-red-900/20 p-4 rounded-md border border-red-100 dark:border-red-900/30">
-        <p class="text-red-600 dark:text-red-400 font-bold">{{ loadError }}</p>
-      </div>
+      <v-alert v-if="loadError" type="error">
+        <p class="font-bold">{{ loadError }}</p>
+      </v-alert>
 
       <!-- 選択カード -->
-      <section class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-6 space-y-5">
+      <v-card tag="section" class="p-6 space-y-5">
         <div v-if="isLoadingUsers && users.length === 0" class="flex items-center gap-3 text-slate-500 font-bold">
-          <div class="w-5 h-5 border-2 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <v-progress-circular size="20" width="2" />
           ユーザー一覧を取得中...
         </div>
 
@@ -278,32 +278,36 @@ onMounted(async () => {
           <span class="text-xs font-bold text-blue-600 dark:text-blue-400">
             比較するユーザー
           </span>
-          <select
+          <v-select
             v-model="selectedId"
-            class="w-full px-3 py-3 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option :value="null">-- 選択してください --</option>
-            <option v-for="u in users" :key="u.id" :value="u.id">
-              {{ u.displayName }} ({{ u.iidxId }})
-            </option>
-          </select>
+            :items="users"
+            :item-title="(u: AdminUserSummary) => `${u.displayName} (${u.iidxId})`"
+            item-value="id"
+            placeholder="-- 選択してください --"
+            clearable
+            density="comfortable"
+            class="w-full font-bold"
+          />
         </label>
 
         <!-- レベル帯トグル -->
         <div class="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-4">
           <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
-          <label class="flex items-center gap-1.5 cursor-pointer select-none">
-            <input type="checkbox" v-model="showLv10Minus" class="w-4 h-4 rounded accent-indigo-500 cursor-pointer" />
-            <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
-          </label>
-          <label class="flex items-center gap-1.5 cursor-pointer select-none">
-            <input type="checkbox" v-model="showLv11" class="w-4 h-4 rounded accent-indigo-500 cursor-pointer" />
-            <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
-          </label>
-          <label class="flex items-center gap-1.5 cursor-pointer select-none">
-            <input type="checkbox" v-model="showLv12" class="w-4 h-4 rounded accent-indigo-500 cursor-pointer" />
-            <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
-          </label>
+          <v-checkbox v-model="showLv10Minus" color="indigo" class="flex-none">
+            <template #label>
+              <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.10以下</span>
+            </template>
+          </v-checkbox>
+          <v-checkbox v-model="showLv11" color="indigo" class="flex-none">
+            <template #label>
+              <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.11</span>
+            </template>
+          </v-checkbox>
+          <v-checkbox v-model="showLv12" color="indigo" class="flex-none">
+            <template #label>
+              <span class="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">Lv.12</span>
+            </template>
+          </v-checkbox>
         </div>
 
         <!-- 集計日時と再集計 -->
@@ -312,44 +316,42 @@ onMounted(async () => {
             集計日時: {{ formatComputedAt(computedAt) }}
             <span class="hidden sm:inline">（1 日 1 回のバッチで更新されます）</span>
           </p>
-          <button
-            @click="recalculate"
+          <v-btn
             :disabled="isRecalculating"
-            class="px-5 py-2 rounded-md font-bold text-xs sm:text-sm transition-all active:scale-95"
-            :class="isRecalculating
-              ? 'bg-slate-300 dark:bg-slate-600 text-white cursor-not-allowed'
-              : 'bg-slate-900 hover:bg-black text-white'"
+            class="px-5 text-xs sm:text-sm"
+            :class="isRecalculating ? '' : 'bg-slate-900 hover:bg-black text-white'"
+            @click="recalculate"
           >
             {{ isRecalculating ? '再集計中...' : '今すぐ再集計' }}
-          </button>
+          </v-btn>
         </div>
         <p v-if="recalcMessage" class="text-xs font-bold text-emerald-600 dark:text-emerald-400">
           {{ recalcMessage }}
         </p>
-      </section>
+      </v-card>
 
       <!-- 未選択時の案内 -->
-      <div v-if="selectedId == null" class="bg-slate-50 dark:bg-slate-900/40 p-6 rounded-md border border-slate-200 dark:border-slate-700 text-center">
+      <v-card v-if="selectedId == null" variant="flat" class="bg-slate-50 dark:bg-slate-900/40 p-6 border border-slate-200 dark:border-slate-700 text-center">
         <p class="text-slate-500 dark:text-slate-400 font-bold">
           ユーザーを選択すると、全ユーザーとの勝敗が表示されます。
         </p>
-      </div>
+      </v-card>
 
       <template v-else>
         <!-- 集計エラー -->
-        <div v-if="statsError" class="bg-red-50 dark:bg-red-900/20 p-4 rounded-md border border-red-100 dark:border-red-900/30">
-          <p class="text-red-600 dark:text-red-400 font-bold">{{ statsError }}</p>
-        </div>
+        <v-alert v-if="statsError" type="error">
+          <p class="font-bold">{{ statsError }}</p>
+        </v-alert>
 
         <!-- ローディング -->
         <div v-if="isLoadingStats" class="flex flex-col items-center justify-center py-16">
-          <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+          <v-progress-circular size="48" width="4" class="mb-4" />
           <p class="text-slate-500 font-bold">勝敗を集計中...</p>
         </div>
 
         <template v-else>
           <!-- 総合サマリー -->
-          <section class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-5 sm:p-6">
+          <v-card tag="section" class="p-5 sm:p-6">
             <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 mb-3">
               {{ selectedUser?.displayName }} の全ユーザー通算
             </h2>
@@ -371,7 +373,7 @@ onMounted(async () => {
                 <span class="text-[10px] text-slate-400 dark:text-slate-500">勝率</span>
               </div>
             </div>
-          </section>
+          </v-card>
 
           <!-- 対戦相手ランキング -->
           <section>
@@ -381,14 +383,13 @@ onMounted(async () => {
               <span class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-bold">(クリックで詳細)</span>
             </h2>
 
-            <div v-if="rows.length === 0" class="bg-slate-50 dark:bg-slate-900/40 p-6 rounded-md border border-slate-200 dark:border-slate-700 text-center">
+            <v-card v-if="rows.length === 0" variant="flat" class="bg-slate-50 dark:bg-slate-900/40 p-6 border border-slate-200 dark:border-slate-700 text-center">
               <p class="text-slate-500 dark:text-slate-400 font-bold">
                 比較できる相手がいません。レベルのトグルを確認してください。
               </p>
-            </div>
+            </v-card>
 
-            <div v-else class="bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700 overflow-x-auto">
-              <table class="w-full text-left border-collapse min-w-[640px]">
+            <v-table v-else class="opponent-table text-left bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700">
                 <thead class="bg-slate-50 dark:bg-slate-900/80 text-[10px] sm:text-sm font-bold text-slate-500">
                   <tr>
                     <th class="p-2 sm:p-4 w-10 sm:w-16 text-center">#</th>
@@ -442,22 +443,18 @@ onMounted(async () => {
                     <td class="p-2 sm:p-4 text-center font-bold text-red-500/80 bg-red-50/30 dark:bg-red-900/5">{{ row.onlyOpponent }}</td>
                   </tr>
                 </tbody>
-              </table>
-            </div>
+            </v-table>
           </section>
 
           <!-- 注意書き -->
-          <div class="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-100 dark:border-blue-900/30">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <v-alert type="info">
             <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
               <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
               <p>・勝率 = WIN ÷ (WIN + DRAW + LOSS)。両者プレイ済みの楽曲だけが母数です。</p>
               <p>・自分のみ / 相手のみ: 片方だけがプレイ済みの楽曲数。勝率には含みません。</p>
               <p>・集計は 1 日 1 回のバッチで更新されます。当日ぶんが無い場合は表示時にその場で集計します。</p>
             </div>
-          </div>
+          </v-alert>
         </template>
       </template>
     </template>
@@ -472,3 +469,10 @@ onMounted(async () => {
     />
   </div>
 </template>
+
+<style scoped>
+/* 旧 <table class="min-w-[640px]">。v-table は内側に <table> を描くので :deep で当てる（はみ出しは v-table が横スクロール） */
+.opponent-table :deep(table) {
+  min-width: 640px;
+}
+</style>

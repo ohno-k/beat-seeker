@@ -1,8 +1,8 @@
 <template>
   <!-- Rank up suggestion panel -->
-  <div
+  <v-card
     v-if="nextRankGap > 0"
-    class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200"
+    class="bg-white dark:bg-slate-800 p-4 sm:p-6 border-slate-200 dark:border-slate-700 transition-colors duration-200"
   >
     <div class="flex items-center justify-between mb-1">
       <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -23,12 +23,13 @@
       {{ t('advice.basedOnExpectedValue') }}
     </p>
 
-    <div v-if="isLoading" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+    <div v-if="isLoading" class="flex items-center justify-center gap-2 py-6 text-slate-400 dark:text-slate-500 text-sm">
+      <v-progress-circular size="20" width="2" />
       {{ t('advice.computingPotential') }}
     </div>
-    <div v-else-if="loadError" class="text-center py-6 text-rose-500 text-xs">
+    <v-alert v-else-if="loadError" type="error" class="my-2 text-xs">
       {{ t('advice.potentialError', { msg: loadError }) }}
-    </div>
+    </v-alert>
     <div v-else-if="suggestions.length === 0" class="text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
       {{ t('advice.noSuggestions') }}
     </div>
@@ -47,16 +48,22 @@
           <div class="flex items-center gap-1 min-w-0">
             <p class="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">{{ sug.title }}</p>
             <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
-            <span
+            <v-chip
               v-if="sug.unplayed"
-              class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-blue-500 text-white"
-            >{{ t('advice.unplayedTag') }}</span>
+              size="x-small"
+              label
+              variant="flat"
+              class="shrink-0 h-auto text-[9px] font-bold px-1 py-px bg-blue-500 text-white"
+            >{{ t('advice.unplayedTag') }}</v-chip>
             <!-- ペア回帰の参照が無く、加法モデルで概算した候補。σ が大きいので達成率も控えめに出ている -->
-            <span
+            <v-chip
               v-if="isRough(sug.accuracy)"
-              class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
+              size="x-small"
+              label
+              variant="flat"
+              class="shrink-0 h-auto text-[9px] font-bold px-1 py-px bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300"
               :title="accuracyLabel(sug.accuracy)"
-            >{{ t('advice.roughTag') }}</span>
+            >{{ t('advice.roughTag') }}</v-chip>
           </div>
           <p class="text-[10px] leading-tight text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-x-1.5">
             <span>{{ diffShort(sug.difficultyName) }}</span>
@@ -78,28 +85,29 @@
           </p>
         </div>
         <!-- 根拠モーダル。行はアイコンだけにして、式・分布図・手順はモーダル側で見せる -->
-        <button
-          type="button"
+        <v-btn
+          icon
+          variant="text"
+          size="x-small"
           @click="openReason(sug)"
-          class="shrink-0 -mr-0.5 p-1 rounded-full text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+          class="shrink-0 -mr-0.5 text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
           :aria-label="t('adviceReason.openButtonAria')"
           :title="t('adviceReason.openButtonAria')"
         >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
+          <v-icon :icon="mdiInformationOutline" size="16" />
+        </v-btn>
       </div>
 
       <!-- 10 件ずつ追加表示。候補は次ランクに届くまで並んでいるので、下まで開けば必要な曲がすべて見える -->
-      <button
+      <v-btn
         v-if="hiddenCount > 0"
-        type="button"
+        variant="outlined"
+        block
         @click="showMore"
-        class="w-full py-2 text-xs font-semibold rounded-md border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+        class="w-full py-2 text-xs font-semibold border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
       >
         {{ t('advice.showMore', { n: hiddenCount }) }}
-      </button>
+      </v-btn>
     </div>
 
     <!-- Total summary -->
@@ -128,13 +136,14 @@
 
     <!-- 挑戦済み: 直近に更新したが目標未達で候補から外した譜面。折りたたみで見返せる -->
     <div v-if="!isLoading && !loadError && attemptedItems.length > 0" class="mt-3">
-      <button
-        type="button"
+      <v-btn
+        variant="outlined"
+        block
         @click="showAttempted = !showAttempted"
-        class="w-full py-2 text-xs font-semibold rounded-md border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+        class="w-full py-2 text-xs font-semibold border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
       >
         {{ showAttempted ? t('advice.attemptedHide') : t('advice.attemptedShow', { n: attemptedItems.length }) }}
-      </button>
+      </v-btn>
       <div v-if="showAttempted" class="mt-2 space-y-2">
         <p class="text-[10px] text-slate-400 dark:text-slate-500">
           {{ t('advice.attemptedHint', { days: attemptCooldownDays }) }}
@@ -148,7 +157,7 @@
             <div class="flex items-center gap-1 min-w-0">
               <p class="font-bold text-slate-700 dark:text-slate-300 text-xs truncate">{{ sug.title }}</p>
               <InformalRankBadge :rank="sug.informalRank" size="xs" class="shrink-0" />
-              <span class="shrink-0 text-[9px] font-bold px-1 py-px rounded bg-amber-500 text-white">{{ t('advice.attemptedTag') }}</span>
+              <v-chip size="x-small" label variant="flat" class="shrink-0 h-auto text-[9px] font-bold px-1 py-px bg-amber-500 text-white">{{ t('advice.attemptedTag') }}</v-chip>
             </div>
             <p class="text-[10px] leading-tight text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-x-1.5">
               <span>{{ diffShort(sug.difficultyName) }}</span>
@@ -170,17 +179,17 @@
               {{ t('advice.pointsToGo', { n: pointsToGo(sug).toLocaleString() }) }}
             </p>
           </div>
-          <button
-            type="button"
+          <v-btn
+            icon
+            variant="text"
+            size="x-small"
             @click="openReason(sug)"
-            class="shrink-0 -mr-0.5 p-1 rounded-full text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+            class="shrink-0 -mr-0.5 text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
             :aria-label="t('adviceReason.openButtonAria')"
             :title="t('adviceReason.openButtonAria')"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </button>
+            <v-icon :icon="mdiInformationOutline" size="16" />
+          </v-btn>
         </div>
       </div>
     </div>
@@ -192,7 +201,7 @@
       :view-user-id="viewingUserId ?? null"
       @close="reasonItem = null"
     />
-  </div>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -246,6 +255,7 @@ import InformalRankBadge from './InformalRankBadge.vue';
 import RankUpAdviceReasonModal from './RankUpAdviceReasonModal.vue';
 import type { AttemptedItem, FillAccuracy, FillRecommendationItem } from '../types/fillRecommendation';
 import { isRoughAccuracy } from '../types/fillRecommendation';
+import { mdiInformationOutline } from '@mdi/js';
 
 const { t } = useI18n();
 const { authHeaders } = useAuth();

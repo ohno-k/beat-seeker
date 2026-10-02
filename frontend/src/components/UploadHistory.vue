@@ -20,6 +20,7 @@ import { diffTable as diffTableRef } from '../composables/useGameData';
 import { getSongMaxScore } from '../utils/scoreData';
 import { CURRENT_VERSION, HISTORY_VERSIONS, versionName } from '../utils/iidxVersions';
 import { formatJstDate, formatJstDateTime, toJstDate } from '../utils/jstTime';
+import { mdiClockOutline, mdiRefresh } from '@mdi/js';
 
 const { t, currentLang } = useI18n();
 import UploadResultModal from './UploadResultModal.vue';
@@ -305,12 +306,10 @@ watch(selectedVersion, () => {
 </script>
 
 <template>
-  <div class="w-full max-w-6xl animate-fade-in bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-100 dark:border-slate-700 transition-colors duration-200">
+  <v-card class="w-full max-w-6xl animate-fade-in p-6 border-slate-100 dark:border-slate-700 transition-colors duration-200">
     <div class="flex items-center justify-between mb-6">
       <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-500 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <v-icon :icon="mdiClockOutline" size="24" class="text-indigo-500 dark:text-indigo-400" />
         {{ t('history.title') }}
       </h2>
       <div class="flex items-center gap-2">
@@ -321,43 +320,50 @@ watch(selectedVersion, () => {
           :title="t('history.versionSelectHint')"
         >
           <span class="max-sm:hidden">{{ t('history.versionSelect') }}</span>
-          <select
-            v-model.number="selectedVersion"
-            class="px-2 py-1.5 text-xs font-semibold border rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          >
-            <option v-for="v in versionOptions" :key="v.num" :value="v.num">
-              {{ v.num }} {{ versionName(v.num) }}
-            </option>
-          </select>
+          <v-select
+            v-model="selectedVersion"
+            :items="versionOptions.map(v => ({ title: `${v.num} ${versionName(v.num)}`, value: v.num }))"
+            item-title="title"
+            item-value="value"
+            class="text-xs font-semibold min-w-[11rem]"
+          />
         </label>
-        <button
-          @click="groupByDay = !groupByDay"
-          :class="groupByDay ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-600' : 'bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'"
-          class="px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors focus:outline-none"
+        <v-btn
+          size="small"
+          :variant="groupByDay ? 'tonal' : 'outlined'"
+          :color="groupByDay ? 'indigo' : undefined"
+          class="text-xs font-semibold"
+          :class="groupByDay ? '' : 'text-slate-500 dark:text-slate-400'"
           :title="t('history.groupByDayHint')"
-        >{{ t('history.groupByDay') }}</button>
-        <button @click="fetchHistory" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg transition-colors focus:outline-none" :title="t('history.refresh')">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-          </svg>
-        </button>
+          @click="groupByDay = !groupByDay"
+        >{{ t('history.groupByDay') }}</v-btn>
+        <v-btn
+          icon
+          variant="text"
+          size="small"
+          class="text-slate-500 dark:text-slate-400"
+          :title="t('history.refresh')"
+          :aria-label="t('history.refresh')"
+          @click="fetchHistory"
+        >
+          <v-icon :icon="mdiRefresh" />
+        </v-btn>
       </div>
     </div>
 
     <div v-if="isLoading" class="py-12 flex justify-center">
-      <div class="w-8 h-8 border-4 border-slate-200 dark:border-slate-700 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin"></div>
+      <v-progress-circular size="32" width="4" color="indigo" />
     </div>
 
-    <div v-else-if="errorMsg" class="py-8 text-center text-red-500 dark:text-red-400">
+    <v-alert v-else-if="errorMsg" type="error" class="my-4">
       {{ errorMsg }}
-    </div>
+    </v-alert>
 
     <div v-else-if="historyList.length === 0" class="py-12 text-center text-slate-500 dark:text-slate-400">
       {{ t('history.empty') }}
     </div>
 
-    <div v-else class="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
-      <table class="w-full text-left border-collapse whitespace-nowrap">
+    <v-table v-else class="text-left whitespace-nowrap rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
         <thead>
           <tr class="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors duration-200">
             <th class="p-4 font-semibold text-center w-16">{{ t('history.colTier') }}</th>
@@ -412,12 +418,12 @@ watch(selectedVersion, () => {
             <!-- 種別列（更新曲数 or 難易度改訂バッジ） -->
             <td class="p-4 text-center align-middle font-bold">
               <div class="flex items-center justify-center gap-1.5">
-                <span v-if="item.updatedCount > 0" class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 rounded text-base">
+                <v-chip v-if="item.updatedCount > 0" label variant="flat" size="default" class="px-3 font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 text-base">
                   {{ item.updatedCount }} {{ t('history.unitSongs') }}
-                </span>
-                <span v-else class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded text-sm">
+                </v-chip>
+                <v-chip v-else label variant="flat" size="default" class="px-3 font-bold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-sm">
                   {{ t('history.revision') }}
-                </span>
+                </v-chip>
               </div>
             </td>
 
@@ -448,8 +454,7 @@ watch(selectedVersion, () => {
             </td>
           </tr>
         </tbody>
-      </table>
-    </div>
+    </v-table>
 
     <!-- アップロード差分モーダル（行クリックで開く） -->
     <UploadResultModal
@@ -460,5 +465,5 @@ watch(selectedVersion, () => {
       :hide-owner="!!props.viewingUserId || !!props.shareToken"
       @close="isModalOpen = false"
     />
-  </div>
+  </v-card>
 </template>

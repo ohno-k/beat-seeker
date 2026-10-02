@@ -20,6 +20,7 @@
 import { ref, computed, onUnmounted, onMounted, nextTick } from 'vue';
 import strategySongs from '../data/strategy_card_songs.json';
 import { useSe } from '../composables/useSe';
+import { mdiFullscreen, mdiFullscreenExit, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js';
 
 const se = useSe();
 
@@ -336,45 +337,39 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
     <!-- SE 音量 / ミュート + フルスクリーン切替ボタン (右上に固定表示) -->
     <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
       <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/70 border border-white/10 backdrop-blur shadow-lg">
-        <button
-          type="button"
+        <v-btn
+          icon
+          variant="text"
+          size="x-small"
           @click="se.toggleMuted()"
           class="text-slate-300 hover:text-white transition-colors"
           :title="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
           :aria-label="se.muted.value ? 'SE ミュート解除' : 'SE ミュート'"
         >
-          <svg v-if="!se.muted.value" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9z" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l4 4V5L9 9zM17 9l4 4m0-4l-4 4" />
-          </svg>
-        </button>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          :value="Math.round(se.volume.value * 100)"
-          @input="se.setVolume((Number(($event.target as HTMLInputElement).value) || 0) / 100)"
-          class="w-20 accent-fuchsia-400"
+          <v-icon :icon="se.muted.value ? mdiVolumeOff : mdiVolumeHigh" size="20" />
+        </v-btn>
+        <v-slider
+          :model-value="Math.round(se.volume.value * 100)"
+          @update:model-value="(v: number) => se.setVolume((Number(v) || 0) / 100)"
+          :min="0"
+          :max="100"
+          :step="1"
+          color="#e879f9"
+          class="w-20 flex-none"
           aria-label="SE 音量"
         />
       </div>
-      <button
-        type="button"
+      <v-btn
+        icon
+        variant="text"
         @click="toggleFullscreen"
-        class="p-2.5 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
+        class="w-11 h-11 rounded-xl bg-slate-800/70 hover:bg-slate-700 border border-white/10 hover:border-white/30 text-slate-300 hover:text-white backdrop-blur transition-all shadow-lg"
         :title="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
         :aria-label="isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン表示'"
       >
-        <!-- 全画面化アイコン (4つの角矢印) / 解除アイコン (内向き矢印) -->
-        <svg v-if="!isFullscreen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" />
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 4v4H5M15 4v4h4M9 20v-4H5M15 20v-4h4" />
-        </svg>
-      </button>
+        <!-- 全画面化アイコン / 解除アイコン -->
+        <v-icon :icon="isFullscreen ? mdiFullscreenExit : mdiFullscreen" size="20" />
+      </v-btn>
     </div>
 
     <!-- ヘッダ -->
@@ -386,7 +381,7 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
     </div>
 
     <!-- メインカード -->
-    <div class="relative max-w-6xl mx-auto bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-10 space-y-10">
+    <v-card class="relative max-w-6xl mx-auto bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 sm:p-10 flex flex-col gap-10 text-white overflow-visible">
 
       <!-- Step 1: ジャンル選択 -->
       <section>
@@ -395,13 +390,14 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
           <h2 class="text-xl font-bold tracking-wide">ジャンル選択</h2>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-          <button
+          <v-card
             v-for="g in GENRES"
             :key="g.key"
+            tag="button"
             type="button"
             @click="selectGenre(g.key)"
             :disabled="isSpinning"
-            class="genre-card relative group rounded-2xl p-4 text-left transition-all duration-300 overflow-hidden border-2"
+            class="genre-card relative group rounded-2xl p-4 text-left text-white transition-all duration-300 overflow-hidden border-2"
             :class="[
               selectedGenre === g.key
                 ? `bg-gradient-to-br ${g.gradient} border-white/40 shadow-xl ${g.glow} scale-105 -translate-y-1`
@@ -420,7 +416,7 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
             </p>
             <!-- 光るリング -->
             <div v-if="selectedGenre === g.key" class="absolute inset-0 rounded-2xl ring-2 ring-white/40 animate-pulse pointer-events-none"></div>
-          </button>
+          </v-card>
         </div>
       </section>
 
@@ -431,13 +427,14 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
           <h2 class="text-xl font-bold tracking-wide">戦を選択</h2>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button
+          <v-card
             v-for="m in MATCHES"
             :key="m.key"
+            tag="button"
             type="button"
             @click="selectMatch(m.key)"
             :disabled="isSpinning || matchDisabled(m.key)"
-            class="match-card relative rounded-2xl p-5 text-left transition-all duration-300 overflow-hidden border-2"
+            class="match-card relative rounded-2xl p-5 text-left text-white transition-all duration-300 overflow-hidden border-2"
             :class="[
               selectedMatch === m.key
                 ? `bg-gradient-to-br ${m.gradient} border-white/40 shadow-xl scale-[1.02]`
@@ -449,9 +446,9 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
           >
             <p class="text-2xl font-black tracking-wide mb-1" :class="selectedMatch === m.key ? 'text-white' : 'text-slate-200'">{{ m.label }}</p>
             <p class="text-xs font-mono tracking-widest" :class="selectedMatch === m.key ? 'text-white/80' : 'text-slate-500'">{{ m.sub }}</p>
-            <span v-if="matchDisabled(m.key)" class="absolute top-2 right-2 text-[9px] font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase tracking-wider">N/A</span>
+            <v-chip v-if="matchDisabled(m.key)" size="x-small" label variant="flat" class="absolute top-2 right-2 h-auto text-[9px] font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-400 uppercase tracking-wider">N/A</v-chip>
             <div v-if="selectedMatch === m.key" class="absolute inset-0 rounded-2xl ring-2 ring-white/40 animate-pulse pointer-events-none"></div>
-          </button>
+          </v-card>
         </div>
         <p v-if="selectedGenre && captainOnlyGenres.includes(selectedGenre)" class="mt-3 text-[11px] text-rose-300/80 font-mono">※ {{ selectedGenre }} は大将戦 (Lv12) のみ抽選可能</p>
       </section>
@@ -487,12 +484,12 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
 
             <p class="relative text-xs font-mono tracking-[0.4em] text-amber-300">DECIDED</p>
             <div class="relative flex items-center justify-center gap-2 flex-wrap">
-              <span v-if="activeGenreMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeGenreMeta.gradient">{{ activeGenreMeta.label }}</span>
-              <span v-if="activeMatchMeta" class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeMatchMeta.gradient">{{ activeMatchMeta.label }}</span>
-              <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ resultSong.level }}</span>
-              <span class="px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase" :class="resultSong.diff === 'L' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'">
+              <v-chip v-if="activeGenreMeta" variant="flat" class="px-3 py-1 h-auto rounded-full text-white text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeGenreMeta.gradient">{{ activeGenreMeta.label }}</v-chip>
+              <v-chip v-if="activeMatchMeta" variant="flat" class="px-3 py-1 h-auto rounded-full text-white text-[10px] font-black tracking-widest uppercase bg-gradient-to-r" :class="activeMatchMeta.gradient">{{ activeMatchMeta.label }}</v-chip>
+              <v-chip variant="flat" class="px-3 py-1 h-auto rounded-full text-white text-[10px] font-black tracking-widest uppercase bg-white/10 border border-white/20">Lv{{ resultSong.level }}</v-chip>
+              <v-chip variant="flat" class="px-3 py-1 h-auto rounded-full text-[10px] font-black tracking-widest uppercase" :class="resultSong.diff === 'L' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'">
                 {{ resultSong.diff === 'L' ? 'LEGGENDARIA' : 'ANOTHER' }}
-              </span>
+              </v-chip>
             </div>
             <p class="relative text-3xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-white to-amber-200 drop-shadow-[0_0_30px_rgba(252,211,77,0.5)] result-title">
               {{ resultSong.title }}
@@ -550,38 +547,36 @@ const activeMatchMeta = computed(() => MATCHES.find(m => m.key === selectedMatch
 
         <!-- アクションボタン -->
         <div class="flex flex-col sm:flex-row gap-3 mt-6">
-          <button
-            type="button"
+          <v-btn
+            size="x-large"
             @click="spin"
             :disabled="!canSpin"
-            class="flex-1 py-4 px-8 rounded-2xl text-lg font-black tracking-widest uppercase transition-all relative overflow-hidden"
+            class="flex-1 h-auto py-4 px-8 rounded-2xl text-lg font-black tracking-widest uppercase transition-all relative overflow-hidden disabled:opacity-100"
             :class="canSpin
               ? 'bg-gradient-to-r from-cyan-500 via-fuchsia-500 to-amber-500 text-white shadow-xl shadow-fuchsia-500/40 hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95'
               : 'bg-slate-800 text-slate-500 cursor-not-allowed'"
           >
             <span v-if="isSpinning" class="flex items-center justify-center gap-2">
-              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
+              <v-progress-circular size="20" width="2" color="currentColor" />
               DRAWING...
             </span>
             <span v-else>{{ resultSong ? 'もう一度抽選' : '抽選する' }}</span>
             <!-- ボタンの内部光沢アニメーション -->
             <span v-if="canSpin" class="absolute inset-0 button-shine pointer-events-none"></span>
-          </button>
-          <button
+          </v-btn>
+          <v-btn
             v-if="resultSong || currentDisplay"
-            type="button"
+            variant="outlined"
+            size="x-large"
             @click="reset"
             :disabled="isSpinning"
-            class="py-4 px-6 rounded-2xl text-sm font-bold tracking-wider uppercase bg-slate-800/60 border border-white/10 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+            class="h-auto py-4 px-6 rounded-2xl text-sm font-bold tracking-wider uppercase bg-slate-800/60 border border-white/10 text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
           >
             リセット
-          </button>
+          </v-btn>
         </div>
       </section>
-    </div>
+    </v-card>
   </div>
 </template>
 

@@ -13,6 +13,7 @@
  * - Lv11/Lv12、検索、勝敗フィルタ、カラムソート、ページネーション対応
  */
 import { ref, computed, watch, onMounted } from 'vue';
+import { mdiArrowLeft, mdiMagnifyPlusOutline } from '@mdi/js';
 import { useI18n } from '../composables/useI18n';
 import { useAuth } from '../composables/useAuth';
 import { songData as songDataBody, diffTable as diffTableRanks, getDifficultyCode } from '../composables/useGameData';
@@ -445,7 +446,7 @@ onMounted(loadData);
 
 <template>
   <div class="w-full max-w-full space-y-6 animate-fade-in">
-    <div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-md border border-slate-200 dark:border-slate-700 transition-colors">
+    <v-card class="bg-white dark:bg-slate-800 p-6 sm:p-8 transition-colors">
 
       <!-- ページヘッダ: タイトルアイコン + 見出し + サブタイトル -->
       <div class="flex items-center gap-4 mb-6">
@@ -463,48 +464,33 @@ onMounted(loadData);
 
       <!-- 検索ボックス + レベルトグル + 勝敗フィルタ + 色凡例 -->
       <div class="flex flex-wrap items-center gap-3 mb-5">
-        <input
+        <v-text-field
           v-model="searchQuery"
           type="text"
           :placeholder="t('songAvg.searchPlaceholder')"
-          class="w-64 px-4 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          class="w-64 flex-none text-sm"
         />
-        <label class="flex items-center gap-1.5 cursor-pointer text-sm font-bold text-slate-600 dark:text-slate-300 select-none">
-          <input type="checkbox" v-model="showLv11" class="w-4 h-4 rounded accent-indigo-500" />
-          ☆11
-        </label>
-        <label class="flex items-center gap-1.5 cursor-pointer text-sm font-bold text-slate-600 dark:text-slate-300 select-none">
-          <input type="checkbox" v-model="showLv12" class="w-4 h-4 rounded accent-indigo-500" />
-          ☆12
-        </label>
+        <v-checkbox v-model="showLv11" label="☆11" class="flex-none text-sm font-bold text-slate-600 dark:text-slate-300 select-none" />
+        <v-checkbox v-model="showLv12" label="☆12" class="flex-none text-sm font-bold text-slate-600 dark:text-slate-300 select-none" />
 
         <!-- 勝敗比較フィルタ（ログイン時のみ表示。未ログインだと自分のベストが無いので意味が無い） -->
         <template v-if="user">
           <div class="flex items-center gap-2 flex-wrap">
-            <select
+            <v-select
               v-model="filterTier"
-              class="px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              <option value="">ティアを選択</option>
-              <option v-for="tier in activeTiers" :key="tier" :value="tier">{{ tier }}</option>
-            </select>
-            <label class="flex items-center gap-1.5 cursor-pointer text-sm font-bold text-emerald-600 dark:text-emerald-400 select-none">
-              <input type="checkbox" v-model="filterWinning" class="w-4 h-4 rounded accent-emerald-500" />
-              勝っている
-            </label>
-            <label class="flex items-center gap-1.5 cursor-pointer text-sm font-bold text-red-500 dark:text-red-400 select-none">
-              <input type="checkbox" v-model="filterLosing" class="w-4 h-4 rounded accent-red-500" />
-              負けている
-            </label>
-            <button
-              @click="applyFilter"
-              class="px-4 py-2 rounded-md bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold transition-colors"
-            >適用</button>
-            <button
+              :items="[{ title: 'ティアを選択', value: '' }, ...activeTiers.map((tier) => ({ title: tier, value: tier }))]"
+              aria-label="ティアを選択"
+              class="w-44 flex-none text-sm"
+            />
+            <v-checkbox v-model="filterWinning" label="勝っている" color="success" class="flex-none text-sm font-bold text-emerald-600 dark:text-emerald-400 select-none" />
+            <v-checkbox v-model="filterLosing" label="負けている" color="error" class="flex-none text-sm font-bold text-red-500 dark:text-red-400 select-none" />
+            <v-btn color="primary" class="text-sm" @click="applyFilter">適用</v-btn>
+            <v-btn
               v-if="appliedFilterTier"
+              variant="outlined"
+              class="text-sm text-slate-500 dark:text-slate-400"
               @click="filterTier = ''; filterWinning = false; filterLosing = false; applyFilter()"
-              class="px-3 py-2 rounded-md border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            >クリア</button>
+            >クリア</v-btn>
           </div>
         </template>
         <div class="flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold">
@@ -517,12 +503,12 @@ onMounted(loadData);
 
       <!-- ローディング / エラー 表示分岐 -->
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-20">
-        <div class="w-12 h-12 border-4 border-indigo-100 dark:border-slate-700 border-t-indigo-600 dark:border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+        <v-progress-circular size="48" width="4" class="mb-4" />
         <p class="text-slate-500 dark:text-slate-400 font-bold">{{ t('songAvg.loading') }}</p>
       </div>
-      <div v-else-if="error" class="p-6 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md text-center font-bold">
+      <v-alert v-else-if="error" type="error" class="p-6 text-center font-bold">
         {{ error }}
-      </div>
+      </v-alert>
 
       <!-- メインの平均スコア比較テーブル -->
       <div v-else class="overflow-x-auto">
@@ -532,31 +518,36 @@ onMounted(loadData);
         </p>
         <div v-if="detailTier" class="mb-4 flex items-center justify-between pb-2 border-b border-indigo-100 dark:border-indigo-900/50">
           <div class="flex items-center gap-3">
-            <button @click="detailTier = null" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 font-bold transition-colors text-xs sm:text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            <v-btn
+              variant="tonal"
+              size="small"
+              :prepend-icon="mdiArrowLeft"
+              class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm"
+              @click="detailTier = null"
+            >
               {{ t('common.back') || '戻る' }}
-            </button>
+            </v-btn>
             <span class="font-bold text-slate-700 dark:text-slate-200" :class="tierColor(detailTier!)">
               {{ detailTier }}の詳細
             </span>
           </div>
         </div>
 
-        <table class="text-sm border-collapse" style="min-width: max-content">
+        <v-table class="text-sm bg-transparent [&_table]:border-collapse" style="min-width: max-content">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700/50">
               <th
-                class="pb-3 pl-2 pr-1 text-left text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600 whitespace-nowrap"
+                class="pt-0 pb-3 pl-2 pr-1 text-left text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600 whitespace-nowrap"
                 @click="toggleSort('level')"
               >☆ <span v-if="sortKey === 'level'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
               <th
-                class="pb-3 pr-6 text-left text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600"
+                class="pt-0 pb-3 pl-0 pr-6 text-left text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600"
                 @click="toggleSort('title')"
               >{{ t('songAvg.colSong') }} <span v-if="sortKey === 'title'">{{ sortDir === 'desc' ? '▼' : '▲' }}</span></th>
               
               <th
                 v-for="col in activeColumns" :key="col.type === 'broad' ? col.tier : col.tier + '-' + col.level"
-                class="pb-3 px-2 text-center text-xs font-bold whitespace-nowrap align-top"
+                class="pt-0 pb-3 px-2 text-center text-xs font-bold whitespace-nowrap align-top"
                 :class="[tierColor(col.tier)]"
               >
                 <!-- 大分類カラム -->
@@ -565,14 +556,19 @@ onMounted(loadData);
                   <span class="mt-1">{{ col.tier }}</span>
                   <span v-if="sortKey === col.tier" class="text-[10px]">{{ sortDir === 'desc' ? '▼' : '▲' }}</span>
                   
-                  <button 
+                  <v-btn
                     v-if="col.tier !== 'Legend' && col.tier !== 'Beginner'"
-                    @click.stop="detailTier = col.tier"
-                    class="absolute top-0 right-0 p-1 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 opacity-0 group-hover/header:opacity-100 transition-opacity hover:text-indigo-500"
+                    icon
+                    variant="outlined"
+                    size="x-small"
+                    density="comfortable"
+                    class="absolute top-0 right-0 w-5 h-5 rounded-full bg-white dark:bg-slate-700 opacity-0 group-hover/header:opacity-100 transition-opacity hover:text-indigo-500"
                     title="1〜5ごとの平均スコアを見る"
+                    aria-label="1〜5ごとの平均スコアを見る"
+                    @click.stop="detailTier = col.tier"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
-                  </button>
+                    <v-icon :icon="mdiMagnifyPlusOutline" size="12" />
+                  </v-btn>
                 </div>
 
                 <!-- 小分類（ドリルダウン）カラム -->
@@ -595,12 +591,15 @@ onMounted(loadData);
               <td class="py-2 pl-2 pr-1 whitespace-nowrap">
                 <div class="flex flex-col items-start gap-0.5">
                   <span class="text-xs font-bold text-slate-500 dark:text-slate-400">☆{{ row.difficultyLevel }}</span>
-                  <span
-                    class="text-[9px] font-bold px-1 py-0.5 rounded leading-none"
+                  <v-chip
+                    label
+                    size="x-small"
+                    variant="flat"
+                    class="text-[9px] font-bold px-1 py-0.5 h-auto rounded leading-none"
                     :class="row.difficultyName === 'LEGGENDARIA'
                       ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                       : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"
-                  >{{ row.difficultyName === 'LEGGENDARIA' ? 'L' : 'A' }}</span>
+                  >{{ row.difficultyName === 'LEGGENDARIA' ? 'L' : 'A' }}</v-chip>
                   <span
                     v-if="getRowRank(row) >= 0"
                     class="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tabular-nums"
@@ -608,7 +607,7 @@ onMounted(loadData);
                 </div>
               </td>
               <!-- 曲名（長い場合は省略記号で1行表示） -->
-              <td class="py-2 pr-6 max-w-[200px]">
+              <td class="py-2 pl-0 pr-6 max-w-[200px]">
                 <span class="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-tight line-clamp-1 block" :title="row.title">
                   {{ row.title }}
                 </span>
@@ -643,48 +642,62 @@ onMounted(loadData);
               </td>
             </tr>
           </tbody>
-        </table>
+        </v-table>
         <!-- ページネーション: 最初/前/ページ番号/次/最後 -->
         <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-6">
-          <button
+          <v-btn
+            variant="text"
+            size="small"
+            min-width="0"
+            class="px-2 text-xs text-slate-500 dark:text-slate-400"
+            :disabled="currentPage === 1"
             @click="currentPage = 1"
+          >«</v-btn>
+          <v-btn
+            variant="text"
+            size="small"
+            min-width="0"
+            class="px-3 text-xs text-slate-500 dark:text-slate-400"
             :disabled="currentPage === 1"
-            class="px-2 py-1 rounded-lg text-xs font-bold disabled:opacity-30 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >«</button>
-          <button
             @click="currentPage--"
-            :disabled="currentPage === 1"
-            class="px-3 py-1 rounded-lg text-xs font-bold disabled:opacity-30 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >‹</button>
+          >‹</v-btn>
 
           <template v-for="p in totalPages" :key="p">
-            <button
+            <v-btn
               v-if="p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2"
+              :variant="p === currentPage ? 'flat' : 'text'"
+              :color="p === currentPage ? 'primary' : undefined"
+              size="small"
+              min-width="0"
+              class="w-8 h-8 text-xs"
+              :class="p === currentPage ? '' : 'text-slate-500 dark:text-slate-400'"
               @click="currentPage = p"
-              class="w-8 h-8 rounded-lg text-xs font-bold transition-colors"
-              :class="p === currentPage
-                ? 'bg-indigo-500 text-white'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'"
-            >{{ p }}</button>
+            >{{ p }}</v-btn>
             <span
               v-else-if="p === currentPage - 3 || p === currentPage + 3"
               class="text-slate-300 dark:text-slate-600 text-xs"
             >…</span>
           </template>
 
-          <button
+          <v-btn
+            variant="text"
+            size="small"
+            min-width="0"
+            class="px-3 text-xs text-slate-500 dark:text-slate-400"
+            :disabled="currentPage === totalPages"
             @click="currentPage++"
+          >›</v-btn>
+          <v-btn
+            variant="text"
+            size="small"
+            min-width="0"
+            class="px-2 text-xs text-slate-500 dark:text-slate-400"
             :disabled="currentPage === totalPages"
-            class="px-3 py-1 rounded-lg text-xs font-bold disabled:opacity-30 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >›</button>
-          <button
             @click="currentPage = totalPages"
-            :disabled="currentPage === totalPages"
-            class="px-2 py-1 rounded-lg text-xs font-bold disabled:opacity-30 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-          >»</button>
+          >»</v-btn>
         </div>
       </div>
 
-    </div>
+    </v-card>
   </div>
 </template>

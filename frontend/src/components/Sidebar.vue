@@ -16,6 +16,7 @@ import { useI18n } from '../composables/useI18n';
 import { useAdmin } from '../composables/useAdmin';
 import { useModalEscape } from '../composables/useModalEscape';
 import { useRankQuiz } from '../composables/useRankQuiz';
+import { mdiChevronRight, mdiClose } from '@mdi/js';
 
 const { t, currentLang, setLanguage, availableLanguages } = useI18n();
 
@@ -270,14 +271,14 @@ watch(() => props.activeTab, (tab) => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div 
-        v-if="isOpen" 
+      <div
+        v-if="isOpen"
         @click="closeSidebar"
         class="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-40 transition-opacity xl:hidden"
       ></div>
     </Transition>
 
-    <!-- Sidebar Panel -->
+    <!-- Sidebar Panel（v-navigation-drawer は v-app のレイアウト計算に乗るので使わず、従来の fixed 配置のまま） -->
     <aside
       role="navigation"
       :aria-label="t('a11y.nav.main')"
@@ -297,116 +298,128 @@ watch(() => props.activeTab, (tab) => {
               beat<span class="text-red-500">-</span>seeker
             </span>
           </div>
-          <button
-            type="button"
+          <v-btn
+            icon
+            variant="text"
+            size="small"
             :aria-label="t('a11y.sidebar.close')"
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden"
             @click="closeSidebar"
-            class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors lg:hidden"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            <v-icon :icon="mdiClose" />
+          </v-btn>
         </div>
 
         <!-- Scrollable Content Area -->
         <div class="flex-1 overflow-y-auto py-6 px-4 space-y-8 custom-scrollbar">
-          
+
           <!-- User Profile Section -->
           <div class="px-2">
             <div v-if="authLoading" class="animate-pulse flex items-center gap-3">
               <div class="w-10 h-10 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
               <div class="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded"></div>
             </div>
-            
+
             <template v-else-if="isLoggedIn">
               <div class="flex flex-col gap-4">
-                <div 
+                <v-list-item
+                  rounded="md"
+                  class="p-2 min-h-0 transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
                   @click="handleAction('editProfile')"
-                  class="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-all group border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
                 >
-                  <div class="w-10 h-10 bg-blue-700 rounded-full flex items-center justify-center text-white font-bold">
-                    {{ (user?.displayName || user?.iidxId || 'U').charAt(0) }}
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                      {{ user?.displayName || user?.iidxId }}
-                    </p>
-                  </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-                
+                  <template #prepend>
+                    <v-avatar size="40" class="bg-blue-700 text-white font-bold mr-3">
+                      {{ (user?.displayName || user?.iidxId || 'U').charAt(0) }}
+                    </v-avatar>
+                  </template>
+                  <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {{ user?.displayName || user?.iidxId }}
+                  </p>
+                  <template #append>
+                    <v-icon :icon="mdiChevronRight" size="16" class="text-slate-400 group-hover:text-slate-600 transition-colors" />
+                  </template>
+                </v-list-item>
+
                 <!-- 管理者ボタン。人気曲ランキング・練習メニュー・カメラで曲検索は検証を終えたので出さない（2026-09-23） -->
                 <div class="flex flex-col gap-1">
-                  <button
+                  <v-btn
                     v-if="isAdmin && !viewingUserId"
+                    variant="outlined"
+                    block
+                    class="h-auto justify-start px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-600"
                     @click="handleAction('openAdmin')"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <template #prepend>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </template>
                     {{ t('nav.adminPanel') }}
-                  </button>
-                  <button
+                  </v-btn>
+                  <v-btn
                     v-if="isAdmin && !viewingUserId"
+                    variant="outlined"
+                    block
+                    class="h-auto justify-start px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-600"
                     @click="goAdminUserComparison"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
+                    <template #prepend>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </template>
                     ユーザー間スコア比較
-                  </button>
-                  <button
+                  </v-btn>
+                  <v-btn
+                    variant="text"
+                    block
+                    class="h-auto justify-start px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                     @click="handleAction('logout')"
-                    class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                    <template #prepend>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </template>
                     {{ t('nav.logout') }}
-                  </button>
+                  </v-btn>
                 </div>
               </div>
             </template>
-            
+
             <template v-else>
-              <button 
-                @click="handleAction('login')"
-                class="w-full btn-primary px-6 py-3"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+              <v-btn color="primary" size="large" block class="px-6" @click="handleAction('login')">
+                <template #prepend>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </template>
                 {{ t('nav.loginRegister') }}
-              </button>
+              </v-btn>
             </template>
-            
+
             <!-- Upload CSV Button in Sidebar -->
             <div v-if="!viewingUserId" class="flex flex-col gap-1 mt-2">
-              <button
-                @click="handleUploadClick"
-                class="w-full btn-secondary px-6 py-3"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
+              <v-btn variant="outlined" size="large" block class="px-6" @click="handleUploadClick">
+                <template #prepend>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </template>
                 {{ t('nav.uploadCsv') }}
-              </button>
+              </v-btn>
             </div>
 
             <!-- 非公式難易度クイズ ミニウィジェット: ログイン中 & 自分閲覧時のみ表示。
                  主張を抑えるためインラインの細めカード。 -->
-            <button
+            <v-card
               v-if="isLoggedIn && !viewingUserId"
+              tag="button"
               type="button"
-              @click="handleRankQuizClick"
-              class="mt-2 w-full text-left bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2.5 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+              class="mt-2 w-full text-left px-3 py-2.5 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
               :title="t('rankQuiz.tooltip')"
+              @click="handleRankQuizClick"
             >
               <div class="flex items-center gap-2 mb-1.5">
                 <svg class="h-4 w-4 text-blue-700 dark:text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
@@ -416,9 +429,7 @@ watch(() => props.activeTab, (tab) => {
                 <span class="ml-auto text-[10px] font-semibold text-slate-500 dark:text-slate-400 tabular-nums">Lv.{{ rankQuizProgress?.level ?? 1 }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <div class="flex-1 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                  <div class="h-full bg-blue-600 transition-all duration-500" :style="{ width: rankQuizPct + '%' }"></div>
-                </div>
+                <v-progress-linear :model-value="rankQuizPct" height="4" rounded color="primary" class="flex-1" />
                 <span class="text-[9px] font-mono text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">{{ rankQuizProgress?.xp ?? 0 }}/{{ rankQuizProgress?.xpForNextLevel ?? 100 }}</span>
               </div>
               <div class="flex items-center justify-between mt-1.5 text-[10px] font-semibold">
@@ -428,97 +439,111 @@ watch(() => props.activeTab, (tab) => {
                 <span v-else class="text-slate-400 dark:text-slate-500">{{ t('rankQuiz.startHint') }}</span>
                 <span class="text-slate-400 dark:text-slate-500">▶</span>
               </div>
-            </button>
+            </v-card>
           </div>
 
           <!-- Primary Navigation -->
-          <nav class="space-y-1" :aria-label="t('a11y.nav.primary')">
+          <v-list tag="nav" nav density="compact" class="space-y-1 p-0 bg-transparent" :aria-label="t('a11y.nav.primary')">
             <template v-for="item in filteredPrimary" :key="item.id">
-              <button
-                type="button"
-                @click="selectTab(item.id)"
+              <v-list-item
                 :aria-current="activeTab === item.id ? 'page' : undefined"
-                class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors group"
+                rounded="md"
+                class="w-full px-4 py-3 min-h-0 text-sm font-medium transition-colors group"
                 :class="activeTab === item.id
                   ? 'bg-blue-700 dark:bg-blue-600 text-white'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
+                @click="selectTab(item.id)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
-                </svg>
+                <template #prepend>
+                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
+                  </svg>
+                </template>
                 {{ item.label }}
-                <span v-if="item.supporterOnly" class="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
-                  Supporter
-                </span>
-              </button>
+                <template v-if="item.supporterOnly" #append>
+                  <v-chip size="x-small" label variant="outlined" class="text-[9px] font-semibold px-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700">
+                    Supporter
+                  </v-chip>
+                </template>
+              </v-list-item>
             </template>
 
             <!-- もっと見る: extra に表示すべき項目があるときだけボタンを出す -->
             <template v-if="filteredExtra.length > 0">
               <!-- 展開時のみ extra 項目を表示。主要メニューと同スタイルで連続感を持たせる。 -->
               <template v-if="showExtra">
-                <button
+                <v-list-item
                   v-for="item in filteredExtra"
                   :key="item.id"
-                  type="button"
-                  @click="selectTab(item.id)"
                   :aria-current="activeTab === item.id ? 'page' : undefined"
-                  class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-md transition-colors group"
+                  rounded="md"
+                  class="w-full px-4 py-3 min-h-0 text-sm font-medium transition-colors group"
                   :class="activeTab === item.id
                     ? 'bg-blue-700 dark:bg-blue-600 text-white'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'"
+                  @click="selectTab(item.id)"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
-                  </svg>
+                  <template #prepend>
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 shrink-0 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
+                    </svg>
+                  </template>
                   {{ item.label }}
-                  <span v-if="item.supporterOnly" class="ml-auto text-[9px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
-                    Supporter
-                  </span>
-                </button>
+                  <template v-if="item.supporterOnly" #append>
+                    <v-chip size="x-small" label variant="outlined" class="text-[9px] font-semibold px-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-700">
+                      Supporter
+                    </v-chip>
+                  </template>
+                </v-list-item>
               </template>
 
               <!-- もっと見る/閉じる トグル。主要メニューより一回り小さく控えめに表示。 -->
-              <button
-                type="button"
+              <v-list-item
+                rounded="md"
+                class="w-full px-4 py-2.5 min-h-0 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
                 @click="toggleExtra"
-                class="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-md hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 transition-transform" :class="{ 'rotate-180': showExtra }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                <template #prepend>
+                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 mr-3 transition-transform" :class="{ 'rotate-180': showExtra }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </template>
                 {{ showExtra ? t('nav.less') : t('nav.more') }}
-                <span v-if="!showExtra" class="ml-auto text-[10px] font-mono text-slate-400 dark:text-slate-500">+{{ filteredExtra.length }}</span>
-              </button>
+                <template v-if="!showExtra" #append>
+                  <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500">+{{ filteredExtra.length }}</span>
+                </template>
+              </v-list-item>
             </template>
-          </nav>
+          </v-list>
 
           <!-- Divider -->
-          <div class="h-px bg-slate-100 dark:bg-slate-700 mx-2"></div>
+          <v-divider class="mx-2 border-slate-100 dark:border-slate-700 opacity-100" />
 
           <!-- Secondary Navigation -->
           <div class="space-y-4">
             <h3 class="px-4 section-label">
               {{ t('app.sidebar.support') }}
             </h3>
-            <nav class="space-y-1" :aria-label="t('a11y.nav.secondary')">
+            <v-list tag="nav" nav density="compact" class="space-y-1 p-0 bg-transparent" :aria-label="t('a11y.nav.secondary')">
               <template v-for="item in secondaryItems" :key="item.id">
-                <button
-                  type="button"
-                  @click="selectTab(item.id)"
+                <v-list-item
                   :aria-current="activeTab === item.id ? 'page' : undefined"
-                  class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-md transition-colors"
+                  rounded="md"
+                  class="w-full px-4 py-2.5 min-h-0 text-sm font-medium transition-colors"
                   :class="activeTab === item.id
                     ? 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white'
                     : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-white'"
+                  @click="selectTab(item.id)"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
-                  </svg>
+                  <template #prepend>
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon" />
+                    </svg>
+                  </template>
                   {{ item.label }}
-                </button>
+                </v-list-item>
               </template>
-            </nav>
+            </v-list>
           </div>
 
           <!-- Language Switcher -->
@@ -527,31 +552,40 @@ watch(() => props.activeTab, (tab) => {
               {{ t('app.sidebar.language') }}
             </h3>
             <div class="px-2">
-              <div class="flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 rounded-md border border-slate-200 dark:border-slate-700">
-                <button
+              <v-btn-toggle
+                :model-value="currentLang"
+                mandatory
+                variant="text"
+                :divided="false"
+                class="w-full h-auto flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700"
+              >
+                <v-btn
                   v-for="lang in availableLanguages"
                   :key="lang"
-                  type="button"
-                  @click="setLanguage(lang)"
+                  :value="lang"
                   :aria-pressed="currentLang === lang"
                   :aria-label="t('a11y.lang.switch', { lang: t(`lang.${lang}`) })"
-                  class="flex-1 py-1 px-2 text-[10px] font-semibold rounded transition-colors"
+                  class="flex-1 h-auto py-1 px-2 min-w-0 text-[10px] font-semibold rounded"
                   :class="currentLang === lang
                     ? 'bg-blue-700 dark:bg-blue-600 text-white'
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-white dark:hover:bg-slate-700'"
+                  @click="setLanguage(lang)"
                 >
                   {{ t(`lang.${lang}`) }}
-                </button>
-              </div>
+                </v-btn>
+              </v-btn-toggle>
             </div>
           </div>
         </div>
 
         <!-- Ko-fi Support -->
         <div class="px-4 pb-3 space-y-2">
-          <button
+          <v-card
+            tag="button"
+            type="button"
+            variant="outlined"
+            class="group flex items-center gap-3 w-full px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left"
             @click="handleKofiClick"
-            class="group flex items-center gap-3 w-full px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors text-left"
           >
             <div class="w-8 h-8 bg-amber-400 rounded flex items-center justify-center shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -565,7 +599,7 @@ watch(() => props.activeTab, (tab) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-          </button>
+          </v-card>
           <!-- Token hint for logged-in users -->
           <div v-if="isLoggedIn && user?.supporterToken" class="px-1">
             <p v-if="kofiCopied" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 text-center">
@@ -584,63 +618,70 @@ watch(() => props.activeTab, (tab) => {
           サイドバー最下部へ移設し、既定は畳んだ 1 行だけにしている。
         -->
         <div v-if="canAccessCompetition" class="px-4 pb-3">
-          <button
-            type="button"
-            @click="toggleCompetitionMenu"
+          <v-btn
+            variant="outlined"
+            block
             :aria-expanded="showCompetitionMenu"
-            class="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-md border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            class="h-auto justify-start px-3 py-2 text-xs font-semibold border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+            @click="toggleCompetitionMenu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-            </svg>
+            <template #prepend>
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </template>
             <span class="truncate">beat-seeker for competition</span>
-            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-3 w-3 ml-auto shrink-0 transition-transform" :class="{ 'rotate-180': showCompetitionMenu }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+            <template #append>
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-3 w-3 shrink-0 transition-transform" :class="{ 'rotate-180': showCompetitionMenu }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </template>
+          </v-btn>
 
           <!-- 展開時のみ 3 リンクを表示。大会管理は内部タブ、他の 2 つはスタンドアロン URL。 -->
-          <div v-if="showCompetitionMenu" class="mt-1 space-y-1">
-            <button
-              type="button"
+          <v-list v-if="showCompetitionMenu" density="compact" class="mt-1 space-y-1 p-0 bg-transparent">
+            <v-list-item
+              rounded="md"
+              class="px-3 py-2 min-h-0 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
               @click="handleCompetitionAdminClick"
-              class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              <div class="flex-1 min-w-0">
-                <p>大会管理</p>
-                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
-              </div>
-            </button>
-            <a
+              <template #prepend>
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </template>
+              <p>大会管理</p>
+              <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">5チーム×4人 総当たり編成</p>
+            </v-list-item>
+            <v-list-item
               href="/strategy-card"
+              rounded="md"
+              class="px-3 py-2 min-h-0 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
               @click="closeSidebar"
-              class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              <div class="flex-1 min-w-0">
-                <p>Strategy Card</p>
-                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
-              </div>
-            </a>
-            <a
+              <template #prepend>
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </template>
+              <p>Strategy Card</p>
+              <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">課題曲ランダム抽選 (OBS用)</p>
+            </v-list-item>
+            <v-list-item
               href="/song-reveal"
+              rounded="md"
+              class="px-3 py-2 min-h-0 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
               @click="closeSidebar"
-              class="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
-              </svg>
-              <div class="flex-1 min-w-0">
-                <p>Song Reveal</p>
-                <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
-              </div>
-            </a>
-          </div>
+              <template #prepend>
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-4 w-4 shrink-0 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V5l12-2v14M9 9l12-2M5 21a2 2 0 100-4 2 2 0 000 4zm12-2a2 2 0 100-4 2 2 0 000 4z" />
+                </svg>
+              </template>
+              <p>Song Reveal</p>
+              <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500">選曲発表演出 (OBS用)</p>
+            </v-list-item>
+          </v-list>
         </div>
 
         <!-- Sidebar Footer -->
@@ -653,64 +694,40 @@ watch(() => props.activeTab, (tab) => {
     </aside>
 
     <!-- Ko-fi Confirmation Modal -->
-    <Teleport to="body">
-      <Transition
-        enter-active-class="transition-opacity duration-200"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-150"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div
-          v-if="showKofiModal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="kofi-modal-title"
-          class="fixed inset-0 z-[100] flex items-center justify-center p-4"
-        >
-          <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="showKofiModal = false"></div>
-          <div class="relative bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 shadow-xl max-w-sm w-full p-6 space-y-4">
-            <!-- Header -->
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 id="kofi-modal-title" class="text-lg font-bold text-slate-900 dark:text-white">{{ t('supporter.modalTitle') }}</h3>
-            </div>
-
-            <!-- Body -->
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              {{ t('supporter.modalDesc') }}
-            </p>
-
-            <!-- Token display -->
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md p-3 text-center">
-              <p class="text-[11px] font-semibold text-amber-700 dark:text-amber-400 mb-1">{{ t('supporter.modalTokenLabel') }}</p>
-              <p class="text-lg font-mono font-bold text-amber-700 dark:text-amber-300 select-all tabular-nums">{{ user?.supporterToken }}</p>
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex gap-2">
-              <button
-                @click="showKofiModal = false"
-                class="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                {{ t('supporter.modalCancel') }}
-              </button>
-              <button
-                @click="confirmKofiOpen"
-                class="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-amber-500 rounded-md hover:bg-amber-600 transition-colors"
-              >
-                {{ t('supporter.modalConfirm') }}
-              </button>
-            </div>
+    <v-dialog v-model="showKofiModal" max-width="384" aria-labelledby="kofi-modal-title">
+      <v-card class="p-6 space-y-4">
+        <!-- Header -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
+          <h3 id="kofi-modal-title" class="text-lg font-bold text-slate-900 dark:text-white">{{ t('supporter.modalTitle') }}</h3>
         </div>
-      </Transition>
-    </Teleport>
+
+        <!-- Body -->
+        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          {{ t('supporter.modalDesc') }}
+        </p>
+
+        <!-- Token display -->
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-md p-3 text-center">
+          <p class="text-[11px] font-semibold text-amber-700 dark:text-amber-400 mb-1">{{ t('supporter.modalTokenLabel') }}</p>
+          <p class="text-lg font-mono font-bold text-amber-700 dark:text-amber-300 select-all tabular-nums">{{ user?.supporterToken }}</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-2">
+          <v-btn variant="tonal" class="flex-1 text-sm font-semibold" @click="showKofiModal = false">
+            {{ t('supporter.modalCancel') }}
+          </v-btn>
+          <v-btn class="flex-1 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600" @click="confirmKofiOpen">
+            {{ t('supporter.modalConfirm') }}
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 

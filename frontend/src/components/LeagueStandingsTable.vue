@@ -83,8 +83,7 @@ const zoneClass = (row: LeagueStandingRow) => {
 </script>
 
 <template>
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+  <v-table class="text-sm bg-transparent">
       <thead>
         <tr class="text-left text-xs text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-slate-700">
           <th class="py-2 pr-2 w-10">{{ t('league.rank') }}</th>
@@ -112,10 +111,13 @@ const zoneClass = (row: LeagueStandingRow) => {
             <span class="inline-flex items-center gap-1.5 align-middle">
               <RankIcon :rank-name="beatTier(row.totalBeatPt).name" :tier="beatTier(row.totalBeatPt).tier" size="2xs" lite disable-party v-bind="previousTierFrame(row.previousBeatPt, 'beat')" />
               <span>{{ row.displayName }}</span>
-              <span v-if="roleBadge(row.role)"
-                    class="inline-flex items-center gap-0.5 px-1.5 py-px rounded text-[10px] font-bold leading-none"
+              <v-chip v-if="roleBadge(row.role)"
+                    size="x-small"
+                    label
+                    variant="flat"
+                    class="gap-0.5 px-1.5 text-[10px] font-bold leading-none"
                     :class="roleBadge(row.role)!.cls"
-                    :title="roleBadge(row.role)!.label + (row.homeTier != null ? ' / ' + divisionName(row.homeTier) : '')">{{ roleBadge(row.role)!.label }}<span v-if="row.homeTier != null" class="font-semibold opacity-80">{{ divisionShort(row.homeTier) }}</span></span>
+                    :title="roleBadge(row.role)!.label + (row.homeTier != null ? ' / ' + divisionName(row.homeTier) : '')">{{ roleBadge(row.role)!.label }}<span v-if="row.homeTier != null" class="font-semibold opacity-80">{{ divisionShort(row.homeTier) }}</span></v-chip>
               <span v-if="row.userId === myUserId" class="text-[10px] text-indigo-500 dark:text-indigo-400">YOU</span>
             </span>
           </td>
@@ -150,6 +152,5 @@ const zoneClass = (row: LeagueStandingRow) => {
           </td>
         </tr>
       </tbody>
-    </table>
-  </div>
+  </v-table>
 </template>

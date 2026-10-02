@@ -12,7 +12,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="bg-white dark:bg-slate-800 rounded-md p-6 sm:p-10 border border-slate-200 dark:border-slate-700 animate-fade-in text-slate-800 dark:text-slate-200">
+  <v-card class="p-6 sm:p-10 animate-fade-in text-slate-800 dark:text-slate-200">
     <h1 class="text-2xl sm:text-3xl font-bold mb-8 text-slate-900 dark:text-white border-b pb-4 border-slate-200 dark:border-slate-700">
       {{ t('privacyPolicy.title') }}
     </h1>
@@ -104,5 +104,5 @@ const { t } = useI18n();
     <div class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700 text-sm text-slate-500 dark:text-slate-400 text-right">
       <p>{{ t('terms.dateLabel', { date: '2026/03/05', update: '2026/09/12' }) }}</p>
     </div>
-  </div>
+  </v-card>
 </template>

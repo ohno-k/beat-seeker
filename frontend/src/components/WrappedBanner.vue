@@ -17,6 +17,7 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { nowJstParts } from '../utils/jstTime';
+import { mdiClose } from '@mdi/js';
 
 interface WrappedTarget {
   year: number;
@@ -78,8 +79,9 @@ function close() {
 </script>
 
 <template>
-  <div
+  <v-card
     v-if="visible"
+    variant="flat"
     class="w-full bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-md px-5 py-4 flex items-center justify-between gap-4 transition-colors"
   >
     <!-- 左側: ロゴ風アイコン + テキスト -->
@@ -103,20 +105,24 @@ function close() {
 
     <!-- 右側: 「見る」ボタン + 閉じるボタン -->
     <div class="flex items-center gap-1 md:gap-2 flex-shrink-0">
-      <button
+      <v-btn
+        size="small"
+        class="hidden sm:inline-flex px-4 text-xs font-bold bg-white/20 hover:bg-white/30 text-white"
         @click="open"
-        class="hidden sm:inline-flex px-4 py-1.5 rounded-md text-xs font-bold bg-white/20 hover:bg-white/30 transition-colors"
       >
         見る →
-      </button>
-      <button
-        @click="close"
-        class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center text-xl leading-none"
+      </v-btn>
+      <v-btn
+        icon
+        variant="text"
+        size="small"
+        class="w-8 h-8 text-white hover:bg-white/20"
         aria-label="今月の振り返りを閉じる"
         title="今月の振り返りを閉じる"
+        @click="close"
       >
-        ×
-      </button>
+        <v-icon :icon="mdiClose" size="20" />
+      </v-btn>
     </div>
-  </div>
+  </v-card>
 </template>

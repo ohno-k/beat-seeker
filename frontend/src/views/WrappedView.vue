@@ -270,18 +270,19 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
     <!-- 未ログイン（自分の振り返りは要ログイン） -->
     <div v-if="showLoginPrompt" class="flex flex-col items-center justify-center min-h-screen gap-4 text-slate-700 dark:text-slate-300">
       <p>この振り返りを見るにはログインが必要です</p>
-      <button @click="router.push('/')" class="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold">トップへ</button>
+      <v-btn color="primary" @click="router.push('/')" class="px-6 rounded-xl font-bold">トップへ</v-btn>
     </div>
 
     <!-- 読み込み中 -->
-    <div v-else-if="isLoading" class="flex items-center justify-center min-h-screen text-slate-500">
+    <div v-else-if="isLoading" class="flex items-center justify-center gap-2 min-h-screen text-slate-500">
+      <v-progress-circular size="20" width="2" />
       <p>読み込み中...</p>
     </div>
 
     <!-- エラー -->
     <div v-else-if="error" class="flex flex-col items-center justify-center min-h-screen gap-3 text-slate-700 dark:text-slate-300">
       <p class="text-red-500">{{ error }}</p>
-      <button @click="router.back()" class="text-sm text-blue-500 underline">戻る</button>
+      <v-btn variant="text" size="small" @click="router.back()" class="text-sm text-blue-500 underline">戻る</v-btn>
     </div>
 
     <!-- 振り返り本体 -->
@@ -296,9 +297,9 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
           <p class="text-xs md:text-sm tracking-[0.4em] opacity-70 mb-3">BEAT-SEEKER WRAPPED</p>
           <h1 class="text-5xl md:text-7xl font-black mb-4">{{ data.displayMonth }}</h1>
           <p class="text-lg md:text-2xl opacity-80 mb-12">{{ data.displayName }} さんの記録</p>
-          <button @click="scrollToCard(1)" class="text-sm opacity-60 hover:opacity-100 transition-opacity animate-bounce">
+          <v-btn variant="text" @click="scrollToCard(1)" class="text-sm text-white font-normal opacity-60 hover:opacity-100 transition-opacity animate-bounce">
             ↓ スクロールして見る
-          </button>
+          </v-btn>
         </section>
 
         <!-- カード 2: プレー量 -->
@@ -476,32 +477,32 @@ const showLoginPrompt = computed(() => !isPublicView.value && !isLoggedIn.value)
           <p class="text-xs md:text-sm tracking-[0.3em] opacity-70 mb-3">{{ data.displayMonth }}</p>
           <h2 class="text-3xl md:text-5xl font-black mb-3">お疲れさまでした</h2>
           <p class="opacity-70 mb-10 text-sm md:text-base">来月もよい記録を</p>
-          <button
+          <v-btn
+            size="x-large"
             @click="handleShare"
             :disabled="isGeneratingShare"
-            class="px-8 py-4 bg-black text-white font-bold text-base md:text-lg rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-wait inline-flex items-center gap-3"
+            class="px-8 h-auto py-4 bg-black text-white font-bold text-base md:text-lg rounded-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-wait"
           >
             <template v-if="isGeneratingShare">
-              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
+              <v-progress-circular size="20" width="2" color="white" class="mr-3" aria-hidden="true" />
               <span>画像を生成中...</span>
             </template>
             <template v-else>
               <span>𝕏 でシェア</span>
             </template>
-          </button>
+          </v-btn>
           <!-- シェア後の案内: クリップボード成功 or ダウンロードのどちらか。fade-in で柔らかく出す。 -->
           <p v-if="shareHintMessage" class="text-xs md:text-sm opacity-90 mt-4 max-w-md leading-relaxed">
             {{ shareHintMessage }}
           </p>
-          <button
+          <v-btn
+            variant="text"
+            size="small"
             @click="router.push('/dashboard')"
-            class="mt-6 text-xs md:text-sm opacity-60 hover:opacity-100 underline"
+            class="mt-6 text-xs md:text-sm text-white font-normal opacity-60 hover:opacity-100 underline"
           >
             ダッシュボードへ戻る
-          </button>
+          </v-btn>
         </section>
       </div>
 

@@ -1,0 +1,22 @@
+/*
+ * カスケードレイヤーの順番（先に書いたものほど弱い）。vuetify/styles より前に読み込むこと。
+ * Tailwind の base（preflight。`* { border-width: 0 }` など）を Vuetify より下に置き、
+ * Vuetify の枠線・リセットが Tailwind の preflight に消されないようにする。
+ * Tailwind のユーティリティ（bg-*, p-* など）はレイヤー外なので、Vuetify より常に強い。
+ */
+@layer tw-base, vuetify-core, vuetify-components, vuetify-overrides, vuetify-utilities, vuetify-final;
+
+/*
+ * Vuetify の既定の見た目の調整（vuetify-overrides レイヤー。Tailwind のクラスを付ければそちらが勝つ）。
+ * 色の指定が無い outlined のボタン・ボタントグルの枠線は、文字色ではなくテーマの罫線色（slate-200 / slate-700）にする
+ * （既存の .btn-secondary と同じ）。color を指定したもの（text-primary など）は従来どおり文字色の枠線。
+ */
+@layer vuetify-overrides {
+  .v-btn--variant-outlined,
+  .v-btn-group--border {
+    border-color: rgba(var(--v-border-color), var(--v-border-opacity));
+  }
+  .v-btn--variant-outlined:is(.text-primary, .text-secondary, .text-success, .text-warning, .text-error, .text-info) {
+    border-color: currentColor;
+  }
+}

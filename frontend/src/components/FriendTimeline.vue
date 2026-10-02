@@ -14,6 +14,7 @@ import { useTimeline } from '../composables/useTimeline';
 import { useAdmin } from '../composables/useAdmin';
 import { useAuth } from '../composables/useAuth';
 import FriendTimelineEventBody from './FriendTimelineEventBody.vue';
+import { mdiAccountGroupOutline, mdiClockOutline, mdiRefresh } from '@mdi/js';
 import { formatJstDate, formatJstShortDateTime, toJstDate } from '../utils/jstTime';
 import type {
   TimelineEntry,
@@ -254,84 +255,89 @@ const badgeClass = (e: TimelineEntry): string => {
 <template>
   <div class="space-y-6">
     <!-- ヘッダ + 再読込ボタン -->
-    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <v-card class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 transition-colors duration-200">
       <div>
         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">タイムライン</h2>
         <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">自分とフレンドの活動を新しい順に表示します</p>
       </div>
       <div class="flex items-center gap-2">
-        <button
+        <v-btn
           v-if="isAdmin"
           @click="handleBackfillAll(false)"
           :disabled="isBackfilling || isLoading"
-          class="flex p-3 bg-rose-50 hover:bg-rose-100 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded-md transition-all items-center gap-2 font-bold text-sm whitespace-nowrap"
+          variant="tonal"
+          color="error"
+          size="large"
+          class="text-sm whitespace-nowrap"
           title="【管理者専用】全ユーザの CSV アップロード履歴から SCORE_UPDATE を再生成します"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isBackfilling }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+          <template #prepend>
+            <v-icon :icon="mdiAccountGroupOutline" size="16" :class="{ 'animate-spin': isBackfilling }" />
+          </template>
           全ユーザを再構築
-        </button>
-        <button
+        </v-btn>
+        <v-btn
           @click="handleBackfill(false)"
           :disabled="isBackfilling || isLoading"
-          class="flex p-3 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-md transition-all items-center gap-2 font-bold text-sm whitespace-nowrap"
+          variant="tonal"
+          color="indigo"
+          size="large"
+          class="text-sm whitespace-nowrap"
           title="自分の過去の CSV アップロード履歴から SCORE_UPDATE イベントを再生成します"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isBackfilling }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <template #prepend>
+            <v-icon :icon="mdiClockOutline" size="16" :class="{ 'animate-spin': isBackfilling }" />
+          </template>
           履歴から再構築
-        </button>
-        <button
+        </v-btn>
+        <v-btn
           @click="fetchTimeline()"
           :disabled="isLoading"
-          class="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-md transition-all flex items-center gap-2 font-bold"
+          variant="tonal"
+          size="large"
+          class="text-sm"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="{ 'animate-spin': isLoading }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span class="text-sm">更新</span>
-        </button>
+          <template #prepend>
+            <v-icon :icon="mdiRefresh" size="20" :class="{ 'animate-spin': isLoading }" />
+          </template>
+          更新
+        </v-btn>
       </div>
-    </div>
+    </v-card>
 
     <!-- バックフィル結果メッセージ -->
-    <div v-if="backfillMsg" class="p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-md text-sm text-indigo-800 dark:text-indigo-300 space-y-2">
-      <div class="flex items-start gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span class="flex-1">{{ backfillMsg }}</span>
-      </div>
-      <!-- バックフィル走行中のみ進捗バーを表示 -->
-      <div v-if="backfillStatus?.running" class="space-y-1.5">
-        <div class="flex justify-between text-[11px] font-bold tabular-nums">
-          <span>{{ backfillStatus.processedUsers }} / {{ backfillStatus.totalUsers }} ユーザ処理中</span>
-          <span>イベント {{ backfillStatus.createdEvents }} 件生成</span>
-        </div>
-        <div class="w-full bg-indigo-100 dark:bg-indigo-900/40 rounded-full h-2 overflow-hidden">
-          <div
-            class="h-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-300"
-            :style="{ width: backfillProgressPct + '%' }"
-          ></div>
+    <v-alert v-if="backfillMsg" type="info" color="indigo" class="text-sm">
+      <div class="space-y-2">
+        <div>{{ backfillMsg }}</div>
+        <!-- バックフィル走行中のみ進捗バーを表示 -->
+        <div v-if="backfillStatus?.running" class="space-y-1.5">
+          <div class="flex justify-between text-[11px] font-bold tabular-nums">
+            <span>{{ backfillStatus.processedUsers }} / {{ backfillStatus.totalUsers }} ユーザ処理中</span>
+            <span>イベント {{ backfillStatus.createdEvents }} 件生成</span>
+          </div>
+          <v-progress-linear
+            :model-value="backfillProgressPct"
+            color="indigo"
+            height="8"
+            rounded
+          />
         </div>
       </div>
-    </div>
+    </v-alert>
 
     <!-- ローディング -->
-    <div v-if="isLoading && entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
-      <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+    <v-card v-if="isLoading && entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800">
+      <v-progress-circular size="40" width="4" class="mb-4" />
       <p class="text-slate-500 dark:text-slate-400">読み込み中...</p>
-    </div>
+    </v-card>
 
     <!-- エラー -->
-    <div v-else-if="error" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300 text-sm">
+    <v-alert v-else-if="error" type="error" class="text-sm">
       {{ error }}
-    </div>
+    </v-alert>
 
     <!-- 空状態 -->
-    <div v-else-if="entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 border-dashed">
+    <v-card v-else-if="entries.length === 0" class="flex flex-col items-center justify-center p-12 bg-white dark:bg-slate-800 border-dashed">
       <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-400 mb-4">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -340,28 +346,29 @@ const badgeClass = (e: TimelineEntry): string => {
       <p class="text-slate-500 dark:text-slate-400 font-bold">まだタイムラインに表示できる活動がありません</p>
       <p class="text-slate-400 dark:text-slate-500 text-sm mt-1 mb-4">CSV をアップロードするとイベントが追加されます。</p>
       <div class="flex flex-col items-center gap-2 mt-2">
-        <button
+        <v-btn
           @click="handleBackfill(false)"
           :disabled="isBackfilling"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-all font-bold text-sm disabled:opacity-50"
+          color="indigo"
+          class="text-sm"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="{ 'animate-spin': isBackfilling }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <template #prepend>
+            <v-icon :icon="mdiRefresh" size="16" :class="{ 'animate-spin': isBackfilling }" />
+          </template>
           過去のアップロード履歴から再構築する
-        </button>
+        </v-btn>
         <p class="text-[11px] text-slate-400 dark:text-slate-500 max-w-xs text-center">
           スコア履歴ログから SCORE_UPDATE イベントを生成します（過去の「抜き」情報は復元できません）。
         </p>
       </div>
-    </div>
+    </v-card>
 
     <!-- イベント本体 -->
     <div v-else class="space-y-4">
       <div v-for="group in threadedEntries" :key="group.date" class="space-y-3">
         <h3 class="text-xs font-bold text-slate-400 dark:text-slate-500 px-2">{{ group.date }}</h3>
 
-        <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+        <v-card class="bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
           <article
             v-for="thread in group.threads"
             :key="thread.key"
@@ -378,12 +385,15 @@ const badgeClass = (e: TimelineEntry): string => {
               <span class="font-bold text-slate-900 dark:text-white text-sm">
                 {{ thread.user.displayName }}
               </span>
-              <span v-if="thread.user.isMe" class="text-[10px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">自分</span>
+              <v-chip v-if="thread.user.isMe" size="x-small" label color="primary" class="text-[10px]">自分</v-chip>
               <!-- 親イベント (最新) のバッジ + 時刻 -->
-              <span
-                class="text-[10px] font-bold px-2 py-0.5 rounded"
+              <v-chip
+                size="x-small"
+                label
+                variant="flat"
+                class="text-[10px] font-bold"
                 :class="badgeClass(thread.items[0])"
-              >{{ badgeLabel(thread.items[0]) }}</span>
+              >{{ badgeLabel(thread.items[0]) }}</v-chip>
               <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ formatRelative(thread.items[0].createdAt) }}</span>
               <span v-if="thread.items.length > 1" class="text-[11px] font-bold text-slate-400 dark:text-slate-500">
                 ・ {{ thread.items.length }} 件の活動
@@ -408,10 +418,13 @@ const badgeClass = (e: TimelineEntry): string => {
               <div v-for="child in thread.items.slice(1)" :key="child.id">
                 <!-- 子のバッジ + 時刻 -->
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span
-                    class="text-[10px] font-bold px-2 py-0.5 rounded"
+                  <v-chip
+                    size="x-small"
+                    label
+                    variant="flat"
+                    class="text-[10px] font-bold"
                     :class="badgeClass(child)"
-                  >{{ badgeLabel(child) }}</span>
+                  >{{ badgeLabel(child) }}</v-chip>
                   <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ formatRelative(child.createdAt) }}</span>
                 </div>
                 <div class="mt-2">
@@ -426,22 +439,25 @@ const badgeClass = (e: TimelineEntry): string => {
             </div>
 
             <!-- スレッドトグルボタン: 折りたたみ時「ほか N 件」展開時「折りたたむ」 -->
-            <button
+            <v-btn
               v-if="thread.items.length > 1"
               type="button"
+              variant="text"
+              color="primary"
+              size="x-small"
               @click="toggleThread(thread.key)"
-              class="mt-2 ml-13 sm:ml-[3.25rem] text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline focus:outline-none"
+              class="mt-2 ml-13 sm:ml-[3.25rem] px-1 text-[11px] font-bold"
             >
               <template v-if="isThreadExpanded(thread.key)">スレッドを折りたたむ</template>
               <template v-else>ほか {{ thread.items.length - 1 }} 件のイベントを表示</template>
-            </button>
+            </v-btn>
           </article>
-        </div>
+        </v-card>
       </div>
 
       <!-- 無限スクロール: 末尾のセンチネルがビューポート手前に来たら過去分を追加取得 -->
       <div v-if="isLoadingMore" class="flex items-center justify-center py-6">
-        <div class="w-6 h-6 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+        <v-progress-circular size="24" width="3" />
       </div>
       <p v-else-if="!hasMore" class="text-center text-xs text-slate-400 dark:text-slate-500 py-6">
         これ以上の活動はありません

@@ -350,9 +350,9 @@ const weakAxisNote = computed(() => {
 <template>
   <div class="w-full max-w-6xl mx-auto flex flex-col gap-4">
     <!-- 権限ガード -->
-    <div v-if="!isAdmin" class="card p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+    <v-card v-if="!isAdmin" class="p-6 text-center text-sm text-slate-500 dark:text-slate-400">
       この機能は現在管理者のみ利用できます。
-    </div>
+    </v-card>
 
     <template v-else>
       <!-- タイトル行 -->
@@ -366,26 +366,26 @@ const weakAxisNote = computed(() => {
           <p v-else class="text-xs text-slate-500 dark:text-slate-400 mt-1">検証中の管理者向け機能です。</p>
         </div>
         <div class="flex gap-2 items-center flex-wrap">
-          <input
+          <v-text-field
             v-model="viewUserId"
             placeholder="userId（空で自分）"
-            class="w-32 px-3 py-2 text-xs rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            class="w-32 flex-none text-xs"
           />
-          <button class="btn-secondary" :disabled="isLoading" @click="loadAll">
+          <v-btn variant="outlined" :disabled="isLoading" @click="loadAll">
             {{ isLoading ? '読み込み中…' : '読み込む' }}
-          </button>
-          <button
-            class="btn-primary"
+          </v-btn>
+          <v-btn
+            color="primary"
             :disabled="isRegenerating || !menu || (menu?.regenerateLeft ?? 0) <= 0"
             @click="regenerate"
           >
             {{ isRegenerating ? '組み直し中…' : `組み直す（残り ${menu?.regenerateLeft ?? 0}）` }}
-          </button>
+          </v-btn>
         </div>
       </div>
 
       <!-- 週プレイ数の設定。提示する曲数がこの値に比例して増減する。 -->
-      <div v-if="menu" class="card px-4 py-3 flex items-center gap-4 flex-wrap">
+      <v-card v-if="menu" class="px-4 py-3 flex items-center gap-4 flex-wrap">
         <div class="min-w-0">
           <p class="section-label">週のプレイ曲数</p>
           <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
@@ -393,23 +393,22 @@ const weakAxisNote = computed(() => {
           </p>
         </div>
         <div class="flex items-center gap-3 flex-1 min-w-[260px]">
-          <input
-            v-model.number="weeklyPlaysInput"
-            type="range"
+          <v-slider
+            v-model="weeklyPlaysInput"
             :min="menu.weeklyPlaysMin"
             :max="menu.weeklyPlaysMax"
             :step="menu.playsPerCredit"
-            class="flex-1 accent-blue-700 dark:accent-blue-500"
+            class="flex-1"
             :disabled="isSavingSettings"
-            @change="saveWeeklyPlays"
+            @end="saveWeeklyPlays"
           />
-          <input
+          <v-text-field
             v-model.number="weeklyPlaysInput"
             type="number"
             :min="menu.weeklyPlaysMin"
             :max="menu.weeklyPlaysMax"
             :step="menu.playsPerCredit"
-            class="w-20 px-2 py-1.5 text-sm font-bold tabular-nums text-right rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            class="w-24 flex-none text-sm font-bold tabular-nums [&_input]:text-right"
             :disabled="isSavingSettings"
             @change="saveWeeklyPlays"
           />
@@ -435,29 +434,32 @@ const weakAxisNote = computed(() => {
           条件に合う譜面が尽きたため {{ menu.items.length }} 曲で打ち切っています。
           設定をこれ以上上げても曲数は増えません。
         </p>
-      </div>
+      </v-card>
 
-      <div v-if="loadError" class="card p-4 text-sm text-rose-600 dark:text-rose-400">
+      <v-alert v-if="loadError" type="error" class="text-sm">
         {{ loadError }}
-      </div>
+      </v-alert>
 
-      <div v-if="isLoading && !menu" class="card p-10 text-center text-sm text-slate-400 dark:text-slate-500">
-        メニューを組み立てています。初回はペア回帰の構築で数秒かかります。
-      </div>
+      <v-card v-if="isLoading && !menu" class="p-10 text-center text-sm text-slate-400 dark:text-slate-500">
+        <v-progress-circular size="20" width="2" class="mb-2" />
+        <p>メニューを組み立てています。初回はペア回帰の構築で数秒かかります。</p>
+      </v-card>
 
       <template v-if="menu">
         <!-- 未集計の注意書き -->
-        <div
+        <v-alert
           v-if="!menu.benchmarkReady"
-          class="card p-3 text-xs text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20"
+          type="warning"
+          class="text-xs"
         >
           ティア別ベンチマークが未集計のため、計測曲は空になります。
           <code class="mx-1">POST /api/admin/training/benchmark/refresh</code>
           で即時集計できます（数十秒）。
-        </div>
+        </v-alert>
 
         <!-- サマリー -->
-        <div class="card grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-700">
+        <v-card>
+        <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-700">
           <div class="p-4">
             <p class="section-label">現在</p>
             <p class="text-2xl font-bold tabular-nums leading-tight mt-0.5">
@@ -517,18 +519,18 @@ const weakAxisNote = computed(() => {
             </p>
           </div>
         </div>
+        </v-card>
 
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 items-start">
           <!-- 左: 3 つの枠 -->
           <div class="flex flex-col gap-4 min-w-0">
-            <div
+            <v-card
               v-for="group in [
                 { key: 'MEASURE', label: '計測曲', items: measureItems, hint: '次のティアを分ける登竜門譜面。目標は上位ティアの平均' },
                 { key: 'TASK', label: '課題曲', items: taskItems, hint: '弱点軸の譜面から、達成確率 40〜70% のもの' },
                 { key: 'FILL', label: 'コスパ埋め', items: fillItems, hint: '期待獲得 BEAT-PT の大きい順' },
               ]"
               :key="group.key"
-              class="card"
             >
               <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 gap-3">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
@@ -565,14 +567,20 @@ const weakAxisNote = computed(() => {
                       {{ item.title }}
                     </span>
                     <InformalRankBadge :rank="item.informalRank" size="xs" class="shrink-0 self-center" />
-                    <span
+                    <v-chip
                       v-if="item.unplayed"
-                      class="shrink-0 self-center text-[9px] font-bold px-1 py-px rounded bg-blue-600 text-white"
-                    >埋め</span>
-                    <span
+                      size="x-small"
+                      label
+                      variant="flat"
+                      class="shrink-0 self-center h-auto text-[9px] font-bold px-1 py-px rounded bg-blue-600 text-white"
+                    >埋め</v-chip>
+                    <v-chip
                       v-if="item.axis"
-                      class="shrink-0 self-center text-[9px] font-bold px-1 py-px rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
-                    >{{ item.axis }}</span>
+                      size="x-small"
+                      label
+                      variant="flat"
+                      class="shrink-0 self-center h-auto text-[9px] font-bold px-1 py-px rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                    >{{ item.axis }}</v-chip>
                   </div>
                   <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                     {{ item.difficultyName }}
@@ -608,22 +616,24 @@ const weakAxisNote = computed(() => {
                 </div>
 
                 <div class="w-20 shrink-0 text-right">
-                  <span
-                    class="inline-block text-[10px] font-bold rounded-full px-2 py-0.5 border whitespace-nowrap"
+                  <v-chip
+                    size="x-small"
+                    variant="flat"
+                    class="h-auto text-[10px] font-bold rounded-full px-2 py-0.5 border whitespace-nowrap"
                     :class="statusClass(item.status)"
-                  >{{ statusLabel(item) }}</span>
+                  >{{ statusLabel(item) }}</v-chip>
                   <!-- スマホでは目標を状態の下にまとめる -->
                   <p class="sm:hidden text-[10px] text-slate-500 dark:text-slate-400 tabular-nums mt-0.5 whitespace-nowrap">
                     {{ fmt(currentScoreOf(item)) }} → {{ fmt(item.targetValue) }}
                   </p>
                 </div>
               </div>
-            </div>
+            </v-card>
           </div>
 
           <!-- 右: レーダーと振り返り -->
           <div class="flex flex-col gap-4">
-            <div class="card">
+            <v-card>
               <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">弱点レーダー</h3>
                 <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ menu.referenceChartCount }} 譜面から</span>
@@ -696,9 +706,9 @@ const weakAxisNote = computed(() => {
                   </template>
                 </p>
               </div>
-            </div>
+            </v-card>
 
-            <div v-if="review" class="card">
+            <v-card v-if="review">
               <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
                 <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">先週の振り返り</h3>
                 <span class="text-[11px] text-slate-400 dark:text-slate-500">{{ review.weekStart }} 週</span>
@@ -720,7 +730,7 @@ const weakAxisNote = computed(() => {
                   </div>
                 </div>
               </div>
-            </div>
+            </v-card>
           </div>
         </div>
       </template>

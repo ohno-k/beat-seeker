@@ -21,6 +21,9 @@
  * - 管理者は類似譜面の「内訳」で類似度計算の過程を表示
  */
 import { ref, computed, watch, onMounted } from 'vue';
+import {
+  mdiAccountCircleOutline, mdiChevronDown, mdiClose, mdiLinkVariant, mdiMagnify, mdiOpenInNew, mdiShuffleVariant,
+} from '@mdi/js';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
@@ -644,75 +647,60 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     </header>
 
     <!-- ページ内のタブ: 譜面ごとの分析 / 全譜面の当たり配置ランキング -->
-    <nav class="page-tabs mb-4" role="tablist">
-      <button type="button" role="tab" :aria-selected="pageTab === 'analysis'" :class="{ on: pageTab === 'analysis' }"
-        @click="pageTab = 'analysis'">譜面分析</button>
-      <button type="button" role="tab" :aria-selected="pageTab === 'ranking'" :class="{ on: pageTab === 'ranking' }"
-        @click="pageTab = 'ranking'">当たり配置ランキング</button>
-    </nav>
+    <v-tabs v-model="pageTab" class="mb-4 border-b border-slate-200 dark:border-slate-700">
+      <v-tab value="analysis" class="text-[0.8rem] font-semibold">譜面分析</v-tab>
+      <v-tab value="ranking" class="text-[0.8rem] font-semibold">当たり配置ランキング</v-tab>
+    </v-tabs>
 
     <template v-if="pageTab === 'analysis'">
     <!-- 管理者が他ユーザーを閲覧中の注意バナー -->
-    <div v-if="isAdminViewing"
-      class="mb-5 flex items-center gap-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 px-4 py-2.5 text-xs text-indigo-700 dark:text-indigo-300 font-medium"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zM19 10a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
+    <v-alert v-if="isAdminViewing" type="info" :icon="mdiAccountCircleOutline" class="mb-5 text-xs font-medium">
       閲覧中ユーザーのスコアで類似譜面を表示しています
-    </div>
+    </v-alert>
 
     <div class="chart-layout">
       <!-- ═══ 曲選択 ═══ -->
       <aside class="picker">
-        <div class="picker-inner rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <v-card class="picker-inner bg-white dark:bg-slate-800">
           <div class="p-3 border-b border-slate-100 dark:border-slate-700">
-            <div class="relative">
-              <svg class="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
-              </svg>
-              <input
-                v-model="searchQuery"
-                type="search"
-                :placeholder="t('scorePrediction.searchPlaceholder')"
-                class="search-input w-full pl-8 pr-3 py-2 rounded-md border border-slate-300 dark:border-slate-600
-                       bg-white dark:bg-slate-900 text-slate-800 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
-              />
-            </div>
+            <v-text-field
+              v-model="searchQuery"
+              type="search"
+              :placeholder="t('scorePrediction.searchPlaceholder')"
+              :prepend-inner-icon="mdiMagnify"
+              class="search-input w-full text-xs"
+            />
             <div class="mt-2.5 flex items-center gap-2">
-              <div class="seg">
-                <button type="button" :class="{ on: levelFilter === 'all' }" @click="levelFilter = 'all'">すべて</button>
-                <button type="button" :class="{ on: levelFilter === 12 }" @click="levelFilter = 12">☆12</button>
-                <button type="button" :class="{ on: levelFilter === 11 }" @click="levelFilter = 11">☆11</button>
-                <button type="button" :class="{ on: levelFilter === 'low' }" @click="levelFilter = 'low'">☆10以下</button>
-              </div>
+              <v-btn-toggle v-model="levelFilter" mandatory>
+                <v-btn type="button" value="all" size="small" class="text-xs">すべて</v-btn>
+                <v-btn type="button" :value="12" size="small" class="text-xs">☆12</v-btn>
+                <v-btn type="button" :value="11" size="small" class="text-xs">☆11</v-btn>
+                <v-btn type="button" value="low" size="small" class="text-xs">☆10以下</v-btn>
+              </v-btn-toggle>
             </div>
             <!-- 件数とランダム（レベルの絞り込みが 4 つあるので、ランダムはこの行に置いて一覧の幅に収める） -->
             <div class="mt-2 flex items-center justify-between gap-2">
               <span class="text-[11px] text-slate-400 dark:text-slate-500 tabular-nums">{{ matchedEntries.length }} 譜面</span>
-              <button type="button" class="random-btn" title="ランダムに選ぶ" @click="pickRandom">
-                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5" />
-                </svg>
+              <v-btn type="button" variant="outlined" size="small" class="ml-auto text-xs" :prepend-icon="mdiShuffleVariant" title="ランダムに選ぶ" @click="pickRandom">
                 ランダム
-              </button>
+              </v-btn>
             </div>
           </div>
 
           <!-- モバイルで曲を選んだ後は畳む -->
-          <button v-if="listCollapsed" type="button" class="reopen-btn text-xs font-semibold text-blue-600 dark:text-blue-400"
+          <v-btn v-if="listCollapsed" type="button" variant="text" color="primary" block class="reopen-btn text-xs"
+            :append-icon="mdiChevronDown"
             @click="pickerOpen = true">
             一覧から選ぶ
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" /></svg>
-          </button>
+          </v-btn>
 
-          <ul class="picker-list" :class="{ collapsed: listCollapsed }">
-            <li v-for="entry in shownEntries" :key="entry.textage">
-              <button type="button"
-                class="song-item"
-                :class="[metaOf(entry.difficulty).cls, { active: selectedEntry?.textage === entry.textage }]"
-                @click="selectEntry(entry)">
+          <v-list class="picker-list" :class="{ collapsed: listCollapsed }" density="compact">
+            <v-list-item v-for="entry in shownEntries" :key="entry.textage"
+              min-height="0"
+              class="song-item"
+              :class="[metaOf(entry.difficulty).cls, { active: selectedEntry?.textage === entry.textage }]"
+              @click="selectEntry(entry)">
+              <div class="flex items-center gap-2">
                 <span class="min-w-0 flex-1">
                   <span class="block truncate text-xs font-medium">{{ entry.title }}</span>
                   <span class="block truncate text-[10px] text-slate-400 dark:text-slate-500">{{ entry.artist }}</span>
@@ -721,28 +709,25 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   :class="metaOf(entry.difficulty).text">
                   ☆{{ entry.level }} {{ diffShort(entry.difficulty) }}
                 </span>
-              </button>
-            </li>
-            <li v-if="matchedEntries.length > listLimit">
-              <button type="button" class="more-btn text-xs text-blue-600 dark:text-blue-400" @click="listLimit += LIST_PAGE">
-                さらに表示（残り {{ matchedEntries.length - listLimit }}）
-              </button>
-            </li>
-            <li v-if="!matchedEntries.length" class="px-3 py-6 text-center text-xs text-slate-400 dark:text-slate-500">
+              </div>
+            </v-list-item>
+            <v-btn v-if="matchedEntries.length > listLimit" type="button" variant="text" color="primary" block class="text-xs" @click="listLimit += LIST_PAGE">
+              さらに表示（残り {{ matchedEntries.length - listLimit }}）
+            </v-btn>
+            <div v-if="!matchedEntries.length" class="px-3 py-6 text-center text-xs text-slate-400 dark:text-slate-500">
               {{ songDataBody.length ? '該当する譜面がありません' : '楽曲データを読み込み中…' }}
-            </li>
-          </ul>
-        </div>
+            </div>
+          </v-list>
+        </v-card>
       </aside>
 
       <!-- ═══ 分析結果 ═══ -->
       <div class="min-w-0">
         <!-- URL で指定された textage が songData に見つからなかった場合 -->
-        <div v-if="unknownTextageFromUrl"
-          class="rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 p-6 text-center">
+        <v-alert v-if="unknownTextageFromUrl" type="warning" :icon="false" class="p-6 text-center">
           <p class="text-amber-700 dark:text-amber-300 font-medium mb-1">{{ t('chartAnalysis.notFound') }}</p>
           <p class="text-xs text-amber-600/80 dark:text-amber-400/80 break-all">{{ unknownTextageFromUrl }}</p>
-        </div>
+        </v-alert>
 
         <!-- 未選択 -->
         <div v-else-if="!selectedEntry"
@@ -754,11 +739,9 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
           <p class="mt-1 text-xs text-slate-400 dark:text-slate-500">
             曲名・アーティストで検索するか、一覧から選びます。
           </p>
-          <button type="button"
-            class="mt-4 inline-flex items-center gap-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2"
-            @click="pickRandom">
+          <v-btn type="button" color="primary" size="small" class="mt-4 text-xs" @click="pickRandom">
             ランダムに 1 譜面見る
-          </button>
+          </v-btn>
           <ul class="feature-list mt-6 text-left text-xs text-slate-500 dark:text-slate-400">
             <li><span class="dot bg-rose-500"></span>小節ごとのノーツ密度（鍵盤／皿）</li>
             <li><span class="dot bg-sky-500"></span>トリル・階段・縦連などの配置パターン</li>
@@ -769,15 +752,15 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
         <div v-else class="flex flex-col gap-4">
           <!-- ─── 譜面ヘッダ ─── -->
-          <section class="hero rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+          <v-card tag="section" class="hero bg-white dark:bg-slate-800"
             :class="metaOf(selectedEntry.difficulty).cls">
             <div class="hero-top">
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
-                  <span class="px-1.5 py-0.5 rounded" :class="diffBadgeClass(selectedEntry.difficulty)">
+                  <v-chip label size="x-small" variant="flat" class="px-1.5 py-0.5 h-auto rounded text-[11px] font-bold" :class="diffBadgeClass(selectedEntry.difficulty)">
                     {{ diffLabel(selectedEntry.difficulty) }}
-                  </span>
-                  <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">☆{{ selectedEntry.level }}</span>
+                  </v-chip>
+                  <v-chip label size="x-small" variant="flat" class="px-1.5 py-0.5 h-auto rounded text-[11px] font-bold bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300">☆{{ selectedEntry.level }}</v-chip>
                 </div>
                 <h3 class="hero-title mt-2 font-bold text-slate-800 dark:text-white break-words">{{ selectedEntry.title }}</h3>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400 break-words">
@@ -785,18 +768,14 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                 </p>
               </div>
               <div class="hero-actions">
-                <button type="button" class="action-btn" @click="copyLink">
-                  <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
-                  </svg>
+                <v-btn type="button" variant="outlined" size="small" class="text-[0.7rem] text-slate-600 dark:text-slate-300" :prepend-icon="mdiLinkVariant" @click="copyLink">
                   {{ linkCopied ? 'コピーしました' : 'リンクをコピー' }}
-                </button>
-                <a v-if="selectedEntry.textage" class="action-btn" :href="`https://textage.cc/score/${selectedEntry.textage}`" target="_blank" rel="noopener noreferrer">
+                </v-btn>
+                <v-btn v-if="selectedEntry.textage" variant="outlined" size="small" class="text-[0.7rem] text-slate-600 dark:text-slate-300"
+                  :append-icon="mdiOpenInNew"
+                  :href="`https://textage.cc/score/${selectedEntry.textage}`" target="_blank" rel="noopener noreferrer">
                   TexTage
-                  <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M19 5l-8 8M18 14v5H5V6h5" />
-                  </svg>
-                </a>
+                </v-btn>
               </div>
             </div>
 
@@ -814,51 +793,52 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
             </dl>
 
             <div v-if="tagBadges.length" class="mt-3 flex flex-wrap gap-1.5">
-              <span v-for="tb in tagBadges" :key="tb.tag"
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold"
-                :class="tb.colorClass">{{ tb.label }}</span>
+              <v-chip v-for="tb in tagBadges" :key="tb.tag"
+                size="x-small" variant="flat"
+                class="px-2 py-0.5 h-auto rounded-full text-[11px] font-bold"
+                :class="tb.colorClass">{{ tb.label }}</v-chip>
             </div>
-          </section>
+          </v-card>
 
           <!-- ─── プロファイル読み込み中／なし ─── -->
           <div v-if="profileState === 'loading'" class="skeleton-grid">
             <div v-for="i in 4" :key="i" class="h-20 rounded-md bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
             <div class="skeleton-wide h-40 rounded-md bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
           </div>
-          <div v-else-if="profileState === 'missing'"
-            class="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 text-center text-xs text-slate-400 dark:text-slate-500">
+          <v-card v-else-if="profileState === 'missing'"
+            class="bg-white dark:bg-slate-800 p-5 text-center text-xs text-slate-400 dark:text-slate-500">
             この譜面の傾向データはまだありません。譜面再生は下から利用できます。
-          </div>
+          </v-card>
 
           <template v-else-if="tendencyProfile">
             <!-- ─── 主要な数値 ─── -->
             <div class="stat-grid">
-              <div class="stat rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <v-card class="stat bg-white dark:bg-slate-800">
                 <div class="stat-label">実効BPM</div>
                 <div class="stat-value text-slate-800 dark:text-white">{{ tendencyProfile.dominantEff16.toFixed(0) }}</div>
                 <div class="stat-sub">加重平均 {{ tendencyProfile.weightedEff16.toFixed(0) }}</div>
-              </div>
-              <div class="stat rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </v-card>
+              <v-card class="stat bg-white dark:bg-slate-800">
                 <div class="stat-label">皿の割合</div>
                 <div class="stat-value text-rose-600 dark:text-rose-400">{{ tendencyProfile.scratchPct.toFixed(1) }}<small>%</small></div>
                 <div class="stat-sub">約 {{ Math.round(tendencyProfile.notes * tendencyProfile.scratchPct / 100) }} ノーツ</div>
-              </div>
-              <div class="stat rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </v-card>
+              <v-card class="stat bg-white dark:bg-slate-800">
                 <div class="stat-label">同時押し率</div>
                 <div class="stat-value text-blue-600 dark:text-blue-400">{{ tendencyProfile.chordPct.toFixed(1) }}<small>%</small></div>
                 <div class="stat-sub">単押し {{ tendencyProfile.singlePct.toFixed(1) }}%</div>
-              </div>
-              <div class="stat rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              </v-card>
+              <v-card class="stat bg-white dark:bg-slate-800">
                 <div class="stat-label">最大密度</div>
                 <div class="stat-value text-amber-600 dark:text-amber-400">{{ density?.peak ?? '-' }}<small>/小節</small></div>
                 <div class="stat-sub">
                   <template v-if="density">{{ density.peakMeasure }}小節目 ・ 平均 {{ density.avg.toFixed(1) }}</template>
                 </div>
-              </div>
+              </v-card>
             </div>
 
             <!-- ─── ノーツ密度 ─── -->
-            <section v-if="density" class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <v-card v-if="density" tag="section" class="card bg-white dark:bg-slate-800">
               <div class="card-head">
                 <h4 class="card-title">ノーツ密度</h4>
                 <div class="legend">
@@ -883,11 +863,11 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   <span v-for="tk in density.ticks" :key="tk.label" :style="{ left: `${tk.left}%` }">{{ tk.label }}</span>
                 </div>
               </div>
-            </section>
+            </v-card>
 
             <!-- ─── 配置パターン / 同時押し構成 ─── -->
             <div class="two-col">
-              <section v-if="patternRows.length" class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <v-card v-if="patternRows.length" tag="section" class="card bg-white dark:bg-slate-800">
                 <div class="card-head">
                   <h4 class="card-title">配置パターン</h4>
                   <span class="card-note">全ノーツに占める割合</span>
@@ -903,9 +883,9 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     </span>
                   </li>
                 </ul>
-              </section>
+              </v-card>
 
-              <section v-if="chordRows.length" class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+              <v-card v-if="chordRows.length" tag="section" class="card bg-white dark:bg-slate-800">
                 <div class="card-head">
                   <h4 class="card-title">同時押し構成</h4>
                   <span class="card-note">打鍵タイミングごとの個数</span>
@@ -917,11 +897,11 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <span class="bar-value tabular-nums">{{ r.pct.toFixed(1) }}%</span>
                   </li>
                 </ul>
-              </section>
+              </v-card>
             </div>
 
             <!-- ─── 打鍵間隔 ─── -->
-            <section v-if="noteDistribution.length" class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <v-card v-if="noteDistribution.length" tag="section" class="card bg-white dark:bg-slate-800">
               <div class="card-head">
                 <h4 class="card-title">打鍵間隔</h4>
                 <span v-if="mainInterval" class="card-note">主なリズム: <b class="text-slate-600 dark:text-slate-300">{{ mainInterval.label }}</b></span>
@@ -939,14 +919,14 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   <span class="tabular-nums text-slate-400 dark:text-slate-500">{{ nd.pct }}%</span>
                 </div>
               </div>
-            </section>
+            </v-card>
           </template>
 
           <!-- ─── 譜面再生（データは「再生する」を押したときに取得。曲を替えたら作り直す）─── -->
           <ChartPlayer v-if="selectedEntry.textage" :key="selectedEntry.textage" :textage="selectedEntry.textage" />
 
           <!-- ─── 類似譜面 ─── -->
-          <section class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <v-card tag="section" class="card bg-white dark:bg-slate-800">
             <div class="card-head">
               <h4 class="card-title">{{ t('scorePrediction.similarSongs') }}</h4>
               <span v-if="similarSongs.length" class="card-note tabular-nums">
@@ -954,14 +934,14 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
               </span>
             </div>
 
-            <p v-if="!isLoggedIn" class="py-3 text-center text-xs text-amber-700 dark:text-amber-300">
+            <v-alert v-if="!isLoggedIn" type="warning" :icon="false" class="text-center text-xs">
               {{ t('chartAnalysis.loginToSeeMore') }}
-            </p>
+            </v-alert>
             <div v-else-if="isLoading" class="py-6 flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">
-              <div class="w-4 h-4 mr-2 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+              <v-progress-circular size="16" width="2" class="mr-2" />
               {{ t('scorePrediction.calculating') }}
             </div>
-            <p v-else-if="predictionError" class="py-3 text-xs text-red-600 dark:text-red-400">{{ predictionError }}</p>
+            <v-alert v-else-if="predictionError" type="error" class="text-xs">{{ predictionError }}</v-alert>
             <p v-else-if="predictionResult && !similarSongs.length" class="py-3 text-center text-xs text-slate-400 dark:text-slate-500">
               類似譜面が見つかりませんでした
             </p>
@@ -981,13 +961,13 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <span class="sim-track"><span class="sim-fill" :style="{ width: `${Math.max(0, Math.min(1, song.similarity)) * 100}%` }"></span></span>
                   </span>
                   <span class="min-w-0 flex items-center gap-1.5">
-                    <span class="shrink-0 px-1 rounded text-[10px] font-bold"
+                    <v-chip label size="x-small" variant="flat" class="shrink-0 px-1 h-auto rounded text-[10px] font-bold"
                       :class="diffBadgeClass(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4')">
                       {{ diffShort(DIFF_CODE_BY_NAME[song.difficultyName] ?? '4') }}
-                    </span>
-                    <button v-if="targetTextages.has(song.textage)" type="button"
-                      class="truncate text-left text-xs text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
-                      @click="goToChart(song.textage)">{{ song.title }}</button>
+                    </v-chip>
+                    <v-btn v-if="targetTextages.has(song.textage)" type="button" variant="text" size="small" density="compact"
+                      class="sim-title text-xs text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                      @click="goToChart(song.textage)"><span class="truncate">{{ song.title }}</span></v-btn>
                     <span v-else class="truncate text-xs text-slate-700 dark:text-slate-200">{{ song.title }}</span>
                   </span>
                   <span class="text-right text-xs tabular-nums whitespace-nowrap">
@@ -997,12 +977,12 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     </template>
                     <span v-else class="text-slate-400 dark:text-slate-500">未プレー</span>
                   </span>
-                  <button v-if="isAdmin" type="button" class="debug-btn" title="類似度の内訳（管理者）"
-                    @click="fetchSimilarityDebug(song.textage)">内訳</button>
+                  <v-btn v-if="isAdmin" type="button" variant="outlined" color="indigo" size="x-small" class="debug-btn text-[0.65rem]" title="類似度の内訳（管理者）"
+                    @click="fetchSimilarityDebug(song.textage)">内訳</v-btn>
                 </li>
               </ul>
             </template>
-          </section>
+          </v-card>
         </div>
       </div>
     </div>
@@ -1012,36 +992,39 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     <RandomRanking v-else @open="openChartFromRanking" />
 
     <!-- 類似度デバッグモーダル（管理者機能）: 計算過程を4グループに分けて表示 -->
-    <Teleport to="body">
-      <div v-if="debugResult || isDebugLoading"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-        @click.self="debugResult = null">
-        <div class="bg-white dark:bg-slate-800 rounded-md shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+    <v-dialog
+      :model-value="!!(debugResult || isDebugLoading)"
+      max-width="672"
+      @update:model-value="(v: boolean) => { if (!v) debugResult = null }"
+    >
+        <v-card variant="flat" class="bg-white dark:bg-slate-800 w-full max-h-[90vh] overflow-y-auto p-6">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">類似度計算過程</h3>
-            <button @click="debugResult = null" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">✕</button>
+            <v-btn icon variant="text" size="small" aria-label="閉じる" @click="debugResult = null">
+              <v-icon :icon="mdiClose" />
+            </v-btn>
           </div>
           <div v-if="isDebugLoading" class="flex justify-center py-10">
-            <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+            <v-progress-circular size="32" width="4" />
           </div>
           <div v-else-if="debugResult">
             <!-- 上部: 比較対象2曲(A,B)の情報カード -->
             <div class="flex gap-3 mb-4 text-sm">
-              <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-md p-3">
+              <v-card variant="flat" class="flex-1 bg-slate-50 dark:bg-slate-900 p-3">
                 <div class="text-xs text-slate-400 mb-1">対象曲 (A)</div>
                 <div class="font-bold text-slate-800 dark:text-slate-100">{{ debugResult.songA?.title }}</div>
                 <div class="text-xs text-slate-500">難易度 {{ debugResult.songA?.informalRank }}</div>
-              </div>
-              <div class="flex-1 bg-slate-50 dark:bg-slate-900 rounded-md p-3">
+              </v-card>
+              <v-card variant="flat" class="flex-1 bg-slate-50 dark:bg-slate-900 p-3">
                 <div class="text-xs text-slate-400 mb-1">参照曲 (B)</div>
                 <div class="font-bold text-slate-800 dark:text-slate-100">{{ debugResult.songB?.title }}</div>
                 <div class="text-xs text-slate-500">難易度 {{ debugResult.songB?.informalRank }}</div>
-              </div>
+              </v-card>
             </div>
             <!-- 生データ比較テーブル: ノーツ密度・BPM・スクラッチ割合などを並べて表示 -->
             <div class="mb-4">
               <div class="text-xs font-bold text-slate-500 mb-2">生データ比較</div>
-              <table class="w-full text-xs">
+              <v-table class="w-full text-xs bg-transparent">
                 <thead><tr class="text-slate-400"><th class="text-left pb-1">指標</th><th class="text-right pb-1">A</th><th class="text-right pb-1">B</th></tr></thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
                   <tr v-for="[key, label] in [
@@ -1057,11 +1040,11 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <td class="py-1 text-right tabular-nums text-slate-700 dark:text-slate-300">{{ debugResult.rawB?.[key] }}</td>
                   </tr>
                 </tbody>
-              </table>
+              </v-table>
             </div>
             <!-- グループ別の類似度内訳（密度/スクラッチ/鍵盤パターン/CN の4グループ） -->
             <div class="space-y-3">
-              <div v-for="[label, key, color, paramLabels] in ([
+              <v-card v-for="[label, key, color, paramLabels] in ([
                 ['Group1: 密度', 'group1_density', 'blue', {
                   dNps_norm: 'ノーツ密度差（正規化）',
                   dEff16_norm: '主要BPM差（正規化）',
@@ -1097,7 +1080,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                   'weight(cnW)': '重み (平均CN割合)',
                   contribution: 'グループ寄与度',
                 }],
-              ] as any[])" :key="key" class="rounded-md border border-slate-100 dark:border-slate-700 p-3">
+              ] as any[])" :key="key" class="p-3">
                 <div class="flex justify-between items-center mb-2">
                   <span class="text-xs font-bold text-slate-600 dark:text-slate-300">{{ label }}</span>
                   <span class="text-sm font-bold tabular-nums"
@@ -1111,20 +1094,19 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
                     <span class="text-right tabular-nums text-slate-700 dark:text-slate-300">{{ val }}</span>
                   </template>
                 </div>
-              </div>
+              </v-card>
             </div>
             <!-- 最終類似度: 各グループ寄与度を掛け合わせた最終値 -->
-            <div class="mt-4 rounded-md bg-slate-900 dark:bg-slate-950 p-4 text-center">
+            <v-card variant="flat" class="mt-4 bg-slate-900 dark:bg-slate-950 p-4 text-center">
               <div class="text-xs text-slate-400 mb-1">最終類似度</div>
               <div class="text-3xl font-bold text-white">{{ debugResult.result?.finalSimilarityPct }}</div>
               <div class="text-xs text-slate-500 mt-1">
                 統合値 (G1×G2^scrW×G3^kbdW×G4^cnW): {{ debugResult.result?.combined }}
               </div>
-            </div>
+            </v-card>
           </div>
-        </div>
-      </div>
-    </Teleport>
+        </v-card>
+    </v-dialog>
 
     <!-- 謝辞: 譜面データ提供元 TexTage へのクレジット -->
     <div class="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700 text-center text-xs text-slate-400 dark:text-slate-500">
@@ -1138,24 +1120,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
 <style scoped>
 /* レスポンシブは Tailwind の sm:/lg: ではなくここで書く（src/output.css が後勝ちで潰すため） */
-.page-tabs {
-  display: flex;
-  gap: 0.25rem;
-  border-bottom: 1px solid rgb(226 232 240);
-}
-.page-tabs button {
-  padding: 0.5rem 0.9rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  color: rgb(100 116 139);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-.page-tabs button.on { color: rgb(37 99 235); border-bottom-color: rgb(37 99 235); }
-.dark .page-tabs { border-bottom-color: rgb(51 65 85); }
-.dark .page-tabs button { color: rgb(148 163 184); }
-.dark .page-tabs button.on { color: rgb(96 165 250); border-bottom-color: rgb(96 165 250); }
 .chart-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1168,7 +1132,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
 /* ── 曲選択 ── */
 .picker-inner { overflow: hidden; }
-.search-input::-webkit-search-cancel-button { cursor: pointer; }
+.search-input :deep(input::-webkit-search-cancel-button) { cursor: pointer; }
 .picker-list {
   max-height: 16rem;
   overflow-y: auto;
@@ -1180,21 +1144,11 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 @media (max-width: 1023px) {
   .picker-list.collapsed { display: none; }
 }
-.reopen-btn {
-  display: none;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  padding: 0.6rem;
-}
+.reopen-btn { display: none; }
 @media (max-width: 1023px) {
   .reopen-btn { display: flex; }
 }
 .song-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   width: 100%;
   padding: 0.4rem 0.6rem 0.4rem 0.7rem;
   border-radius: 0.375rem;
@@ -1209,38 +1163,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .dark .song-item:hover { background: rgb(51 65 85 / 0.5); }
 .dark .song-item.active.is-ano { background: rgb(127 29 29 / 0.3); }
 .dark .song-item.active.is-leg { background: rgb(88 28 135 / 0.3); }
-.more-btn { width: 100%; padding: 0.6rem; }
-
-.seg {
-  display: inline-flex;
-  border-radius: 0.375rem;
-  overflow: hidden;
-  border: 1px solid rgb(203 213 225);
-  font-size: 0.75rem;
-}
-.seg button { padding: 0.3rem 0.55rem; font-weight: 600; white-space: nowrap; color: rgb(71 85 105); background: white; }
-.seg button + button { border-left: 1px solid rgb(203 213 225); }
-.seg button.on { color: white; background: rgb(37 99 235); }
-.dark .seg { border-color: rgb(71 85 105); }
-.dark .seg button { color: rgb(203 213 225); background: rgb(30 41 59); }
-.dark .seg button + button { border-left-color: rgb(71 85 105); }
-.dark .seg button.on { color: white; background: rgb(37 99 235); }
-.random-btn {
-  margin-left: auto;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.375rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: rgb(71 85 105);
-  border: 1px solid rgb(203 213 225);
-}
-.random-btn:hover { background: rgb(248 250 252); }
-.dark .random-btn { color: rgb(203 213 225); border-color: rgb(71 85 105); }
-.dark .random-btn:hover { background: rgb(51 65 85); }
 
 /* ── 未選択 ── */
 .empty-state { padding: 2.5rem 1.25rem; }
@@ -1272,21 +1194,6 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
   .hero-top { flex-direction: column; }
   .hero-actions { justify-content: flex-start; }
 }
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.35rem 0.65rem;
-  border-radius: 0.375rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  white-space: nowrap;
-  color: rgb(71 85 105);
-  border: 1px solid rgb(226 232 240);
-}
-.action-btn:hover { background: rgb(248 250 252); }
-.dark .action-btn { color: rgb(203 213 225); border-color: rgb(71 85 105); }
-.dark .action-btn:hover { background: rgb(51 65 85); }
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1391,13 +1298,9 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 .sim-track { flex: 1; height: 0.35rem; border-radius: 9999px; background: rgb(241 245 249); overflow: hidden; }
 .dark .sim-track { background: rgb(51 65 85); }
 .sim-fill { display: block; height: 100%; background: rgb(59 130 246); border-radius: 9999px; }
-.debug-btn {
-  font-size: 0.65rem;
-  padding: 0.15rem 0.4rem;
-  border-radius: 0.25rem;
-  color: rgb(99 102 241);
-  border: 1px solid rgb(199 210 254);
-}
+/* 類似譜面の曲名（v-btn text）。行の幅に合わせて省略記号で切る */
+.sim-title { min-width: 0; height: auto; padding: 0; justify-content: flex-start; text-align: left; font-weight: 400; }
+.sim-title :deep(.v-btn__content) { min-width: 0; max-width: 100%; }
 @media (max-width: 639px) {
   .similar-row { grid-template-columns: 3rem minmax(0, 1fr) auto; }
   .similar-row .debug-btn { display: none; }

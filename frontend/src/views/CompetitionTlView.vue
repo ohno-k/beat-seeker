@@ -146,29 +146,35 @@ const undecidedStrategyCount = computed<number>(() =>
 <template>
   <div class="competition-tl-view min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-4 sm:p-8 relative">
     <!-- 言語切替ボタン群 (右上固定) -->
-    <div class="absolute top-3 right-3 z-30 flex items-center gap-1 p-1 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 backdrop-blur shadow-sm">
-      <button
+    <v-btn-toggle
+      :model-value="currentLang"
+      mandatory
+      class="absolute top-3 right-3 z-30 bg-white/80 dark:bg-slate-800/80 backdrop-blur shadow-sm"
+    >
+      <v-btn
         v-for="lang in availableLanguages"
         :key="lang"
-        type="button"
+        :value="lang"
+        size="small"
         @click="setLanguage(lang)"
         :aria-pressed="currentLang === lang"
-        class="px-2 py-1 text-[11px] font-bold rounded-lg transition-all"
-        :class="currentLang === lang
-          ? 'bg-blue-600 text-white shadow-sm'
-          : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'"
-      >{{ t(`lang.${lang}`) }}</button>
+        class="text-[11px]"
+      >{{ t(`lang.${lang}`) }}</v-btn>
+    </v-btn-toggle>
+
+    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">
+      <v-progress-circular size="20" width="2" class="mr-2" />{{ t('competition.player.loading') }}
     </div>
 
-    <div v-if="isLoading && !view" class="text-center py-20 text-slate-400 text-sm">{{ t('competition.player.loading') }}</div>
-
-    <div
+    <v-alert
       v-else-if="!view"
-      class="max-w-2xl mx-auto bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-700 rounded-2xl p-6 text-center"
+      type="error"
+      :icon="false"
+      class="max-w-2xl mx-auto rounded-2xl p-6 text-center"
     >
       <p class="text-lg font-bold text-rose-700 dark:text-rose-300">{{ t('competition.tl.invalidToken') }}</p>
       <p class="text-sm text-rose-600 dark:text-rose-400 mt-2">{{ t('competition.tl.invalidTokenHint') }}</p>
-    </div>
+    </v-alert>
 
     <div v-else class="max-w-5xl mx-auto space-y-6">
       <!-- ヘッダ: 大会名・自チーム名・メンバー -->
@@ -176,7 +182,7 @@ const undecidedStrategyCount = computed<number>(() =>
         <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">{{ view.competition.name }}</p>
         <div class="flex items-baseline gap-2 mt-1 flex-wrap">
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight" :class="teamColorClass(view.team.teamName)">{{ view.team.teamName }}</h1>
-          <span class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlAdminBadge') }}</span>
+          <v-chip size="small" label class="text-[10px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider">{{ t('competition.common.tlAdminBadge') }}</v-chip>
         </div>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono">
           {{ t('competition.common.status') }} <span class="font-bold">{{ statusLabel(view.competition.status) }}</span>
@@ -185,7 +191,7 @@ const undecidedStrategyCount = computed<number>(() =>
       </div>
 
       <!-- メンバー一覧 + 予選コスト残量 -->
-      <section class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+      <v-card tag="section" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
           <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.membersHeader') }}</p>
           <div class="flex items-center gap-3 flex-wrap">
@@ -195,14 +201,16 @@ const undecidedStrategyCount = computed<number>(() =>
               {{ t('competition.matchKind.middle') }} {{ view.costPerKind.middle }} ·
               {{ t('competition.matchKind.captain') }} {{ view.costPerKind.captain }}
             </p>
-            <span class="text-[10px] font-black px-2 py-0.5 rounded bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 tracking-wider">
+            <v-chip size="small" label class="text-[10px] font-black bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300 tracking-wider">
               ⚡ ストラテジー {{ view.strategyUsedMatchupCount }} / {{ view.strategyLimit }} 組
-            </span>
+            </v-chip>
             <!-- 決定できる状態なのに未決定の試合が残っていれば警告表示 (意思決定漏れの防止) -->
-            <span
+            <v-chip
               v-if="undecidedStrategyCount > 0"
-              class="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider"
-            >{{ t('competition.tl.strategyUndecidedCount', { n: undecidedStrategyCount }) }}</span>
+              size="small"
+              label
+              class="text-[10px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider"
+            >{{ t('competition.tl.strategyUndecidedCount', { n: undecidedStrategyCount }) }}</v-chip>
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -213,7 +221,7 @@ const undecidedStrategyCount = computed<number>(() =>
           >
             <p class="font-bold text-sm truncate">
               {{ m.displayName }}
-              <span v-if="m.isTl" class="ml-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">{{ t('competition.common.tlBadge') }}</span>
+              <v-chip v-if="m.isTl" size="x-small" label class="ml-1 text-[9px] font-black bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 tracking-wider align-middle">{{ t('competition.common.tlBadge') }}</v-chip>
             </p>
             <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
               <span class="text-slate-400">{{ t('competition.tl.costRemaining') }}</span>
@@ -229,16 +237,16 @@ const undecidedStrategyCount = computed<number>(() =>
             </div>
           </div>
         </div>
-      </section>
+      </v-card>
 
       <!-- 4 matchup ぶんのアサイン UI -->
       <section class="space-y-4">
         <p class="text-xs font-black tracking-[0.3em] uppercase text-slate-500">{{ t('competition.tl.matchupsHeader', { n: sortedMatchups.length }) }}</p>
-        <p v-if="sortedMatchups.length === 0" class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
+        <v-card v-if="sortedMatchups.length === 0" class="text-center text-sm text-slate-400 italic py-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl">
           {{ t('competition.tl.noMatchups') }}<br />{{ t('competition.tl.noMatchupsHint') }}
-        </p>
+        </v-card>
 
-        <div
+        <v-card
           v-for="mu in sortedMatchups"
           :key="mu.matchupId"
           class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden"
@@ -246,20 +254,26 @@ const undecidedStrategyCount = computed<number>(() =>
           <div class="px-4 py-3 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between flex-wrap gap-2">
             <p class="font-bold text-sm">
               {{ t('competition.player.vs') }} <span :class="teamColorClass(mu.opponentTeam.teamName)">{{ mu.opponentTeam.teamName ?? '?' }}</span>
-              <span
+              <v-chip
                 v-if="mu.isFinals"
-                class="ml-2 text-[10px] font-black px-2 py-0.5 rounded bg-amber-500 text-white tracking-wider"
-              >🏆 {{ t('competition.tl.finalsBadge') }}</span>
+                size="small"
+                label
+                class="ml-2 text-[10px] font-black bg-amber-500 text-white tracking-wider"
+              >🏆 {{ t('competition.tl.finalsBadge') }}</v-chip>
             </p>
             <div class="flex items-center gap-2 flex-wrap">
-              <span
+              <v-chip
                 v-if="mu.myLineupPublished"
-                class="text-[9px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
-              >{{ t('competition.tl.mySidePublished') }}</span>
-              <span
+                size="x-small"
+                label
+                class="text-[9px] font-black bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 tracking-wider"
+              >{{ t('competition.tl.mySidePublished') }}</v-chip>
+              <v-chip
                 v-else
-                class="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
-              >{{ t('competition.tl.mySideUnpublished') }}</span>
+                size="x-small"
+                label
+                class="text-[9px] font-black bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+              >{{ t('competition.tl.mySideUnpublished') }}</v-chip>
               <p class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">
                 {{ t('competition.tl.matchupOrder', { n: mu.matchupOrder }) }} · {{ t('competition.tl.mySideLabel', { side: mu.mySide.toUpperCase() }) }}
               </p>
@@ -283,44 +297,44 @@ const undecidedStrategyCount = computed<number>(() =>
               <div>
                 <p class="font-bold text-sm">{{ kindLabel(match.matchKind) }}</p>
                 <p class="text-[10px] font-mono text-slate-400">{{ kindLevelLabel(match.matchKind) }}</p>
-                <span
+                <v-chip
                   v-if="match.requiredGenre"
-                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider"
+                  size="x-small"
+                  label
+                  class="mt-1 text-[9px] font-black tracking-wider"
                   :class="genreBadgeClass(match.requiredGenre)"
                 >
                   {{ t('competition.tl.requiredGenrePrefix') }} {{ match.requiredGenre }}
-                </span>
-                <span
+                </v-chip>
+                <v-chip
                   v-else
-                  class="inline-block mt-1 text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
+                  size="x-small"
+                  label
+                  class="mt-1 text-[9px] font-black bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 tracking-wider"
                 >
                   {{ t('competition.tl.genreUnspecified') }}
-                </span>
+                </v-chip>
               </div>
 
               <!-- 自軍 slot: select で 4 メンバーから選ぶ -->
               <div>
                 <p class="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">{{ t('competition.tl.myArmy') }}</p>
                 <div class="flex items-center gap-2">
-                  <select
-                    :value="match.myAssigned?.participantId ?? ''"
+                  <!-- 選べない理由 (予選: 他試合で起用中/コスト不足、決勝: 2 戦上限/連続出場) は共通判定 -->
+                  <v-select
+                    :model-value="match.myAssigned?.participantId ?? ''"
                     :disabled="match.myLocked"
-                    @change="handleAssign(match, ($event.target as HTMLSelectElement).value)"
-                    class="flex-1 px-3 py-1.5 rounded-lg text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none focus:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <option value="">未割当</option>
-                    <!-- 選べない理由 (予選: 他試合で起用中/コスト不足、決勝: 2 戦上限/連続出場) は共通判定 -->
-                    <option
-                      v-for="m in view.members"
-                      :key="m.id"
-                      :value="m.id"
-                      :disabled="!!assignBlockReason(mu, match, m.id)"
-                    >
-                      {{ m.displayName }}{{ m.isTl ? ' (TL)' : '' }}
-                      <template v-if="!mu.isFinals"> (残{{ m.remainingCost }})</template>
-                      <template v-if="assignBlockReason(mu, match, m.id)"> {{ assignBlockReason(mu, match, m.id) }}</template>
-                    </option>
-                  </select>
+                    :items="[
+                      { title: '未割当', value: '' },
+                      ...view.members.map(m => ({
+                        title: `${m.displayName}${m.isTl ? ' (TL)' : ''}${!mu.isFinals ? ` (残${m.remainingCost})` : ''}${assignBlockReason(mu, match, m.id) ? ` ${assignBlockReason(mu, match, m.id)}` : ''}`,
+                        value: m.id,
+                        props: { disabled: !!assignBlockReason(mu, match, m.id) },
+                      })),
+                    ]"
+                    @update:model-value="(v: number | string | null) => handleAssign(match, v == null ? '' : String(v))"
+                    class="flex-1 text-sm"
+                  />
                 </div>
                 <div class="mt-1 flex items-center gap-2 text-[10px] font-mono">
                   <span v-if="match.myAssigned" class="text-slate-400">
@@ -347,22 +361,22 @@ const undecidedStrategyCount = computed<number>(() =>
                     <div class="flex items-center justify-between gap-2">
                       <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider">{{ t('competition.tl.strategyLabel') }}</span>
                       <div class="flex items-center gap-1">
-                        <button
-                          type="button"
+                        <v-btn
+                          size="x-small"
                           @click="handleSetStrategy(match, true)"
-                          class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all"
+                          class="rounded-lg text-[10px] font-black tracking-wider uppercase"
                           :class="match.myStrategyDecided && match.myStrategyEnabled
                             ? 'bg-gradient-to-r from-fuchsia-500 to-amber-500 text-white shadow'
                             : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-fuchsia-100 hover:text-fuchsia-700 dark:hover:bg-fuchsia-900/40 dark:hover:text-fuchsia-300'"
-                        >{{ t('competition.tl.strategyUse') }}</button>
-                        <button
-                          type="button"
+                        >{{ t('competition.tl.strategyUse') }}</v-btn>
+                        <v-btn
+                          size="x-small"
                           @click="handleSetStrategy(match, false)"
-                          class="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all"
+                          class="rounded-lg text-[10px] font-black tracking-wider uppercase"
                           :class="match.myStrategyDecided && !match.myStrategyEnabled
                             ? 'bg-slate-600 text-white shadow dark:bg-slate-500'
                             : 'bg-slate-200 dark:bg-slate-700 text-slate-500 hover:bg-slate-300 dark:hover:bg-slate-600'"
-                        >{{ t('competition.tl.strategySkip') }}</button>
+                        >{{ t('competition.tl.strategySkip') }}</v-btn>
                       </div>
                     </div>
                     <p class="mt-1 text-[10px] font-mono text-right">
@@ -413,7 +427,7 @@ const undecidedStrategyCount = computed<number>(() =>
               </div>
             </li>
           </ul>
-        </div>
+        </v-card>
       </section>
 
       <!-- 運営チャット (チャットボット風フローティングウィジェット) -->

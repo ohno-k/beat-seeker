@@ -87,12 +87,12 @@ const errorMessage = computed(() => {
 </script>
 
 <template>
-  <div
-    v-if="isOpen && detection"
-    class="fixed inset-0 z-[120] bg-slate-900/60 dark:bg-slate-950/80 flex items-center justify-center p-4 backdrop-blur-sm"
-    @click.self="emit('cancel')"
+  <v-dialog
+    :model-value="isOpen && !!detection"
+    max-width="448"
+    @update:model-value="(v: boolean) => { if (!v) emit('cancel') }"
   >
-    <div class="card w-full max-w-md p-6">
+    <v-card v-if="detection" class="p-6">
 
       <!-- 判定成功: 取り込み内容の確認 -->
       <template v-if="isOk">
@@ -102,10 +102,12 @@ const errorMessage = computed(() => {
 
         <!-- 判定された作品を主役として大きく見せる -->
         <div class="flex items-center gap-3 mb-3">
-          <span
-            class="px-2 py-0.5 text-xs font-bold rounded border"
+          <v-chip
+            label
+            variant="outlined"
+            class="px-2 text-xs font-bold border"
             :class="versionBadgeClass(detectedVersion)"
-          >{{ detectedVersion }}</span>
+          >{{ detectedVersion }}</v-chip>
           <span class="text-lg font-bold text-slate-800 dark:text-slate-100">
             {{ versionName(detectedVersion) }}
           </span>
@@ -136,12 +138,12 @@ const errorMessage = computed(() => {
         <!-- 前作／現行作を選ばせるモード: 2 つの取り込み先を縦に並べる -->
         <template v-if="ambiguous">
           <div class="flex flex-col gap-2 mb-3">
-            <button class="btn-primary w-full" :disabled="isSubmitting" @click="emit('confirm-current')">
+            <v-btn color="primary" block :disabled="isSubmitting" @click="emit('confirm-current')">
               {{ t('past.confirm.asCurrent', ambiguousParams) }}
-            </button>
-            <button class="btn-secondary w-full" :disabled="isSubmitting" @click="emit('confirm')">
+            </v-btn>
+            <v-btn variant="outlined" block :disabled="isSubmitting" @click="emit('confirm')">
               {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.asPast', ambiguousParams) }}
-            </button>
+            </v-btn>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">
             {{ t('past.confirm.asCurrentNote') }}
@@ -150,9 +152,9 @@ const errorMessage = computed(() => {
             {{ t('past.notRanked') }}
           </p>
           <div class="flex justify-end">
-            <button class="btn-secondary" :disabled="isSubmitting" @click="emit('cancel')">
+            <v-btn variant="outlined" :disabled="isSubmitting" @click="emit('cancel')">
               {{ t('past.confirm.cancel') }}
-            </button>
+            </v-btn>
           </div>
         </template>
 
@@ -163,12 +165,12 @@ const errorMessage = computed(() => {
           </p>
 
           <div class="flex justify-end gap-2">
-            <button class="btn-secondary" :disabled="isSubmitting" @click="emit('cancel')">
+            <v-btn variant="outlined" :disabled="isSubmitting" @click="emit('cancel')">
               {{ t('past.confirm.cancel') }}
-            </button>
-            <button class="btn-primary" :disabled="isSubmitting" @click="emit('confirm')">
+            </v-btn>
+            <v-btn color="primary" :disabled="isSubmitting" @click="emit('confirm')">
               {{ isSubmitting ? t('past.confirm.submitting') : t('past.confirm.submit') }}
-            </button>
+            </v-btn>
           </div>
         </template>
       </template>
@@ -182,12 +184,12 @@ const errorMessage = computed(() => {
           {{ errorMessage }}
         </p>
         <div class="flex justify-end">
-          <button class="btn-secondary" @click="emit('cancel')">
+          <v-btn variant="outlined" @click="emit('cancel')">
             {{ t('past.error.close') }}
-          </button>
+          </v-btn>
         </div>
       </template>
 
-    </div>
-  </div>
+    </v-card>
+  </v-dialog>
 </template>

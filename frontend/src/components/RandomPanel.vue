@@ -94,8 +94,10 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 <template>
   <div class="random-panel mt-4 flex flex-col gap-3 text-xs text-slate-600 dark:text-slate-300">
     <!-- ── 判別 ── -->
-    <details class="panel">
-      <summary class="panel-title">RANDOM の判別（白鍵がどこに来たか）</summary>
+    <v-expansion-panels flat class="panel">
+      <v-expansion-panel class="bg-transparent">
+      <v-expansion-panel-title class="panel-title min-h-0">RANDOM の判別（白鍵がどこに来たか）</v-expansion-panel-title>
+      <v-expansion-panel-text class="panel-text">
       <div class="panel-body">
         <p v-if="ident.whiteAt !== null" class="leading-relaxed">
           元の白鍵（1・3・5・7）のレーンは、曲頭から
@@ -112,7 +114,7 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
         </p>
 
         <div class="open-scroll mt-2">
-        <table class="open-table">
+        <v-table class="open-table bg-transparent">
           <thead>
             <tr>
               <th class="text-left">打鍵</th>
@@ -126,8 +128,8 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
               <td class="whitespace-nowrap tabular-nums">
                 #{{ i + 1 }}<span class="text-slate-400 dark:text-slate-500"> 小節{{ ev.measure }}</span>
                 <span v-if="i === ident.whiteAt || i === ident.fullAt" class="tags">
-                  <span v-if="i === ident.whiteAt" class="tag">白鍵が分かる</span>
-                  <span v-if="i === ident.fullAt" class="tag tag-full">並びが決まる</span>
+                  <v-chip v-if="i === ident.whiteAt" label size="x-small" variant="flat" class="tag">白鍵が分かる</v-chip>
+                  <v-chip v-if="i === ident.fullAt" label size="x-small" variant="flat" class="tag tag-full">並びが決まる</v-chip>
                 </span>
               </td>
               <td><span class="lanes"><span v-for="(c, j) in cells(ev.keys, '1234567')" :key="j" class="cell"
@@ -136,14 +138,18 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
                 :class="[c.white ? 'w' : 'b', { on: c.filled }]"></span></span></td>
             </tr>
           </tbody>
-        </table>
+        </v-table>
         </div>
       </div>
-    </details>
+      </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
 
-    <!-- ── 配置評価 ── -->
-    <details class="panel" open>
-      <summary class="panel-title">RANDOM の配置評価（当たり乱探し）</summary>
+    <!-- ── 配置評価（既定で開く） ── -->
+    <v-expansion-panels flat model-value="eval" class="panel">
+      <v-expansion-panel value="eval" class="bg-transparent">
+      <v-expansion-panel-title class="panel-title min-h-0">RANDOM の配置評価（当たり乱探し）</v-expansion-panel-title>
+      <v-expansion-panel-text class="panel-text">
       <div class="panel-body">
         <div class="flex flex-wrap items-center gap-2">
           <span class="text-slate-500 dark:text-slate-400">
@@ -154,9 +160,9 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
         <template v-if="evaluation">
           <div class="mt-3 flex flex-col gap-1">
-            <p v-if="topTenthLabels.length" class="top-notice">
+            <v-alert v-if="topTenthLabels.length" type="warning" :icon="false" class="text-xs font-semibold">
               ★ {{ topTenthLabels.join('・') }} が 5,040 通りの上位5%に入っています（RANDOM を使わなくても当たりに近い配置です）
-            </p>
+            </v-alert>
             <div v-if="current" class="flex flex-wrap items-center gap-1.5">
               今の並び <PatternChips :pattern="current.pattern" small />
               <b class="text-slate-800 dark:text-white tabular-nums">{{ current.rank }} 位</b>
@@ -173,10 +179,10 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
               <span class="cand-pattern">
                 <span class="base-label">{{ b.label }}</span>
                 <PatternChips :pattern="b.cand.pattern" small />
-                <span v-if="isTopTenth(b.cand.rank)" class="top-badge">上位5%</span>
+                <v-chip v-if="isTopTenth(b.cand.rank)" size="x-small" variant="flat" class="top-badge">上位5%</v-chip>
                 <span v-else class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">上位 {{ percent(b.cand.rank) }}%</span>
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', b.cand.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
+              <v-btn type="button" variant="outlined" color="primary" size="small" class="text-xs" @click="emit('apply', b.cand.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></v-btn>
             </li>
           </ol>
 
@@ -188,13 +194,13 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
                 <PatternChips :pattern="g.head.pattern" small />
                 <span v-if="g.others" class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">ほか同点 {{ g.others }} 通り</span>
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
+              <v-btn type="button" variant="outlined" color="primary" size="small" class="text-xs" @click="emit('apply', g.head.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></v-btn>
             </li>
           </ol>
 
-          <button type="button" class="mt-2 text-blue-600 dark:text-blue-400 font-semibold" @click="showWorst = !showWorst">
+          <v-btn type="button" variant="text" color="primary" size="small" class="mt-2 px-1 text-xs" @click="showWorst = !showWorst">
             {{ showWorst ? '避けたい並びを隠す' : '避けたい並びを見る' }}
-          </button>
+          </v-btn>
           <ol v-if="showWorst" class="cand-list">
             <li v-for="g in worst" :key="g.head.pattern" :class="{ current: g.head.pattern === currentPattern }">
               <span class="rank tabular-nums">{{ g.head.rank }}</span>
@@ -202,7 +208,7 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
                 <PatternChips :pattern="g.head.pattern" small />
                 <span v-if="g.others" class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">ほか同点 {{ g.others }} 通り</span>
               </span>
-              <button type="button" class="apply-btn" @click="emit('apply', g.head.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
+              <v-btn type="button" variant="outlined" color="primary" size="small" class="text-xs" @click="emit('apply', g.head.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></v-btn>
             </li>
           </ol>
 
@@ -233,7 +239,9 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
           </details>
         </template>
       </div>
-    </details>
+      </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </div>
 </template>
 
@@ -248,10 +256,12 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
   list-style-position: inside;
 }
 .dark .panel-title { color: rgb(226 232 240); }
+/* v-expansion-panel-text の既定の余白は使わず、panel-body の余白にそろえる */
+.panel-text :deep(.v-expansion-panel-text__wrapper) { padding: 0; }
 .panel-body { padding: 0 0.75rem 0.75rem; }
 
 .open-scroll { overflow-x: auto; }
-.open-table { border-collapse: collapse; }
+.open-table :deep(table) { width: auto; border-collapse: collapse; }
 .tags { display: flex; gap: 0.25rem; margin-top: 0.15rem; }
 .open-table th { padding: 0.25rem 0.5rem; font-weight: 600; color: rgb(100 116 139); text-align: left; white-space: nowrap; }
 .open-table td { padding: 0.2rem 0.5rem; vertical-align: middle; }
@@ -284,16 +294,6 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
   .open-table th, .open-table td { padding-left: 0.3rem; padding-right: 0.3rem; }
 }
 
-.seg { display: inline-flex; border-radius: 0.375rem; overflow: hidden; border: 1px solid rgb(203 213 225); }
-.seg button { padding: 0.35rem 0.6rem; font-weight: 600; white-space: nowrap; color: rgb(71 85 105); background: white; }
-.seg button + button { border-left: 1px solid rgb(203 213 225); }
-.seg button.on { color: white; background: rgb(37 99 235); }
-.dark .seg { border-color: rgb(71 85 105); }
-.dark .seg button { color: rgb(203 213 225); background: rgb(51 65 85); }
-.dark .seg button + button { border-left-color: rgb(71 85 105); }
-.dark .seg button.on { color: white; background: rgb(37 99 235); }
-
-
 .cand-list { margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.2rem; }
 .criteria > summary { cursor: pointer; font-size: 11px; font-weight: 600; color: rgb(100 116 139); }
 .cand-list li {
@@ -323,25 +323,6 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
   color: rgb(69 26 3);
   background: rgb(251 191 36);
 }
-.top-notice {
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  color: rgb(146 64 14);
-  background: rgb(254 243 199);
-}
-.dark .top-notice { color: rgb(253 230 138); background: rgb(120 53 15 / 0.35); }
 .base-label { font-weight: 700; color: rgb(51 65 85); white-space: nowrap; }
 .dark .base-label { color: rgb(226 232 240); }
-.apply-btn {
-  padding: 0.35rem 0.6rem;
-  border-radius: 0.375rem;
-  font-weight: 600;
-  white-space: nowrap;
-  color: rgb(37 99 235);
-  border: 1px solid rgb(147 197 253);
-}
-.apply-btn:hover { background: rgb(239 246 255); }
-.dark .apply-btn { color: rgb(147 197 253); border-color: rgb(30 64 175); }
-.dark .apply-btn:hover { background: rgb(15 23 42); }
 </style>

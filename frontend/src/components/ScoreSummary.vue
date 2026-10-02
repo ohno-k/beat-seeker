@@ -11,7 +11,7 @@
   -->
   <div class="w-full mx-auto space-y-6 animate-fade-in relative">
     <!-- ===== フィルタ・検索ヘッダ ===== -->
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors duration-200">
+    <v-card class="bg-white dark:bg-slate-800 p-6 border-slate-200 dark:border-slate-700 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-colors duration-200">
       <div>
         <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">{{ t('table.title') }}</h2>
         <p class="text-slate-500 dark:text-slate-400 mt-1">{{ t('table.dataCount', { n: filteredScores.length }) }}</p>
@@ -19,230 +19,259 @@
       <div class="flex flex-col md:flex-row items-start md:items-center justify-end gap-3 w-full xl:w-auto">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
           <!-- Hide Zero Score Toggle -->
-          <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap">
-            <div class="relative inline-flex items-center">
-              <input type="checkbox" v-model="hideZeroScore" class="sr-only peer">
-              <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-            </div>
-            <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">{{ t('table.hideZero') }}</span>
-          </label>
+          <v-switch v-model="hideZeroScore" class="flex-none whitespace-nowrap">
+            <template #label>
+              <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">{{ t('table.hideZero') }}</span>
+            </template>
+          </v-switch>
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
             <!-- Level Filter -->
           <div class="relative w-full md:w-36">
-            <button 
-              @click.stop="toggleDropdown('level')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
-              :title="filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : t('table.level')"
+            <v-menu
+              :model-value="openDropdown === 'level'"
+              :close-on-content-click="false"
+              @update:model-value="(v: boolean) => { if (v !== (openDropdown === 'level')) toggleDropdown('level') }"
             >
-              <span class="truncate">{{ filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : t('table.level') }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div v-if="openDropdown === 'level'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="l in (viewMode === 'rate' ? [1,2,3,4,5,6,7,8,9,10,11,12] : [11,12])" :key="l" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input 
-                  type="checkbox" 
-                  :checked="isSelected(filterLevel, l.toString())"
-                  @change="toggleFilterValue(filterLevel, l.toString())"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  v-bind="menuProps"
+                  variant="outlined"
+                  block
+                  :append-icon="mdiChevronDown"
+                  class="filter-dd-btn px-3 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                  :title="filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : t('table.level')"
                 >
-                <span class="ml-3 text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">☆{{ l }}</span>
-              </label>
-            </div>
+                  <span class="truncate">{{ filterLevel.length > 0 ? filterLevel.map(l => '☆'+l).join(', ') : t('table.level') }}</span>
+                </v-btn>
+              </template>
+              <v-list class="relative w-48 py-2 max-h-64 overflow-y-auto">
+                <v-checkbox
+                  v-for="l in (viewMode === 'rate' ? [1,2,3,4,5,6,7,8,9,10,11,12] : [11,12])"
+                  :key="l"
+                  :model-value="isSelected(filterLevel, l.toString())"
+                  class="px-4"
+                  @update:model-value="toggleFilterValue(filterLevel, l.toString())"
+                >
+                  <template #label><span class="text-sm font-medium text-slate-600 dark:text-slate-300">☆{{ l }}</span></template>
+                </v-checkbox>
+              </v-list>
+            </v-menu>
           </div>
 
           <!-- Difficulty Filter -->
           <div class="relative w-full md:w-36">
-            <button 
-              @click.stop="toggleDropdown('difficulty')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
-              :title="filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : t('table.difficulty')"
+            <v-menu
+              :model-value="openDropdown === 'difficulty'"
+              :close-on-content-click="false"
+              @update:model-value="(v: boolean) => { if (v !== (openDropdown === 'difficulty')) toggleDropdown('difficulty') }"
             >
-              <span class="truncate">{{ filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : t('table.difficulty') }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div v-if="openDropdown === 'difficulty'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="d in DIFFICULTY_FILTER_OPTIONS" :key="d" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(filterDifficulty, d)"
-                  @change="toggleFilterValue(filterDifficulty, d)"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  v-bind="menuProps"
+                  variant="outlined"
+                  block
+                  :append-icon="mdiChevronDown"
+                  class="filter-dd-btn px-3 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                  :title="filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : t('table.difficulty')"
                 >
-                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ t(`table.difficulty.${d.toLowerCase()}`) }}</span>
-              </label>
-            </div>
+                  <span class="truncate">{{ filterDifficulty.length > 0 ? filterDifficulty.map(d => d.substring(0,3)).join(', ') : t('table.difficulty') }}</span>
+                </v-btn>
+              </template>
+              <v-list class="relative w-48 py-2 max-h-64 overflow-y-auto">
+                <v-checkbox
+                  v-for="d in DIFFICULTY_FILTER_OPTIONS"
+                  :key="d"
+                  :model-value="isSelected(filterDifficulty, d)"
+                  class="px-4"
+                  @update:model-value="toggleFilterValue(filterDifficulty, d)"
+                >
+                  <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ t(`table.difficulty.${d.toLowerCase()}`) }}</span></template>
+                </v-checkbox>
+              </v-list>
+            </v-menu>
           </div>
 
           <!-- DJ Level Filter -->
           <div class="relative w-full md:w-32">
-            <button
-              @click.stop="toggleDropdown('djLevel')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
+            <v-menu
+              :model-value="openDropdown === 'djLevel'"
+              :close-on-content-click="false"
+              @update:model-value="(v: boolean) => { if (v !== (openDropdown === 'djLevel')) toggleDropdown('djLevel') }"
             >
-              <span class="truncate">{{ t('table.rank') }}{{ filterDjLevel.length > 0 ? ` (${filterDjLevel.length})` : '' }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div v-if="openDropdown === 'djLevel'" class="absolute z-20 mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="lvl in DJ_LEVELS" :key="lvl" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(filterDjLevel, lvl)"
-                  @change="toggleFilterValue(filterDjLevel, lvl)"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  v-bind="menuProps"
+                  variant="outlined"
+                  block
+                  :append-icon="mdiChevronDown"
+                  class="filter-dd-btn px-3 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
                 >
-                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ lvl }}</span>
-              </label>
-            </div>
+                  <span class="truncate">{{ t('table.rank') }}{{ filterDjLevel.length > 0 ? ` (${filterDjLevel.length})` : '' }}</span>
+                </v-btn>
+              </template>
+              <v-list class="relative w-48 py-2 max-h-64 overflow-y-auto">
+                <v-checkbox
+                  v-for="lvl in DJ_LEVELS"
+                  :key="lvl"
+                  :model-value="isSelected(filterDjLevel, lvl)"
+                  class="px-4"
+                  @update:model-value="toggleFilterValue(filterDjLevel, lvl)"
+                >
+                  <template #label><span class="text-sm font-bold text-slate-600 dark:text-slate-300">{{ lvl }}</span></template>
+                </v-checkbox>
+              </v-list>
+            </v-menu>
           </div>
 
           <!-- Clear Type Filter -->
           <div class="relative w-full md:w-36">
-            <button
-              @click.stop="toggleDropdown('clearType')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
+            <v-menu
+              :model-value="openDropdown === 'clearType'"
+              :close-on-content-click="false"
+              @update:model-value="(v: boolean) => { if (v !== (openDropdown === 'clearType')) toggleDropdown('clearType') }"
             >
-              <span class="truncate">{{ t('table.lamp') }}{{ filterClearType.length > 0 ? ` (${filterClearType.length})` : '' }}</span>
-              <svg class="h-4 w-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div v-if="openDropdown === 'clearType'" class="absolute z-20 mt-1 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="ct in ['FULLCOMBO CLEAR', 'EX HARD CLEAR', 'HARD CLEAR', 'CLEAR', 'EASY CLEAR', 'ASSIST CLEAR', 'FAILED', 'NO PLAY']" :key="ct" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(filterClearType, ct)"
-                  @change="toggleFilterValue(filterClearType, ct)"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  v-bind="menuProps"
+                  variant="outlined"
+                  block
+                  :append-icon="mdiChevronDown"
+                  class="filter-dd-btn px-3 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
                 >
-                <span class="ml-3 text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{{ ct }}</span>
-              </label>
-            </div>
+                  <span class="truncate">{{ t('table.lamp') }}{{ filterClearType.length > 0 ? ` (${filterClearType.length})` : '' }}</span>
+                </v-btn>
+              </template>
+              <v-list class="relative w-56 py-2 max-h-64 overflow-y-auto">
+                <v-checkbox
+                  v-for="ct in ['FULLCOMBO CLEAR', 'EX HARD CLEAR', 'HARD CLEAR', 'CLEAR', 'EASY CLEAR', 'ASSIST CLEAR', 'FAILED', 'NO PLAY']"
+                  :key="ct"
+                  :model-value="isSelected(filterClearType, ct)"
+                  class="px-4"
+                  @update:model-value="toggleFilterValue(filterClearType, ct)"
+                >
+                  <template #label><span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ ct }}</span></template>
+                </v-checkbox>
+              </v-list>
+            </v-menu>
           </div>
 
           <!-- 歴代ベスト作品フィルタ（歴代自己ベストスコアを出した作品で絞り込む）。過去作を取り込み済みの本人閲覧時のみ表示。 -->
           <div v-if="canFilterBestVersion" class="relative w-full md:w-44">
-            <button
-              @click.stop="toggleDropdown('bestVersion')"
-              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
-              :title="t('table.bestVersionHint')"
+            <v-menu
+              :model-value="openDropdown === 'bestVersion'"
+              :close-on-content-click="false"
+              @update:model-value="(v: boolean) => { if (v !== (openDropdown === 'bestVersion')) toggleDropdown('bestVersion') }"
             >
-              <span class="truncate">{{ t('table.bestVersion') }}{{ filterBestVersion.length > 0 ? ` (${filterBestVersion.length})` : '' }}</span>
-              <!-- 選択直後は過去作スコアを遅延取得するので、その間だけスピナーを出す -->
-              <span v-if="isLoadingPast && filterBestVersion.length > 0" class="w-3 h-3 shrink-0 ml-1 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
-              <svg v-else class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div v-if="openDropdown === 'bestVersion'" class="absolute z-20 mt-1 w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-64 overflow-y-auto animate-fade-in">
-              <label v-for="v in bestVersionOptions" :key="v.num" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  :checked="isSelected(filterBestVersion, String(v.num))"
-                  @change="toggleFilterValue(filterBestVersion, String(v.num))"
-                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+              <template #activator="{ props: menuProps }">
+                <v-btn
+                  v-bind="menuProps"
+                  variant="outlined"
+                  block
+                  class="filter-dd-btn px-3 text-xs sm:text-sm font-medium bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                  :title="t('table.bestVersionHint')"
                 >
-                <span class="ml-3 px-1 py-0.5 text-[9px] font-bold rounded border leading-none shrink-0" :class="versionBadgeClass(v.num)">{{ v.num }}</span>
-                <span class="ml-2 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate">{{ v.name }}</span>
-                <span v-if="v.current" class="ml-1 text-[10px] text-slate-400 dark:text-slate-500 shrink-0">{{ t('past.manager.current') }}</span>
-              </label>
-            </div>
+                  <span class="truncate">{{ t('table.bestVersion') }}{{ filterBestVersion.length > 0 ? ` (${filterBestVersion.length})` : '' }}</span>
+                  <template #append>
+                    <!-- 選択直後は過去作スコアを遅延取得するので、その間だけスピナーを出す -->
+                    <v-progress-circular v-if="isLoadingPast && filterBestVersion.length > 0" size="12" width="2" color="warning" />
+                    <v-icon v-else :icon="mdiChevronDown" />
+                  </template>
+                </v-btn>
+              </template>
+              <v-list class="relative w-56 py-2 max-h-64 overflow-y-auto">
+                <v-checkbox
+                  v-for="v in bestVersionOptions"
+                  :key="v.num"
+                  :model-value="isSelected(filterBestVersion, String(v.num))"
+                  class="px-4"
+                  @update:model-value="toggleFilterValue(filterBestVersion, String(v.num))"
+                >
+                  <template #label>
+                    <span class="flex items-center min-w-0">
+                      <span class="px-1 py-0.5 text-[9px] font-bold rounded border leading-none shrink-0" :class="versionBadgeClass(v.num)">{{ v.num }}</span>
+                      <span class="ml-2 text-sm font-bold text-slate-600 dark:text-slate-300 truncate">{{ v.name }}</span>
+                      <span v-if="v.current" class="ml-1 text-[10px] text-slate-400 dark:text-slate-500 shrink-0">{{ t('past.manager.current') }}</span>
+                    </span>
+                  </template>
+                </v-checkbox>
+              </v-list>
+            </v-menu>
           </div>
           </div>
         </div>
         <!-- Search -->
-        <div class="relative w-full md:w-64">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            class="block w-full pl-9 pr-3 py-2 border border-slate-200 dark:border-slate-700 rounded-md leading-5 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
-            :placeholder="t('table.searchPlaceholder')"
-          >
-        </div>
+        <v-text-field
+          v-model="searchQuery"
+          type="text"
+          :prepend-inner-icon="mdiMagnify"
+          class="w-full md:w-64 md:flex-none"
+          :placeholder="t('table.searchPlaceholder')"
+        />
       </div>
-    </div>
+    </v-card>
 
     <!-- ===== 適用済みフィルタチップ行（フィルタが 1 つ以上掛かっている時だけ表示） ===== -->
     <!-- 各チップの × で個別解除、右端の「全クリア」で一括解除できる。 -->
     <div v-if="appliedFilterChips.length > 0" class="flex flex-wrap items-center gap-2 animate-fade-in">
-      <span
+      <v-chip
         v-for="chip in appliedFilterChips"
         :key="chip.id"
-        class="inline-flex items-center gap-1.5 pl-3 pr-1 py-1 text-xs font-bold rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+        closable
+        :close-icon="mdiClose"
+        :close-label="t('filter.removeChip', { label: chip.label })"
+        rounded="pill"
+        variant="outlined"
+        class="text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
+        @click:close="chip.remove()"
       >
         {{ chip.label }}
-        <button
-          type="button"
-          :aria-label="t('filter.removeChip', { label: chip.label })"
-          class="rounded-full p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-          @click="chip.remove()"
-        >
-          <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </span>
-      <button
-        type="button"
+      </v-chip>
+      <v-btn
+        variant="outlined"
+        size="small"
+        :prepend-icon="mdiClose"
+        class="ml-auto text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
         @click="clearAllFilters"
-        class="ml-auto inline-flex items-center gap-1 px-3 py-1 text-xs font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
       >
-        <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
         {{ t('filter.clearAll') }}
-      </button>
+      </v-btn>
     </div>
 
     <!-- ===== モードタブ（BEAT-TIER / RATE-TIER / TIER CARD）＋「歴代ベストを反映」トグル ===== -->
     <!-- RATE-TIER タブだけは機能フラグ（showRateTier）で出し分ける。BEAT-TIER と TIER CARD は常時表示。 -->
     <div class="flex flex-wrap items-center gap-3">
-      <div class="flex gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-md w-fit border border-slate-200 dark:border-slate-700">
-        <button
-          @click="viewMode = 'beat'"
-          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-          :class="viewMode === 'beat' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >BEAT-TIER</button>
-        <button
-          v-if="showRateTier"
-          @click="viewMode = 'rate'"
-          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-          :class="viewMode === 'rate' ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >RATE-TIER</button>
-        <button
-          @click="viewMode = 'card'"
-          class="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
-          :class="viewMode === 'card' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-        >{{ t('tierCard.tab') }}</button>
-      </div>
+      <v-btn-toggle
+        v-model="viewMode"
+        mandatory
+        :color="viewMode === 'beat' ? 'primary' : viewMode === 'rate' ? 'success' : 'warning'"
+      >
+        <v-btn value="beat" class="px-4 text-sm">BEAT-TIER</v-btn>
+        <v-btn v-if="showRateTier" value="rate" class="px-4 text-sm">RATE-TIER</v-btn>
+        <v-btn value="card" class="px-4 text-sm">{{ t('tierCard.tab') }}</v-btn>
+      </v-btn-toggle>
 
       <!-- 過去作のスコアが現行を上回っている譜面を、そのスコアで上書き表示するトグル -->
-      <label
+      <div
         v-if="canUsePastMode && hasPastImports"
-        class="flex items-center gap-2 cursor-pointer group whitespace-nowrap"
+        class="flex items-center gap-2 whitespace-nowrap"
         :title="t('past.toggleHint')"
       >
-        <div class="relative inline-flex items-center">
-          <input type="checkbox" :checked="showAllTime" @change="toggleAllTime" class="sr-only peer">
-          <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
-        </div>
-        <span
-          class="text-xs sm:text-sm font-bold transition-colors"
-          :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-800 dark:group-hover:text-slate-200'"
-        >{{ t('past.toggle') }}</span>
-        <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
-      </label>
+        <v-switch
+          :model-value="showAllTime"
+          color="warning"
+          class="flex-none"
+          @update:model-value="toggleAllTime"
+        >
+          <template #label>
+            <span
+              class="text-xs sm:text-sm font-bold transition-colors"
+              :class="showAllTime ? 'text-amber-600 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400'"
+            >{{ t('past.toggle') }}</span>
+          </template>
+        </v-switch>
+        <v-progress-circular v-if="isLoadingPast" size="12" width="2" color="warning" />
+      </div>
     </div>
 
     <!-- 歴代反映中である旨の注意書き。集計値と表示値がずれる理由を明示する -->
@@ -251,9 +280,8 @@
     </p>
 
     <!-- ===== データテーブル（displayScores を描画。ヘッダ列クリックで toggleSort）。TIER CARD モード時は下のカード表に置き換わる ===== -->
-    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
-      <div v-if="viewMode !== 'card'" class="overflow-x-auto">
-        <table class="w-full text-left text-[10px] sm:text-sm text-slate-600 dark:text-slate-300">
+    <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden transition-colors duration-200">
+      <v-table v-if="viewMode !== 'card'" class="bg-transparent text-left text-[10px] sm:text-sm text-slate-600 dark:text-slate-300">
           <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold h-10 sm:h-12">
             <tr>
               <th class="px-1 sm:px-6 py-2 sm:py-4 text-left text-[9px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors w-auto sm:w-4/12" @click="toggleSort('title')">
@@ -472,9 +500,8 @@
               </td>
             </tr>
           </tbody>
-        </table>
-      </div>
-      
+      </v-table>
+
       <!--
         ===== TIER CARD（縄跳びカード方式の単曲ティア早見表） =====
         行 = 譜面（filteredScores と同じフィルタ・ソート。ページングは行わず全曲を描画）、列 = 単曲ティア 51 種（Novice 1 → Legend）。
@@ -493,35 +520,38 @@
             <!-- セル表示モード（EX SCORE / Around / 必要な点数） -->
             <div class="flex items-center gap-2">
               <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('tierCard.display') }}</span>
-              <div class="flex gap-0.5 bg-slate-100 dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-                <button
+              <v-btn-toggle v-model="tierCardDisplay" mandatory color="warning">
+                <v-btn
                   v-for="opt in TIER_CARD_DISPLAY_OPTIONS"
                   :key="opt.value"
-                  type="button"
-                  @click="tierCardDisplay = opt.value"
-                  class="px-2 py-1 rounded-md text-xs font-bold transition-colors whitespace-nowrap"
-                  :class="tierCardDisplay === opt.value ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                >{{ t(opt.labelKey) }}</button>
-              </div>
+                  :value="opt.value"
+                  size="small"
+                  class="text-xs whitespace-nowrap"
+                >{{ t(opt.labelKey) }}</v-btn>
+              </v-btn-toggle>
             </div>
             <!-- 並び替え（列ヘッダが無いのでセレクタで指定。向きは隣のボタンで反転） -->
             <div class="flex items-center gap-2">
               <span class="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">{{ t('tierCard.sort') }}</span>
-              <select
-                :value="sortKey"
-                @change="onCardSortChange"
-                class="text-xs border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors cursor-pointer"
-              >
-                <option value="informalRank">{{ t('tierCard.sortInformal') }}</option>
-                <option value="title">{{ t('tierCard.sortTitle') }}</option>
-                <option value="unofficialSongRank">{{ t('tierCard.sortTier') }}</option>
-                <option value="scoreRate">{{ t('tierCard.sortRate') }}</option>
-              </select>
-              <button
-                type="button"
+              <v-select
+                :model-value="sortKey"
+                :items="[
+                  { title: t('tierCard.sortInformal'), value: 'informalRank' },
+                  { title: t('tierCard.sortTitle'), value: 'title' },
+                  { title: t('tierCard.sortTier'), value: 'unofficialSongRank' },
+                  { title: t('tierCard.sortRate'), value: 'scoreRate' },
+                ]"
+                item-title="title"
+                item-value="value"
+                class="text-xs min-w-[150px]"
+                @update:model-value="(key: string) => onCardSortChange({ target: { value: key } } as unknown as Event)"
+              />
+              <v-btn
+                variant="outlined"
+                size="small"
+                class="text-xs text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                 @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
-                class="px-2 py-1 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-              >{{ sortOrder === 'asc' ? '▲' : '▼' }}</button>
+              >{{ sortOrder === 'asc' ? '▲' : '▼' }}</v-btn>
             </div>
           </div>
         </div>
@@ -531,8 +561,7 @@
           <span class="inline-flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-sm bg-amber-100 dark:bg-amber-900/40 ring-1 ring-inset ring-amber-400 dark:ring-amber-600"></span>{{ t('tierCard.legendNext') }}</span>
           <span>{{ t('tierCard.legendDash') }}</span>
         </div>
-        <div class="overflow-auto max-h-[75vh]">
-          <table class="border-collapse text-[10px] sm:text-xs whitespace-nowrap">
+        <v-table class="max-h-[75vh] bg-transparent text-[10px] sm:text-xs whitespace-nowrap [&_table]:border-collapse" style="--v-table-row-height: auto; --v-table-header-height: auto">
             <thead class="sticky top-0 z-20">
               <!-- 上段: ブロック名（Novice〜Mythic は 5 列結合、Legend は 1 列） -->
               <tr class="bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
@@ -608,8 +637,7 @@
                 </td>
               </tr>
             </tbody>
-          </table>
-        </div>
+        </v-table>
       </div>
 
       <!-- ===== ページネーション（件数表示 + 1 ページあたり件数セレクタ + 前後ボタン）。TIER CARD は全曲描画なので出さない ===== -->
@@ -620,33 +648,36 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="text-sm text-slate-500 dark:text-slate-400">{{ t('table.itemsPerPage') }}:</span>
-            <select v-model="itemsPerPage" class="text-sm border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 transition-colors cursor-pointer">
-              <option :value="10">10{{ t('scores.count') }}</option>
-              <option :value="25">25{{ t('scores.count') }}</option>
-              <option :value="50">50{{ t('scores.count') }}</option>
-              <option :value="100">100{{ t('scores.count') }}</option>
-            </select>
+            <v-select
+              v-model="itemsPerPage"
+              :items="[10, 25, 50, 100].map(n => ({ title: `${n}${t('scores.count')}`, value: n }))"
+              item-title="title"
+              item-value="value"
+              class="text-sm min-w-[110px]"
+            />
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button 
-            @click="prevPage" 
+          <v-btn
+            variant="outlined"
+            class="text-sm font-medium text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
             :disabled="currentPage === 1"
-            class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+            @click="prevPage"
           >
             {{ t('table.prev') }}
-          </button>
+          </v-btn>
           <span class="text-sm font-medium text-slate-600 dark:text-slate-400 px-2 min-w-[3rem] text-center">{{ currentPage }} / {{ totalPages }}</span>
-          <button 
-            @click="nextPage" 
+          <v-btn
+            variant="outlined"
+            class="text-sm font-medium text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
             :disabled="currentPage === totalPages"
-            class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+            @click="nextPage"
           >
             {{ t('table.next') }}
-          </button>
+          </v-btn>
         </div>
       </div>
-    </div>
+    </v-card>
 
     <!--
       ===== 全画面詳細モーダル =====
@@ -656,96 +687,108 @@
         - 各タブのコンテンツ（v-if でひとつだけ表示）
         - Sticky Footer: モバイル閉じるボタン
     -->
-    <Teleport to="body">
-      <div v-if="selectedRecord" class="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-fade-in transition-colors duration-200" @click.self="closeDetailModal">
+    <v-dialog
+      :model-value="!!selectedRecord"
+      fullscreen
+      :scrollable="false"
+      :z-index="100"
+      transition="fade-transition"
+      @update:model-value="(v: boolean) => { if (!v) closeDetailModal() }"
+    >
+      <v-card v-if="selectedRecord" variant="flat" rounded="0" class="h-full bg-slate-50 dark:bg-slate-900 flex flex-col transition-colors duration-200">
 
       <!-- ===== モーダル Sticky ヘッダ（曲情報 + 閉じるボタン + タブバー） ===== -->
-      <div class="bg-white dark:bg-slate-900 sticky top-0 z-10 w-full border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+      <div class="bg-white dark:bg-slate-900 sticky top-0 z-10 w-full shrink-0 border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
         <div class="px-4 py-3 sm:px-6 sm:py-5 flex justify-between items-center">
           <div class="flex flex-col pr-4 max-w-full overflow-hidden">
             <h3 class="text-xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100 leading-tight mb-0.5 sm:mb-1 truncate" :title="selectedRecord.title">{{ selectedRecord.title }}</h3>
             <p class="text-xs sm:text-base font-medium text-slate-500 dark:text-slate-400 truncate" :title="`${selectedRecord.artist} • ${selectedRecord.genre}`">{{ selectedRecord.artist }} • {{ selectedRecord.genre }}</p>
           </div>
-          <button @click="closeDetailModal" class="flex-shrink-0 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors p-2 sm:p-3 border border-slate-200 dark:border-slate-700">
-            <svg class="w-5 h-5 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <v-btn
+            icon
+            variant="outlined"
+            :aria-label="t('common.backToList')"
+            class="flex-shrink-0 w-9 h-9 sm:w-14 sm:h-14 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+            @click="closeDetailModal"
+          >
+            <v-icon :icon="mdiClose" class="text-[20px] sm:text-[32px]" />
+          </v-btn>
         </div>
         <!-- モーダル内タブバー: detail / rate-tier / rivals(=ranking) / history。ログイン状態や難易度で一部のみ表示 -->
-        <div class="flex border-t border-slate-100 dark:border-slate-800">
-          <button
-            @click="modalTab = 'detail'"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
-            :class="modalTab === 'detail' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >{{ t('table.detail') }}</button>
-          <button
+        <v-tabs :model-value="modalTab" grow class="border-t border-slate-100 dark:border-slate-800">
+          <v-tab value="detail" color="primary" class="text-sm font-bold" @click="modalTab = 'detail'">{{ t('table.detail') }}</v-tab>
+          <v-tab
             v-if="['ANOTHER', 'LEGGENDARIA'].includes(selectedRecord?.difficultyName ?? '')"
+            value="rate-tier"
+            color="success"
+            class="text-sm font-bold"
             @click="modalTab = 'rate-tier'"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
-            :class="modalTab === 'rate-tier' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >Rate-Tier</button>
-          <button
+          >Rate-Tier</v-tab>
+          <v-tab
             v-if="showMilestoneTab"
+            value="milestone"
+            color="warning"
+            class="text-sm font-bold"
             @click="handleMilestoneTabClick"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
-            :class="modalTab === 'milestone' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >{{ t('table.milestone') }}</button>
-          <button
+          >{{ t('table.milestone') }}</v-tab>
+          <v-tab
             v-if="isLoggedIn"
+            value="rivals"
+            color="primary"
+            class="text-sm font-bold"
             @click="handleRivalTabClick"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1"
-            :class="modalTab === 'rivals' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
           >
             {{ t('table.ranking') }}
-            <span v-if="rankingList.length > 0" class="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded px-1.5">{{ rankingList.length }}</span>
-          </button>
-          <button
+            <v-chip v-if="rankingList.length > 0" label size="x-small" color="primary" variant="tonal" class="ml-1 text-xs">{{ rankingList.length }}</v-chip>
+          </v-tab>
+          <v-tab
             v-if="isLoggedIn && ['ANOTHER', 'LEGGENDARIA'].includes(selectedRecord?.difficultyName ?? '')"
+            value="history"
+            color="purple"
+            class="text-sm font-bold"
             @click="handleHistoryTabClick"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
-            :class="modalTab === 'history' ? 'border-violet-500 text-violet-600 dark:text-violet-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >{{ t('table.history') }}</button>
+          >{{ t('table.history') }}</v-tab>
           <!-- 歴代タブ: 過去作を含めたスコア推移。本人のスコア閲覧時のみ -->
-          <button
+          <v-tab
             v-if="canUsePastMode"
+            value="past"
+            color="warning"
+            class="text-sm font-bold"
             @click="handlePastTabClick"
-            class="flex-1 py-2 text-sm font-bold border-b-2 transition-colors"
-            :class="modalTab === 'past' ? 'border-amber-500 text-amber-600 dark:text-amber-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'"
-          >{{ t('past.tab') }}</button>
-        </div>
+          >{{ t('past.tab') }}</v-tab>
+        </v-tabs>
       </div>
       
       <!-- ===== モーダルのスクロール可能な本体領域 ===== -->
-      <div class="flex-1 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
+      <div class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-8 lg:p-12 pb-24">
 
         <!-- ===== Rate-Tier タブ: 獲得PT + スコアレート + 閾値表 ===== -->
         <div v-if="modalTab === 'rate-tier'" class="w-full max-w-4xl mx-auto space-y-6">
           <!-- 獲得PT と スコアレート を大きく横並びで表示 -->
           <div class="grid grid-cols-2 gap-4">
-            <div class="bg-emerald-900/10 dark:bg-emerald-900/20 p-6 sm:p-8 rounded-md flex flex-col items-center justify-center border border-emerald-100 dark:border-emerald-800/50">
+            <v-card class="bg-emerald-900/10 dark:bg-emerald-900/20 p-6 sm:p-8 flex flex-col items-center justify-center border-emerald-100 dark:border-emerald-800/50">
               <p class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-2">{{ t('table.colPoints') }}</p>
               <p class="text-4xl sm:text-6xl font-bold text-emerald-700 dark:text-emerald-300 tracking-tight">
                 {{ calculateScoreRateTierPoints(selectedRecord!.scoreRate).toFixed(2) }}
               </p>
               <p class="text-xs font-bold text-emerald-500 dark:text-emerald-500 mt-1">/ 256 pt (MAX)</p>
-            </div>
-            <div class="bg-blue-50 dark:bg-slate-800 p-6 sm:p-8 rounded-md border-4 border-blue-200 dark:border-slate-700 flex flex-col items-center justify-center">
+            </v-card>
+            <v-card class="bg-blue-50 dark:bg-slate-800 p-6 sm:p-8 border-4 border-blue-200 dark:border-slate-700 flex flex-col items-center justify-center">
               <p class="text-xs sm:text-sm font-bold text-blue-500 dark:text-blue-400 mb-2">{{ t('table.colRate') }}</p>
               <p class="text-4xl sm:text-6xl font-bold text-blue-600 dark:text-blue-300 tracking-tight flex items-baseline">
                 <template v-if="selectedRecord!.scoreRate >= 0">{{ selectedRecord!.scoreRate.toFixed(2) }}</template>
                 <template v-else>---</template>
                 <span class="text-xl sm:text-3xl font-bold ml-1">%</span>
               </p>
-            </div>
+            </v-card>
           </div>
 
           <!-- Rate-Tier の閾値テーブル（各閾値の到達/未到達を ✓ / +差% で表示） -->
-          <div class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800">
+          <v-card class="border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-3 border-b border-slate-200 dark:border-slate-700">
               <p class="text-xs font-bold text-slate-600 dark:text-slate-400">{{ t('table.rateTierThresholds') }}</p>
             </div>
-            <table class="w-full text-sm">
+            <v-table class="bg-transparent text-sm">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700">
                   <th class="px-6 py-3 text-left text-xs font-bold text-slate-400">{{ t('table.colRate') }}</th>
@@ -774,60 +817,57 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
+            </v-table>
+          </v-card>
         </div>
 
         <!-- ===== Ranking タブ: 自分 + フレンド + (任意)公開ユーザー + (任意)TOPランカー仮想ユーザーを統合表示 ===== -->
         <div v-else-if="modalTab === 'rivals'" class="w-full">
           <!-- 表示フィルタ: 公開ユーザー / 仮想ユーザーの表示切替 -->
           <div class="flex flex-wrap items-center gap-4 mb-4 p-3 bg-slate-50 dark:bg-slate-700/30 rounded-md border border-slate-100 dark:border-slate-700">
-            <label class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
-              <input type="checkbox" v-model="showPublicUsers" class="w-4 h-4 rounded accent-blue-600" />
-              スコア公開ユーザーも表示
-            </label>
-            <label class="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer">
-              <input type="checkbox" v-model="showVirtualUsers" class="w-4 h-4 rounded accent-amber-500" />
-              TOPランカー仮想ユーザーを表示
-            </label>
+            <v-checkbox v-model="showPublicUsers" class="flex-none">
+              <template #label><span class="text-sm font-bold text-slate-700 dark:text-slate-200">スコア公開ユーザーも表示</span></template>
+            </v-checkbox>
+            <v-checkbox v-model="showVirtualUsers" color="warning" class="flex-none">
+              <template #label><span class="text-sm font-bold text-slate-700 dark:text-slate-200">TOPランカー仮想ユーザーを表示</span></template>
+            </v-checkbox>
             <!-- 作品セレクト（前作の曲別ランキング）。前作のアーカイブがある期間だけ出す -->
-            <label v-if="rankingVersionOptions.length > 1" class="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-200" :title="t('table.rankingVersionHint')">
+            <div v-if="rankingVersionOptions.length > 1" class="flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-200" :title="t('table.rankingVersionHint')">
               <span>{{ t('ranking.versionSelect') }}</span>
-              <select
-                v-model.number="rankingVersion"
-                class="px-2 py-1 text-xs font-semibold border rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              >
-                <option v-for="v in rankingVersionOptions" :key="v.num" :value="v.num">
-                  {{ v.num }} {{ versionName(v.num) }}
-                </option>
-              </select>
-            </label>
-            <span v-if="isPastRanking" class="text-[11px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700 border border-violet-300 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-700">
+              <v-select
+                v-model="rankingVersion"
+                :items="rankingVersionOptions.map(v => ({ title: `${v.num} ${versionName(v.num)}`, value: v.num }))"
+                item-title="title"
+                item-value="value"
+                color="indigo"
+                class="text-xs min-w-[180px]"
+              />
+            </div>
+            <v-chip v-if="isPastRanking" label variant="outlined" class="text-[11px] font-bold bg-violet-100 text-violet-700 border-violet-300 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-700">
               {{ t('ranking.archiveBadge', { name: versionName(rankingVersion) }) }}
-            </span>
+            </v-chip>
             <!-- 管理者は公開設定に関係なく全員を表示（運用確認用） -->
-            <span v-if="isAdmin" class="text-[11px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-300 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-700">
+            <v-chip v-if="isAdmin" label variant="outlined" class="text-[11px] font-bold bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-900/40 dark:text-rose-300 dark:border-rose-700">
               {{ t('table.adminSeeAll') }}
-            </span>
+            </v-chip>
           </div>
 
           <!-- ===== 単曲ランク分布: スコアのある全実ユーザー（非公開含む・匿名集計）の単曲ランクをヒストグラム表示 ===== -->
           <!--     「散布図」に切り替えると EXSCORE × (PGREAT+GREAT)/NOTES の散布図（点は可視範囲、回帰線は全ユーザー）を表示 -->
-          <div v-if="songTierDist || judgeScatter" class="mb-4 p-4 bg-white dark:bg-slate-800 rounded-md border border-slate-100 dark:border-slate-700">
+          <v-card v-if="songTierDist || judgeScatter" class="mb-4 p-4 bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700">
             <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
               <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">
                 {{ songDistChartMode === 'bar' ? t('table.songRankDist') : t('table.judgeScatter') }}
               </h4>
-              <div class="flex bg-slate-100 dark:bg-slate-900 rounded-lg p-0.5">
-                <button
+              <v-btn-toggle v-model="songDistChartMode" mandatory>
+                <v-btn
                   v-for="opt in (['bar', 'scatter'] as const)"
                   :key="opt"
-                  type="button"
-                  @click="songDistChartMode = opt"
-                  class="px-2.5 py-1 text-[11px] font-bold rounded-md transition-colors"
-                  :class="songDistChartMode === opt ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-                >{{ opt === 'bar' ? t('table.songDistChartBar') : t('table.songDistChartScatter') }}</button>
-              </div>
+                  :value="opt"
+                  size="small"
+                  class="text-[11px]"
+                >{{ opt === 'bar' ? t('table.songDistChartBar') : t('table.songDistChartScatter') }}</v-btn>
+              </v-btn-toggle>
             </div>
             <template v-if="songDistChartMode === 'bar'">
               <template v-if="songTierDist">
@@ -843,12 +883,12 @@
               </template>
               <p v-else class="py-8 text-center text-xs text-slate-400 dark:text-slate-500">{{ t('table.songDistChartEmpty') }}</p>
             </template>
-          </div>
+          </v-card>
 
           <p v-if="isPastRanking" class="mb-3 text-[11px] text-slate-500 dark:text-slate-400">{{ t('table.pastRankingNote') }}</p>
 
           <div v-if="isLoadingRivals || isLoadingSongRanking || isLoadingPastSongRanking" class="flex flex-col items-center justify-center py-20">
-            <div class="w-10 h-10 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <v-progress-circular size="40" width="4" class="mb-4" />
             <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
           </div>
           <div v-else-if="isPastRanking && activeSongRankingList.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
@@ -860,8 +900,7 @@
             </svg>
             <p class="font-bold">{{ t('table.rivalNotPlayed') }}</p>
           </div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full">
+          <v-table v-else class="bg-transparent">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
                   <th class="pb-3 pl-3 text-xs font-bold text-slate-400 w-12">{{ t('table.colRankNum') }}</th>
@@ -902,22 +941,26 @@
                   <td class="py-3">
                     <template v-if="row.kind === 'virtual'">
                       <div class="flex items-center gap-2 min-w-0">
-                        <span
+                        <v-chip
                           v-if="row.virtualBadge === 'allTimeGlobal' || row.virtualBadge === 'globalAllTime'"
-                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-500 text-white text-[10px] font-bold shrink-0"
-                        >歴代</span>
-                        <span
+                          label size="x-small" variant="flat"
+                          class="px-1.5 bg-rose-500 text-white text-[10px] font-bold shrink-0"
+                        >歴代</v-chip>
+                        <v-chip
                           v-else-if="row.virtualBadge === 'allTimeArea'"
-                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-rose-500 text-white text-[10px] font-bold shrink-0"
-                        >エリア歴代</span>
-                        <span
+                          label size="x-small" variant="flat"
+                          class="px-1.5 bg-rose-500 text-white text-[10px] font-bold shrink-0"
+                        >エリア歴代</v-chip>
+                        <v-chip
                           v-else-if="row.virtualBadge === 'versionTop'"
-                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-indigo-500 text-white text-[10px] font-bold shrink-0"
-                        >バージョンTOP</span>
-                        <span
+                          label size="x-small" variant="flat"
+                          class="px-1.5 bg-indigo-500 text-white text-[10px] font-bold shrink-0"
+                        >バージョンTOP</v-chip>
+                        <v-chip
                           v-else
-                          class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold shrink-0"
-                        >TOP</span>
+                          label size="x-small" variant="flat"
+                          class="px-1.5 bg-amber-500 text-white text-[10px] font-bold shrink-0"
+                        >TOP</v-chip>
                         <span class="font-bold text-slate-800 dark:text-slate-100 text-sm truncate">
                           {{ row.virtualEntry!.versionName }} {{ row.virtualEntry!.prefectureName }}
                           <span class="ml-1 text-xs text-slate-500 dark:text-slate-400">({{ row.virtualEntry!.djName }})</span>
@@ -987,25 +1030,20 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
+          </v-table>
 
           <!-- 描画件数の上限超過分は「残りを表示」で段階的に追加（モバイルのメモリ保護） -->
           <div v-if="hiddenRankingCount > 0" class="pt-3 text-center">
-            <button
-              type="button"
-              @click="showMoreRanking"
-              class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline focus:outline-none"
-            >
+            <v-btn variant="text" color="primary" class="text-sm" @click="showMoreRanking">
               残り {{ hiddenRankingCount }} 件を表示
-            </button>
+            </v-btn>
           </div>
         </div>
 
         <!-- ===== History タブ: 譜面のスコア更新履歴を時系列表示 ===== -->
         <div v-else-if="modalTab === 'history'" class="w-full">
           <div v-if="isLoadingHistory" class="flex flex-col items-center justify-center py-20">
-            <div class="w-10 h-10 border-4 border-violet-100 border-t-violet-500 rounded-full animate-spin mb-4"></div>
+            <v-progress-circular size="40" width="4" color="purple" class="mb-4" />
             <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
           </div>
           <div v-else-if="songHistory.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
@@ -1014,8 +1052,7 @@
             </svg>
             <p class="font-bold">{{ t('table.noHistoryData') }}</p>
           </div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full">
+          <v-table v-else class="bg-transparent">
               <thead>
                 <tr class="text-left border-b border-slate-100 dark:border-slate-700/50">
                   <th class="pb-3 pl-3 text-xs font-bold text-slate-400">{{ t('table.colDate') }}</th>
@@ -1040,8 +1077,7 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
-          </div>
+          </v-table>
         </div>
 
         <!-- ===== 大台（Milestone）タブ: 100点刻みの節目ラインごとの達成人数を表示 ===== -->
@@ -1052,7 +1088,7 @@
           </div>
           <template v-else-if="selectedChartHistory && selectedChartHistory.entries.length > 0">
             <!-- 歴代ベストスコアと、その上下の到達度（AAA+/MAX- 等）を併記する -->
-            <div class="bg-amber-50 dark:bg-amber-900/20 p-4 sm:p-6 rounded-md border border-amber-100 dark:border-amber-800/50">
+            <v-card class="bg-amber-50 dark:bg-amber-900/20 p-4 sm:p-6 border-amber-100 dark:border-amber-800/50">
               <p class="text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">{{ t('past.bestScore') }}</p>
               <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <p class="text-3xl sm:text-4xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">
@@ -1071,11 +1107,10 @@
                 </span>
                 {{ selectedChartHistory.bestScore.version }} {{ versionName(selectedChartHistory.bestScore.version) }}
               </p>
-            </div>
+            </v-card>
 
             <!-- 作品別の内訳 -->
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs sm:text-sm">
+            <v-table class="bg-transparent text-left text-xs sm:text-sm">
                 <thead class="text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
                   <tr>
                     <th class="py-2 pr-2 font-medium">{{ t('past.colVersion') }}</th>
@@ -1119,8 +1154,7 @@
                     </td>
                   </tr>
                 </tbody>
-              </table>
-            </div>
+            </v-table>
 
             <!-- ★が作品間で変わっている譜面はその旨を明示する（現行基準の表示との齟齬を防ぐ） -->
             <p v-if="hasLevelChanged" class="text-xs text-amber-600 dark:text-amber-400">
@@ -1136,33 +1170,33 @@
         <div v-else-if="modalTab === 'milestone'" class="w-full max-w-4xl mx-auto space-y-6">
           <!-- サマリー: 集計人数 / 自分のスコア / MAX理論値 -->
           <div class="grid grid-cols-3 gap-3">
-            <div class="bg-amber-900/10 dark:bg-amber-900/20 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-amber-100 dark:border-amber-800/50">
+            <v-card class="bg-amber-900/10 dark:bg-amber-900/20 p-4 sm:p-6 flex flex-col items-center justify-center border-amber-100 dark:border-amber-800/50">
               <p class="text-[10px] sm:text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">{{ t('table.milestonePlayers') }}</p>
               <p class="text-2xl sm:text-4xl font-bold text-amber-700 dark:text-amber-300 tabular-nums">{{ milestonePlayerCount }}</p>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700">
+            </v-card>
+            <v-card class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 flex flex-col items-center justify-center border-slate-200 dark:border-slate-700">
               <p class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">{{ t('table.exScore') }}</p>
               <p class="text-2xl sm:text-4xl font-bold text-slate-700 dark:text-slate-200 tabular-nums">
                 <template v-if="selectedRecord!.score > 0">{{ selectedRecord!.score.toLocaleString() }}</template>
                 <template v-else>---</template>
               </p>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 rounded-md flex flex-col items-center justify-center border border-slate-200 dark:border-slate-700">
+            </v-card>
+            <v-card class="bg-slate-50 dark:bg-slate-800 p-4 sm:p-6 flex flex-col items-center justify-center border-slate-200 dark:border-slate-700">
               <p class="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">MAX</p>
               <p class="text-2xl sm:text-4xl font-bold text-slate-700 dark:text-slate-200 tabular-nums">{{ selectedRecord!.maxScore.toLocaleString() }}</p>
-            </div>
+            </v-card>
           </div>
 
           <!-- ローディング -->
           <div v-if="isLoadingMilestones" class="flex flex-col items-center justify-center py-20">
-            <div class="w-10 h-10 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+            <v-progress-circular size="40" width="4" color="warning" class="mb-4" />
             <p class="text-slate-500 dark:text-slate-400">{{ t('common.loading') }}</p>
           </div>
 
           <template v-else>
           <!-- AAA / MAX- 達成者の併記 -->
           <div class="grid grid-cols-2 gap-3">
-            <div class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-md border border-slate-200 dark:border-slate-700">
+            <v-card class="bg-white dark:bg-slate-800 p-3 sm:p-4 border-slate-200 dark:border-slate-700">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
                   <span v-if="milestoneAaaMax.achievedAaa" class="text-emerald-500">✓ </span>AAA
@@ -1174,8 +1208,8 @@
                 <span class="text-xs text-slate-400">{{ t('table.milestoneAchievers') }}</span>
                 <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums ml-auto">{{ milestoneAaaMax.aaaRate.toFixed(1) }}%</span>
               </div>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-3 sm:p-4 rounded-md border border-slate-200 dark:border-slate-700">
+            </v-card>
+            <v-card class="bg-white dark:bg-slate-800 p-3 sm:p-4 border-slate-200 dark:border-slate-700">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-sm font-bold text-slate-700 dark:text-slate-200">
                   <span v-if="milestoneAaaMax.achievedMaxMinus" class="text-emerald-500">✓ </span>MAX-
@@ -1187,15 +1221,15 @@
                 <span class="text-xs text-slate-400">{{ t('table.milestoneAchievers') }}</span>
                 <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums ml-auto">{{ milestoneAaaMax.maxMinusRate.toFixed(1) }}%</span>
               </div>
-            </div>
+            </v-card>
           </div>
 
           <!-- 大台ラインテーブル（降順） -->
-          <div class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800">
+          <v-card class="border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-3 border-b border-slate-200 dark:border-slate-700">
               <p class="text-xs font-bold text-slate-600 dark:text-slate-400">{{ t('table.milestone') }}</p>
             </div>
-            <table class="w-full text-sm">
+            <v-table class="bg-transparent text-sm">
               <thead>
                 <tr class="border-b border-slate-100 dark:border-slate-700">
                   <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-400">{{ t('table.exScore') }}</th>
@@ -1221,17 +1255,15 @@
                         {{ row.line.toLocaleString() }}
                       </span>
                       <span class="text-[11px] text-slate-400 tabular-nums">{{ row.lineRate.toFixed(2) }}%</span>
-                      <span v-if="row.isNextTarget" class="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold shrink-0">
+                      <v-chip v-if="row.isNextTarget" label size="x-small" variant="flat" class="px-1.5 bg-amber-500 text-white text-[10px] font-bold shrink-0">
                         {{ t('table.milestoneToGo', { n: row.toGo }) }}
-                      </span>
+                      </v-chip>
                     </div>
                   </td>
                   <!-- 達成率のプログレスバー -->
                   <td class="px-2 py-3 hidden sm:table-cell">
                     <div class="flex items-center gap-2">
-                      <div class="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                        <div class="h-full rounded-full bg-amber-500" :style="{ width: row.rate + '%' }"></div>
-                      </div>
+                      <v-progress-linear :model-value="row.rate" color="amber" bg-color="blue-grey" height="8" rounded class="flex-1" />
                       <span class="text-xs text-slate-500 dark:text-slate-400 tabular-nums w-12 text-right">{{ row.rate.toFixed(1) }}%</span>
                     </div>
                   </td>
@@ -1241,12 +1273,12 @@
                   </td>
                 </tr>
               </tbody>
-            </table>
+            </v-table>
             <!-- 0人時の注記 -->
             <div v-if="milestonesLoaded && milestonePlayerCount === 0" class="px-4 sm:px-6 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
               {{ t('table.milestoneNoPlayers') }}
             </div>
-          </div>
+          </v-card>
           </template>
 
           <!-- 脚注: 匿名集計の注記 -->
@@ -1259,12 +1291,12 @@
           <!-- 譜面メタ情報（難易度バッジ + タイトル） -->
           <div class="flex flex-col items-center sm:items-start gap-2 sm:gap-4">
             <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
-              <span :class="['px-3 py-1 sm:px-4 sm:py-1.5 rounded text-xs sm:text-sm font-bold', selectedRecord.difficultyColor]">
+              <v-chip label variant="flat" :class="['px-3 sm:px-4 text-xs sm:text-sm font-bold', selectedRecord.difficultyColor]">
                 {{ selectedRecord.difficultyName }} {{ selectedRecord.difficultyLevel ? `☆${selectedRecord.difficultyLevel}` : '' }}
-              </span>
-              <span v-if="selectedRecord.informalRank" class="px-3 py-1 sm:px-4 sm:py-1.5 rounded text-xs sm:text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              </v-chip>
+              <v-chip v-if="selectedRecord.informalRank" label variant="outlined" class="px-3 sm:px-4 text-xs sm:text-sm font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700">
                 {{ t('table.colInformal') }}: {{ selectedRecord.informalRank }}
-              </span>
+              </v-chip>
             </div>
             <h3 class="text-2xl sm:text-5xl font-bold text-slate-800 dark:text-slate-100 tracking-tight text-center sm:text-left leading-tight mt-1 sm:mt-0">
               {{ selectedRecord.title }}
@@ -1272,21 +1304,21 @@
           </div>
           <!-- 最終プレー日時バッジ -->
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <span class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white dark:bg-slate-800 transition-colors">
-              {{ t('table.lastPlayTime') }}: <span class="text-slate-700 dark:text-slate-200 font-bold">{{ selectedRecord.lastPlayTime || t('table.unknown') }}</span>
-            </span>
+            <v-chip label variant="outlined" size="default" class="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 border-slate-300 dark:border-slate-600 px-3 sm:px-4 bg-white dark:bg-slate-800">
+              {{ t('table.lastPlayTime') }}:&nbsp;<span class="text-slate-700 dark:text-slate-200 font-bold">{{ selectedRecord.lastPlayTime || t('table.unknown') }}</span>
+            </v-chip>
           </div>
 
           <!-- スコアパネル 2×2 グリッド: ランプ / DJ LEVEL / BEAT-PT / EX スコア + スコアレート -->
           <div class="grid grid-cols-2 gap-3 sm:gap-6">
-            <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+            <v-card class="bg-white dark:bg-slate-800 p-3 sm:p-6 border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getClearTypeBgColor(selectedRecord.clearType)"></div>
               <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 mb-1 mt-1 sm:mb-2 sm:mt-2">{{ t('table.lamp') }}</p>
               <p class="text-lg sm:text-4xl font-bold text-center" :class="getClearTypeColor(selectedRecord.clearType)">
                 {{ selectedRecord.clearType }}
               </p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-3 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
+            </v-card>
+            <v-card class="bg-white dark:bg-slate-800 p-3 sm:p-6 border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
               <div class="absolute top-0 left-0 w-full h-1 sm:h-2" :class="getDjLevelBgColor(selectedRecord.djLevel)"></div>
               <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-500 mb-1 mt-1 sm:mb-2 sm:mt-2">{{ t('table.colRank') }}</p>
               <div class="flex flex-col items-center">
@@ -1294,9 +1326,9 @@
                   {{ selectedRecord.djLevel }}
                 </p>
               </div>
-            </div>
-            
-            <div class="bg-indigo-900/10 dark:bg-indigo-900/20 p-4 sm:p-8 rounded-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200 border border-indigo-100 dark:border-indigo-800/50">
+            </v-card>
+
+            <v-card class="bg-indigo-900/10 dark:bg-indigo-900/20 p-4 sm:p-8 flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200 border-indigo-100 dark:border-indigo-800/50">
               <p class="text-xs sm:text-sm font-bold text-indigo-500 dark:text-indigo-400 mb-1 sm:mb-2">BEAT-PT</p>
               <div class="flex items-baseline gap-1 sm:gap-2">
                 <p class="text-4xl sm:text-6xl font-bold text-indigo-700 dark:text-indigo-300 tracking-tight">
@@ -1304,9 +1336,9 @@
                 </p>
                 <p v-if="selectedRecord.maxBeatTierPoints > 0" class="text-sm sm:text-xl font-bold text-indigo-400 dark:text-indigo-500">/ {{ selectedRecord.maxBeatTierPoints.toFixed(1) }}</p>
               </div>
-            </div>
-            
-            <div class="bg-slate-800 dark:bg-slate-700 p-4 sm:p-8 rounded-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200">
+            </v-card>
+
+            <v-card variant="flat" class="bg-slate-800 dark:bg-slate-700 p-4 sm:p-8 flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors duration-200">
               <p class="text-xs sm:text-sm font-bold text-slate-400 dark:text-slate-300 mb-1 sm:mb-2">{{ t('table.exScore') }}</p>
               <div class="flex items-baseline gap-1 sm:gap-2">
                 <p class="text-4xl sm:text-6xl font-bold text-white tracking-tight">
@@ -1314,9 +1346,9 @@
                 </p>
                 <p v-if="selectedRecord.maxScore > 0" class="text-sm sm:text-xl font-bold text-slate-500 dark:text-slate-400">/ {{ selectedRecord.maxScore }}</p>
               </div>
-            </div>
-            <div 
-               class="p-4 sm:p-8 rounded-md flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative duration-200"
+            </v-card>
+            <v-card
+               class="p-4 sm:p-8 flex flex-col items-center justify-center col-span-2 sm:col-span-1 transition-colors relative duration-200"
                :class="selectedRecord.scoreRate >= 0 ? 'bg-blue-50 dark:bg-slate-800 border-4 border-blue-200 dark:border-slate-700' : 'bg-slate-100 dark:bg-slate-800/50 border-dashed border-4 border-slate-300 dark:border-slate-600 group cursor-help'"
                :title="selectedRecord.scoreRate >= 0 ? '' : t('table.rateCalculabilityHint')"
             >
@@ -1330,11 +1362,11 @@
                  </template>
                 <span class="text-xl sm:text-3xl font-bold ml-1 sm:ml-2">%</span>
               </p>
-            </div>
+            </v-card>
           </div>
 
           <!-- 判定内訳: PGREAT / GREAT / MISS を 3 カラムで表示 -->
-          <div class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800 transition-colors duration-200">
+          <v-card class="border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-4 sm:px-6 py-2 sm:py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
               <p class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">{{ t('table.judgmentDetail') }}</p>
             </div>
@@ -1352,7 +1384,7 @@
                 <span class="text-2xl sm:text-5xl font-bold text-slate-800 dark:text-slate-200">{{ selectedRecord.missCount !== null ? selectedRecord.missCount : '-' }}</span>
               </div>
             </div>
-          </div>
+          </v-card>
 
           <!-- ===== リザルト画像セクション（端末ファイルから登録 → R2 保存 → タップで拡大）=====
                リザルト画像は本人専用。他ユーザーのスコア閲覧時（viewingMode あり）は表示しない。 -->
@@ -1364,7 +1396,7 @@
           />
 
           <!-- ===== オプション投票セクション（正規/MIRROR/RANDOM/R-RAN/S-RAN）===== -->
-          <div class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+          <v-card class="border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-emerald-50 dark:bg-emerald-900/30 px-4 sm:px-6 py-3 sm:py-4 border-b border-emerald-100 dark:border-emerald-800/50 flex items-center justify-between transition-colors duration-200">
               <p class="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -1372,31 +1404,32 @@
                 </svg>
                 {{ t('table.optionVote') }}
               </p>
-              <span v-if="voteData.totalVotes > 0" class="text-[10px] sm:text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded">{{ t('table.voteCount', { n: voteData.totalVotes }) }}</span>
+              <v-chip v-if="voteData.totalVotes > 0" label size="x-small" variant="flat" class="px-2 text-[10px] sm:text-xs font-bold text-emerald-500 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50">{{ t('table.voteCount', { n: voteData.totalVotes }) }}</v-chip>
             </div>
             <div class="p-4 sm:p-6">
-              <div class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-md border border-slate-200 dark:border-slate-700/50">
+              <v-alert :icon="false" color="secondary" class="mb-4 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
                 <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                   {{ t('table.voteHint') }}
                 </p>
-              </div>
+              </v-alert>
               
               <!-- 投票ボタン（ログイン中のみ）: 自分の票と一致したボタンは active 色で強調 -->
               <div v-if="isLoggedIn" class="flex flex-wrap gap-2 mb-4">
-                <button
+                <v-btn
                   v-for="opt in optionTypes"
                   :key="opt.value"
-                  @click="castVote(opt.value)"
+                  variant="outlined"
                   :disabled="isVoting"
-                  class="px-3 py-2 rounded-md text-xs sm:text-sm font-bold border-2 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  class="px-3 text-xs sm:text-sm border-2"
                   :class="voteData.myVotes.includes(opt.value)
                     ? `${opt.activeBg} ${opt.activeText} ${opt.activeBorder}`
                     : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'"
+                  @click="castVote(opt.value)"
                 >
-                  <span>{{ opt.icon }}</span>
+                  <span class="mr-1.5">{{ opt.icon }}</span>
                   {{ opt.label }}
-                  <span v-if="voteData.myVotes.includes(opt.value)" class="text-[10px]">✔</span>
-                </button>
+                  <span v-if="voteData.myVotes.includes(opt.value)" class="ml-1.5 text-[10px]">✔</span>
+                </v-btn>
               </div>
               <div v-else class="mb-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-md text-sm text-slate-500 dark:text-slate-400 italic text-center">
                 {{ t('table.loginToVote') }}
@@ -1423,10 +1456,10 @@
                 {{ t('table.noVotesYet') }}
               </div>
             </div>
-          </div>
+          </v-card>
 
           <!-- ===== BEAT-PT 目標計算セクション: スライダーで目標 PT 増分を選ぶと、必要スコアを逆算して表示 ===== -->
-          <div v-if="selectedRecord.maxScore > 0 && selectedRecord.maxBeatTierPoints > 0 && selectedRecord.beatTierPoints < selectedRecord.maxBeatTierPoints" class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+          <v-card v-if="selectedRecord.maxScore > 0 && selectedRecord.maxBeatTierPoints > 0 && selectedRecord.beatTierPoints < selectedRecord.maxBeatTierPoints" class="border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-indigo-50 dark:bg-indigo-900/30 px-6 py-4 border-b border-indigo-100 dark:border-indigo-800/50 flex items-center justify-between transition-colors duration-200">
               <p class="text-sm font-bold text-indigo-700 dark:text-indigo-400 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -1446,14 +1479,14 @@
                     </span>
                   </div>
                 </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  :max="selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints" 
-                  step="0.1" 
-                  v-model.number="targetBeatPtSlider"
-                  class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-indigo-600"
-                >
+                <v-slider
+                  v-model="targetBeatPtSlider"
+                  :min="0"
+                  :max="selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints"
+                  :step="0.1"
+                  color="indigo"
+                  class="w-full"
+                />
                 <div class="flex justify-between text-xs font-medium text-slate-400 dark:text-slate-500">
                   <span>0</span>
                   <span>{{ t('scores.targetMaxIncrease', { n: (selectedRecord.maxBeatTierPoints - selectedRecord.beatTierPoints).toFixed(1) }) }}</span>
@@ -1470,10 +1503,10 @@
                 </div>
               </div>
             </div>
-          </div>
+          </v-card>
 
           <!-- ===== メモ セクション: 譜面ごとのフリーテキストメモ（ログイン時のみ編集可） ===== -->
-          <div v-if="selectedRecord.id || !isLoggedIn" class="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
+          <v-card v-if="selectedRecord.id || !isLoggedIn" class="border-slate-200 dark:border-slate-700 overflow-hidden bg-white dark:bg-slate-800 mt-6 transition-colors duration-200">
             <div class="bg-slate-100 dark:bg-slate-900/50 px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between transition-colors duration-200">
               <p class="text-sm font-bold text-slate-600 dark:text-slate-400">{{ t('scores.options') }}</p>
               <a href="https://www.iidx-memo.com/" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs font-bold flex items-center gap-1 transition-colors">
@@ -1487,32 +1520,37 @@
             <div class="p-6">
               <template v-if="selectedRecord.options && selectedRecord.options.length > 0">
                 <div class="flex flex-wrap gap-2">
-                  <span v-for="opt in selectedRecord.options" :key="opt"
-                        class="inline-flex items-center px-3 py-1 rounded text-sm font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  <v-chip v-for="opt in selectedRecord.options" :key="opt"
+                        label variant="outlined" size="default"
+                        class="px-3 text-sm font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
                     {{ opt }}
-                  </span>
+                  </v-chip>
                 </div>
               </template>
               <template v-else>
                 <div class="text-slate-400 dark:text-slate-500 italic text-sm">{{ t('scores.noOptions') }}</div>
               </template>
             </div>
-          </div>
+          </v-card>
           
         </div>
       </div>
       
       <!-- ===== モーダル Sticky フッタ: 「一覧に戻る」ボタン（全タブ共通） ===== -->
       <div class="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.2)] w-full flex justify-center z-10 transition-colors duration-200">
-         <button @click="closeDetailModal" class="w-full max-w-md px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-md transition-colors flex items-center justify-center gap-2">
-           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-           </svg>
+         <v-btn
+           color="primary"
+           size="x-large"
+           block
+           :prepend-icon="mdiClose"
+           class="max-w-md text-lg"
+           @click="closeDetailModal"
+         >
            {{ t('common.backToList') }}
-         </button>
+         </v-btn>
       </div>
-    </div>
-    </Teleport>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -1574,6 +1612,7 @@ import { usePastScores } from '../composables/usePastScores';
 import type { ChartHistory } from '../composables/usePastScores';
 import { chartKey } from '../composables/usePastScores';
 import { versionShort, versionName, versionBadgeClass, CURRENT_VERSION, SUPPORTED_VERSIONS, HISTORY_VERSIONS } from '../utils/iidxVersions';
+import { mdiChevronDown, mdiClose, mdiMagnify } from '@mdi/js';
 import ResultImageSection from './ResultImageSection.vue';
 import RankIcon from './RankIcon.vue';
 import InformalRankBadge from './InformalRankBadge.vue';
@@ -3960,5 +3999,11 @@ defineExpose({ openSongByTitle });
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* フィルタのドロップダウンボタン: ラベルを左寄せにし、長いラベルは省略表示（…）にする */
+.filter-dd-btn :deep(.v-btn__content) {
+  min-width: 0;
+  justify-content: flex-start;
 }
 </style>

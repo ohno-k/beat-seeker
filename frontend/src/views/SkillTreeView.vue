@@ -13,6 +13,7 @@
  *  - `useAuth` — API 認証ヘッダ。
  *  - `useI18n` — 多言語。
  */
+import { mdiChevronRight } from '@mdi/js';
 import { ref, computed, onMounted } from 'vue';
 import { useAuth, API_BASE } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
@@ -145,14 +146,14 @@ function currentPos(chain: SkillChain): number {
     </div>
 
     <div v-if="loading" class="flex flex-col items-center py-20">
-      <div class="w-12 h-12 border-4 border-indigo-200 dark:border-indigo-900 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+      <v-progress-circular size="48" width="4" color="indigo" class="mb-4" />
       <p class="text-slate-500 dark:text-slate-400 font-medium">スキルツリーを生成中...</p>
     </div>
 
-    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-6 text-center">
+    <v-alert v-else-if="error" type="error" :icon="false" class="p-6 text-center">
       <p class="text-red-600 dark:text-red-400 font-medium">{{ error }}</p>
-      <button @click="fetchData" class="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold">リトライ</button>
-    </div>
+      <v-btn color="error" size="small" class="mt-3" @click="fetchData">リトライ</v-btn>
+    </v-alert>
 
     <div v-else-if="data" class="space-y-8">
 
@@ -188,7 +189,7 @@ function currentPos(chain: SkillChain): number {
             </div>
 
             <!-- ノードカード: 難易度・曲名・ノーツ数・クリアランク・NEXTバッジ。クリックで詳細展開 -->
-            <div
+            <v-card
               class="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all cursor-pointer hover:border-slate-300 dark:hover:border-slate-500 text-sm"
               :class="[
                 prog(node.textage)?.clearRank >= 2
@@ -208,85 +209,87 @@ function currentPos(chain: SkillChain): number {
                 {{ clearLabel(prog(node.textage)!.bestClear) }}
               </span>
               <span v-else class="text-[10px] text-slate-400 dark:text-slate-600 w-12 text-right flex-shrink-0">—</span>
-              <span v-if="idx === currentPos(chain) + 1 && isLoggedIn" class="px-1.5 py-0.5 bg-indigo-500 text-white text-[9px] font-bold rounded flex-shrink-0">
+              <v-chip v-if="idx === currentPos(chain) + 1 && isLoggedIn" label size="x-small" variant="flat" color="indigo" class="text-[9px] font-bold flex-shrink-0">
                 NEXT
-              </span>
-            </div>
+              </v-chip>
+            </v-card>
           </div>
         </div>
 
         <!-- 展開された詳細: BPM・ノーツ・皿割合など追加情報を表示 -->
         <template v-for="node in chain.nodes" :key="'detail-' + node.textage">
-          <div v-if="selectedNode === node.textage" class="ml-6 mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-md border border-slate-200 dark:border-slate-700 text-xs">
+          <v-card v-if="selectedNode === node.textage" class="ml-6 mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 text-xs">
             <div class="flex items-center gap-2 mb-2">
               <span class="font-bold text-slate-800 dark:text-white text-sm">{{ node.title }}</span>
               <span class="text-slate-400">{{ node.artist }}</span>
             </div>
             <div class="flex flex-wrap gap-2 mb-2">
-              <span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 rounded">BPM {{ node.bpmRaw || node.bpmMain }}</span>
-              <span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 rounded">{{ node.notes }} notes</span>
-              <span v-if="node.scratchPct > 0" class="px-2 py-0.5 rounded" :class="node.scratchPct > 12 ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' : 'bg-slate-200 dark:bg-slate-600'">
+              <v-chip label variant="flat" class="text-xs bg-slate-200 dark:bg-slate-600">BPM {{ node.bpmRaw || node.bpmMain }}</v-chip>
+              <v-chip label variant="flat" class="text-xs bg-slate-200 dark:bg-slate-600">{{ node.notes }} notes</v-chip>
+              <v-chip v-if="node.scratchPct > 0" label variant="flat" class="text-xs" :class="node.scratchPct > 12 ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' : 'bg-slate-200 dark:bg-slate-600'">
                 皿 {{ node.scratchPct.toFixed(1) }}%
-              </span>
-              <span v-if="node.chordPct > 0" class="px-2 py-0.5 rounded" :class="node.chordPct > 55 ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' : 'bg-slate-200 dark:bg-slate-600'">
+              </v-chip>
+              <v-chip v-if="node.chordPct > 0" label variant="flat" class="text-xs" :class="node.chordPct > 55 ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' : 'bg-slate-200 dark:bg-slate-600'">
                 同時 {{ node.chordPct.toFixed(1) }}%
-              </span>
-              <span v-if="node.cnNotes" class="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/40 rounded text-yellow-700 dark:text-yellow-400">CN {{ node.cnNotes }}</span>
-              <span v-if="node.isSoflan" class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 rounded text-orange-700 dark:text-orange-400">ソフラン</span>
+              </v-chip>
+              <v-chip v-if="node.cnNotes" label variant="flat" class="text-xs bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400">CN {{ node.cnNotes }}</v-chip>
+              <v-chip v-if="node.isSoflan" label variant="flat" class="text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400">ソフラン</v-chip>
             </div>
             <div v-if="node.similarityToPrev > 0" class="text-[11px] italic" :class="chainColor(chain).text">
               前の譜面と {{ Math.round(node.similarityToPrev * 100) }}% 類似 — {{ node.connectionReason }}
             </div>
-          </div>
+          </v-card>
         </template>
       </section>
 
       <!-- ===== 独立譜面セクション: どのチェーンにも属さない譜面を2カラムグリッドで表示 ===== -->
       <section v-if="independentCharts.length > 0">
-        <button
+        <v-btn
+          variant="text"
+          size="small"
+          class="mb-3 px-1 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
           @click="showIndependent = !showIndependent"
-          class="flex items-center gap-2 mb-3 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="showIndependent ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
+          <template #prepend>
+            <v-icon :icon="mdiChevronRight" class="transition-transform" :class="showIndependent ? 'rotate-90' : ''" />
+          </template>
           独立譜面（{{ independentCharts.length }}）
-        </button>
+        </v-btn>
 
         <div v-if="showIndependent" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-          <div
+          <v-card
             v-for="chain in independentCharts"
             :key="chain.categoryId"
             class="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-white/60 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/40 text-sm cursor-pointer hover:border-slate-300 dark:hover:border-slate-500 transition-all"
             @click="selectedNode = selectedNode === chain.nodes[0].textage ? null : chain.nodes[0].textage"
           >
-            <span class="text-[10px] font-bold px-1 py-0.5 rounded text-white" :class="levelColor(chain.nodes[0].level).badge">
+            <v-chip label size="x-small" variant="flat" class="text-[10px] font-bold px-1 text-white" :class="levelColor(chain.nodes[0].level).badge">
               {{ diffLabel(chain.nodes[0].difficulty) }}{{ chain.nodes[0].level || '?' }}
-            </span>
+            </v-chip>
             <span class="font-medium text-slate-800 dark:text-slate-200 truncate flex-1 text-xs">{{ chain.nodes[0].title }}</span>
             <span class="text-[10px] text-slate-400 dark:text-slate-500 flex-shrink-0">{{ chain.nodes[0].notes }}n</span>
             <span v-if="prog(chain.nodes[0].textage)" class="text-[10px] font-bold flex-shrink-0" :class="clearColors[prog(chain.nodes[0].textage)!.bestClear]">
               {{ clearLabel(prog(chain.nodes[0].textage)!.bestClear) }}
             </span>
-          </div>
+          </v-card>
         </div>
 
         <!-- 独立譜面クリック時の詳細展開 -->
         <template v-for="chain in independentCharts" :key="'ind-detail-' + chain.categoryId">
-          <div v-if="selectedNode === chain.nodes[0].textage" class="mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 rounded-md border border-slate-200 dark:border-slate-700 text-xs">
+          <v-card v-if="selectedNode === chain.nodes[0].textage" class="mt-1 mb-3 p-3 bg-slate-50 dark:bg-slate-700/40 text-xs">
             <div class="flex items-center gap-2 mb-2">
               <span class="font-bold text-slate-800 dark:text-white text-sm">{{ chain.nodes[0].title }}</span>
               <span class="text-slate-400">{{ chain.nodes[0].artist }}</span>
             </div>
             <div class="flex flex-wrap gap-2">
-              <span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 rounded">BPM {{ chain.nodes[0].bpmRaw || chain.nodes[0].bpmMain }}</span>
-              <span class="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 rounded">{{ chain.nodes[0].notes }} notes</span>
-              <span v-if="chain.nodes[0].scratchPct > 0" class="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 rounded">皿 {{ chain.nodes[0].scratchPct.toFixed(1) }}%</span>
-              <span v-if="chain.nodes[0].chordPct > 0" class="px-2 py-0.5 bg-slate-200 dark:bg-slate-600 rounded">同時 {{ chain.nodes[0].chordPct.toFixed(1) }}%</span>
-              <span v-if="chain.nodes[0].cnNotes" class="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/40 rounded text-yellow-700 dark:text-yellow-400">CN {{ chain.nodes[0].cnNotes }}</span>
-              <span v-if="chain.nodes[0].isSoflan" class="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/40 rounded text-orange-700 dark:text-orange-400">ソフラン</span>
+              <v-chip label variant="flat" class="text-xs bg-slate-200 dark:bg-slate-600">BPM {{ chain.nodes[0].bpmRaw || chain.nodes[0].bpmMain }}</v-chip>
+              <v-chip label variant="flat" class="text-xs bg-slate-200 dark:bg-slate-600">{{ chain.nodes[0].notes }} notes</v-chip>
+              <v-chip v-if="chain.nodes[0].scratchPct > 0" label variant="flat" class="text-xs bg-slate-200 dark:bg-slate-600">皿 {{ chain.nodes[0].scratchPct.toFixed(1) }}%</v-chip>
+              <v-chip v-if="chain.nodes[0].chordPct > 0" label variant="flat" class="text-xs bg-slate-200 dark:bg-slate-600">同時 {{ chain.nodes[0].chordPct.toFixed(1) }}%</v-chip>
+              <v-chip v-if="chain.nodes[0].cnNotes" label variant="flat" class="text-xs bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400">CN {{ chain.nodes[0].cnNotes }}</v-chip>
+              <v-chip v-if="chain.nodes[0].isSoflan" label variant="flat" class="text-xs bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-400">ソフラン</v-chip>
             </div>
-          </div>
+          </v-card>
         </template>
       </section>
 

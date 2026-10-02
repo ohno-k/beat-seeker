@@ -17,6 +17,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { songData as songDataBody } from '../composables/useGameData';
 import type { SongDataEntry } from '../composables/useGameData';
+import { mdiMagnify } from '@mdi/js';
 
 const { t } = useI18n();
 
@@ -160,53 +161,48 @@ const textageUrl = (s: SongDataEntry) => {
     </div>
 
     <!-- フィルタ領域: 検索＋難易度＋レベル＋結果件数表示 -->
-    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 p-4">
+    <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4">
       <div class="flex flex-wrap gap-3 items-center">
         <!-- 検索入力: 入力のたびに1ページ目に戻す -->
-        <div class="relative flex-1 min-w-[200px]">
-          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            v-model="searchQuery"
-            type="text"
-            :placeholder="t('chartList.searchPlaceholder')"
-            class="w-full pl-10 pr-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            @input="currentPage = 1"
-          />
-        </div>
+        <v-text-field
+          v-model="searchQuery"
+          type="text"
+          :placeholder="t('chartList.searchPlaceholder')"
+          :prepend-inner-icon="mdiMagnify"
+          class="flex-1 min-w-[200px]"
+          @update:model-value="currentPage = 1"
+        />
 
         <!-- 難易度フィルタ: DIFF_MAP のキーをプルダウン化 -->
-        <select
+        <v-select
           v-model="selectedDifficulty"
-          class="px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          @change="currentPage = 1"
-        >
-          <option value="">{{ t('chartList.allDifficulties') }}</option>
-          <option v-for="(info, code) in DIFF_MAP" :key="code" :value="code">{{ info.name }}</option>
-        </select>
+          :items="[{ title: t('chartList.allDifficulties'), value: '' }, ...Object.entries(DIFF_MAP).map(([code, info]) => ({ title: info.name, value: code }))]"
+          item-title="title"
+          item-value="value"
+          class="flex-none min-w-[180px]"
+          @update:model-value="currentPage = 1"
+        />
 
         <!-- レベルフィルタ: 全譜面に存在するレベル値のみ選択肢化 -->
-        <select
+        <v-select
           v-model="selectedLevel"
-          class="px-4 py-2.5 rounded-md border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          @change="currentPage = 1"
-        >
-          <option value="">{{ t('chartList.allLevels') }}</option>
-          <option v-for="lv in availableLevels" :key="lv" :value="lv">Lv.{{ lv }}</option>
-        </select>
+          :items="[{ title: t('chartList.allLevels'), value: '' }, ...availableLevels.map(lv => ({ title: `Lv.${lv}`, value: lv }))]"
+          item-title="title"
+          item-value="value"
+          class="flex-none min-w-[140px]"
+          @update:model-value="currentPage = 1"
+        />
 
         <!-- 件数表示: 現在のフィルタに一致する件数 -->
         <span class="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">
           {{ filtered.length.toLocaleString() }} {{ t('chartList.charts') }}
         </span>
       </div>
-    </div>
+    </v-card>
 
     <!-- 譜面一覧テーブル: ヘッダクリックでソート、行ホバーで色付け -->
-    <div class="bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+    <v-card class="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 overflow-hidden">
+      <v-table class="bg-transparent text-sm">
           <thead>
             <tr class="border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/30">
               <th
@@ -281,12 +277,15 @@ const textageUrl = (s: SongDataEntry) => {
                 {{ song.artist }}
               </td>
               <td class="px-3 py-3 text-center">
-                <span
+                <v-chip
+                  label
+                  size="x-small"
+                  variant="flat"
                   :class="[getDiff(song.difficulty).color, getDiff(song.difficulty).bg]"
-                  class="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md"
+                  class="text-[10px] font-bold"
                 >
                   {{ getDiff(song.difficulty).name }}
-                </span>
+                </v-chip>
               </td>
               <td class="px-3 py-3 text-center font-bold text-slate-700 dark:text-slate-300">
                 {{ song.level }}
@@ -318,29 +317,32 @@ const textageUrl = (s: SongDataEntry) => {
               </td>
             </tr>
           </tbody>
-        </table>
-      </div>
+      </v-table>
 
       <!-- ページネーション: 総ページ数が2以上のときだけ表示 -->
       <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/20">
-        <button
+        <v-btn
+          variant="outlined"
+          size="small"
+          class="text-xs"
           :disabled="currentPage <= 1"
           @click="currentPage--"
-          class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           {{ t('chartList.prev') }}
-        </button>
+        </v-btn>
         <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
           {{ currentPage }} / {{ totalPages }}
         </span>
-        <button
+        <v-btn
+          variant="outlined"
+          size="small"
+          class="text-xs"
           :disabled="currentPage >= totalPages"
           @click="currentPage++"
-          class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           {{ t('chartList.next') }}
-        </button>
+        </v-btn>
       </div>
-    </div>
+    </v-card>
   </div>
 </template>
