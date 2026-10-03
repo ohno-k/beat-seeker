@@ -27,6 +27,7 @@
  *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）、交互の表に当たる交互
  * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 180 の 16 分より速い親指の交互が 3 打鍵以上続いたときの、
  *   3 打鍵目以降の鍵盤の数
+ * - 折り返し階段: 同じ手で 3 打以上の階段がすぐ引き返す（3-2-1-2）箇所の、引き返す点とその前後の 3 打（2-1-2。BPM 150 換算で 24 分以上の速さのとき。{@link countFoldStairs}）
  * - 16 分縦連の衝突: {@link CLASH_WINDOW} 秒ごとに、16 分縦連のある鍵盤と同じ手に来た別の連打鍵盤（一緒に押す和音を除く）の打鍵の数
  *   （その窓の 16 分縦連の数を上限に数える）
  * - CN 押しっぱなし中の同じ手: レーン 3（皿側の手）・4・6（皿を回さない手の人差し指・中指）の CN を押している間に、
@@ -84,7 +85,7 @@ const CN_HARD_LANES = [3, 4, 6];
 
 /** 減点の形（表示順）。値は該当するノーツの数 */
 export const PENALTY_KEYS = [
-  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'jackClash', 'cnHold',
+  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'foldStair', 'jackClash', 'cnHold',
 ] as const;
 export type PenaltyKey = typeof PENALTY_KEYS[number];
 export const PENALTY_LABELS: Record<PenaltyKey, string> = {
@@ -94,6 +95,7 @@ export const PENALTY_LABELS: Record<PenaltyKey, string> = {
   unsplit16: '16 分が割れない',
   fastMove: '片手の速い移動',
   trill: 'トリル（6⇔7・1⇔3・47⇔56）',
+  foldStair: '折り返し階段（24 分以上）',
   jackClash: '16 分縦連の衝突',
   cnHold: 'CN 押しっぱなし中の同じ手',
 };
@@ -386,7 +388,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   for (let key = 1; key <= 7; key++) handOfKey[key] = laneOf[key] <= SCRATCH_HAND_LANES ? 0 : 1;
 
   const m: RandomMetrics = {
-    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, jackClash: 0, cnHold: 0,
+    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, foldStair: 0, jackClash: 0, cnHold: 0,
   };
   // 和音ごとの、手ごとのレーン（[0] = 皿側の手、[1] = もう一方の手）
   const handLanes: [number[], number[]][] = new Array(chords.length);
@@ -397,6 +399,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     handLanes[c] = lanes;
   }
   const stair = markStairs(handLanes, chords.map(([i]) => events[i].time));
+  m.foldStair = countFoldStairs(handLanes, chords.map(([i]) => events[i]));
 
   const lastTime = [-Infinity, -Infinity];
   // 両手とも打鍵単位（和音ごと）で数える: 皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で、
@@ -495,6 +498,45 @@ function markStairs(handLanes: [number[], number[]][], times: number[]): Uint8Ar
     flush();
   }
   return mark;
+}
+
+/**
+ * 折り返し階段の数（2026-10-03 ユーザー判断）。手ごとに、その手が押す単打を順にたどり、
+ * 隣のレーンへ同じ向きに 3 打以上続いた階段（例: 3-2-1）が、すぐ隣のレーンへ引き返す（3-2-1-2）箇所で、
+ * 引き返す点の 1 つ前（1 回目の 2）・引き返す点（1）・引き返した直後（2 回目の 2）の 3 打を数える。
+ * 対象は BPM 150 換算で 24 分以上の速さ（{@link FAST24_TICKS}）のときだけ（引き返す前後の 2 つの間隔とも）。
+ * Mare Nectaris の正規のように、速い階段を片手の中で往復する形は押しにくいので、階段扱い（減点なし）とは別に数える。
+ */
+function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: number; time: number }[]): number {
+  let count = 0;
+  for (const hand of [0, 1] as const) {
+    // その手の直前 3 打の和音（古い順）と、今の階段の打数（同じ向きに続いた打数）
+    const prev: number[] = [];
+    let runLen = 0;
+    let dir = 0;
+    for (let c = 0; c < handLanes.length; c++) {
+      const cur = handLanes[c][hand];
+      if (cur.length === 0) continue;
+      const p = prev[prev.length - 1];
+      let step = 0;
+      if (p !== undefined && cur.length === 1 && handLanes[p][hand].length === 1
+        && gapTicksOf(chordHeads[p], chordHeads[c]) <= FAST24_TICKS + 1e-6) {
+        const d = cur[0] - handLanes[p][hand][0];
+        if (d === 1 || d === -1) step = d;
+      }
+      if (step !== 0 && step === -dir && runLen >= 3) {
+        // 3 打以上の階段がすぐ引き返した: 引き返す点の 1 つ前・引き返す点・今の打鍵（2-1-2 の 3 打）
+        count += 3;
+      }
+      if (step !== 0 && step === dir) runLen++;
+      else if (step !== 0) runLen = 2;
+      else runLen = 1;
+      dir = step;
+      prev.push(c);
+      if (prev.length > 3) prev.shift();
+    }
+  }
+  return count;
 }
 
 function upperBoundNum(a: number[], x: number): number {
