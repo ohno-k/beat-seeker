@@ -5,12 +5,14 @@
  * 【コンポーネントの役割】 譜面再生の下に出す RANDOM の補助。
  * - 判別: 曲頭の何打鍵目で元の白鍵（1・3・5・7）のレーンが分かるか、並び全体が分かるか（utils/randomEval.ts の identifyRandom）。
  *   曲頭の打鍵を「正規」と「今の並び」で並べて、ゲームで光ったレーンからどう読むかを見せる
- * - 配置評価: 5,040 通りの並びを手の負荷で順位付けする（evaluateRandom）。押すと計算し、並びを選ぶとその RANDOM で再生できる
+ * - 配置評価: 5,040 通りの並びを、押しにくい形に当たるノーツの数で順位付けする（evaluateRandom）。並びを選ぶとその RANDOM で再生できる。
+ *   「評価表を見る」で、1 位・今の並び・正規・MIRROR・R-RANDOM 最良の形ごとの数と評価基準をモーダル（RandomEvalModal）で出す
  */
 import { ref, computed, watch, onMounted } from 'vue';
 import type { ChartTimeline } from '../utils/chartPlayback';
 import { evaluateRandom, identifyRandom, WHITE_KEYS, type RandomEvaluation, type RandomCandidate } from '../utils/randomEval';
 import PatternChips from './PatternChips.vue';
+import RandomEvalModal from './RandomEvalModal.vue';
 
 const props = defineProps<{
   timeline: ChartTimeline;
@@ -88,6 +90,28 @@ const TOP_TENTH = 252;
 const isTopTenth = (rank: number) => rank <= TOP_TENTH;
 const topTenthLabels = computed(() => baseRows.value.filter(b => isTopTenth(b.cand.rank)).map(b => b.label));
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
+
+// ── 評価表（モーダル） ──
+const showEvalTable = ref(false);
+/** 評価表に並べる並び（1 位・今の並び・正規・MIRROR・R-RANDOM 最良） */
+const evalColumns = computed(() => {
+  const ev = evaluation.value;
+  if (!ev) return [];
+  const cols: { label: string; cand: RandomCandidate }[] = [];
+  // 同じ並びが重なったら 1 列にまとめて見出しを並べる（今の並びが正規なら「今の並び・正規」）
+  const add = (label: string, c: RandomCandidate | null | undefined) => {
+    if (!c) return;
+    const same = cols.find(x => x.cand.pattern === c.pattern);
+    if (same) same.label += `・${label}`;
+    else cols.push({ label, cand: c });
+  };
+  add('1 位', ev.candidates[0]);
+  add('今の並び', current.value);
+  add('正規', offRank.value);
+  add('MIRROR', mirRank.value);
+  add('R-RAN 最良', bestRRandom.value);
+  return cols;
+});
 
 </script>
 
@@ -206,31 +230,11 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
             </li>
           </ol>
 
-          <details class="criteria mt-3">
-            <summary>評価基準を見る</summary>
-          <p class="mt-1 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
-            RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。
-            密度の高いところほど配置を優先します: どの指標も、打鍵ごとに周り 1 秒のノーツ数（皿を含む）が多いほど重く数えます。
-            16 分より速い音符ほど少しずつ重く数えます（24 分 1.25 倍・32 分 1.5 倍・48 分以上 2 倍。割合・回数は重みつきの値です）。
-            BPM 150 より速い譜面は、音符の長さではなく実際の速さを BPM 150 に換算して数えます（MAX 300 の 8 分は 16 分扱い）。当たり配置の決め手として次の 6 つを特に重く見ています:
-            両手にまたがる同時押し＝2 鍵以上の同時押しが左右の手にまたがる回数（少ないほど良い。密集部の同時押しを片手ずつに収められる配置が当たり。次の打鍵まで 8 分以上空く同時押しは数えません）。
-            16分縦連の衝突＝16 分で続く縦連のある鍵盤と、それと一緒に動かない別の連打鍵盤が同じ手に来る量（少ないほど良い。2 鍵・3 鍵の連打などは左右に分けるのが当たり。16 分縦連がほとんど無い譜面ではあまり効きません）。
-            CN の押しっぱなし＝1P でレーン 3・4・6 に来た CN を押している間に、同じ手に来る別のノーツ（レーン 3 の CN なら皿も）の量（少ないほど良い。CN の少ない譜面ではあまり効きません）。
-            きれいな形＝速く続く 3 打鍵が同じずらし幅で続く（階段・二重階段が崩れない）割合（多いほど良い。上の 5 つより軽く見ています。速く続く打鍵の少ない譜面では、短い階段 1 か所で順位が決まらないよう効きを弱めます）。
-            連皿中は逆の手＝連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿を回さない方の手に来る割合（連皿の無い譜面では出しません）。
-            16分が左右に割れる＝16 分以上の速さ（16 分・24 分・32 分…）で続く 2 つの打鍵で、どちらの手も片方の打鍵にしか鍵盤が無い（手が形を切り替えない）割合。
-            密度の高い区間（難所）ほど重く数えます（デニム配置が割れるか、など）。どの並びでも割れない組があるので 100% にはなりません。
-            片手の速い連打＝同じ手で 0.105 秒未満に続く別レーンへの打鍵の数（離れたレーンほど重く数える。少ないほど良い）。
-            1P の皿を回さない手は、4 人差し指・5 親指・6 中指・7 薬指（小指）の運指で数えます: 親指だけの打鍵と親指以外の打鍵の交互（467 と 5 のトリルなど）は軽く、
-            6・7 のトリル（3 打鍵以上続く 6⇔7 の交互）は 3 打鍵目から大きく減点し、2 鍵ずつの同時押しの交互はやりやすい順に 45⇔67・57⇔46・47⇔56 を軽く数えます（同じ手で続いても、この形なら割れたものとして扱います。ただし 47⇔56 が 3 打鍵以上続くトリルは、6・7 のトリルと同じく 3 打鍵目から大きく減点します）。
-            皿側の手（レーン 1〜3）の交互も、やりやすい順に 13⇔2・1⇔23・12⇔3 を軽く数え、1・3 のトリル（3 打鍵以上続く 1⇔3 の交互）は 6・7 のトリルと同じく 3 打鍵目から大きく減点します。1P では、同じ手で同じ 2 つの形を速く行き来するトリルは長いほど少し重く数えます（3 打鍵目から 1 打鍵ごとに 0.1 倍ずつ増え、最大 1.5 倍）。（2P と皿側の手は運指が人によって違うので、レーンの距離だけで数えます）。
-            次に、皿と同時に取れる＝単発の皿と同じタイミングの鍵盤が、皿側の手に来る割合（皿と一緒に同じ手で取れる）を、上の 3 つより軽く見ています。
-            どれもこの譜面で一番良い並びを 0、一番悪い並びを 1 にそろえて重みづけして足し、さらに次の負荷で差をつけています:
-            皿の前後＝皿と同時ではないが前後 0.1 秒に皿側の手へ来るノーツ（連皿の最中は除く）、片手最大＝片手の 1 秒あたりの最大ノーツ数。
-            片手で自分のレーンの鍵盤をまとめて押す和音（白黒分けの 246 など）は普通の押し方なので負荷に数えていません。
-            押しやすさの目安です。
-          </p>
-          </details>
+          <button type="button" class="eval-open mt-3" @click="showEvalTable = true">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M9 4v16M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" /></svg>
+            評価表を見る（形ごとの減点と評価基準）
+          </button>
+          <RandomEvalModal v-if="showEvalTable" :columns="evalColumns" :side="side" @close="showEvalTable = false" />
         </template>
       </div>
     </details>
@@ -238,6 +242,19 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 </template>
 
 <style scoped>
+.eval-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  color: rgb(37 99 235);
+  border: 1px solid rgb(147 197 253);
+}
+.eval-open:hover { background: rgb(239 246 255); }
+.dark .eval-open { color: rgb(147 197 253); border-color: rgb(30 64 175); }
+.dark .eval-open:hover { background: rgb(30 41 59); }
 .panel { border: 1px solid rgb(226 232 240); border-radius: 0.375rem; }
 .dark .panel { border-color: rgb(51 65 85); }
 .panel-title {
@@ -295,7 +312,6 @@ const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
 
 .cand-list { margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.2rem; }
-.criteria > summary { cursor: pointer; font-size: 11px; font-weight: 600; color: rgb(100 116 139); }
 .cand-list li {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr) auto;
