@@ -4,9 +4,10 @@
  *
  * 【コンポーネントの役割】 譜面分析ページの「当たり配置ランキング」タブ。
  * 正規・MIRROR・R-RANDOM（12 通りの最良）・自由入力の並びが、各譜面の 5,040 通り中で何位かを一覧にし、
- * 当たり（順位の小さい）譜面から並べる。1P 基準。
+ * 当たり（順位の小さい）譜面から並べる。サイドはプロフィールのプレイサイド（未ログインは画面で切り替え）。
  *
- * 【データ】 scripts/build-random-ranking.mts で事前に計算した frontend/public/data/random-ranking/ のファイル。
+ * 【データ】 scripts/build-random-ranking.mts で事前に計算した frontend/public/data/random-ranking/ のファイル（1P）。
+ * 2P は 1P の左右反転なので、2P で並び p の順位は 1P で p を逆順にした並びの順位として読み替える（2P のファイルは無い）。
  * - summary.json: 譜面ごとの正規・MIRROR・R-RANDOM 最良の順位
  * - ranks-12.bin / ranks-11.bin / ranks-low.bin: 自由入力用。譜面ごとに 5,040 バイト（並びの辞書順）、
  *   1 バイト = floor((順位 - 1) × 256 / 5040)。自由入力を使ったときだけ、表示に必要なレベルのファイルを読む
@@ -16,6 +17,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import PatternChips from './PatternChips.vue';
 import { allPatterns } from '../utils/randomEval';
 import { isValidPattern } from '../utils/chartPlayback';
+import { usePlaySide } from '../composables/usePlaySide';
 
 /** open = 譜面を譜面分析で開く。pattern = その行の並び（譜面再生をこの並びで始める） */
 const emit = defineEmits<{ (e: 'open', textage: string, pattern: string): void }>();
@@ -27,6 +29,13 @@ interface ChartRow {
 }
 interface Summary { generatedAt: string; side: number; total: number; bucketsPerRank: number; charts: ChartRow[]; }
 
+// プレイサイド: ログイン中はプロフィールの設定、未ログインは画面の切り替え。
+// データは 1P のものだけ。2P の評価は 1P の左右反転なので、2P で並び p の順位 = 1P で p を逆順にした並びの順位として読み替える
+const { profileSide } = usePlaySide();
+const guestSide = ref<1 | 2>(1);
+const side = computed<1 | 2>(() => profileSide.value ?? guestSide.value);
+/** 今のサイドの並び → 1P のデータを引く並び */
+const to1P = (p: string) => (side.value === 2 ? [...p].reverse().join('') : p);
 const BASE = `${import.meta.env.BASE_URL}data/random-ranking/`;
 const TOP10 = 504; // 5,040 通りの上位 10%
 
@@ -91,7 +100,7 @@ watch([mode, freePattern, neededGroups], async () => {
 /** 自由入力の並びの、その譜面での順位の幅（約 20 位刻み）。データ未読込なら null */
 function freeRank(r: ChartRow): { from: number; to: number } | null {
   const bin = bins.value[r.g];
-  const idx = PATTERN_INDEX.get(freePattern.value);
+  const idx = PATTERN_INDEX.get(to1P(freePattern.value));
   if (!bin || idx === undefined || !summary.value) return null;
   const bucket = bin[r.i * summary.value.total + idx];
   const { total, bucketsPerRank } = summary.value;
@@ -113,9 +122,11 @@ const rows = computed((): ViewRow[] => {
     let rank: number | null;
     let rankTo: number | null = null;
     let pattern: string;
-    if (mode.value === 'off') { rank = r.off; pattern = '1234567'; }
-    else if (mode.value === 'mirror') { rank = r.mir; pattern = '7654321'; }
-    else if (mode.value === 'rran') { rank = r.rr; pattern = r.rrp; }
+    // 2P は 1P の左右反転: 2P の正規 = 1P の MIRROR、2P の MIRROR = 1P の正規、R乱の最良は 1P の最良の並びを逆順にしたもの
+    const two = side.value === 2;
+    if (mode.value === 'off') { rank = two ? r.mir : r.off; pattern = '1234567'; }
+    else if (mode.value === 'mirror') { rank = two ? r.off : r.mir; pattern = '7654321'; }
+    else if (mode.value === 'rran') { rank = r.rr; pattern = to1P(r.rrp); }
     else {
       if (!freePattern.value) continue;
       const fr = freeRank(r);
@@ -138,7 +149,7 @@ const levelLabel = (l: number) => `☆${l}`;
 <template>
   <section class="ranking text-xs text-slate-600 dark:text-slate-300">
     <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
-      各譜面で、選んだ並びが RANDOM の 5,040 通り中の何位か（1P 基準・配置評価と同じ基準）を一覧にします。順位が小さいほど当たりです。
+      各譜面で、選んだ並びが RANDOM の 5,040 通り中の何位か（{{ side }}P・配置評価と同じ基準）を一覧にします。順位が小さいほど当たりです。
     </p>
 
     <!-- 並び・絞り込み -->
@@ -156,6 +167,14 @@ const levelLabel = (l: number) => `☆${l}`;
           <PatternChips v-if="freePattern" :pattern="freePattern" small />
           <span v-else-if="freeInput" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
         </template>
+      </div>
+      <div class="control">
+        <span class="control-label">サイド</span>
+        <span v-if="profileSide" class="font-semibold">{{ profileSide }}P<span class="ml-1 font-normal text-slate-400 dark:text-slate-500">（プロフィールの設定）</span></span>
+        <div v-else class="seg">
+          <button type="button" :class="{ on: guestSide === 1 }" @click="guestSide = 1">1P</button>
+          <button type="button" :class="{ on: guestSide === 2 }" @click="guestSide = 2">2P</button>
+        </div>
       </div>
       <div class="control">
         <span class="control-label">レベル</span>

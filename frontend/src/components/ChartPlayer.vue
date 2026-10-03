@@ -22,7 +22,8 @@ let autoStartNext = false;
  *
  * 【表示】
  * - スクロールは「ソフラン再現」（拍基準。BPM が上がると速く流れる＝実機と同じ）と「一定速度」（時間基準）の切り替え
- * - 表示時間（主 BPM でノーツが画面上端から判定ラインまで落ちる秒数。緑数字の目安も併記）・再生速度・1P/2P・打鍵音
+ * - 表示時間（主 BPM でノーツが画面上端から判定ラインまで落ちる秒数。緑数字の目安も併記）・再生速度・打鍵音
+ * - プレイサイド: ログイン中はプロフィールの設定（usePlaySide）。未ログインのときだけ設定欄で 1P/2P を切り替える
  * - 描画は canvas。requestAnimationFrame の間だけ動き、タブが隠れたら一時停止する
  * - モバイル: 幅は親に合わせ、高さは画面の約 6 割。canvas のタップで再生/一時停止（縦スクロールは妨げない）。
  *   マウスは canvas の上下ドラッグで前後に送れる
@@ -30,6 +31,7 @@ let autoStartNext = false;
 import { ref, shallowRef, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { API_BASE, useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
+import { usePlaySide } from '../composables/usePlaySide';
 import { loadYouTubeApi, YT_STATE, type YTPlayer } from '../utils/youtube';
 import { tapResidual, median, MIN_TAPS } from '../utils/videoSync';
 import {
@@ -140,6 +142,11 @@ watch(settings, (s) => {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch { /* 保存できなくても動作は続ける */ }
   draw();
 }, { deep: true });
+
+// プレイサイド: ログイン中はプロフィールの設定（usePlaySide）、未ログインは設定欄の切り替え（settings.side）
+const { profileSide } = usePlaySide();
+const side = computed<1 | 2>(() => profileSide.value ?? settings.value.side);
+watch(side, () => draw());
 
 const RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5];
 // 緑数字 ≒ 表示時間(ms) × 0.6（60fps 基準の目安）
@@ -909,7 +916,7 @@ function draw() {
   const W = cssW;
   const H = cssH;
   const judgeY = H - 56;
-  const { xs, ws, left, laneW } = laneLayout(W, s.side);
+  const { xs, ws, left, laneW } = laneLayout(W, side.value);
 
   // 位置の座標系: ソフラン再現 = tick、一定速度 = 秒
   const beat = s.mode === 'beat';
@@ -1361,7 +1368,9 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
           </div>
           <div class="setting">
             <span class="setting-label">サイド</span>
-            <div class="seg">
+            <!-- ログイン中はプロフィールのプレイサイドに従う（変更はプロフィール編集から） -->
+            <span v-if="profileSide" class="font-semibold">{{ profileSide }}P<span class="ml-1 font-normal text-slate-400 dark:text-slate-500">（プロフィールの設定）</span></span>
+            <div v-else class="seg">
               <button type="button" :class="{ on: settings.side === 1 }" @click="settings.side = 1">1P</button>
               <button type="button" :class="{ on: settings.side === 2 }" @click="settings.side = 2">2P</button>
             </div>
@@ -1397,7 +1406,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
       譜面データを読み込み中…
     </div>
     <p v-else-if="error" class="mt-3 text-xs text-red-600 dark:text-red-400">{{ error }}</p>
-    <RandomPanel v-if="timeline && !loading" :timeline="timeline" :side="settings.side" :current-pattern="shownPattern"
+    <RandomPanel v-if="timeline && !loading" :timeline="timeline" :side="side" :current-pattern="shownPattern"
       @apply="applyAndPlay" />
   </div>
   </div>

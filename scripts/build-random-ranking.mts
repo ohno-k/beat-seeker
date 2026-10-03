@@ -2,7 +2,8 @@
  * build-random-ranking.mts
  *
  * 譜面分析ページの「当たり配置ランキング」（正規・MIRROR・R-RANDOM・自由入力）用のデータを作る。
- * 譜面ごとに RANDOM の配置評価（frontend/src/utils/randomEval.ts、1P 基準）で 5,040 通りを順位付けし、
+ * 譜面ごとに RANDOM の配置評価（frontend/src/utils/randomEval.ts）で 5,040 通りを 1P として順位付けし、
+ * 2P のデータは作らない（2P の評価は 1P の左右反転なので、2P で並び p の順位 = 1P で p を逆順にした並びの順位。ページが読み替える）。
  * 次の 2 種類を frontend/public/data/random-ranking/ に書く。
  *
  * - summary.json: 譜面ごとの正規・MIRROR・R-RANDOM 最良の順位（一覧・並べ替えに使う）

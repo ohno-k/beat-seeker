@@ -1028,7 +1028,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     </div>
     </template>
 
-    <!-- 当たり配置ランキング: 正規・MIRROR・R-RANDOM・自由入力の並びが各譜面で何位か（1P 基準・事前計算） -->
+    <!-- 当たり配置ランキング: 正規・MIRROR・R-RANDOM・自由入力の並びが各譜面で何位か（プロフィールのプレイサイド・事前計算） -->
     <RandomRanking v-else @open="openChartFromRanking" />
 
     <!-- 類似度デバッグモーダル（管理者機能）: 計算過程を4グループに分けて表示 -->
