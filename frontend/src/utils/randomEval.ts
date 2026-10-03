@@ -22,7 +22,8 @@
  *   階段（{@link markStairs}）も数えない。24 分以上の速さ（{@link FAST24_TICKS}）の打鍵は、同じ手が 3 打以上続いたときだけ数える
  *   （片手ずつ 2 打ずつの配置は悪くない）
  * - 片手の速い移動: 同じ手で {@link FAST_GAP} 秒未満に続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打は数えない）。
- *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。
+ *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。ただし 16 分以上で途切れない流れの中で
+ *   階段のノーツが {@link STAIR_FREE_NOTES} 打を超えた分（繰り返す階段）は数える（{@link markStairs}）。
  *   1P は運指上やりやすい形を数えない: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互
  *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）、交互の表に当たる交互
  * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 180 の 16 分より速い親指の交互が 3 打鍵以上続いたときの、
@@ -63,6 +64,11 @@ const FAST24_TICKS = 16;
  * これより速いと親指が絡んでも押せないので、普通の速い移動として数え、3 打鍵目からはトリルにも数える（2026-10-03 ユーザー判断）
  */
 const THUMB_EASY_GAP = 60 / 180 / 4 - 1e-6;
+/**
+ * 階段を減点しないのは、16 分以上で途切れずに続く流れの中で、階段のノーツ（各階段の 1 打目から、両手合わせて）が
+ * この打数までのとき（一時的な階段は見やすく処理しやすいが、繰り返すと外れ配置。2026-10-03 ユーザー判断）
+ */
+const STAIR_FREE_NOTES = 7;
 /**
  * BPM 150 で 1 秒あたりの tick 数（1 tick = 5 / (8 × BPM) 秒）。打鍵の間隔は、音符の長さ（tick）と
  * 実際の秒数を BPM 150 に換算した tick の短い方で見る。BPM 150 以下の譜面は音符の長さのまま、
@@ -398,7 +404,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     for (let k = i; k < j; k++) lanes[handOfKey[events[k].key]].push(laneOf[events[k].key]);
     handLanes[c] = lanes;
   }
-  const stair = markStairs(handLanes, chords.map(([i]) => events[i].time));
+  const stair = markStairs(handLanes, chords.map(([i]) => events[i].time), pairKind);
   m.foldStair = countFoldStairs(handLanes, chords.map(([i]) => events[i]));
 
   const lastTime = [-Infinity, -Infinity];
@@ -467,16 +473,26 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
  * 階段（指の転がし）の判定。手ごとに、その手が押す打鍵を順にたどり、単打が {@link FAST_GAP} 秒未満の間隔で
  * 隣のレーンへ同じ向きに 3 打以上続く区間を探して、2 打目以降の和音に印を付ける（ビット 1 = 皿側の手、2 = もう一方の手）。
  * 階段は指を転がして取れるので「16 分が割れない」「片手の速い移動」に数えない（2026-10-03 ユーザー判断。1 つ飛ばしは含めない）。
+ *
+ * ただし減点しないのは一時的な階段だけ: 16 分以上の速さで途切れずに続く流れ（{@link Prepared.pairKind}。8 分以上空くと数え直し）の中で、
+ * 階段になっているノーツ（各階段の 1 打目から、両手合わせて）を順に数え、{@link STAIR_FREE_NOTES} 打を超えた分は印を付けない
+ * （階段を繰り返す配置は外れ。2026-10-03 ユーザー判断）。
  */
-function markStairs(handLanes: [number[], number[]][], times: number[]): Uint8Array {
+function markStairs(handLanes: [number[], number[]][], times: number[], pairKind: Int8Array): Uint8Array {
   const mark = new Uint8Array(handLanes.length);
+  // 階段の一員（1 打目を含む）。流れの中で何打目の階段かを数えるのに使う
+  const member = new Uint8Array(handLanes.length);
   for (const hand of [0, 1] as const) {
     let prevC = -1;
     // 今続いている階段: 向き（+1 / -1）と、その区間の和音（1 打目から）
     let dir = 0;
     let run: number[] = [];
     const flush = () => {
-      if (run.length >= 3) for (let n = 1; n < run.length; n++) mark[run[n]] |= 1 << hand;
+      if (run.length < 3) return;
+      for (let n = 0; n < run.length; n++) {
+        member[run[n]] |= 1 << hand;
+        if (n > 0) mark[run[n]] |= 1 << hand;
+      }
     };
     for (let c = 0; c < handLanes.length; c++) {
       const cur = handLanes[c][hand];
@@ -496,6 +512,16 @@ function markStairs(handLanes: [number[], number[]][], times: number[]): Uint8Ar
       prevC = c;
     }
     flush();
+  }
+  // 途切れない流れごとに階段のノーツを数え、STAIR_FREE_NOTES 打を超えたら階段扱い（減点しない印）を外す
+  let inStream = 0;
+  for (let c = 0; c < handLanes.length; c++) {
+    if (c === 0 || pairKind[c - 1] === 0) inStream = 0;
+    for (const hand of [0, 1] as const) {
+      if (!(member[c] & (1 << hand))) continue;
+      inStream++;
+      if (inStream > STAIR_FREE_NOTES) mark[c] &= ~(1 << hand);
+    }
   }
   return mark;
 }
