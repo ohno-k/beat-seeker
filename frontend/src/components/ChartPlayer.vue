@@ -41,6 +41,8 @@ import RandomPanel from './RandomPanel.vue';
 
 const props = defineProps<{
   textage: string;
+  /** 譜面再生を始める並び（当たり配置ランキングから開いたとき。空なら正規） */
+  initialPattern?: string;
 }>();
 /** go = 管理者の埋め作業で次の譜面へ移る（親がその譜面を選ぶ） */
 const emit = defineEmits<{ (e: 'go', textage: string): void }>();
@@ -180,6 +182,19 @@ function applyPattern(p: string) {
   patternInput.value = p;
 }
 
+/** 並びから譜面オプションを決めて当てる（1234567 = 正規、7654321 = MIRROR、その回転 = R-RANDOM、ほか = RANDOM） */
+function applyStartPattern(p: string | undefined) {
+  if (!p || !isValidPattern(p)) return;
+  const s = settings.value;
+  if (p === OFF_PATTERN) s.option = 'off';
+  else if (p === MIRROR_PATTERN) s.option = 'mirror';
+  else if ((OFF_PATTERN + OFF_PATTERN).includes(p) || (MIRROR_PATTERN + MIRROR_PATTERN).includes(p)) { s.option = 'rrandom'; s.pattern = p; }
+  else { s.option = 'random'; s.pattern = p; }
+  patternInput.value = shownPattern.value;
+}
+// 当たり配置ランキングから開いたときはその並びで始める（同じ譜面を開き直したときも当て直す）
+watch(() => props.initialPattern, applyStartPattern);
+
 function onPatternInput(e: Event) {
   const v = (e.target as HTMLInputElement).value.replace(/[^1-7]/g, '').slice(0, 7);
   patternInput.value = v;
@@ -195,6 +210,8 @@ const shownPattern = computed(() => {
   return isValidPattern(s.pattern) ? s.pattern : OFF_PATTERN;
 });
 const patternInvalid = computed(() => settings.value.option === 'random' && !isValidPattern(patternInput.value));
+// 譜面ごとに作り直されるので、開いた時点の並びはここで当てる（shownPattern の定義より後で呼ぶ）
+applyStartPattern(props.initialPattern);
 
 /** オプションを当てたレーン。描画・打鍵処理はこれを引く */
 const lanes = computed(() => {

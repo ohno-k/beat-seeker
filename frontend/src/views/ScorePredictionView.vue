@@ -116,6 +116,7 @@ const listCollapsed = computed(() => !!selectedEntry.value && !pickerOpen.value 
  */
 function selectEntry(entry: SongDataEntry) {
   pickerOpen.value = false;
+  startPattern.value = null;
   if (selectedEntry.value?.textage === entry.textage && !isAdminViewing.value) return;
   selectedEntry.value = entry;
   unknownTextageFromUrl.value = null;
@@ -135,13 +136,20 @@ function selectEntry(entry: SongDataEntry) {
   }
 }
 
-/** 当たり配置ランキングの行から、その譜面を譜面分析タブで開く。 */
-function openChartFromRanking(textage: string) {
+/** 当たり配置ランキングから開いた譜面と、譜面再生を始める並び（ほかの譜面を選んだら消す） */
+const startPattern = ref<{ textage: string; pattern: string } | null>(null);
+const playerStartPattern = computed(() =>
+  startPattern.value && startPattern.value.textage === selectedEntry.value?.textage ? startPattern.value.pattern : '');
+
+/** 当たり配置ランキングの行から、その譜面を譜面分析タブで開く。譜面再生はその行の並び（正規・MIRROR・R-RANDOM・自由入力）で始める。 */
+function openChartFromRanking(textage: string, pattern: string) {
   pageTab.value = 'analysis';
   const entry = targetEntries.value.find(s => s.textage === textage);
   if (entry) {
     selectEntry(entry);
+    startPattern.value = { textage, pattern };
   } else {
+    startPattern.value = { textage, pattern };
     const path = textageToPath(textage);
     if (path) router.push(path);
   }
@@ -955,7 +963,7 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
 
           <!-- ─── 譜面再生（データは「再生する」を押したときに取得。曲を替えたら作り直す）─── -->
           <ChartPlayer v-if="selectedEntry.textage" :key="selectedEntry.textage" :textage="selectedEntry.textage"
-            @go="openFromPlayer" />
+            :initial-pattern="playerStartPattern" @go="openFromPlayer" />
 
           <!-- ─── 類似譜面 ─── -->
           <section class="card rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">

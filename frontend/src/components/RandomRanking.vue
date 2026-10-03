@@ -17,7 +17,8 @@ import PatternChips from './PatternChips.vue';
 import { allPatterns } from '../utils/randomEval';
 import { isValidPattern } from '../utils/chartPlayback';
 
-const emit = defineEmits<{ (e: 'open', textage: string): void }>();
+/** open = 譜面を譜面分析で開く。pattern = その行の並び（譜面再生をこの並びで始める） */
+const emit = defineEmits<{ (e: 'open', textage: string, pattern: string): void }>();
 
 interface ChartRow {
   t: string; d: string; l: number; n: number; x: string;
@@ -189,7 +190,7 @@ const levelLabel = (l: number) => `☆${l}`;
         <li v-for="(v, n) in shown" :key="v.row.x" :class="{ top: v.rank <= TOP10 }">
           <span class="pos tabular-nums">{{ n + 1 }}</span>
           <span class="lv tabular-nums" :class="v.row.d === '10' ? 'leg' : 'ano'">{{ levelLabel(v.row.l) }} {{ diffLabel(v.row.d) }}</span>
-          <button type="button" class="title" :title="`${v.row.t} を譜面分析で開く`" @click="emit('open', v.row.x)">{{ v.row.t }}</button>
+          <button type="button" class="title" :title="`${v.row.t} を譜面分析で開く（${v.pattern} で譜面再生）`" @click="emit('open', v.row.x, v.pattern)">{{ v.row.t }}</button>
           <PatternChips v-if="mode === 'rran'" :pattern="v.pattern" small class="chips" />
           <span class="rank tabular-nums">
             <span v-if="v.rank <= TOP10" class="top-badge">上位10%</span>
