@@ -448,6 +448,8 @@ const offsetTouched = ref(false);
 const usingEstimate = ref(false);
 const offsetSaving = ref(false);
 const offsetMessage = ref('');
+/** 合わせ済みの譜面でも、ずれ合わせの操作を開いて見る */
+const syncOpen = ref(false);
 /** 「リズムに合わせて叩く」の打鍵の差（秒） */
 const taps = ref<number[]>([]);
 const manualUrl = ref('');
@@ -492,6 +494,7 @@ async function applyVideoInfo(data: VideoInfo) {
   offsetTouched.value = false;
   offsetMessage.value = '';
   taps.value = [];
+  syncOpen.value = false;
   if (data.status !== 'ok' || !data.videoId) {
     destroyVideo();
     return;
@@ -688,6 +691,9 @@ const offsetStatus = computed(() => {
 });
 /** 保存ボタンを出すか（調整した、または推定値のまま確定したい） */
 const canSaveOffset = computed(() => offsetTouched.value || usingEstimate.value);
+/** ずれが合わせ済みなら操作を畳んでおく */
+const syncCollapsible = computed(() => videoInfo.value?.offsetSource === 'chart' && !offsetTouched.value && !offsetMessage.value);
+const syncCollapsed = computed(() => syncCollapsible.value && !syncOpen.value);
 
 async function postVideo(path: string, body: object): Promise<VideoInfo | null> {
   const res = await fetch(`${API_BASE}/api/analysis/chart-video/${path}`, {
@@ -1142,7 +1148,10 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                   <span class="setting-label">ずれ</span>
                   <span class="font-bold tabular-nums">{{ fmtOffset(offset) }} 秒</span>
                   <span class="sync-status" :class="{ warn: !offsetTouched && !videoInfo.offsetSource }">{{ offsetStatus }}</span>
+                  <button v-if="syncCollapsible" type="button" class="sync-toggle" :aria-expanded="!syncCollapsed"
+                    @click="syncOpen = !syncOpen">{{ syncCollapsed ? '調整する ▾' : '閉じる ▴' }}</button>
                 </div>
+                <template v-if="!syncCollapsed">
                 <div class="sync-row">
                   <div class="seg nudge">
                     <button type="button" title="譜面を早める" @click="nudge(-0.1)">−0.1</button>
@@ -1169,6 +1178,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
                   合わせ方: 再生して最初のノーツの音が鳴った瞬間に「最初のノーツの音で押す」。続けて再生中に聞こえるノーツの音に合わせて
                   「リズムに合わせて叩く」を {{ MIN_TAPS }} 回以上押すと細かく直せます。±ボタンでも調整できます。
                 </p>
+                </template>
               </div>
             </template>
 
@@ -1604,6 +1614,8 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 }
 .sync-status { color: rgb(100 116 139); }
 .sync-status.warn { color: rgb(217 119 6); font-weight: 600; }
+.sync-toggle { margin-left: auto; font-size: 0.75rem; color: rgb(37 99 235); }
+.dark .sync-toggle { color: rgb(147 197 253); }
 .seg.nudge button { padding-left: 0.6rem; padding-right: 0.6rem; font-variant-numeric: tabular-nums; }
 .video-btn {
   padding: 0.35rem 0.7rem;
