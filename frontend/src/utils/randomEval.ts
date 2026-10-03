@@ -10,19 +10,19 @@
  * 総合 = 減点の形ごとの該当ノーツ数の合計（2026-10-03 ユーザー判断で重み付けをやめた）。
  * 補正（難所ほど重い・16 分より速いほど重い・トリルが長いほど重い）や、譜面内の最良〜最悪への引き伸ばしはしない。
  * 1 つのノーツが複数の形に当たれば、形ごとに数える（トリルは「片手の速い移動」と「トリル」の両方に入る）。
- * 「両手にまたがる同時押し」は 2026-10-03 に廃止（「16 分が割れない」と意図が重なるため。重み無しで数えると両手で取る普通の和音まで
+ * 「両手にまたがる同時押し」は 2026-10-03 に廃止（「割れない」と意図が重なるため。重み無しで数えると両手で取る普通の和音まで
  * 減点し、正規譜面が 99% の譜面で全並びの平均より悪くなっていた）。
  *
  * 減点の形（{@link PENALTY_KEYS}）:
  * - 皿と同時なのに逆の手: 単発の皿と同じタイミングの鍵盤が、皿を回さない方の手に来た数（皿側の手なら皿＋1 のように一緒に取れる）
  * - 連皿中に皿側の手: 連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿側の手に来た数
  * - 皿の前後に皿側の手: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に皿がある鍵盤が、皿側の手に来た数（連皿の最中は除く）
- * - 16 分が割れない: 16 分以上の速さで続く 2 つの打鍵で、後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤の数。
+ * - 割れない（12 分以上）: 12 分以上の速さ（{@link FAST_TICKS}。2026-10-03 に 16 分から広げた）で続く 2 つの打鍵で、後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤の数。
  *   1P では交互の表（皿を回さない手の 45⇔67・57⇔46・47⇔56、皿側の手の 13⇔2・1⇔23・12⇔3）に当たる交互は割れたものとして数えない。
  *   階段（{@link markStairs}）も数えない。24 分以上の速さ（{@link FAST24_TICKS}）の打鍵は、同じ手が 3 打以上続いたときだけ数える
  *   （片手ずつ 2 打ずつの配置は悪くない）
- * - 片手の速い移動: 同じ手で {@link FAST_GAP} 秒未満に続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打は数えない）。
- *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。ただし 16 分以上で途切れない流れの中で
+ * - 片手の速い移動: 同じ手で 12 分以上の速さ（{@link FAST_TICKS}）で続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打は数えない）。
+ *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。ただし 12 分以上で途切れない流れの中で
  *   階段のノーツが {@link STAIR_FREE_NOTES} 打を超えた分（繰り返す階段）は数える（{@link markStairs}）。
  *   1P は運指上やりやすい形を数えない: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互
  *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）、交互の表に当たる交互
@@ -34,7 +34,7 @@
  * - CN 押しっぱなし中の同じ手: レーン 3（皿側の手）・4・6（皿を回さない手の人差し指・中指）の CN を押している間に、
  *   同じ手に来るほかの鍵盤（レーン 3 の CN なら皿も）の数
  *
- * 「16 分」「8 分」などの間隔は、BPM 150 より速い譜面では実際の速さを BPM 150 に換算して見る（{@link gapTicksOf}）。
+ * 「12 分」「16 分」「8 分」などの間隔は、BPM 150 より速い譜面では実際の速さを BPM 150 に換算して見る（{@link gapTicksOf}）。
  * 手の分け方は皿側の手が皿に近い 3 レーン（1P なら 1〜3、2P なら 5〜7）を持つ形に固定。2P は 1P を左右反転して数える
  * （{@link SCRATCH_HAND_LANES}。1P の運指 4 人差し指・5 親指・6 中指・7 薬指/小指 と合わせてある）。
  * 1 つの手が自分のレーンの鍵盤をまとめて押す和音（白黒分けで 246 を片手など）は普通の押し方なので数えない。
@@ -46,14 +46,19 @@ import { groupCharges, CN_RELEASE_PAD, type ChartTimeline } from './chartPlaybac
 export const SCRATCH_HAND_LANES = 3;
 /** 皿の前後とみなす皿との時間差（秒）。 */
 export const SCRATCH_WINDOW = 0.1;
-/** 片手の速い移動とみなす間隔（秒。BPM 150 の 16 分 = 0.1 秒）。 */
-export const FAST_GAP = 0.105;
 /**
- * 16 分以上の速さとみなす打鍵の間隔（tick。4 分 = 96、16 分 = 24、24 分 = 16、32 分 = 12）。
- * 16 分が割れるかは、この間隔で続く組（16 分と、それより速い 24 分・32 分など）を見る
+ * 速さを見る減点（割れない・片手の速い移動・トリル・階段・繰り返す階段の流れ）の対象とする打鍵の間隔
+ * （tick。4 分 = 96、12 分 = 32、16 分 = 24、24 分 = 16、32 分 = 12）。12 分と、それより速い打鍵が対象。
+ * 間隔は {@link gapTicksOf}（BPM 150 以下の譜面は音符の長さ、速い譜面は実際の速さを BPM 150 に換算）で測る。
+ * 2026-10-03 に 16 分（24）から 12 分（32）へ広げた（GRID KNIGHT のような BPM 160 の 12 分も対象。ユーザー判断）
  */
-const SIXTEENTH_MIN = 1;
-const SIXTEENTH_MAX = 24;
+const FAST_MIN_TICKS = 1;
+const FAST_TICKS = 32;
+/** 速さを見る減点の対象となる間隔か */
+function isFast(a: { tick: number; time: number }, b: { tick: number; time: number }): boolean {
+  const g = gapTicksOf(a, b);
+  return g >= FAST_MIN_TICKS && g <= FAST_TICKS + 1e-6;
+}
 /**
  * 24 分以上の速さとみなす間隔（tick。BPM 150 の 24 分 = 16）。この速さの打鍵では、片手ずつ 2 打ずつの配置（右右左左…）も
  * 悪くないので、同じ手が 3 打以上続いたときだけ「16 分が割れない」に数える（2026-10-03 ユーザー判断）
@@ -65,7 +70,7 @@ const FAST24_TICKS = 16;
  */
 const THUMB_EASY_GAP = 60 / 180 / 4 - 1e-6;
 /**
- * 階段を減点しないのは、16 分以上で途切れずに続く流れの中で、階段のノーツ（各階段の 1 打目から、両手合わせて）が
+ * 階段を減点しないのは、12 分以上で途切れずに続く流れの中で、階段のノーツ（各階段の 1 打目から、両手合わせて）が
  * この打数までのとき（一時的な階段は見やすく処理しやすいが、繰り返すと外れ配置。2026-10-03 ユーザー判断）
  */
 const STAIR_FREE_NOTES = 7;
@@ -98,7 +103,7 @@ export const PENALTY_LABELS: Record<PenaltyKey, string> = {
   scratchSimulOff: '皿と同時なのに逆の手',
   streamSameHand: '連皿中に皿側の手',
   scratchNear: '皿の前後に皿側の手',
-  unsplit16: '16 分が割れない',
+  unsplit16: '割れない（12 分以上）',
   fastMove: '片手の速い移動',
   trill: 'トリル（6⇔7・1⇔3・47⇔56）',
   foldStair: '折り返し階段（24 分以上）',
@@ -160,7 +165,7 @@ interface Prepared {
   nearScratch: boolean[];
   /** 16 分間隔で続く和音の組（chords の添字 i と i + 1） */
   pairs16: number[];
-  /** 和音 c と c + 1 の間隔: 0 = 16 分より遅い、1 = 16 分（24 分より遅い）、2 = 24 分以上の速さ（BPM 150 換算） */
+  /** 和音 c と c + 1 の間隔: 0 = 12 分より遅い、1 = 12 分〜16 分（24 分より遅い）、2 = 24 分以上の速さ（BPM 150 換算） */
   pairKind: Int8Array;
   /** 鍵盤の組 (a, b) の 16 分縦連の衝突の数（a に 16 分縦連、b に一緒に押さない連打）。並びによらない */
   clashPair: number[][];
@@ -207,7 +212,7 @@ function prepare(tl: ChartTimeline): Prepared {
   const pairKind = new Int8Array(chords.length);
   for (let c = 0; c + 1 < chords.length; c++) {
     const gap = gapOf(c);
-    if (gap >= SIXTEENTH_MIN && gap <= SIXTEENTH_MAX) {
+    if (isFast(events[chords[c][0]], events[chords[c + 1][0]])) {
       pairs16.push(c);
       pairKind[c] = gap <= FAST24_TICKS + 1e-6 ? 2 : 1;
     }
@@ -346,8 +351,8 @@ const only = (s: number[], lane: number) => s.length === 1 && s[0] === lane;
 interface Move { fast: number; trill: number; alt: '13' | '67' | '4756' | 'thumb' | null }
 
 /** 1P の皿側の手の、直前の打鍵から今の打鍵への移動（交互の表に当たれば楽な形、1⇔3 の単打の交互は 3 打鍵目からトリル）。 */
-function scratchHandMove(cur: number[], prev: number[], gap: number, afterAlt: Move['alt']): Move {
-  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return { fast: 0, trill: 0, alt: null };
+function scratchHandMove(cur: number[], prev: number[], fast: boolean, afterAlt: Move['alt']): Move {
+  if (!fast || prev.length === 0) return { fast: 0, trill: 0, alt: null };
   if ((only(cur, 1) && only(prev, 3)) || (only(cur, 3) && only(prev, 1))) {
     return { fast: 1, trill: afterAlt === '13' ? 1 : 0, alt: '13' };
   }
@@ -361,8 +366,8 @@ function scratchHandMove(cur: number[], prev: number[], gap: number, afterAlt: M
  * 親指（レーン 5）だけの打鍵と親指を使わない打鍵の交互は、{@link THUMB_EASY_GAP}（BPM 180 の 16 分）以上の間隔なら楽な形。
  * それより速いと普通の速い移動として数え、3 打鍵目からはトリルにも数える。
  */
-function fingerMove(cur: number[], prev: number[], gap: number, afterAlt: Move['alt']): Move {
-  if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return { fast: 0, trill: 0, alt: null };
+function fingerMove(cur: number[], prev: number[], fast: boolean, gapSec: number, afterAlt: Move['alt']): Move {
+  if (!fast || prev.length === 0) return { fast: 0, trill: 0, alt: null };
   if ((only(cur, 6) && only(prev, 7)) || (only(cur, 7) && only(prev, 6))) {
     return { fast: 1, trill: afterAlt === '67' ? 1 : 0, alt: '67' };
   }
@@ -373,7 +378,7 @@ function fingerMove(cur: number[], prev: number[], gap: number, afterAlt: Move['
   if (tt) return { fast: 0, trill: 0, alt: null };
   const disjoint = cur.every(l => !prev.includes(l));
   if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
-    if (gap >= THUMB_EASY_GAP) return { fast: 0, trill: 0, alt: null };
+    if (gapSec >= THUMB_EASY_GAP) return { fast: 0, trill: 0, alt: null };
     const n = newLanes(cur, prev);
     return { fast: n, trill: afterAlt === 'thumb' ? n : 0, alt: 'thumb' };
   }
@@ -404,10 +409,12 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     for (let k = i; k < j; k++) lanes[handOfKey[events[k].key]].push(laneOf[events[k].key]);
     handLanes[c] = lanes;
   }
-  const stair = markStairs(handLanes, chords.map(([i]) => events[i].time), pairKind);
-  m.foldStair = countFoldStairs(handLanes, chords.map(([i]) => events[i]));
+  const heads = chords.map(([i]) => events[i]);
+  const stair = markStairs(handLanes, heads, pairKind);
+  m.foldStair = countFoldStairs(handLanes, heads);
 
-  const lastTime = [-Infinity, -Infinity];
+  // 手ごとの直前の打鍵（速さの判定に使う）
+  const lastHead: [KeyEvent | null, KeyEvent | null] = [null, null];
   // 両手とも打鍵単位（和音ごと）で数える: 皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で、
   // 皿側の手は交互の表（13⇔2 など）で
   const prevLanes: [number[], number[]] = [[], []];
@@ -425,10 +432,11 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
         prevLanes[hand] = cur;
         continue;
       }
-      const gap = events[i].time - lastTime[hand];
+      const last = lastHead[hand];
+      const fast = last !== null && isFast(last, events[i]);
       const move = hand === 0
-        ? scratchHandMove(cur, prevLanes[hand], gap, lastAlt[hand])
-        : fingerMove(cur, prevLanes[hand], gap, lastAlt[hand]);
+        ? scratchHandMove(cur, prevLanes[hand], fast, lastAlt[hand])
+        : fingerMove(cur, prevLanes[hand], fast, last ? events[i].time - last.time : Infinity, lastAlt[hand]);
       m.fastMove += move.fast;
       m.trill += move.trill;
       lastAlt[hand] = move.alt;
@@ -440,7 +448,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       if (inStream[k] && hand === 0) m.streamSameHand++;
       if (nearScratch[k] && hand === 0) m.scratchNear++;
     }
-    for (let k = i; k < j; k++) lastTime[handOfKey[events[k].key]] = events[k].time;
+    for (let k = i; k < j; k++) lastHead[handOfKey[events[k].key]] = events[k];
   }
 
   // 16 分が割れない: 後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤。数えないもの:
@@ -470,15 +478,15 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
 }
 
 /**
- * 階段（指の転がし）の判定。手ごとに、その手が押す打鍵を順にたどり、単打が {@link FAST_GAP} 秒未満の間隔で
+ * 階段（指の転がし）の判定。手ごとに、その手が押す打鍵を順にたどり、単打が 12 分以上の速さ（{@link FAST_TICKS}）で
  * 隣のレーンへ同じ向きに 3 打以上続く区間を探して、2 打目以降の和音に印を付ける（ビット 1 = 皿側の手、2 = もう一方の手）。
  * 階段は指を転がして取れるので「16 分が割れない」「片手の速い移動」に数えない（2026-10-03 ユーザー判断。1 つ飛ばしは含めない）。
  *
- * ただし減点しないのは一時的な階段だけ: 16 分以上の速さで途切れずに続く流れ（{@link Prepared.pairKind}。8 分以上空くと数え直し）の中で、
+ * ただし減点しないのは一時的な階段だけ: 12 分以上の速さで途切れずに続く流れ（{@link Prepared.pairKind}。8 分以上空くと数え直し）の中で、
  * 階段になっているノーツ（各階段の 1 打目から、両手合わせて）を順に数え、{@link STAIR_FREE_NOTES} 打を超えた分は印を付けない
  * （階段を繰り返す配置は外れ。2026-10-03 ユーザー判断）。
  */
-function markStairs(handLanes: [number[], number[]][], times: number[], pairKind: Int8Array): Uint8Array {
+function markStairs(handLanes: [number[], number[]][], heads: { tick: number; time: number }[], pairKind: Int8Array): Uint8Array {
   const mark = new Uint8Array(handLanes.length);
   // 階段の一員（1 打目を含む）。流れの中で何打目の階段かを数えるのに使う
   const member = new Uint8Array(handLanes.length);
@@ -498,7 +506,7 @@ function markStairs(handLanes: [number[], number[]][], times: number[], pairKind
       const cur = handLanes[c][hand];
       if (cur.length === 0) continue;
       let step = 0;
-      if (prevC >= 0 && cur.length === 1 && handLanes[prevC][hand].length === 1 && times[c] - times[prevC] < FAST_GAP) {
+      if (prevC >= 0 && cur.length === 1 && handLanes[prevC][hand].length === 1 && isFast(heads[prevC], heads[c])) {
         const d = cur[0] - handLanes[prevC][hand][0];
         if (d === 1 || d === -1) step = d;
       }
