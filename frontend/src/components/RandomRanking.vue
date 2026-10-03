@@ -104,7 +104,9 @@ function freeRank(r: ChartRow): { from: number; to: number } | null {
   if (!bin || idx === undefined || !summary.value) return null;
   const bucket = bin[r.i * summary.value.total + idx];
   const { total, bucketsPerRank } = summary.value;
-  return { from: Math.floor((bucket * total) / bucketsPerRank) + 1, to: Math.floor(((bucket + 1) * total) / bucketsPerRank) };
+  // 保存側は bucket = floor((順位 - 1) × bucketsPerRank / total)。この bucket になる順位は
+  // ceil(bucket × total / bucketsPerRank) + 1 〜 ceil((bucket + 1) × total / bucketsPerRank)（切り捨てで戻すと端が 1 位ずれる）
+  return { from: Math.ceil((bucket * total) / bucketsPerRank) + 1, to: Math.ceil(((bucket + 1) * total) / bucketsPerRank) };
 }
 
 // ── 一覧 ─────────────────────────────────────────────────
