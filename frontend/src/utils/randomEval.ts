@@ -9,7 +9,9 @@
  *
  * 総合 = 減点の形ごとの該当ノーツ数の合計（2026-10-03 ユーザー判断で重み付けをやめた）。
  * 補正（難所ほど重い・16 分より速いほど重い・トリルが長いほど重い）や、譜面内の最良〜最悪への引き伸ばしはしない。
- * 1 つのノーツが複数の形に当たれば、形ごとに数える（トリルは「片手の速い移動」と「トリル」の両方に入る）。
+ * 1 つのノーツが複数の形に当たれば、形ごとに数える（トリルは「片手の速い移動」または「16 分が割れない」と「トリル」の両方に入る）。
+ * ただし「16 分が割れない」と「片手の速い移動」は同じ打鍵を二重に数えない（16 分が割れないに数えた打鍵は片手の速い移動に数えない。
+ * 2026-10-03 ユーザー判断。同じノーツが 2 点になり、片手に寄った 16 分ばかりが重くなっていた）。
  * 「両手にまたがる同時押し」は 2026-10-03 に廃止（「16 分が割れない」と意図が重なるため。重み無しで数えると両手で取る普通の和音まで
  * 減点し、正規譜面が 99% の譜面で全並びの平均より悪くなっていた）。
  *
@@ -21,12 +23,12 @@
  *   1P では交互の表（皿を回さない手の 45⇔67・57⇔46・47⇔56、皿側の手の 13⇔2・1⇔23・12⇔3）に当たる交互は割れたものとして数えない。
  *   階段（{@link markStairs}）も数えない。24 分以上の速さ（{@link FAST24_TICKS}）の打鍵は、同じ手が 3 打以上続いたときだけ数える
  *   （片手ずつ 2 打ずつの配置は悪くない）
- * - 片手の速い移動: 同じ手で {@link FAST_GAP} 秒未満に続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打は数えない）。
+ * - 片手の速い移動: 同じ手で {@link FAST_GAP} 秒未満に続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打と、
+ *   「16 分が割れない」に数えた打鍵は数えない）。
  *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。
- *   1P は運指上やりやすい形を数えない: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互
- *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）、交互の表に当たる交互
- * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 180 の 16 分より速い親指の交互が 3 打鍵以上続いたときの、
- *   3 打鍵目以降の鍵盤の数
+ *   1P は運指上やりやすい形を数えない: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互（速さによらない）、
+ *   交互の表に当たる交互
+ * - トリル: 6⇔7・1⇔3 の単打の速い交互と 47⇔56 の速い交互が 3 打鍵以上続いたときの、3 打鍵目以降の鍵盤の数
  * - 折り返し階段: 同じ手で 3 打以上の階段がすぐ引き返す（3-2-1-2）箇所の、引き返す点とその前後の 3 打（2-1-2。BPM 150 換算で 24 分以上の速さのとき。{@link countFoldStairs}）
  * - 16 分縦連の衝突: {@link CLASH_WINDOW} 秒ごとに、16 分縦連のある鍵盤と同じ手に来た別の連打鍵盤（一緒に押す和音を除く）の打鍵の数
  *   （その窓の 16 分縦連の数を上限に数える）
@@ -58,11 +60,6 @@ const SIXTEENTH_MAX = 24;
  * 悪くないので、同じ手が 3 打以上続いたときだけ「16 分が割れない」に数える（2026-10-03 ユーザー判断）
  */
 const FAST24_TICKS = 16;
-/**
- * 1P の皿を回さない手の、親指（レーン 5）だけの打鍵と親指以外の打鍵の交互を楽な形とみなす最短の間隔（秒。BPM 180 の 16 分）。
- * これより速いと親指が絡んでも押せないので、普通の速い移動として数え、3 打鍵目からはトリルにも数える（2026-10-03 ユーザー判断）
- */
-const THUMB_EASY_GAP = 60 / 180 / 4 - 1e-6;
 /**
  * BPM 150 で 1 秒あたりの tick 数（1 tick = 5 / (8 × BPM) 秒）。打鍵の間隔は、音符の長さ（tick）と
  * 実際の秒数を BPM 150 に換算した tick の短い方で見る。BPM 150 以下の譜面は音符の長さのまま、
@@ -337,7 +334,7 @@ function newLanes(cur: number[], prev: number[]): number {
 const only = (s: number[], lane: number) => s.length === 1 && s[0] === lane;
 
 /** 片手の速い移動の判定結果。fast = 片手の速い移動に数える鍵盤の数、trill = トリルに数える鍵盤の数、alt = 続けて数えるための交互の種類 */
-interface Move { fast: number; trill: number; alt: '13' | '67' | '4756' | 'thumb' | null }
+interface Move { fast: number; trill: number; alt: '13' | '67' | '4756' | null }
 
 /** 1P の皿側の手の、直前の打鍵から今の打鍵への移動（交互の表に当たれば楽な形、1⇔3 の単打の交互は 3 打鍵目からトリル）。 */
 function scratchHandMove(cur: number[], prev: number[], gap: number, afterAlt: Move['alt']): Move {
@@ -352,8 +349,8 @@ function scratchHandMove(cur: number[], prev: number[], gap: number, afterAlt: M
 /**
  * 1P の皿を回さない手の、直前の打鍵から今の打鍵への移動。
  * 6⇔7 の単打の交互は 3 打鍵目からトリル。2-2 交互の表に当たれば楽な形（47⇔56 は 3 打鍵目から片手の速い移動とトリル）。
- * 親指（レーン 5）だけの打鍵と親指を使わない打鍵の交互は、{@link THUMB_EASY_GAP}（BPM 180 の 16 分）以上の間隔なら楽な形。
- * それより速いと普通の速い移動として数え、3 打鍵目からはトリルにも数える。
+ * 親指（レーン 5）だけの打鍵と親指を使わない打鍵の交互は、速さによらず楽な形（2026-10-03 ユーザー判断で BPM 180 の 16 分より
+ * 速いと数える制限をやめた。BPM 190 前後の譜面で親指の交互が全部減点になり、白黒分けなどが不当に悪くなっていた）。
  */
 function fingerMove(cur: number[], prev: number[], gap: number, afterAlt: Move['alt']): Move {
   if (!(gap > 1e-6 && gap < FAST_GAP) || prev.length === 0) return { fast: 0, trill: 0, alt: null };
@@ -367,9 +364,7 @@ function fingerMove(cur: number[], prev: number[], gap: number, afterAlt: Move['
   if (tt) return { fast: 0, trill: 0, alt: null };
   const disjoint = cur.every(l => !prev.includes(l));
   if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
-    if (gap >= THUMB_EASY_GAP) return { fast: 0, trill: 0, alt: null };
-    const n = newLanes(cur, prev);
-    return { fast: n, trill: afterAlt === 'thumb' ? n : 0, alt: 'thumb' };
+    return { fast: 0, trill: 0, alt: null };
   }
   return { fast: newLanes(cur, prev), trill: 0, alt: null };
 }
@@ -401,6 +396,22 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   const stair = markStairs(handLanes, chords.map(([i]) => events[i].time));
   m.foldStair = countFoldStairs(handLanes, chords.map(([i]) => events[i]));
 
+  // 16 分が割れない: 後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤。数えないもの:
+  // 交互の表に当たる交互、階段（指の転がし）、24 分以上の速さで同じ手が 2 打目まで（右右左左… の 2 打ずつは悪くない）。
+  // 数えた和音に手ごとの印を付け（ビット 1 = 皿側の手、2 = もう一方の手）、片手の速い移動では数えない（二重に数えない）
+  const unsplit = new Uint8Array(chords.length);
+  for (const c of pairs16) {
+    for (const hand of [0, 1] as const) {
+      const a = handLanes[c][hand], b = handLanes[c + 1][hand];
+      if (a.length === 0 || b.length === 0) continue;
+      if (hand === 0 ? scratchAlt(a, b) : twoTwo(a, b)) continue;
+      if (stair[c + 1] & (1 << hand)) continue;
+      if (pairKind[c] === 2 && !(c > 0 && pairKind[c - 1] > 0 && handLanes[c - 1][hand].length > 0)) continue;
+      m.unsplit16 += b.length;
+      unsplit[c + 1] |= 1 << hand;
+    }
+  }
+
   const lastTime = [-Infinity, -Infinity];
   // 両手とも打鍵単位（和音ごと）で数える: 皿を回さない手は運指（4 人差し指・5 親指・6 中指・7 薬指/小指）で、
   // 皿側の手は交互の表（13⇔2 など）で
@@ -423,7 +434,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       const move = hand === 0
         ? scratchHandMove(cur, prevLanes[hand], gap, lastAlt[hand])
         : fingerMove(cur, prevLanes[hand], gap, lastAlt[hand]);
-      m.fastMove += move.fast;
+      if (!(unsplit[c] & (1 << hand))) m.fastMove += move.fast;
       m.trill += move.trill;
       lastAlt[hand] = move.alt;
       prevLanes[hand] = cur;
@@ -435,19 +446,6 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       if (nearScratch[k] && hand === 0) m.scratchNear++;
     }
     for (let k = i; k < j; k++) lastTime[handOfKey[events[k].key]] = events[k].time;
-  }
-
-  // 16 分が割れない: 後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤。数えないもの:
-  // 交互の表に当たる交互、階段（指の転がし）、24 分以上の速さで同じ手が 2 打目まで（右右左左… の 2 打ずつは悪くない）
-  for (const c of pairs16) {
-    for (const hand of [0, 1] as const) {
-      const a = handLanes[c][hand], b = handLanes[c + 1][hand];
-      if (a.length === 0 || b.length === 0) continue;
-      if (hand === 0 ? scratchAlt(a, b) : twoTwo(a, b)) continue;
-      if (stair[c + 1] & (1 << hand)) continue;
-      if (pairKind[c] === 2 && !(c > 0 && pairKind[c - 1] > 0 && handLanes[c - 1][hand].length > 0)) continue;
-      m.unsplit16 += b.length;
-    }
   }
 
   // 16 分縦連の衝突: 同じ手に来た鍵盤の組の数を足す
