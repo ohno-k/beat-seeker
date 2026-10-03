@@ -10,6 +10,8 @@
  * 総合 = 減点の形ごとの該当ノーツ数の合計（2026-10-03 ユーザー判断で重み付けをやめた）。
  * 補正（難所ほど重い・16 分より速いほど重い・トリルが長いほど重い）や、譜面内の最良〜最悪への引き伸ばしはしない。
  * 1 つのノーツが複数の形に当たれば、形ごとに数える（トリルは「片手の速い移動」と「トリル」の両方に入る）。
+ * 「両手にまたがる同時押し」は 2026-10-03 に廃止（「16 分が割れない」と意図が重なるため。重み無しで数えると両手で取る普通の和音まで
+ * 減点し、正規譜面が 99% の譜面で全並びの平均より悪くなっていた）。
  *
  * 減点の形（{@link PENALTY_KEYS}）:
  * - 皿と同時なのに逆の手: 単発の皿と同じタイミングの鍵盤が、皿を回さない方の手に来た数（皿側の手なら皿＋1 のように一緒に取れる）
@@ -20,8 +22,6 @@
  * - 片手の速い移動: 同じ手で {@link FAST_GAP} 秒未満に続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打は数えない）。
  *   1P は運指上やりやすい形を数えない: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互、交互の表に当たる交互
  * - トリル（1P）: 6⇔7・1⇔3 の単打の速い交互と 47⇔56 の速い交互が 3 打鍵以上続いたときの、3 打鍵目以降の鍵盤の数
- * - 両手にまたがる同時押し: 2 鍵以上の同時押しが左右の手にまたがった和音の鍵盤の数。
- *   次の打鍵まで 8 分（{@link STRADDLE_REST_TICKS} tick）以上空く同時押しは、両手で取っても間に合うので数えない
  * - 16 分縦連の衝突: {@link CLASH_WINDOW} 秒ごとに、16 分縦連のある鍵盤と同じ手に来た別の連打鍵盤（一緒に押す和音を除く）の打鍵の数
  *   （その窓の 16 分縦連の数を上限に数える）
  * - CN 押しっぱなし中の同じ手（1P）: レーン 3（皿側の手）・4・6（皿を回さない手の人差し指・中指）の CN を押している間に、
@@ -64,14 +64,12 @@ const JACK16_TICKS = 24;
 const REPEAT_TICKS = 96;
 /** 16 分縦連の衝突を数える窓（秒） */
 const CLASH_WINDOW = 1.0;
-/** 両手にまたがる同時押しでも、次の打鍵までこの間隔（tick。8 分 = 48）以上空けば数えない */
-const STRADDLE_REST_TICKS = 48;
 /** 1P で、押している間に同じ手のノーツが来ると押しにくい CN のレーン（3 = 皿側の手、4 人差し指・6 中指） */
 const CN_HARD_LANES = [3, 4, 6];
 
 /** 減点の形（表示順）。値は該当するノーツの数 */
 export const PENALTY_KEYS = [
-  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'chordStraddle', 'jackClash', 'cnHold',
+  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'jackClash', 'cnHold',
 ] as const;
 export type PenaltyKey = typeof PENALTY_KEYS[number];
 export const PENALTY_LABELS: Record<PenaltyKey, string> = {
@@ -81,7 +79,6 @@ export const PENALTY_LABELS: Record<PenaltyKey, string> = {
   unsplit16: '16 分が割れない',
   fastMove: '片手の速い移動',
   trill: 'トリル（6⇔7・1⇔3・47⇔56）',
-  chordStraddle: '両手にまたがる同時押し',
   jackClash: '16 分縦連の衝突',
   cnHold: 'CN 押しっぱなし中の同じ手',
 };
@@ -142,8 +139,6 @@ interface Prepared {
   pairs16: number[];
   /** 鍵盤の組 (a, b) の 16 分縦連の衝突の数（a に 16 分縦連、b に一緒に押さない連打）。並びによらない */
   clashPair: number[][];
-  /** 和音ごとの、次の打鍵まで 8 分以上空くか（両手にまたがっても数えない） */
-  restAfter: boolean[];
   /** CN（区間をつないだ 1 本）ごとの鍵盤と、押している間に来る打鍵の数（鍵盤ごと。添字 0 = 皿） */
   holds: { key: number; during: number[] }[];
 }
@@ -188,7 +183,6 @@ function prepare(tl: ChartTimeline): Prepared {
     const gap = gapOf(c);
     if (gap >= SIXTEENTH_MIN && gap <= SIXTEENTH_MAX) pairs16.push(c);
   }
-  const restAfter = chords.map((_, c) => c + 1 >= chords.length || gapOf(c) >= STRADDLE_REST_TICKS);
 
   // CN の押しっぱなし: 先頭の後〜離すタイミング（終端 + CN_RELEASE_PAD）の前に来る打鍵を鍵盤ごとに数える
   // （先頭と同じ tick の打鍵は一緒に押す和音なので数えない）
@@ -239,7 +233,7 @@ function prepare(tl: ChartTimeline): Prepared {
       for (let b = 1; b <= 7; b++) if (b !== a) clashPair[a][b] += Math.min(W.jack16[a], W.repApart[a][b]);
     }
   }
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, clashPair, restAfter, holds };
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, clashPair, holds };
 }
 
 /**
@@ -356,7 +350,7 @@ function fingerMove(cur: number[], prev: number[], gap: number, afterAlt: Move['
 
 /** 1 つの並びの減点の形ごとの該当ノーツ数。 */
 function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
-  const { events, chords, simulScratch, inStream, nearScratch, pairs16, clashPair, restAfter, holds } = prep;
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16, clashPair, holds } = prep;
   // 元の鍵盤 → 手（0 = 皿側の手、1 = もう一方の手）とレーン（1〜7、左から）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = lane;
@@ -367,7 +361,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   }
 
   const m: RandomMetrics = {
-    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, chordStraddle: 0, jackClash: 0, cnHold: 0,
+    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, jackClash: 0, cnHold: 0,
   };
   // 和音ごとの、手ごとのレーン（[0] = 皿側の手、[1] = もう一方の手）
   const handLanes: [number[], number[]][] = new Array(chords.length);
@@ -413,7 +407,6 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       lastTime[hand] = events[k].time;
       lastLane[hand] = laneOf[events[k].key];
     }
-    if (j - i >= 2 && lanes[0].length > 0 && lanes[1].length > 0 && !restAfter[c]) m.chordStraddle += j - i;
   }
 
   // 16 分が割れない: 後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤（1P は交互の表に当たれば割れたものとする）

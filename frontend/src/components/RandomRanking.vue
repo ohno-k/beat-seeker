@@ -27,7 +27,7 @@ interface ChartRow {
 interface Summary { generatedAt: string; side: number; total: number; bucketsPerRank: number; charts: ChartRow[]; }
 
 const BASE = `${import.meta.env.BASE_URL}data/random-ranking/`;
-const TOP5 = 252; // 5,040 通りの上位 5%
+const TOP10 = 504; // 5,040 通りの上位 10%
 
 const summary = ref<Summary | null>(null);
 const loadError = ref('');
@@ -127,7 +127,7 @@ const rows = computed((): ViewRow[] => {
   return out;
 });
 const shown = computed(() => rows.value.slice(0, limit.value));
-const topCount = computed(() => rows.value.filter(v => v.rank <= TOP5).length);
+const topCount = computed(() => rows.value.filter(v => v.rank <= TOP10).length);
 
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 const diffLabel = (d: string) => (d === '10' ? 'L' : 'A');
@@ -177,7 +177,7 @@ const levelLabel = (l: number) => `☆${l}`;
         <span v-else-if="binLoading">自由入力の順位データを読み込み中…</span>
         <template v-else>
           <span class="tabular-nums">{{ rows.length }} 譜面</span>
-          <span class="tabular-nums">上位 5% に入る譜面 <b class="text-amber-600 dark:text-amber-400">{{ topCount }}</b></span>
+          <span class="tabular-nums">上位 10% に入る譜面 <b class="text-amber-600 dark:text-amber-400">{{ topCount }}</b></span>
           <span v-if="query.trim() && rows.length === 0" class="text-red-500 dark:text-red-400">
             曲名「{{ query.trim() }}」に一致する譜面がありません
             <button type="button" class="ml-1 underline font-semibold" @click="query = ''">絞り込みを解除</button>
@@ -186,13 +186,13 @@ const levelLabel = (l: number) => `☆${l}`;
       </div>
 
       <ol class="rank-list mt-2">
-        <li v-for="(v, n) in shown" :key="v.row.x" :class="{ top: v.rank <= TOP5 }">
+        <li v-for="(v, n) in shown" :key="v.row.x" :class="{ top: v.rank <= TOP10 }">
           <span class="pos tabular-nums">{{ n + 1 }}</span>
           <span class="lv tabular-nums" :class="v.row.d === '10' ? 'leg' : 'ano'">{{ levelLabel(v.row.l) }} {{ diffLabel(v.row.d) }}</span>
           <button type="button" class="title" :title="`${v.row.t} を譜面分析で開く`" @click="emit('open', v.row.x)">{{ v.row.t }}</button>
           <PatternChips v-if="mode === 'rran'" :pattern="v.pattern" small class="chips" />
           <span class="rank tabular-nums">
-            <span v-if="v.rank <= TOP5" class="top-badge">上位5%</span>
+            <span v-if="v.rank <= TOP10" class="top-badge">上位10%</span>
             {{ v.rankTo ? `${v.rank}〜${v.rankTo}` : v.rank }}位
             <span class="pct">（{{ percent(v.rank) }}%）</span>
           </span>

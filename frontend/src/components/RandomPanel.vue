@@ -85,10 +85,10 @@ const baseRows = computed(() => {
   if (bestRRandom.value) rows.push({ label: 'R-RAN 最良', cand: bestRRandom.value });
   return rows;
 });
-/** 上位 5%（5,040 通り中 252 位以内）。正規・MIRROR・R-RANDOM がここに入るなら、RANDOM を使わなくても当たりに近い */
-const TOP_TENTH = 252;
-const isTopTenth = (rank: number) => rank <= TOP_TENTH;
-const topTenthLabels = computed(() => baseRows.value.filter(b => isTopTenth(b.cand.rank)).map(b => b.label));
+/** 上位 10%（5,040 通り中 504 位以内）。正規・MIRROR・R-RANDOM がここに入るなら、RANDOM を使わなくても当たりに近い */
+const TOP_RANK = 504;
+const isTop = (rank: number) => rank <= TOP_RANK;
+const topLabels = computed(() => baseRows.value.filter(b => isTop(b.cand.rank)).map(b => b.label));
 const percent = (rank: number) => Math.max(1, Math.round((rank / 5040) * 100));
 
 // ── 評価表（モーダル） ──
@@ -178,13 +178,14 @@ const evalColumns = computed(() => {
 
         <template v-if="evaluation">
           <div class="mt-3 flex flex-col gap-1">
-            <p v-if="topTenthLabels.length" class="top-notice">
-              ★ {{ topTenthLabels.join('・') }} が 5,040 通りの上位5%に入っています（RANDOM を使わなくても当たりに近い配置です）
+            <p v-if="topLabels.length" class="top-notice">
+              ★ {{ topLabels.join('・') }} が 5,040 通りの上位10%に入っています（RANDOM を使わなくても当たりに近い配置です）
             </p>
             <div v-if="current" class="flex flex-wrap items-center gap-1.5">
               今の並び <PatternChips :pattern="current.pattern" small />
               <b class="text-slate-800 dark:text-white tabular-nums">{{ current.rank }} 位</b>
-              <span class="text-slate-400 dark:text-slate-500">（上位 {{ percent(current.rank) }}%）</span>
+              <span v-if="isTop(current.rank)" class="top-badge">上位10%</span>
+              <span v-else class="text-slate-400 dark:text-slate-500">（上位 {{ percent(current.rank) }}%）</span>
             </div>
           </div>
 
@@ -192,12 +193,12 @@ const evalColumns = computed(() => {
           <div class="mt-3 font-semibold text-slate-500 dark:text-slate-400">正規・MIRROR の順位</div>
           <ol class="cand-list">
             <li v-for="b in baseRows" :key="b.label"
-              :class="{ current: b.cand.pattern === currentPattern, 'top-tenth': isTopTenth(b.cand.rank) }">
+              :class="{ current: b.cand.pattern === currentPattern, 'top-rank': isTop(b.cand.rank) }">
               <span class="rank tabular-nums">{{ b.cand.rank }}</span>
               <span class="cand-pattern">
                 <span class="base-label">{{ b.label }}</span>
                 <PatternChips :pattern="b.cand.pattern" small />
-                <span v-if="isTopTenth(b.cand.rank)" class="top-badge">上位5%</span>
+                <span v-if="isTop(b.cand.rank)" class="top-badge">上位10%</span>
                 <span v-else class="text-[10px] text-slate-400 dark:text-slate-500 whitespace-nowrap">上位 {{ percent(b.cand.rank) }}%</span>
               </span>
               <button type="button" class="apply-btn" @click="emit('apply', b.cand.pattern)"><span class="btn-long">この並びで再生</span><span class="btn-short">再生</span></button>
@@ -326,10 +327,10 @@ const evalColumns = computed(() => {
 .dark .cand-list li { background: rgb(30 41 59); }
 .rank { font-weight: 700; text-align: right; color: rgb(100 116 139); }
 .cand-pattern { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
-/* 正規・MIRROR・R-RANDOM が上位 5% に入ったとき */
-.cand-list li.top-tenth { background: rgb(254 243 199); box-shadow: inset 0 0 0 2px rgb(245 158 11); }
-.dark .cand-list li.top-tenth { background: rgb(120 53 15 / 0.35); box-shadow: inset 0 0 0 2px rgb(217 119 6); }
-.cand-list li.top-tenth.current { box-shadow: inset 0 0 0 2px rgb(245 158 11), inset 0 0 0 4px rgb(37 99 235); }
+/* 正規・MIRROR・R-RANDOM が上位 10% に入ったとき */
+.cand-list li.top-rank { background: rgb(254 243 199); box-shadow: inset 0 0 0 2px rgb(245 158 11); }
+.dark .cand-list li.top-rank { background: rgb(120 53 15 / 0.35); box-shadow: inset 0 0 0 2px rgb(217 119 6); }
+.cand-list li.top-rank.current { box-shadow: inset 0 0 0 2px rgb(245 158 11), inset 0 0 0 4px rgb(37 99 235); }
 .top-badge {
   padding: 0.05rem 0.4rem;
   border-radius: 9999px;
