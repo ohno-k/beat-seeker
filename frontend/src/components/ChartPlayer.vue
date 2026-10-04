@@ -461,14 +461,9 @@ const { isLoggedIn, authHeaders } = useAuth();
 const { isAdmin } = useAdmin();
 
 // ── 減点の色付け（管理者専用） ─────────────────────────────────
-// RANDOM の配置評価で今の並びが減点された打鍵を、減点の形ごとの色で塗る（1 つの打鍵が複数の形に当たれば一番重い形の色）。
-// 減点の無い鍵盤ノーツは暗く、皿はそのまま。薄い色ほど減点が軽い（難所の重みが小さい）
-const PENALTY_COLORS: Record<PenaltyKey, string> = {
-  scratchSimulOff: '#fb7185', streamSameHand: '#f97316', scratchNear: '#fbbf24', scratch3: '#a3e635',
-  unsplit16: '#22d3ee', fastMove: '#3b82f6', trill: '#c084fc', foldStair: '#f9a8d4',
-  jackClash: '#f8fafc', cnHold: '#10b981', uneven: '#d946ef',
-};
-const PENALTY_DIM = '#334155';
+// RANDOM の配置評価で今の並びが減点された鍵盤ノーツをオレンジで塗る（減点の無いノーツと皿はいつもの色＝白鍵は白・黒鍵は青。
+// 形による色分けはしない＝ユーザー判断）。凡例で隠した形だけに当たるノーツはいつもの色
+const PENALTY_ON = '#f97316';
 const penaltyView = ref(false);
 /** 凡例で隠した減点の形 */
 const penaltyHidden = ref<PenaltyKey[]>([]);
@@ -481,26 +476,21 @@ const penaltyMarks = computed(() => {
   if (!isAdmin.value || !penaltyView.value || !tl || !p) return null;
   return explainPattern(tl, p, side.value);
 });
-/** 描画用: ノーツ・CN ごとの色と濃さ、形ごとの打鍵数 */
+/** 描画用: 減点されたノーツ・CN の添字と、形ごとの打鍵数 */
 const penaltyPaint = computed(() => {
   const marks = penaltyMarks.value;
   if (!marks) return null;
   const hidden = new Set(penaltyHidden.value);
   const counts = Object.fromEntries(PENALTY_KEYS.map(k => [k, 0])) as Record<PenaltyKey, number>;
-  const pick = (r: NotePenalty) => {
-    let best: PenaltyKey | null = null, bestV = 0, total = 0;
-    for (const k of PENALTY_KEYS) {
-      const v = r[k] ?? 0;
-      if (v > 0) counts[k]++;
-      if (hidden.has(k)) continue;
-      total += v;
-      if (v > bestV) { bestV = v; best = k; }
-    }
-    return best ? { color: PENALTY_COLORS[best], alpha: 0.3 + 0.7 * Math.min(1, total) } : null;
-  };
   const toPaint = (m: Map<number, NotePenalty>) => {
-    const out = new Map<number, { color: string; alpha: number }>();
-    for (const [i, r] of m) { const x = pick(r); if (x) out.set(i, x); }
+    const out = new Set<number>();
+    for (const [i, r] of m) {
+      for (const k of PENALTY_KEYS) {
+        if (!((r[k] ?? 0) > 0)) continue;
+        counts[k]++;
+        if (!hidden.has(k)) out.add(i);
+      }
+    }
     return out;
   };
   return { notes: toPaint(marks.notes), cns: toPaint(marks.cns), counts };
@@ -1037,11 +1027,10 @@ function draw() {
     g.fillStyle = CN_BODY[color];
     g.fillRect(xs[lane] + inset, yTop, ws[lane] - inset * 2, yBottom - yTop);
     g.fillStyle = NOTE_COLOR[color];
+    // 減点の色付け中: 減点された鍵盤の CN の先頭はオレンジ
     if (flags & 1 && cStart[i] >= posNow) {
-      const pt = paint && tl.cnKeys[i] !== 0 ? paint.cns.get(i) : undefined;
-      if (paint && tl.cnKeys[i] !== 0) { g.fillStyle = pt ? pt.color : PENALTY_DIM; g.globalAlpha = pt ? pt.alpha : 1; }
+      if (paint && tl.cnKeys[i] !== 0 && paint.cns.has(i)) g.fillStyle = PENALTY_ON;
       g.fillRect(xs[lane] + 1, yOf(cStart[i]) - noteH, ws[lane] - 2, noteH);
-      g.globalAlpha = 1;
       g.fillStyle = NOTE_COLOR[color];
     }
     if (flags & 2 && cEnd[i] <= posTop) g.fillRect(xs[lane] + 1, yOf(cEnd[i]) - noteH, ws[lane] - 2, noteH);
@@ -1054,13 +1043,8 @@ function draw() {
   for (let i = lowerBound(nPos, posNow); i < nPos.length && nPos[i] <= posTop; i++) {
     const lane = la ? la.noteLanes[i] : tl.noteKeys[i];
     g.fillStyle = NOTE_COLOR[s.noteColor === 'key' ? tl.noteKeys[i] : lane];
-    if (paint && tl.noteKeys[i] !== 0) {
-      const pt = paint.notes.get(i);
-      g.fillStyle = pt ? pt.color : PENALTY_DIM;
-      g.globalAlpha = pt ? pt.alpha : 1;
-    }
+    if (paint && tl.noteKeys[i] !== 0 && paint.notes.has(i)) g.fillStyle = PENALTY_ON;
     g.fillRect(xs[lane] + 1, Math.round(yOf(nPos[i])) - noteH, ws[lane] - 2, noteH);
-    g.globalAlpha = 1;
   }
 
   // 判定ライン・鍵盤
@@ -1322,13 +1306,12 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
             <button v-for="k in PENALTY_KEYS" :key="k" type="button" class="penalty-chip"
               :class="{ off: penaltyHidden.includes(k) }" :title="penaltyHidden.includes(k) ? '色付けを戻す' : '色付けを隠す'"
               @click="togglePenaltyKey(k)">
-              <span class="penalty-swatch" :style="{ background: PENALTY_COLORS[k] }"></span>
               {{ PENALTY_LABELS[k] }}<span class="tabular-nums text-slate-400 dark:text-slate-500">{{ penaltyPaint.counts[k] }}</span>
             </button>
           </template>
           <span v-else class="text-slate-400 dark:text-slate-500">S-RANDOM は並びが決まらないので色付けできません</span>
           <p class="w-full text-[11px] text-slate-400 dark:text-slate-500">
-            今の並びで減点された鍵盤ノーツを、一番重い減点の形の色で塗ります（薄いほど軽い＝難所の重みが小さい。減点の無いノーツは暗く、皿はそのまま）。数字はその形に当たったノーツ数です。
+            今の並びで減点された鍵盤ノーツを<span class="font-bold text-orange-500">オレンジ</span>で塗ります（減点の無いノーツと皿はいつもの色）。数字はその形に当たったノーツ数で、押すとその形をオレンジにしないようにできます。
           </p>
         </div>
 
@@ -1748,7 +1731,6 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
 }
 .dark .penalty-chip { border-color: rgb(71 85 105); color: rgb(226 232 240); background: rgb(30 41 59); }
 .penalty-chip.off { opacity: 0.4; text-decoration: line-through; }
-.penalty-swatch { width: 0.7rem; height: 0.7rem; border-radius: 2px; flex-shrink: 0; }
 .admin-box {
   display: flex;
   flex-direction: column;
