@@ -19,16 +19,16 @@
  * - 連皿中に皿側の手: 連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿側の手に来た数
  * - 皿の前後に皿側の手: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に皿がある鍵盤が、皿側の手に来た数（連皿の最中は除く）
  * - 割れない（12 分以上）: 12 分以上の速さ（{@link FAST_TICKS}。2026-10-03 に 16 分から広げた）で続く 2 つの打鍵で、後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤の数。
- *   1P では交互の表（皿を回さない手の 45⇔67・57⇔46・47⇔56、皿側の手の 13⇔2・1⇔23・12⇔3）に当たる交互は割れたものとして数えない。
+ *   1P では交互の表（皿を回さない手の 45⇔67・57⇔46・47⇔56、皿側の手の 13⇔2・1⇔23・12⇔3）に当たる交互は、やりやすさの重さ（順に 0・0.5・1）を掛けて数える。
  *   階段（{@link markStairs}）も数えない。24 分以上の速さ（{@link FAST24_TICKS}）の打鍵は、同じ手が 3 打以上続いたときだけ数える
  *   （片手ずつ 2 打ずつの配置は悪くない）
- * - 片手の速い移動: 同じ手で 12 分以上の速さ（{@link FAST_TICKS}）で続く打鍵で、新しく別のレーンを押した鍵盤の数（同じレーンの縦連打は数えない）。
+ * - 片手の速い移動: 同じ手で 12 分以上の速さ（{@link FAST_TICKS}）で続く打鍵で、新しく別のレーンを押した鍵盤を、離れたレーンほど重く数える（{@link distanceCost}: 隣 1.0、1 つ飛ばし 1.3、2 つ飛ばし 1.6 …。縦連打は数えない）。
  *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。ただし 12 分以上で途切れない流れの中で
  *   階段のノーツが {@link STAIR_FREE_NOTES} 打を超えた分（繰り返す階段）は数える（{@link markStairs}）。
- *   1P は運指上やりやすい形を数えない: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互
- *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）、交互の表に当たる交互
- * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 180 の 16 分より速い親指の交互が 3 打鍵以上続いたときの、
- *   3 打鍵目以降の鍵盤の数
+ *   運指上やりやすい形は軽く数える: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互は {@link THUMB_ALT_COST}
+ *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）。交互の表に当たる交互は、やりやすさの重さ（0・0.5・1）を掛けて数える
+ * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 180 の 16 分より速い親指の交互が 3 打鍵以上続いたときの 3 打鍵目以降。1 回の移動を {@link TRILL_COST} とし、
+ *   片手の速い移動に入れた普通の移動の重さを引いた残りを数える（6⇔7 なら速い移動 1 ＋ トリル 3）
  * - 折り返し階段: 同じ手で 3 打以上の階段がすぐ引き返す（3-2-1-2）箇所の、引き返す点とその前後の 3 打（2-1-2。BPM 150 換算で 24 分以上の速さのとき。{@link countFoldStairs}）
  * - 16 分縦連の衝突: {@link CLASH_WINDOW} 秒ごとに、16 分縦連のある鍵盤と同じ手に来た別の連打鍵盤（一緒に押す和音を除く）の打鍵の数
  *   （その窓の 16 分縦連の数を上限に数える）
@@ -320,12 +320,13 @@ const THUMB_LANE = 5;
 
 /**
  * 1P の皿を回さない手（レーン 4〜7）の 2 鍵ずつの同時押しの交互。ユーザー（上級者）の案内による、やりやすい順:
- * 45⇔67（人差し指+親指 ⇔ 中指+薬指）→ 57⇔46 → 47⇔56。どれも楽な形として数えない（47⇔56 は 3 打鍵以上続くとトリル）
+ * 45⇔67（人差し指+親指 ⇔ 中指+薬指）→ 57⇔46 → 47⇔56。やりやすさに応じて cost を掛けて数える（割れない・片手の速い移動とも。
+ * 2026-10-04 ユーザー判断で段階をつけた。3 つとも減点なしだと 47⇔56 の並びが 45⇔67 と同点になった）。47⇔56 は 3 打鍵以上続くとトリルにも数える
  */
-const TWO_TWO: { a: number; b: number }[] = [
-  { a: 0b0011, b: 0b1100 }, // 45 ⇔ 67
-  { a: 0b1010, b: 0b0101 }, // 57 ⇔ 46
-  { a: 0b1001, b: 0b0110 }, // 47 ⇔ 56
+const TWO_TWO: { a: number; b: number; cost: number }[] = [
+  { a: 0b0011, b: 0b1100, cost: 0 }, // 45 ⇔ 67
+  { a: 0b1010, b: 0b0101, cost: 0.5 }, // 57 ⇔ 46
+  { a: 0b1001, b: 0b0110, cost: 1 }, // 47 ⇔ 56
 ];
 const TWO_TWO_4756 = TWO_TWO[2];
 /** レーン 4〜7 の集合 → ビット（4 = 1、5 = 2、6 = 4、7 = 8）。4〜7 以外を含むと -1 */
@@ -344,12 +345,12 @@ function twoTwo(a: number[], b: number[]) {
 
 /**
  * 1P の皿側の手（レーン 1〜3）の交互。ユーザー（上級者）の案内による、やりやすい順:
- * 13⇔2 → 1⇔23 → 12⇔3。どれも楽な形として数えない。
+ * 13⇔2 → 1⇔23 → 12⇔3。{@link TWO_TWO} と同じく、やりやすさに応じて cost を掛けて数える。
  */
-const SCRATCH_ALT: { a: number; b: number }[] = [
-  { a: 0b101, b: 0b010 }, // 13 ⇔ 2
-  { a: 0b001, b: 0b110 }, // 1 ⇔ 23
-  { a: 0b011, b: 0b100 }, // 12 ⇔ 3
+const SCRATCH_ALT: { a: number; b: number; cost: number }[] = [
+  { a: 0b101, b: 0b010, cost: 0 }, // 13 ⇔ 2
+  { a: 0b001, b: 0b110, cost: 0.5 }, // 1 ⇔ 23
+  { a: 0b011, b: 0b100, cost: 1 }, // 12 ⇔ 3
 ];
 /** レーン 1〜3 の集合 → ビット（1 = 1、2 = 2、3 = 4）。1〜3 以外を含むと -1 */
 function leftMask(lanes: number[]): number {
@@ -368,6 +369,26 @@ function newLanes(cur: number[], prev: number[]): number {
   return cur.filter(l => !prev.includes(l)).length;
 }
 const only = (s: number[], lane: number) => s.length === 1 && s[0] === lane;
+/**
+ * 新しく押すレーンごとに、直前の打鍵の一番近いレーンとの距離で数える移動の重さ（隣 1.0、1 つ飛ばし 1.3、2 つ飛ばし 1.6 …）。
+ * 同じレーン（縦連打）は数えない（2026-10-04 ユーザー判断で以前の重さに戻した）
+ */
+function distanceCost(cur: number[], prev: number[]): number {
+  let cost = 0;
+  for (const lane of cur) {
+    if (prev.includes(lane)) continue;
+    const dist = Math.min(...prev.map(p => Math.abs(p - lane)));
+    cost += 1 + 0.3 * (dist - 1);
+  }
+  return cost;
+}
+/** 親指（レーン 5）だけの打鍵と親指以外の打鍵の交互（楽な速さのとき）の重さ */
+const THUMB_ALT_COST = 0.2;
+/**
+ * トリル（6⇔7・1⇔3 の単打、47⇔56、速すぎる親指の交互）の 3 打鍵目以降の、1 回の移動あたりの重さ。
+ * 片手の速い移動に普通の移動の重さを入れ、残り（TRILL_COST − 移動の重さ）をトリルに入れる
+ */
+const TRILL_COST = 4;
 
 /** 片手の速い移動の判定結果。fast = 片手の速い移動に数える鍵盤の数、trill = トリルに数える鍵盤の数、alt = 続けて数えるための交互の種類 */
 interface Move { fast: number; trill: number; alt: '13' | '67' | '4756' | 'thumb' | null }
@@ -376,10 +397,12 @@ interface Move { fast: number; trill: number; alt: '13' | '67' | '4756' | 'thumb
 function scratchHandMove(cur: number[], prev: number[], fast: boolean, afterAlt: Move['alt']): Move {
   if (!fast || prev.length === 0) return { fast: 0, trill: 0, alt: null };
   if ((only(cur, 1) && only(prev, 3)) || (only(cur, 3) && only(prev, 1))) {
-    return { fast: 1, trill: afterAlt === '13' ? 1 : 0, alt: '13' };
+    const base = distanceCost(cur, prev);
+    return { fast: base, trill: afterAlt === '13' ? TRILL_COST - base : 0, alt: '13' };
   }
-  if (scratchAlt(cur, prev)) return { fast: 0, trill: 0, alt: null };
-  return { fast: newLanes(cur, prev), trill: 0, alt: null };
+  const sa = scratchAlt(cur, prev);
+  if (sa) return { fast: newLanes(cur, prev) * sa.cost, trill: 0, alt: null };
+  return { fast: distanceCost(cur, prev), trill: 0, alt: null };
 }
 
 /**
@@ -391,20 +414,23 @@ function scratchHandMove(cur: number[], prev: number[], fast: boolean, afterAlt:
 function fingerMove(cur: number[], prev: number[], fast: boolean, gapSec: number, afterAlt: Move['alt']): Move {
   if (!fast || prev.length === 0) return { fast: 0, trill: 0, alt: null };
   if ((only(cur, 6) && only(prev, 7)) || (only(cur, 7) && only(prev, 6))) {
-    return { fast: 1, trill: afterAlt === '67' ? 1 : 0, alt: '67' };
+    const base = distanceCost(cur, prev);
+    return { fast: base, trill: afterAlt === '67' ? TRILL_COST - base : 0, alt: '67' };
   }
   const tt = twoTwo(cur, prev);
-  if (tt === TWO_TWO_4756) {
-    return afterAlt === '4756' ? { fast: 2, trill: 2, alt: '4756' } : { fast: 0, trill: 0, alt: '4756' };
+  if (tt) {
+    // 2-2 交互はやりやすさの cost を掛けて数える。47⇔56 は 3 打鍵目からトリル（1 回の移動で TRILL_COST）
+    const is4756 = tt === TWO_TWO_4756;
+    const base = newLanes(cur, prev) * tt.cost;
+    return { fast: base, trill: is4756 && afterAlt === '4756' ? TRILL_COST - base : 0, alt: is4756 ? '4756' : null };
   }
-  if (tt) return { fast: 0, trill: 0, alt: null };
   const disjoint = cur.every(l => !prev.includes(l));
   if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
-    if (gapSec >= THUMB_EASY_GAP) return { fast: 0, trill: 0, alt: null };
-    const n = newLanes(cur, prev);
-    return { fast: n, trill: afterAlt === 'thumb' ? n : 0, alt: 'thumb' };
+    if (gapSec >= THUMB_EASY_GAP) return { fast: THUMB_ALT_COST, trill: 0, alt: null };
+    const base = distanceCost(cur, prev);
+    return { fast: base, trill: afterAlt === 'thumb' ? TRILL_COST - base : 0, alt: 'thumb' };
   }
-  return { fast: newLanes(cur, prev), trill: 0, alt: null };
+  return { fast: distanceCost(cur, prev), trill: 0, alt: null };
 }
 
 /**
@@ -474,15 +500,16 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   }
 
   // 16 分が割れない: 後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤。数えないもの:
-  // 交互の表に当たる交互、階段（指の転がし）、24 分以上の速さで同じ手が 2 打目まで（右右左左… の 2 打ずつは悪くない）
+  // 階段（指の転がし）、24 分以上の速さで同じ手が 2 打目まで（右右左左… の 2 打ずつは悪くない）
   for (const c of pairs16) {
     for (const hand of [0, 1] as const) {
       const a = handLanes[c][hand], b = handLanes[c + 1][hand];
       if (a.length === 0 || b.length === 0) continue;
-      if (hand === 0 ? scratchAlt(a, b) : twoTwo(a, b)) continue;
       if (stair[c + 1] & (1 << hand)) continue;
       if (pairKind[c] === 2 && !(c > 0 && pairKind[c - 1] > 0 && handLanes[c - 1][hand].length > 0)) continue;
-      m.unsplit16 += b.length * w[c + 1];
+      // 交互の表に当たれば、やりやすさの cost を掛ける（45⇔67・13⇔2 は 0 で数えない）
+      const alt = hand === 0 ? scratchAlt(a, b) : twoTwo(a, b);
+      m.unsplit16 += b.length * (alt ? alt.cost : 1) * w[c + 1];
     }
   }
 
