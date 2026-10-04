@@ -561,7 +561,7 @@ import { useDarkMode } from '../composables/useDarkMode';
 import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useFriends } from '../composables/useFriends';
-import { calculatePoints, WEIGHTS, getFolderRankInfoByRate, getFolderRankThresholdRate } from '../utils/beatTier';
+import { calculatePoints, WEIGHTS, getFolderRankInfoByRate, getFolderRankThresholdRate, TOP_CHART_LIMIT } from '../utils/beatTier';
 import { songData as songDataBodyRef, diffTable as diffTableRanksRef, getDifficultyCode } from '../composables/useGameData';
 import { usePastScores, chartKey } from '../composables/usePastScores';
 import { CLEAR_TYPE_RANK } from '../composables/constants';
@@ -702,6 +702,10 @@ interface HistoryRecord {
   aCount: number;
   beatPtIncrease: number;
   updatedCount: number;
+  /** 更新譜面の配列（UpdatedSong[]）の JSON 文字列。古い行や空の更新では null / "[]"。 */
+  diffJson?: string | null;
+  /** 記録の種別タグ。世代切替時の 0PT 行などに入る。null は通常のアップロード。 */
+  tag?: string | null;
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
@@ -801,9 +805,43 @@ const dailyHistory = computed<HistoryRecord[]>(() => {
     });
 });
 
-// 初回インポートを除いたデータ（BEAT-PT増加量グラフ・統計用）
+/**
+ * BEAT-PT 対象（上位 100 譜面）が 100 譜面埋まった日の JST 日付キー。
+ *
+ * それまでの総 BEAT-PT は「譜面数が増えたぶん」伸びるだけで実力の推移を表さないため、
+ * BEAT-PT のグラフはこの日から始める。履歴には譜面数が無いので、各アップロードの diffJson から
+ * 「BEAT-PT > 0 になった譜面」を積み上げて数える。世代切替の 0PT 行（tag あり）で数え直す。
+ * 100 に届かない（古い行で diffJson が無い等）ときは null を返し、全期間を表示する。
+ */
+const beatPtFilledDateKey = computed<string | null>(() => {
+  const charted = new Set<string>();
+  for (const r of historyData.value) {
+    if (r.tag) charted.clear();
+    if (!r.diffJson || r.diffJson === '[]') continue;
+    try {
+      const diffs = JSON.parse(r.diffJson);
+      if (!Array.isArray(diffs)) continue;
+      for (const d of diffs) {
+        if ((d?.newBeatPt ?? 0) > 0) charted.add(`${d.title}_${d.difficulty}`);
+      }
+    } catch {
+      continue; // 壊れた diffJson は無視
+    }
+    if (charted.size >= TOP_CHART_LIMIT) return toJstDateKey(r.date);
+  }
+  return null;
+});
+
+/** BEAT-PT グラフ用の日別履歴（100 譜面埋まった日以降）。 */
+const beatPtDailyHistory = computed(() => {
+  const start = beatPtFilledDateKey.value;
+  if (!start) return dailyHistory.value;
+  return dailyHistory.value.filter(r => toJstDateKey(r.date) >= start);
+});
+
+// 起点の日を除いたデータ（BEAT-PT増加量グラフ・統計用）
 const historyWithoutFirst = computed(() =>
-  dailyHistory.value.length > 1 ? dailyHistory.value.slice(1) : dailyHistory.value
+  beatPtDailyHistory.value.length > 1 ? beatPtDailyHistory.value.slice(1) : beatPtDailyHistory.value
 );
 
 const avgBeatPtIncrease = computed(() => {
@@ -825,12 +863,12 @@ const shortJstLabel = (date: string) => {
 const labels = computed(() => dailyHistory.value.map(r => shortJstLabel(r.date)));
 
 const beatPtChartData = computed(() => {
-  if (!dailyHistory.value.length) return null;
+  if (!beatPtDailyHistory.value.length) return null;
   return {
-    labels: labels.value,
+    labels: beatPtDailyHistory.value.map(r => shortJstLabel(r.date)),
     datasets: [{
       label: t('dashboard.beatPtTrend'),
-      data: dailyHistory.value.map(r => r.totalBeatPt),
+      data: beatPtDailyHistory.value.map(r => r.totalBeatPt),
       borderColor: '#a855f7',
       backgroundColor: 'rgba(168,85,247,0.1)',
       fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: '#a855f7'

@@ -191,7 +191,7 @@ function folderBlockBounds(informalRank: string | undefined): readonly number[] 
  * 【総合 BEAT-PT】 合計対象となる上位譜面数。譜面数が多いユーザー同士を公平に比較するため
  * 上位 100 譜面で打ち切る。
  */
-const TOP_CHART_LIMIT = 100;
+export const TOP_CHART_LIMIT = 100;
 
 /**
  * 【表示丸め】 小数第 1 位まで表示するための丸め倍率。× 10 → round → / 10。
