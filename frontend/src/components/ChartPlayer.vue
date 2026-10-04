@@ -463,14 +463,14 @@ const { isAdmin } = useAdmin();
 // ── 減点の色付け（管理者専用） ─────────────────────────────────
 // RANDOM の配置評価で今の並びが減点された鍵盤ノーツをオレンジで塗る（減点の無いノーツと皿はいつもの色＝白鍵は白・黒鍵は青。
 // 形による色分けはしない＝ユーザー判断）。凡例で隠した形だけに当たるノーツはいつもの色。
-// 減点が重いほど彩度を下げる（2026-10-05 ユーザー判断）: そのノーツの減点の量（形の合計、難所の重みつき）が
-// 0 に近いほど鮮やかなオレンジ、PENALTY_HEAVY 以上で彩度 PENALTY_SAT_MIN まで下げる
+// 減点が重いほど鮮やかなオレンジ、軽いほど元のノーツの色に近づける（2026-10-05 ユーザー判断）: そのノーツの減点の量
+// （形の合計、難所の重みつき）が PENALTY_HEAVY 以上でオレンジそのもの、それより軽いと量に比例して元の色と混ぜる
 const PENALTY_HEAVY = 1;
-const PENALTY_SAT_MAX = 95;
-const PENALTY_SAT_MIN = 20;
-function penaltyColor(amount: number): string {
-  const t = Math.min(1, amount / PENALTY_HEAVY);
-  return `hsl(25 ${Math.round(PENALTY_SAT_MAX - (PENALTY_SAT_MAX - PENALTY_SAT_MIN) * t)}% 53%)`;
+const PENALTY_RGB = [249, 115, 22]; // #f97316
+/** 元のノーツの色（#rrggbb）とオレンジを、減点の量 t（0〜1）の割合で混ぜる */
+function penaltyMix(base: string, t: number): string {
+  const c = [1, 3, 5].map((o, n) => Math.round(parseInt(base.slice(o, o + 2), 16) * (1 - t) + PENALTY_RGB[n] * t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
 }
 const penaltyView = ref(false);
 /** 凡例で隠した減点の形 */
@@ -484,14 +484,14 @@ const penaltyMarks = computed(() => {
   if (!isAdmin.value || !penaltyView.value || !tl || !p) return null;
   return explainPattern(tl, p, side.value);
 });
-/** 描画用: 減点されたノーツ・CN の添字 → 色と、形ごとの打鍵数 */
+/** 描画用: 減点されたノーツ・CN の添字 → オレンジの割合（0〜1）と、形ごとの打鍵数 */
 const penaltyPaint = computed(() => {
   const marks = penaltyMarks.value;
   if (!marks) return null;
   const hidden = new Set(penaltyHidden.value);
   const counts = Object.fromEntries(PENALTY_KEYS.map(k => [k, 0])) as Record<PenaltyKey, number>;
   const toPaint = (m: Map<number, NotePenalty>) => {
-    const out = new Map<number, string>();
+    const out = new Map<number, number>();
     for (const [i, r] of m) {
       let total = 0;
       for (const k of PENALTY_KEYS) {
@@ -500,7 +500,7 @@ const penaltyPaint = computed(() => {
         counts[k]++;
         if (!hidden.has(k)) total += v;
       }
-      if (total > 0) out.set(i, penaltyColor(total));
+      if (total > 0) out.set(i, Math.min(1, total / PENALTY_HEAVY));
     }
     return out;
   };
@@ -1040,8 +1040,8 @@ function draw() {
     g.fillStyle = NOTE_COLOR[color];
     // 減点の色付け中: 減点された鍵盤の CN の先頭はオレンジ
     if (flags & 1 && cStart[i] >= posNow) {
-      const pc = paint && tl.cnKeys[i] !== 0 ? paint.cns.get(i) : undefined;
-      if (pc) g.fillStyle = pc;
+      const pt = paint && tl.cnKeys[i] !== 0 ? paint.cns.get(i) : undefined;
+      if (pt !== undefined) g.fillStyle = penaltyMix(NOTE_COLOR[color], pt);
       g.fillRect(xs[lane] + 1, yOf(cStart[i]) - noteH, ws[lane] - 2, noteH);
       g.fillStyle = NOTE_COLOR[color];
     }
@@ -1055,8 +1055,8 @@ function draw() {
   for (let i = lowerBound(nPos, posNow); i < nPos.length && nPos[i] <= posTop; i++) {
     const lane = la ? la.noteLanes[i] : tl.noteKeys[i];
     g.fillStyle = NOTE_COLOR[s.noteColor === 'key' ? tl.noteKeys[i] : lane];
-    const pc = paint && tl.noteKeys[i] !== 0 ? paint.notes.get(i) : undefined;
-    if (pc) g.fillStyle = pc;
+    const pt = paint && tl.noteKeys[i] !== 0 ? paint.notes.get(i) : undefined;
+    if (pt !== undefined) g.fillStyle = penaltyMix(NOTE_COLOR[s.noteColor === 'key' ? tl.noteKeys[i] : lane], pt);
     g.fillRect(xs[lane] + 1, Math.round(yOf(nPos[i])) - noteH, ws[lane] - 2, noteH);
   }
 
@@ -1324,7 +1324,7 @@ function upperBound(arr: ArrayLike<number>, x: number): number {
           </template>
           <span v-else class="text-slate-400 dark:text-slate-500">S-RANDOM は並びが決まらないので色付けできません</span>
           <p class="w-full text-[11px] text-slate-400 dark:text-slate-500">
-            今の並びで減点された鍵盤ノーツを<span class="font-bold text-orange-500">オレンジ</span>で塗ります（減点が重いほどくすんだ色、軽いほど鮮やかな色。減点の無いノーツと皿はいつもの色）。数字はその形に当たったノーツ数で、押すとその形をオレンジにしないようにできます。
+            今の並びで減点された鍵盤ノーツを<span class="font-bold text-orange-500">オレンジ</span>で塗ります（減点が重いほど鮮やかなオレンジ、軽いほど元のノーツの色に近い色。減点の無いノーツと皿はいつもの色）。数字はその形に当たったノーツ数で、押すとその形をオレンジにしないようにできます。
           </p>
         </div>
 
