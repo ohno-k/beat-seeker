@@ -5,7 +5,7 @@
  * 【コンポーネントの役割】 譜面再生の下に出す RANDOM の補助。
  * - 判別: 曲頭の何打鍵目で元の白鍵（1・3・5・7）のレーンが分かるか、並び全体が分かるか（utils/randomEval.ts の identifyRandom）。
  *   曲頭の打鍵を「正規」と「今の並び」で並べて、ゲームで光ったレーンからどう読むかを見せる
- * - 配置評価: 5,040 通りの並びを、押しにくい形に当たるノーツの数で順位付けする（evaluateRandom）。並びを選ぶとその RANDOM で再生できる。
+ * - 配置評価: 5,040 通りの並びを、押しにくい形に当たるノーツの数（難所ほど重い）で順位付けする（evaluateRandom）。並びを選ぶとその RANDOM で再生できる。
  *   「評価表を見る」で、1 位・今の並び・正規・MIRROR・R-RANDOM 最良の形ごとの数と評価基準をモーダル（RandomEvalModal）で出す
  */
 import { ref, computed, watch, onMounted } from 'vue';

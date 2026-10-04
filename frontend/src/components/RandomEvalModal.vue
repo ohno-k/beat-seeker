@@ -24,6 +24,8 @@ const rows = computed(() => PENALTY_KEYS
   })
   .filter(r => r.values.some(v => v > 0)));
 const bestTotal = computed(() => Math.min(...props.columns.map(c => c.cand.score)));
+/** 難所の重みで小数になるので小数 1 桁で出す */
+const fmt = (v: number) => v.toFixed(1);
 </script>
 
 <template>
@@ -47,7 +49,7 @@ const bestTotal = computed(() => Math.min(...props.columns.map(c => c.cand.score
         <div class="flex-1 overflow-y-auto custom-scrollbar px-5 py-4 space-y-5 text-sm text-slate-700 dark:text-slate-300">
           <section>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">
-              押しにくい形（減点の形）に当たるノーツの数です。合計が少ないほど当たり（{{ side }}P・5,040 通り中の順位）。
+              押しにくい形（減点の形）に当たるノーツの数を、難所ほど重くして足したものです。合計が少ないほど当たり（{{ side }}P・5,040 通り中の順位）。
               各行で一番少ない数を太字にしています。
             </p>
             <div class="overflow-x-auto">
@@ -68,11 +70,11 @@ const bestTotal = computed(() => Math.min(...props.columns.map(c => c.cand.score
                 <tbody>
                   <tr v-for="r in rows" :key="r.key">
                     <td>{{ r.label }}</td>
-                    <td v-for="(v, n) in r.values" :key="n" :class="{ best: v === r.best }">{{ v }}</td>
+                    <td v-for="(v, n) in r.values" :key="n" :class="{ best: v === r.best }">{{ fmt(v) }}</td>
                   </tr>
                   <tr class="total">
                     <td>合計</td>
-                    <td v-for="c in columns" :key="c.cand.pattern" :class="{ best: c.cand.score === bestTotal }">{{ c.cand.score }}</td>
+                    <td v-for="c in columns" :key="c.cand.pattern" :class="{ best: c.cand.score === bestTotal }">{{ fmt(c.cand.score) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -82,7 +84,7 @@ const bestTotal = computed(() => Math.min(...props.columns.map(c => c.cand.score
           <section class="text-xs leading-relaxed space-y-2">
             <h4 class="font-bold text-slate-900 dark:text-white">評価基準</h4>
             <p>
-              重み付けはせず、1 つのノーツが複数の形に当たれば形ごとに数えます。RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。
+              1 つのノーツが複数の形に当たれば形ごとに数えます。形ごとの重みは付けず、密度の高い区間（難所）で起きたノーツほど重く数えます（周り 1 秒のノーツ数を譜面内の最大で割って 2 乗した重み。スカスカの区間はほとんど効きません）。RANDOM は鍵盤をレーンごと入れ替えるので、縦連打はどの並びでも同じです。
               BPM 150 より速い譜面は、音符の長さではなく実際の速さを BPM 150 に換算して見ます（MAX 300 の 8 分は 16 分扱い）。
               皿側の手が {{ side === 1 ? '1〜3' : '5〜7' }}、もう一方の手が {{ side === 1 ? '4〜7' : '1〜4' }} レーンを押す前提です。
             </p>

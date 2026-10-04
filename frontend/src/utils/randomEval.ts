@@ -7,8 +7,9 @@
  * RANDOM は鍵盤をレーンごと入れ替えるだけなので、同じ鍵盤の縦連打や総ノーツ数はどの並びでも変わらない。
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
- * 総合 = 減点の形ごとの該当ノーツ数の合計（2026-10-03 ユーザー判断で重み付けをやめた）。
- * 補正（難所ほど重い・16 分より速いほど重い・トリルが長いほど重い）や、譜面内の最良〜最悪への引き伸ばしはしない。
+ * 総合 = 減点の形ごとの該当ノーツ数を、難所の重み（{@link HARD_POWER}）をつけて足したもの。形ごとの係数は付けない。
+ * 2026-10-03 に重み付けをいったんやめ、2026-10-04 に難所の重み（周り ±1 秒の密度 ÷ 譜面内の最大 の 2 乗）だけ復活した（ユーザー判断）。
+ * 速さ・トリルの長さによる補正や、譜面内の最良〜最悪への引き伸ばしはしない。
  * 1 つのノーツが複数の形に当たれば、形ごとに数える（トリルは「片手の速い移動」と「トリル」の両方に入る）。
  * 「両手にまたがる同時押し」は 2026-10-03 に廃止（「割れない」と意図が重なるため。重み無しで数えると両手で取る普通の和音まで
  * 減点し、正規譜面が 99% の譜面で全並びの平均より悪くなっていた）。
@@ -74,6 +75,13 @@ const THUMB_EASY_GAP = 60 / 180 / 4 - 1e-6;
  * この打数までのとき（一時的な階段は見やすく処理しやすいが、繰り返すと外れ配置。2026-10-03 ユーザー判断）
  */
 const STAIR_FREE_NOTES = 7;
+/**
+ * 難所の重み（2026-10-04 ユーザー判断で復活。形ごとの係数は付けない）: 減点の形に当たったノーツを、
+ * 周り ±DENSITY_HALF 秒のノーツ数（皿を含む）を譜面内の最大で割って HARD_POWER 乗した重みで数える。
+ * 密度の高い区間（難所）で起きた形ほど順位に効き、スカスカの区間はほとんど効かない
+ */
+const DENSITY_HALF = 1.0;
+const HARD_POWER = 2;
 /**
  * BPM 150 で 1 秒あたりの tick 数（1 tick = 5 / (8 × BPM) 秒）。打鍵の間隔は、音符の長さ（tick）と
  * 実際の秒数を BPM 150 に換算した tick の短い方で見る。BPM 150 以下の譜面は音符の長さのまま、
@@ -167,7 +175,9 @@ interface Prepared {
   pairs16: number[];
   /** 和音 c と c + 1 の間隔: 0 = 12 分より遅い、1 = 12 分〜16 分（24 分より遅い）、2 = 24 分以上の速さ（BPM 150 換算） */
   pairKind: Int8Array;
-  /** 鍵盤の組 (a, b) の 16 分縦連の衝突の数（a に 16 分縦連、b に一緒に押さない連打）。並びによらない */
+  /** 和音ごとの難所の重み（0〜1。{@link HARD_POWER}） */
+  chordWeights: Float64Array;
+  /** 鍵盤の組 (a, b) の 16 分縦連の衝突の量（a に 16 分縦連、b に一緒に押さない連打。難所の重みつき）。並びによらない */
   clashPair: number[][];
   /** CN（区間をつないだ 1 本）ごとの鍵盤と、押している間に来る打鍵の数（鍵盤ごと。添字 0 = 皿） */
   holds: { key: number; during: number[] }[];
@@ -218,30 +228,41 @@ function prepare(tl: ChartTimeline): Prepared {
     }
   }
 
+  // 難所の重み: 和音ごとに周り ±DENSITY_HALF 秒のノーツ数（鍵盤と皿）を譜面内の最大で割って HARD_POWER 乗
+  const allTimes = [...events.map(e => e.time), ...scratchTimes].sort((a, b) => a - b);
+  const densityAt = (t: number) => upperBoundNum(allTimes, t + DENSITY_HALF) - lowerBoundNum(allTimes, t - DENSITY_HALF);
+  const densities = chords.map(([i]) => densityAt(events[i].time));
+  const dMax = Math.max(1, ...densities);
+  const hardAt = (t: number) => Math.pow(densityAt(t) / dMax, HARD_POWER);
+  const chordWeights = Float64Array.from(densities, d => Math.pow(d / dMax, HARD_POWER));
+  const eventChord = new Int32Array(events.length);
+  chords.forEach(([i, j], c) => { for (let k = i; k < j; k++) eventChord[k] = c; });
+
   // CN の押しっぱなし: 先頭の後〜離すタイミング（終端 + CN_RELEASE_PAD）の前に来る打鍵を鍵盤ごとに数える
-  // （先頭と同じ tick の打鍵は一緒に押す和音なので数えない）
+  // （先頭と同じ tick の打鍵は一緒に押す和音なので数えない。難所の重みつき）
   const eventTicks = events.map(e => e.tick);
-  const scratchTickList = scratchHits.map(h => h.tick).sort((a, b) => a - b);
+  scratchHits.sort((a, b) => a.tick - b.tick);
+  const scratchTickList = scratchHits.map(h => h.tick);
   const holds: { key: number; during: number[] }[] = [];
   for (const g of groupCharges(tl).groups) {
     if (g.key === 0) continue;
     const during = new Array<number>(8).fill(0);
     const until = g.end + CN_RELEASE_PAD - 1e-6;
     for (let k = upperBoundNum(eventTicks, g.start + 1e-6); k < events.length && eventTicks[k] < until; k++) {
-      if (events[k].key !== g.key) during[events[k].key]++;
+      if (events[k].key !== g.key) during[events[k].key] += chordWeights[eventChord[k]];
     }
     for (let k = upperBoundNum(scratchTickList, g.start + 1e-6); k < scratchTickList.length && scratchTickList[k] < until; k++) {
-      during[0]++;
+      during[0] += hardAt(scratchHits[k].time);
     }
     if (during.some(v => v > 0)) holds.push({ key: g.key, during });
   }
 
-  // 16 分縦連の衝突: 窓ごとに、鍵盤 a の 16 分縦連の数と、a と一緒に押さない鍵盤 b の連打の数を数え、
+  // 16 分縦連の衝突: 窓ごとに、鍵盤 a の 16 分縦連の数と、a と一緒に押さない鍵盤 b の連打の数を（難所の重みつきで）数え、
   // 組 (a, b) ごとに少ない方を足す
   type Win = { jack16: number[]; repApart: number[][] };
   const wins = new Map<number, Win>();
   const lastHit: { tick: number; time: number }[] = Array.from({ length: 8 }, () => ({ tick: -Infinity, time: -Infinity }));
-  chords.forEach(([i, j]) => {
+  chords.forEach(([i, j], c) => {
     const id = Math.floor(events[i].time / CLASH_WINDOW);
     let W = wins.get(id);
     if (!W) {
@@ -253,9 +274,9 @@ function prepare(tl: ChartTimeline): Prepared {
     for (let k = i; k < j; k++) {
       const key = events[k].key;
       const gap = gapTicksOf(lastHit[key], events[k]);
-      if (gap <= JACK16_TICKS) W.jack16[key]++;
+      if (gap <= JACK16_TICKS) W.jack16[key] += chordWeights[c];
       if (gap <= REPEAT_TICKS) {
-        for (let a = 1; a <= 7; a++) if (a !== key && !inChord.has(a)) W.repApart[a][key]++;
+        for (let a = 1; a <= 7; a++) if (a !== key && !inChord.has(a)) W.repApart[a][key] += chordWeights[c];
       }
       lastHit[key] = events[k];
     }
@@ -267,7 +288,7 @@ function prepare(tl: ChartTimeline): Prepared {
       for (let b = 1; b <= 7; b++) if (b !== a) clashPair[a][b] += Math.min(W.jack16[a], W.repApart[a][b]);
     }
   }
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, clashPair, holds };
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, clashPair, holds };
 }
 
 /**
@@ -282,7 +303,8 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
     const metrics = measure(prep, pattern, side);
     let score = 0;
     for (const k of PENALTY_KEYS) score += metrics[k];
-    return { pattern, metrics, score, rank: 0 };
+    // 難所の重みで小数になるので、同点の判定がぶれないよう小数 3 桁にそろえる
+    return { pattern, metrics, score: Math.round(score * 1000) / 1000, rank: 0 };
   });
   candidates.sort((a, b) => a.score - b.score || a.pattern.localeCompare(b.pattern));
   // 同点は同じ順位
@@ -391,7 +413,7 @@ function fingerMove(cur: number[], prev: number[], fast: boolean, gapSec: number
  * そのため 2P で並び p の順位は、1P で p を逆順にした並びの順位と同じになる（2026-10-03 ユーザー判断）。
  */
 function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
-  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, clashPair, holds } = prep;
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights: w, clashPair, holds } = prep;
   // 元の鍵盤 → 1P 換算のレーン（1〜7。2P は左右反転）と手（0 = 皿側の手 = レーン 1〜3、1 = もう一方の手）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = side === 1 ? lane : 8 - lane;
@@ -411,7 +433,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   }
   const heads = chords.map(([i]) => events[i]);
   const stair = markStairs(handLanes, heads, pairKind);
-  m.foldStair = countFoldStairs(handLanes, heads);
+  m.foldStair = countFoldStairs(handLanes, heads, w);
 
   // 手ごとの直前の打鍵（速さの判定に使う）
   const lastHead: [KeyEvent | null, KeyEvent | null] = [null, null];
@@ -437,16 +459,16 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       const move = hand === 0
         ? scratchHandMove(cur, prevLanes[hand], fast, lastAlt[hand])
         : fingerMove(cur, prevLanes[hand], fast, last ? events[i].time - last.time : Infinity, lastAlt[hand]);
-      m.fastMove += move.fast;
-      m.trill += move.trill;
+      m.fastMove += move.fast * w[c];
+      m.trill += move.trill * w[c];
       lastAlt[hand] = move.alt;
       prevLanes[hand] = cur;
     }
     for (let k = i; k < j; k++) {
       const hand = handOfKey[events[k].key];
-      if (simulScratch[k] && hand === 1) m.scratchSimulOff++;
-      if (inStream[k] && hand === 0) m.streamSameHand++;
-      if (nearScratch[k] && hand === 0) m.scratchNear++;
+      if (simulScratch[k] && hand === 1) m.scratchSimulOff += w[c];
+      if (inStream[k] && hand === 0) m.streamSameHand += w[c];
+      if (nearScratch[k] && hand === 0) m.scratchNear += w[c];
     }
     for (let k = i; k < j; k++) lastHead[handOfKey[events[k].key]] = events[k];
   }
@@ -460,7 +482,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       if (hand === 0 ? scratchAlt(a, b) : twoTwo(a, b)) continue;
       if (stair[c + 1] & (1 << hand)) continue;
       if (pairKind[c] === 2 && !(c > 0 && pairKind[c - 1] > 0 && handLanes[c - 1][hand].length > 0)) continue;
-      m.unsplit16 += b.length;
+      m.unsplit16 += b.length * w[c + 1];
     }
   }
 
@@ -474,6 +496,8 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     for (let key = 1; key <= 7; key++) if (key !== h.key && handOfKey[key] === hand) m.cnHold += h.during[key];
     if (hand === 0) m.cnHold += h.during[0];
   }
+  // 難所の重みで小数になるので、表示と同点の判定のため小数 3 桁にそろえる
+  for (const k of PENALTY_KEYS) m[k] = Math.round(m[k] * 1000) / 1000;
   return m;
 }
 
@@ -541,7 +565,7 @@ function markStairs(handLanes: [number[], number[]][], heads: { tick: number; ti
  * 対象は BPM 150 換算で 24 分以上の速さ（{@link FAST24_TICKS}）のときだけ（引き返す前後の 2 つの間隔とも）。
  * Mare Nectaris の正規のように、速い階段を片手の中で往復する形は押しにくいので、階段扱い（減点なし）とは別に数える。
  */
-function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: number; time: number }[]): number {
+function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: number; time: number }[], w: Float64Array): number {
   let count = 0;
   for (const hand of [0, 1] as const) {
     // その手の直前 3 打の和音（古い順）と、今の階段の打数（同じ向きに続いた打数）
@@ -559,8 +583,8 @@ function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: 
         if (d === 1 || d === -1) step = d;
       }
       if (step !== 0 && step === -dir && runLen >= 3) {
-        // 3 打以上の階段がすぐ引き返した: 引き返す点の 1 つ前・引き返す点・今の打鍵（2-1-2 の 3 打）
-        count += 3;
+        // 3 打以上の階段がすぐ引き返した: 引き返す点の 1 つ前・引き返す点・今の打鍵（2-1-2 の 3 打。難所の重みつき）
+        count += w[prev[prev.length - 2]] + w[p] + w[c];
       }
       if (step !== 0 && step === dir) runLen++;
       else if (step !== 0) runLen = 2;
@@ -571,6 +595,12 @@ function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: 
     }
   }
   return count;
+}
+
+function lowerBoundNum(a: number[], x: number): number {
+  let lo = 0, hi = a.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (a[mid] < x) lo = mid + 1; else hi = mid; }
+  return lo;
 }
 
 function upperBoundNum(a: number[], x: number): number {
