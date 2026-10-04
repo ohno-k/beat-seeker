@@ -159,7 +159,11 @@ export interface RandomEvaluation {
 }
 
 /** 鍵盤の打鍵（皿を除く）。時刻順で、同じ時刻の和音は連続して並ぶ。 */
-interface KeyEvent { time: number; tick: number; key: number }
+interface KeyEvent {
+  time: number; tick: number; key: number;
+  /** 元のノーツ: 0 以上 = 通常ノーツの添字、負 = CN の添字 -(i + 1)（減点の色付け {@link explainPattern} 用） */
+  src: number;
+}
 
 /** 1〜7 の順列を全部作る（辞書順）。 */
 export function allPatterns(): string[] {
@@ -203,7 +207,11 @@ interface Prepared {
   /** 鍵盤の組 (a, b) の 16 分縦連の衝突の量（a に 16 分縦連、b に一緒に押さない連打。難所の重みつき）。並びによらない */
   clashPair: number[][];
   /** CN（区間をつないだ 1 本）ごとの鍵盤と、押している間に来る打鍵の数（鍵盤ごと。添字 0 = 皿） */
-  holds: { key: number; during: number[] }[];
+  holds: { key: number; during: number[]; hits: number[] }[];
+  /** 16 分縦連の衝突の窓ごとの集計（色付け用。jackHits[a] = a の 16 分縦連の打鍵、repHits[a][b] = a と一緒に押さない b の連打の打鍵） */
+  clashWins: { jack16: number[]; repApart: number[][]; jackHits: number[][]; repHits: number[][][] }[];
+  /** 打鍵（events の添字）→ 和音（chords の添字） */
+  eventChord: Int32Array;
 }
 
 function prepare(tl: ChartTimeline): Prepared {
@@ -211,12 +219,12 @@ function prepare(tl: ChartTimeline): Prepared {
   const scratchTimes: number[] = [];
   const scratchTicks = new Set<number>();
   const scratchHits: { time: number; tick: number }[] = [];
-  const push = (time: number, tick: number, key: number) => {
+  const push = (time: number, tick: number, key: number, src: number) => {
     if (key === 0) { scratchTimes.push(time); scratchTicks.add(Math.round(tick)); scratchHits.push({ time, tick }); }
-    else events.push({ time, tick, key });
+    else events.push({ time, tick, key, src });
   };
-  for (let i = 0; i < tl.noteKeys.length; i++) push(tl.noteTimes[i], tl.noteTicks[i], tl.noteKeys[i]);
-  for (let i = 0; i < tl.cnKeys.length; i++) if (tl.cnFlags[i] & 1) push(tl.cnStartTimes[i], tl.cnStartTicks[i], tl.cnKeys[i]);
+  for (let i = 0; i < tl.noteKeys.length; i++) push(tl.noteTimes[i], tl.noteTicks[i], tl.noteKeys[i], i);
+  for (let i = 0; i < tl.cnKeys.length; i++) if (tl.cnFlags[i] & 1) push(tl.cnStartTimes[i], tl.cnStartTicks[i], tl.cnKeys[i], -(i + 1));
   events.sort((a, b) => a.tick - b.tick || a.key - b.key);
   scratchTimes.sort((a, b) => a - b);
 
@@ -281,30 +289,34 @@ function prepare(tl: ChartTimeline): Prepared {
   const eventTicks = events.map(e => e.tick);
   scratchHits.sort((a, b) => a.tick - b.tick);
   const scratchTickList = scratchHits.map(h => h.tick);
-  const holds: { key: number; during: number[] }[] = [];
+  const holds: Prepared['holds'] = [];
   for (const g of groupCharges(tl).groups) {
     if (g.key === 0) continue;
     const during = new Array<number>(8).fill(0);
+    const hits: number[] = [];
     const until = g.end + CN_RELEASE_PAD - 1e-6;
     for (let k = upperBoundNum(eventTicks, g.start + 1e-6); k < events.length && eventTicks[k] < until; k++) {
-      if (events[k].key !== g.key) during[events[k].key] += chordWeights[eventChord[k]];
+      if (events[k].key !== g.key) { during[events[k].key] += chordWeights[eventChord[k]]; hits.push(k); }
     }
     for (let k = upperBoundNum(scratchTickList, g.start + 1e-6); k < scratchTickList.length && scratchTickList[k] < until; k++) {
       during[0] += hardAt(scratchHits[k].time);
     }
-    if (during.some(v => v > 0)) holds.push({ key: g.key, during });
+    if (during.some(v => v > 0)) holds.push({ key: g.key, during, hits });
   }
 
   // 16 分縦連の衝突: 窓ごとに、鍵盤 a の 16 分縦連の数と、a と一緒に押さない鍵盤 b の連打の数を（難所の重みつきで）数え、
   // 組 (a, b) ごとに少ない方を足す
-  type Win = { jack16: number[]; repApart: number[][] };
+  type Win = Prepared['clashWins'][number];
   const wins = new Map<number, Win>();
   const lastHit: { tick: number; time: number }[] = Array.from({ length: 8 }, () => ({ tick: -Infinity, time: -Infinity }));
   chords.forEach(([i, j], c) => {
     const id = Math.floor(events[i].time / CLASH_WINDOW);
     let W = wins.get(id);
     if (!W) {
-      W = { jack16: new Array(8).fill(0), repApart: Array.from({ length: 8 }, () => new Array(8).fill(0)) };
+      W = {
+        jack16: new Array(8).fill(0), repApart: Array.from({ length: 8 }, () => new Array(8).fill(0)),
+        jackHits: Array.from({ length: 8 }, () => []), repHits: Array.from({ length: 8 }, () => Array.from({ length: 8 }, () => [])),
+      };
       wins.set(id, W);
     }
     const inChord = new Set<number>();
@@ -312,9 +324,9 @@ function prepare(tl: ChartTimeline): Prepared {
     for (let k = i; k < j; k++) {
       const key = events[k].key;
       const gap = gapTicksOf(lastHit[key], events[k]);
-      if (gap <= JACK16_TICKS) W.jack16[key] += chordWeights[c];
+      if (gap <= JACK16_TICKS) { W.jack16[key] += chordWeights[c]; W.jackHits[key].push(k); }
       if (gap <= REPEAT_TICKS) {
-        for (let a = 1; a <= 7; a++) if (a !== key && !inChord.has(a)) W.repApart[a][key] += chordWeights[c];
+        for (let a = 1; a <= 7; a++) if (a !== key && !inChord.has(a)) { W.repApart[a][key] += chordWeights[c]; W.repHits[a][key].push(k); }
       }
       lastHit[key] = events[k];
     }
@@ -326,7 +338,7 @@ function prepare(tl: ChartTimeline): Prepared {
       for (let b = 1; b <= 7; b++) if (b !== a) clashPair[a][b] += Math.min(W.jack16[a], W.repApart[a][b]);
     }
   }
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, link16, timeline, clashPair, holds };
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, link16, timeline, clashPair, clashWins: [...wins.values()], holds, eventChord };
 }
 
 /**
@@ -350,6 +362,35 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
     c.rank = i > 0 && c.score === candidates[i - 1].score ? candidates[i - 1].rank : i + 1;
   });
   return { candidates, byPattern: new Map(candidates.map(c => [c.pattern, c])) };
+}
+
+/** 1 つのノーツの減点（形ごとの量。難所の重みつき） */
+export type NotePenalty = Partial<Record<PenaltyKey, number>>;
+export interface PenaltyMarks {
+  /** 通常ノーツの添字 → 減点 */
+  notes: Map<number, NotePenalty>;
+  /** CN の添字 → 先頭の打鍵の減点 */
+  cns: Map<number, NotePenalty>;
+}
+/**
+ * 【関数の役割】 1 つの並びで、どのノーツがどの減点の形に当たったかを返す（譜面再生の減点の色付け用。管理者専用）。
+ * 数え方は {@link evaluateRandom} と同じ。和音や手ごとにまとめて数える形は、その打鍵に量を等分して載せる。
+ * 16 分縦連の衝突は窓（{@link CLASH_WINDOW} 秒）ごとの量を、その窓の縦連と衝突した連打の打鍵に等分して載せる。
+ * CN 押しっぱなし中の皿は、皿のノーツには載せない。
+ */
+export function explainPattern(tl: ChartTimeline, pattern: string, side: 1 | 2): PenaltyMarks {
+  const prep = prepare(tl);
+  const out: PenaltyMarks = { notes: new Map(), cns: new Map() };
+  measure(prep, pattern, side, (k, key, amount) => {
+    if (!(amount > 0)) return;
+    const src = prep.events[k].src;
+    const map = src >= 0 ? out.notes : out.cns;
+    const id = src >= 0 ? src : -src - 1;
+    const rec = map.get(id) ?? {};
+    rec[key] = (rec[key] ?? 0) + amount;
+    map.set(id, rec);
+  });
+  return out;
 }
 
 /** 1P の皿を回さない手で親指が押すレーン。 */
@@ -482,8 +523,11 @@ function fingerMove(cur: number[], prev: number[], fast: boolean, gapSec: number
  * 2P は 1P を左右反転して数える（レーン L を 8 − L に置き換え、皿側の手 = 5〜7、親指 = 3 …）。
  * そのため 2P で並び p の順位は、1P で p を逆順にした並びの順位と同じになる（2026-10-03 ユーザー判断）。
  */
-function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
-  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights: w, clashPair, holds } = prep;
+/** 減点の色付け用: 打鍵（events の添字）に減点の形と量を記録する */
+type Marker = (k: number, key: PenaltyKey, amount: number) => void;
+
+function measure(prep: Prepared, pattern: string, side: 1 | 2, mark?: Marker): RandomMetrics {
+  const { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights: w, clashPair, holds, eventChord } = prep;
   // 元の鍵盤 → 1P 換算のレーン（1〜7。2P は左右反転）と手（0 = 皿側の手 = レーン 1〜3、1 = もう一方の手）
   const laneOf = new Array<number>(8).fill(0);
   for (let lane = 1; lane <= 7; lane++) laneOf[Number(pattern[lane - 1])] = side === 1 ? lane : 8 - lane;
@@ -501,9 +545,17 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     for (let k = i; k < j; k++) lanes[handOfKey[events[k].key]].push(laneOf[events[k].key]);
     handLanes[c] = lanes;
   }
+  /** 和音 c のうち手 hand の打鍵に amount を等分して記録する（色付けのときだけ） */
+  const markHand = (c: number, hand: number, key: PenaltyKey, amount: number) => {
+    if (!mark || amount <= 0) return;
+    const [i, j] = chords[c];
+    let n = 0;
+    for (let k = i; k < j; k++) if (handOfKey[events[k].key] === hand) n++;
+    for (let k = i; k < j; k++) if (handOfKey[events[k].key] === hand) mark(k, key, amount / n);
+  };
   const heads = chords.map(([i]) => events[i]);
   const stair = markStairs(handLanes, heads, pairKind);
-  m.foldStair = countFoldStairs(handLanes, heads, w);
+  m.foldStair = countFoldStairs(handLanes, heads, w, mark && ((c, hand, amount) => markHand(c, hand, 'foldStair', amount)));
 
   // 手ごとの直前の打鍵（速さの判定に使う）
   const lastHead: [KeyEvent | null, KeyEvent | null] = [null, null];
@@ -531,14 +583,18 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
         : fingerMove(cur, prevLanes[hand], fast, last ? events[i].time - last.time : Infinity, lastAlt[hand]);
       m.fastMove += move.fast * w[c];
       m.trill += move.trill * w[c];
+      if (mark) {
+        markHand(c, hand, 'fastMove', move.fast * w[c]);
+        markHand(c, hand, 'trill', move.trill * w[c]);
+      }
       lastAlt[hand] = move.alt;
       prevLanes[hand] = cur;
     }
     for (let k = i; k < j; k++) {
       const hand = handOfKey[events[k].key];
-      if (simulScratch[k] && hand === 1) m.scratchSimulOff += w[c];
-      if (inStream[k] && hand === 0) m.streamSameHand += w[c];
-      if (nearScratch[k] && hand === 0) m.scratchNear += w[c];
+      if (simulScratch[k] && hand === 1) { m.scratchSimulOff += w[c]; mark?.(k, 'scratchSimulOff', w[c]); }
+      if (inStream[k] && hand === 0) { m.streamSameHand += w[c]; mark?.(k, 'streamSameHand', w[c]); }
+      if (nearScratch[k] && hand === 0) { m.scratchNear += w[c]; mark?.(k, 'scratchNear', w[c]); }
     }
     for (let k = i; k < j; k++) lastHead[handOfKey[events[k].key]] = events[k];
   }
@@ -554,11 +610,27 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
       // 交互の表に当たれば、やりやすさの cost を掛ける（45⇔67・13⇔2 は 0 で数えない）
       const alt = hand === 0 ? scratchAlt(a, b) : twoTwo(a, b);
       m.unsplit16 += b.length * (alt ? alt.cost : 1) * w[c + 1];
+      markHand(c + 1, hand, 'unsplit16', b.length * (alt ? alt.cost : 1) * w[c + 1]);
     }
   }
 
   // 16 分縦連の衝突: 同じ手に来た鍵盤の組の数を足す
   for (let a = 1; a <= 7; a++) for (let b = 1; b <= 7; b++) if (a !== b && handOfKey[a] === handOfKey[b]) m.jackClash += clashPair[a][b];
+  // 色付け: 窓ごとに、組 (a, b) の量を a の 16 分縦連の打鍵と b の連打の打鍵に等分して載せる
+  if (mark) {
+    for (const W of prep.clashWins) {
+      for (let a = 1; a <= 7; a++) {
+        if (W.jack16[a] <= 0) continue;
+        for (let b = 1; b <= 7; b++) {
+          if (b === a || handOfKey[a] !== handOfKey[b]) continue;
+          const amount = Math.min(W.jack16[a], W.repApart[a][b]);
+          if (amount <= 0) continue;
+          const hits = [...W.jackHits[a], ...W.repHits[a][b]];
+          for (const k of hits) mark(k, 'jackClash', amount / hits.length);
+        }
+      }
+    }
+  }
 
   // CN の押しっぱなし: レーン 3・4・6（1P 換算）の CN を押している間に、同じ手に来るほかの鍵盤（皿側の手なら皿も）
   for (const h of holds) {
@@ -566,9 +638,11 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     const hand = handOfKey[h.key];
     for (let key = 1; key <= 7; key++) if (key !== h.key && handOfKey[key] === hand) m.cnHold += h.during[key];
     if (hand === 0) m.cnHold += h.during[0];
+    // 色付け: 押している間に同じ手に来た鍵盤（皿は色付けしない）
+    if (mark) for (const k of h.hits) if (handOfKey[events[k].key] === hand) mark(k, 'cnHold', w[eventChord[k]]);
   }
-  m.uneven = countUneven(prep, laneOf);
-  m.scratch3 = countScratch3(prep, laneOf);
+  m.uneven = countUneven(prep, laneOf, mark);
+  m.scratch3 = countScratch3(prep, laneOf, mark);
   // 難所の重みで小数になるので、表示と同点の判定のため小数 3 桁にそろえる
   for (const k of PENALTY_KEYS) m[k] = Math.round(m[k] * 1000) / 1000;
   return m;
@@ -638,7 +712,10 @@ function markStairs(handLanes: [number[], number[]][], heads: { tick: number; ti
  * 対象は BPM 150 換算で 24 分以上の速さ（{@link FAST24_TICKS}）のときだけ（引き返す前後の 2 つの間隔とも）。
  * Mare Nectaris の正規のように、速い階段を片手の中で往復する形は押しにくいので、階段扱い（減点なし）とは別に数える。
  */
-function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: number; time: number }[], w: Float64Array): number {
+function countFoldStairs(
+  handLanes: [number[], number[]][], chordHeads: { tick: number; time: number }[], w: Float64Array,
+  onMark?: (c: number, hand: number, amount: number) => void,
+): number {
   let count = 0;
   for (const hand of [0, 1] as const) {
     // その手の直前 3 打の和音（古い順）と、今の階段の打数（同じ向きに続いた打数）
@@ -658,6 +735,7 @@ function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: 
       if (step !== 0 && step === -dir && runLen >= 3) {
         // 3 打以上の階段がすぐ引き返した: 引き返す点の 1 つ前・引き返す点・今の打鍵（2-1-2 の 3 打。難所の重みつき）
         count += w[prev[prev.length - 2]] + w[p] + w[c];
+        if (onMark) for (const x of [prev[prev.length - 2], p, c]) onMark(x, hand, w[x]);
       }
       if (step !== 0 && step === dir) runLen++;
       else if (step !== 0) runLen = 2;
@@ -684,7 +762,7 @@ function equalStep(lanes: number[]): number {
  *     両方が同じ間隔の等間隔で、同じレーンを使わず互い違いに並ぶ（整った格子）のでなければ、今の和音の鍵盤の数
  * を難所の重みつきで足す。手の分け方は見ない（並びそのものの見やすさ。2P は左右反転しても等間隔・格子は変わらない）。
  */
-function countUneven(prep: Prepared, laneOf: number[]): number {
+function countUneven(prep: Prepared, laneOf: number[], mark?: Marker): number {
   const { events, chords, chordWeights: w, link16 } = prep;
   const lanesOf = (c: number) => {
     const [i, j] = chords[c];
@@ -698,7 +776,10 @@ function countUneven(prep: Prepared, laneOf: number[]): number {
     if (link16[c] === 0 || size < 2) continue;
     const ls = lanesOf(c);
     const step = equalStep(ls);
-    if (size >= 3 && step < 0) total += size * w[c];
+    if (size >= 3 && step < 0) {
+      total += size * w[c];
+      if (mark) for (let k = chords[c][0]; k < chords[c][1]; k++) mark(k, 'uneven', w[c]);
+    }
     if (!(link16[c] & 1)) continue;
     const prevSize = chords[c - 1][1] - chords[c - 1][0];
     if (prevSize < 2 || Math.abs(prevSize - size) > 1 || Math.max(prevSize, size) < 3) continue;
@@ -706,7 +787,10 @@ function countUneven(prep: Prepared, laneOf: number[]): number {
     // 2 つの和音のレーンを合わせて並べ、前後の和音が 1 レーンずつ互い違いに並ぶか（同じレーンを使わない）
     const merged = [...pl.map(v => [v, 0]), ...ls.map(v => [v, 1])].sort((x, y) => x[0] - y[0]);
     const mesh = merged.every((x, n) => n === 0 || (x[1] !== merged[n - 1][1] && x[0] !== merged[n - 1][0]));
-    if (!(step > 0 && step === equalStep(pl) && mesh)) total += size * w[c];
+    if (!(step > 0 && step === equalStep(pl) && mesh)) {
+      total += size * w[c];
+      if (mark) for (let k = chords[c][0]; k < chords[c][1]; k++) mark(k, 'uneven', w[c]);
+    }
   }
   return total;
 }
@@ -717,7 +801,7 @@ function countUneven(prep: Prepared, laneOf: number[]): number {
  * その前後のレーン 1・2 の鍵盤を難所の重みつきで数える（皿＋3 の打鍵そのものは数えない）。
  * 皿と 3 を一緒に押すと左手が皿と 3 に開いたままになり、その間の 1・2 を 16 分で押すのは取りにくい（S+3 → 1 → 2 → S+3）。
  */
-function countScratch3(prep: Prepared, laneOf: number[]): number {
+function countScratch3(prep: Prepared, laneOf: number[], mark?: Marker): number {
   const { events, chords, chordWeights: w, timeline } = prep;
   // 皿側の手の打鍵（と皿）だけを並べる: 和音の添字、レーン 1・2 の鍵盤の数、皿＋3 か
   const items: { it: Prepared['timeline'][number]; n12: number; s3: boolean }[] = [];
@@ -744,7 +828,13 @@ function countScratch3(prep: Prepared, laneOf: number[]): number {
   for (let n = 0; n < items.length; n++) {
     const { it, n12, s3 } = items[n];
     if (n12 === 0 || s3) continue;
-    if (before[n] || after[n]) total += n12 * w[it.chord];
+    if (before[n] || after[n]) {
+      total += n12 * w[it.chord];
+      if (mark) {
+        const [i, j] = chords[it.chord];
+        for (let k = i; k < j; k++) if (laneOf[events[k].key] < SCRATCH_HAND_LANES) mark(k, 'scratch3', w[it.chord]);
+      }
+    }
   }
   return total;
 }
