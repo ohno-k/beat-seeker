@@ -26,14 +26,18 @@
  *   階段（同じ手の単打が隣のレーンへ同じ向きに 3 打以上続く、指の転がし）は数えない。ただし 12 分以上で途切れない流れの中で
  *   階段のノーツが {@link STAIR_FREE_NOTES} 打を超えた分（繰り返す階段）は数える（{@link markStairs}）。
  *   運指上やりやすい形は軽く数える: 皿を回さない手の親指（レーン 5）だけの打鍵と親指以外の打鍵の交互は {@link THUMB_ALT_COST}
- *   （{@link THUMB_EASY_GAP} = BPM 180 の 16 分より速いと数える）。交互の表に当たる交互は、やりやすさの重さ（0・0.5・1）を掛けて数える
- * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 180 の 16 分より速い親指の交互が 3 打鍵以上続いたときの 3 打鍵目以降。1 回の移動を {@link TRILL_COST} とし、
+ *   （16 分換算で BPM 200 まで。BPM 250 に向けて少しずつ重くする。{@link thumbHardness}）。交互の表に当たる交互は、やりやすさの重さ（0・0.5・1）を掛けて数える
+ * - トリル: 6⇔7・1⇔3 の単打の速い交互、47⇔56 の速い交互、BPM 200（16 分換算）より速い親指の交互が 3 打鍵以上続いたときの 3 打鍵目以降。1 回の移動を {@link TRILL_COST} とし、
  *   片手の速い移動に入れた普通の移動の重さを引いた残りを数える（6⇔7 なら速い移動 1 ＋ トリル 3）
  * - 折り返し階段: 同じ手で 3 打以上の階段がすぐ引き返す（3-2-1-2）箇所の、引き返す点とその前後の 3 打（2-1-2。BPM 150 換算で 24 分以上の速さのとき。{@link countFoldStairs}）
  * - 16 分縦連の衝突: {@link CLASH_WINDOW} 秒ごとに、16 分縦連のある鍵盤と同じ手に来た別の連打鍵盤（一緒に押す和音を除く）の打鍵の数
  *   （その窓の 16 分縦連の数を上限に数える）
  * - CN 押しっぱなし中の同じ手: レーン 3（皿側の手）・4・6（皿を回さない手の人差し指・中指）の CN を押している間に、
  *   同じ手に来るほかの鍵盤（レーン 3 の CN なら皿も）の数
+ * - 見やすさ（16 分の和音の形）: 16 分以上の速さ（{@link LINK16_TICKS}）で前後とつながる和音の形（2026-10-04 ユーザー判断で追加）。
+ *   (1) 3 鍵以上の和音でレーンが等間隔でない（135 や 246 は見やすく、124 や 1356 は見にくい）ときの鍵盤の数、
+ *   (2) 2 鍵以上で鍵盤の数の差が 1 以下（多い方が 3 鍵以上）の和音が 16 分で続くとき、両方が同じ間隔の等間隔で、
+ *   同じレーンを使わず互い違いに並ぶ格子（135⇔246、15⇔246 など）でなければ、後ろの和音の鍵盤の数（{@link countUneven}）
  *
  * 「12 分」「16 分」「8 分」などの間隔は、BPM 150 より速い譜面では実際の速さを BPM 150 に換算して見る（{@link gapTicksOf}）。
  * 手の分け方は皿側の手が皿に近い 3 レーン（1P なら 1〜3、2P なら 5〜7）を持つ形に固定。2P は 1P を左右反転して数える
@@ -66,10 +70,18 @@ function isFast(a: { tick: number; time: number }, b: { tick: number; time: numb
  */
 const FAST24_TICKS = 16;
 /**
- * 1P の皿を回さない手の、親指（レーン 5）だけの打鍵と親指以外の打鍵の交互を楽な形とみなす最短の間隔（秒。BPM 180 の 16 分）。
- * これより速いと親指が絡んでも押せないので、普通の速い移動として数え、3 打鍵目からはトリルにも数える（2026-10-03 ユーザー判断）
+ * 1P の皿を回さない手の、親指（レーン 5）だけの打鍵と親指以外の打鍵の交互の厳しさ（2026-10-04 ユーザー判断で緩めた。旧: BPM 180 の 16 分で打ち切り）。
+ * 間隔を 16 分換算の BPM（60 ÷ 4 ÷ 間隔）にして、THUMB_EASY_BPM までは楽な形、THUMB_HARD_BPM 以上は押せない形
+ * （普通の速い移動 ＋ 3 打鍵目からトリル）、その間は BPM に比例して楽な形から押せない形へ少しずつ重くする（{@link thumbHardness}）
  */
-const THUMB_EASY_GAP = 60 / 180 / 4 - 1e-6;
+const THUMB_EASY_BPM = 200;
+const THUMB_HARD_BPM = 250;
+/** 親指の交互の厳しさ（0 = 楽な形、1 = 押せない形）。gapSec は同じ手の直前の打鍵からの秒数 */
+function thumbHardness(gapSec: number): number {
+  if (!(gapSec > 0) || !isFinite(gapSec)) return 0;
+  const bpm16 = 60 / 4 / gapSec;
+  return Math.min(1, Math.max(0, (bpm16 - THUMB_EASY_BPM) / (THUMB_HARD_BPM - THUMB_EASY_BPM)));
+}
 /**
  * 階段を減点しないのは、12 分以上で途切れずに続く流れの中で、階段のノーツ（各階段の 1 打目から、両手合わせて）が
  * この打数までのとき（一時的な階段は見やすく処理しやすいが、繰り返すと外れ配置。2026-10-03 ユーザー判断）
@@ -97,6 +109,8 @@ const STREAM_MIN_NOTES = 3;
 /** 16 分縦連とみなす同じ鍵盤の間隔（tick。16 分 = 24）と、連打とみなす間隔（4 分 = 96） */
 const JACK16_TICKS = 24;
 const REPEAT_TICKS = 96;
+/** 見やすさ（16 分の和音の形）で、前後の和音とつながっているとみなす間隔（tick。BPM 150 換算の 16 分 = 24） */
+const LINK16_TICKS = 24;
 /** 16 分縦連の衝突を数える窓（秒） */
 const CLASH_WINDOW = 1.0;
 /** 1P で、押している間に同じ手のノーツが来ると押しにくい CN のレーン（3 = 皿側の手、4 人差し指・6 中指） */
@@ -104,7 +118,7 @@ const CN_HARD_LANES = [3, 4, 6];
 
 /** 減点の形（表示順）。値は該当するノーツの数 */
 export const PENALTY_KEYS = [
-  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'foldStair', 'jackClash', 'cnHold',
+  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'foldStair', 'jackClash', 'cnHold', 'uneven',
 ] as const;
 export type PenaltyKey = typeof PENALTY_KEYS[number];
 export const PENALTY_LABELS: Record<PenaltyKey, string> = {
@@ -117,6 +131,7 @@ export const PENALTY_LABELS: Record<PenaltyKey, string> = {
   foldStair: '折り返し階段（24 分以上）',
   jackClash: '16 分縦連の衝突',
   cnHold: 'CN 押しっぱなし中の同じ手',
+  uneven: '見やすさ（16 分の和音の形）',
 };
 
 /** 減点の形ごとの該当ノーツ数。 */
@@ -177,6 +192,8 @@ interface Prepared {
   pairKind: Int8Array;
   /** 和音ごとの難所の重み（0〜1。{@link HARD_POWER}） */
   chordWeights: Float64Array;
+  /** 和音 c が前の和音と 16 分以上の速さ（{@link LINK16_TICKS}）でつながるか（ビット 1）、次の和音とつながるか（ビット 2） */
+  link16: Uint8Array;
   /** 鍵盤の組 (a, b) の 16 分縦連の衝突の量（a に 16 分縦連、b に一緒に押さない連打。難所の重みつき）。並びによらない */
   clashPair: number[][];
   /** CN（区間をつないだ 1 本）ごとの鍵盤と、押している間に来る打鍵の数（鍵盤ごと。添字 0 = 皿） */
@@ -220,8 +237,10 @@ function prepare(tl: ChartTimeline): Prepared {
   const gapOf = (c: number) => gapTicksOf(events[chords[c][0]], events[chords[c + 1][0]]);
   const pairs16: number[] = [];
   const pairKind = new Int8Array(chords.length);
+  const link16 = new Uint8Array(chords.length);
   for (let c = 0; c + 1 < chords.length; c++) {
     const gap = gapOf(c);
+    if (gap > 0 && gap <= LINK16_TICKS + 1e-6) { link16[c] |= 2; link16[c + 1] |= 1; }
     if (isFast(events[chords[c][0]], events[chords[c + 1][0]])) {
       pairs16.push(c);
       pairKind[c] = gap <= FAST24_TICKS + 1e-6 ? 2 : 1;
@@ -288,7 +307,7 @@ function prepare(tl: ChartTimeline): Prepared {
       for (let b = 1; b <= 7; b++) if (b !== a) clashPair[a][b] += Math.min(W.jack16[a], W.repApart[a][b]);
     }
   }
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, clashPair, holds };
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, link16, clashPair, holds };
 }
 
 /**
@@ -408,7 +427,7 @@ function scratchHandMove(cur: number[], prev: number[], fast: boolean, afterAlt:
 /**
  * 1P の皿を回さない手の、直前の打鍵から今の打鍵への移動。
  * 6⇔7 の単打の交互は 3 打鍵目からトリル。2-2 交互の表に当たれば楽な形（47⇔56 は 3 打鍵目から片手の速い移動とトリル）。
- * 親指（レーン 5）だけの打鍵と親指を使わない打鍵の交互は、{@link THUMB_EASY_GAP}（BPM 180 の 16 分）以上の間隔なら楽な形。
+ * 親指（レーン 5）だけの打鍵と親指を使わない打鍵の交互は、16 分換算で BPM 200 までなら楽な形、BPM 250 以上は押せない形、その間は少しずつ重く（{@link thumbHardness}）。
  * それより速いと普通の速い移動として数え、3 打鍵目からはトリルにも数える。
  */
 function fingerMove(cur: number[], prev: number[], fast: boolean, gapSec: number, afterAlt: Move['alt']): Move {
@@ -426,9 +445,15 @@ function fingerMove(cur: number[], prev: number[], fast: boolean, gapSec: number
   }
   const disjoint = cur.every(l => !prev.includes(l));
   if (disjoint && ((only(cur, THUMB_LANE) && !prev.includes(THUMB_LANE)) || (only(prev, THUMB_LANE) && !cur.includes(THUMB_LANE)))) {
-    if (gapSec >= THUMB_EASY_GAP) return { fast: THUMB_ALT_COST, trill: 0, alt: null };
+    // 楽な形（THUMB_ALT_COST）から押せない形（普通の移動 ＋ 3 打鍵目からトリル）へ、速さに応じて少しずつ重くする
+    const h = thumbHardness(gapSec);
+    if (h <= 0) return { fast: THUMB_ALT_COST, trill: 0, alt: null };
     const base = distanceCost(cur, prev);
-    return { fast: base, trill: afterAlt === 'thumb' ? TRILL_COST - base : 0, alt: 'thumb' };
+    return {
+      fast: THUMB_ALT_COST * (1 - h) + base * h,
+      trill: afterAlt === 'thumb' ? (TRILL_COST - base) * h : 0,
+      alt: 'thumb',
+    };
   }
   return { fast: distanceCost(cur, prev), trill: 0, alt: null };
 }
@@ -447,7 +472,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   for (let key = 1; key <= 7; key++) handOfKey[key] = laneOf[key] <= SCRATCH_HAND_LANES ? 0 : 1;
 
   const m: RandomMetrics = {
-    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, foldStair: 0, jackClash: 0, cnHold: 0,
+    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, foldStair: 0, jackClash: 0, cnHold: 0, uneven: 0,
   };
   // 和音ごとの、手ごとのレーン（[0] = 皿側の手、[1] = もう一方の手）
   const handLanes: [number[], number[]][] = new Array(chords.length);
@@ -523,6 +548,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     for (let key = 1; key <= 7; key++) if (key !== h.key && handOfKey[key] === hand) m.cnHold += h.during[key];
     if (hand === 0) m.cnHold += h.during[0];
   }
+  m.uneven = countUneven(prep, laneOf);
   // 難所の重みで小数になるので、表示と同点の判定のため小数 3 桁にそろえる
   for (const k of PENALTY_KEYS) m[k] = Math.round(m[k] * 1000) / 1000;
   return m;
@@ -622,6 +648,47 @@ function countFoldStairs(handLanes: [number[], number[]][], chordHeads: { tick: 
     }
   }
   return count;
+}
+
+/** 昇順のレーンが等間隔ならその間隔、そうでなければ -1（2 鍵はいつも等間隔） */
+function equalStep(lanes: number[]): number {
+  const d = lanes[1] - lanes[0];
+  for (let n = 2; n < lanes.length; n++) if (lanes[n] - lanes[n - 1] !== d) return -1;
+  return d;
+}
+
+/**
+ * 見やすさ（16 分の和音の形）の減点（2026-10-04 ユーザー判断）。16 分以上の速さで前後とつながる和音について、
+ * (1) 3 鍵以上でレーンが等間隔でなければ、その和音の鍵盤の数
+ * (2) 前の和音と 16 分以上でつながり、両方 2 鍵以上・鍵盤の数の差が 1 以下・多い方が 3 鍵以上のとき、
+ *     両方が同じ間隔の等間隔で、同じレーンを使わず互い違いに並ぶ（整った格子）のでなければ、今の和音の鍵盤の数
+ * を難所の重みつきで足す。手の分け方は見ない（並びそのものの見やすさ。2P は左右反転しても等間隔・格子は変わらない）。
+ */
+function countUneven(prep: Prepared, laneOf: number[]): number {
+  const { events, chords, chordWeights: w, link16 } = prep;
+  const lanesOf = (c: number) => {
+    const [i, j] = chords[c];
+    const ls: number[] = [];
+    for (let k = i; k < j; k++) ls.push(laneOf[events[k].key]);
+    return ls.sort((a, b) => a - b);
+  };
+  let total = 0;
+  for (let c = 0; c < chords.length; c++) {
+    const size = chords[c][1] - chords[c][0];
+    if (link16[c] === 0 || size < 2) continue;
+    const ls = lanesOf(c);
+    const step = equalStep(ls);
+    if (size >= 3 && step < 0) total += size * w[c];
+    if (!(link16[c] & 1)) continue;
+    const prevSize = chords[c - 1][1] - chords[c - 1][0];
+    if (prevSize < 2 || Math.abs(prevSize - size) > 1 || Math.max(prevSize, size) < 3) continue;
+    const pl = lanesOf(c - 1);
+    // 2 つの和音のレーンを合わせて並べ、前後の和音が 1 レーンずつ互い違いに並ぶか（同じレーンを使わない）
+    const merged = [...pl.map(v => [v, 0]), ...ls.map(v => [v, 1])].sort((x, y) => x[0] - y[0]);
+    const mesh = merged.every((x, n) => n === 0 || (x[1] !== merged[n - 1][1] && x[0] !== merged[n - 1][0]));
+    if (!(step > 0 && step === equalStep(pl) && mesh)) total += size * w[c];
+  }
+  return total;
 }
 
 function lowerBoundNum(a: number[], x: number): number {
