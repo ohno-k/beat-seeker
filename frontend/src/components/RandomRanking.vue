@@ -4,6 +4,7 @@
  *
  * 【コンポーネントの役割】 譜面分析ページの「当たり配置ランキング」タブ。
  * 正規・MIRROR・R-RANDOM（12 通りの最良）・自由入力の並びが、各譜面の 5,040 通り中で何位かを一覧にし、
+ * （自由入力は「.」を 2 つ以上入れるとワイルドカード。残りの鍵盤の入れ方のうち譜面ごとに一番良い並びを R-RANDOM と同じく出す）
  * 当たり（順位の小さい）譜面から並べる。サイドはプロフィールのプレイサイド（未ログインは画面で切り替え）。
  *
  * 【データ】 scripts/build-random-ranking.mts で事前に計算した frontend/public/data/random-ranking/ のファイル（1P）。
@@ -61,9 +62,41 @@ const MODES: { value: Mode; label: string }[] = [
 ];
 const mode = ref<Mode>('off');
 const freeInput = ref('');
-const freePattern = computed(() => (isValidPattern(freeInput.value) ? freeInput.value : ''));
+/**
+ * 自由入力の解釈。1〜7 を 1 回ずつの 7 桁なら 1 つの並び。「.」をワイルドカード（どの鍵盤でもよいレーン）として 2 つ以上入れると、
+ * 残りの鍵盤を「.」の位置に入れた全部の並びが候補になり、譜面ごとに一番良い並びを出す（R乱と同じ見せ方）。
+ * candidates は今のサイドの並びと、1P のデータを引く添字
+ */
+const freeQuery = computed((): { candidates: { pattern: string; idx: number }[]; wild: boolean; error: string } | null => {
+  const v = freeInput.value;
+  if (!v) return null;
+  if (v.length < 7) return null; // 入力途中
+  const digits = v.replace(/\./g, '');
+  if (new Set(digits).size !== digits.length) return { candidates: [], wild: false, error: '同じ鍵盤は 1 回まで' };
+  const dots = 7 - digits.length;
+  if (dots === 1) return { candidates: [], wild: false, error: 'ワイルド（.）は 2 つ以上' };
+  if (dots === 0) {
+    if (!isValidPattern(v)) return { candidates: [], wild: false, error: '1〜7 を 1 回ずつ' };
+    return { candidates: [{ pattern: v, idx: PATTERN_INDEX.get(to1P(v))! }], wild: false, error: '' };
+  }
+  const rest = [1, 2, 3, 4, 5, 6, 7].map(String).filter(k => !digits.includes(k));
+  const out: { pattern: string; idx: number }[] = [];
+  const fill = (chars: string[], pool: string[]) => {
+    const i = chars.indexOf('.');
+    if (i < 0) { const p = chars.join(''); out.push({ pattern: p, idx: PATTERN_INDEX.get(to1P(p))! }); return; }
+    for (let n = 0; n < pool.length; n++) {
+      chars[i] = pool[n];
+      fill(chars, pool.filter((_, m) => m !== n));
+      chars[i] = '.';
+    }
+  };
+  fill([...v], rest);
+  return { candidates: out, wild: true, error: '' };
+});
+/** 自由入力が使える状態か（並びかワイルドカードとして正しい） */
+const freeReady = computed(() => !!freeQuery.value && !freeQuery.value.error);
 function onFreeInput(e: Event) {
-  freeInput.value = (e.target as HTMLInputElement).value.replace(/[^1-7]/g, '').slice(0, 7);
+  freeInput.value = (e.target as HTMLInputElement).value.replace(/[^1-7.]/g, '').slice(0, 7);
 }
 
 type LevelFilter = 'all' | 12 | 11 | 'low';
@@ -71,7 +104,7 @@ const level = ref<LevelFilter>('all');
 const query = ref('');
 const PAGE = 100;
 const limit = ref(PAGE);
-watch([mode, level, query, freePattern], () => { limit.value = PAGE; });
+watch([mode, level, query, freeInput], () => { limit.value = PAGE; });
 
 // ── 自由入力: レベルごとの順位ファイル ─────────────────────────
 const PATTERN_INDEX = new Map(allPatterns().map((p, i) => [p, i]));
@@ -79,8 +112,8 @@ const bins = ref<Partial<Record<ChartRow['g'], Uint8Array>>>({});
 const binLoading = ref(false);
 const neededGroups = computed((): ChartRow['g'][] =>
   level.value === 'all' ? ['12', '11', 'low'] : level.value === 12 ? ['12'] : level.value === 11 ? ['11'] : ['low']);
-watch([mode, freePattern, neededGroups], async () => {
-  if (mode.value !== 'free' || !freePattern.value) return;
+watch([mode, freeReady, neededGroups], async () => {
+  if (mode.value !== 'free' || !freeReady.value) return;
   const missing = neededGroups.value.filter(g => !bins.value[g]);
   if (!missing.length) return;
   binLoading.value = true;
@@ -97,16 +130,26 @@ watch([mode, freePattern, neededGroups], async () => {
   }
 }, { immediate: true });
 
-/** 自由入力の並びの、その譜面での順位の幅（約 20 位刻み）。データ未読込なら null */
-function freeRank(r: ChartRow): { from: number; to: number } | null {
+/**
+ * 自由入力の、その譜面での順位の幅（約 20 位刻み）と並び。ワイルドカードなら候補のうち一番良い並び
+ * （同じ幅に複数あれば先に見つかったもの）。データ未読込なら null
+ */
+function freeRank(r: ChartRow): { from: number; to: number; pattern: string } | null {
   const bin = bins.value[r.g];
-  const idx = PATTERN_INDEX.get(to1P(freePattern.value));
-  if (!bin || idx === undefined || !summary.value) return null;
-  const bucket = bin[r.i * summary.value.total + idx];
+  const q = freeQuery.value;
+  if (!bin || !q || q.error || !summary.value) return null;
+  const base = r.i * summary.value.total;
+  let bucket = 256;
+  let pattern = '';
+  for (const c of q.candidates) {
+    const b = bin[base + c.idx];
+    if (b < bucket) { bucket = b; pattern = c.pattern; if (b === 0) break; }
+  }
+  if (!pattern) return null;
   const { total, bucketsPerRank } = summary.value;
   // 保存側は bucket = floor((順位 - 1) × bucketsPerRank / total)。この bucket になる順位は
   // ceil(bucket × total / bucketsPerRank) + 1 〜 ceil((bucket + 1) × total / bucketsPerRank)（切り捨てで戻すと端が 1 位ずれる）
-  return { from: Math.ceil((bucket * total) / bucketsPerRank) + 1, to: Math.ceil(((bucket + 1) * total) / bucketsPerRank) };
+  return { from: Math.ceil((bucket * total) / bucketsPerRank) + 1, to: Math.ceil(((bucket + 1) * total) / bucketsPerRank), pattern };
 }
 
 // ── 一覧 ─────────────────────────────────────────────────
@@ -130,9 +173,10 @@ const rows = computed((): ViewRow[] => {
     else if (mode.value === 'mirror') { rank = two ? r.off : r.mir; pattern = '7654321'; }
     else if (mode.value === 'rran') { rank = r.rr; pattern = to1P(r.rrp); }
     else {
-      if (!freePattern.value) continue;
+      if (!freeReady.value) continue;
       const fr = freeRank(r);
-      rank = fr?.from ?? null; rankTo = fr?.to ?? null; pattern = freePattern.value;
+      if (!fr) continue;
+      rank = fr.from; rankTo = fr.to; pattern = fr.pattern;
     }
     if (rank === null) continue;
     out.push({ row: r, rank, rankTo, pattern });
@@ -162,12 +206,13 @@ const levelLabel = (l: number) => `☆${l}`;
           <button v-for="m in MODES" :key="m.value" type="button" :class="{ on: mode === m.value }" @click="mode = m.value">{{ m.label }}</button>
         </div>
         <template v-if="mode === 'free'">
-          <input :value="freeInput" type="text" inputmode="numeric" maxlength="7" placeholder="例: 2461357" aria-label="並び"
+          <input :value="freeInput" type="text" maxlength="7" placeholder="例: 2461357 / 246...." aria-label="並び（. はワイルドカード）"
             class="free-input tabular-nums rounded border bg-white dark:bg-slate-700 px-2 py-1.5"
-            :class="freeInput && !freePattern ? 'border-red-400 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'"
+            :class="freeQuery?.error ? 'border-red-400 dark:border-red-500' : 'border-slate-300 dark:border-slate-600'"
             @input="onFreeInput" />
-          <PatternChips v-if="freePattern" :pattern="freePattern" small />
-          <span v-else-if="freeInput" class="text-red-500 dark:text-red-400">1〜7 を 1 回ずつ</span>
+          <PatternChips v-if="freeReady" :pattern="freeInput" small />
+          <span v-if="freeQuery?.wild && freeReady" class="text-slate-400 dark:text-slate-500 tabular-nums">{{ freeQuery.candidates.length }} 通りから譜面ごとに最良</span>
+          <span v-if="freeQuery?.error" class="text-red-500 dark:text-red-400">{{ freeQuery.error }}</span>
         </template>
       </div>
       <div class="control">
@@ -195,7 +240,7 @@ const levelLabel = (l: number) => `☆${l}`;
     <p v-else-if="!summary" class="mt-3 text-slate-400">読み込み中…</p>
     <template v-else>
       <div class="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-slate-500 dark:text-slate-400">
-        <span v-if="mode === 'free' && !freePattern">並びを 7 桁で入力してください（1〜7 を 1 回ずつ）</span>
+        <span v-if="mode === 'free' && !freeReady">並びを 7 桁で入力してください（1〜7 を 1 回ずつ。決めないレーンは . にすると、残りの鍵盤の入れ方のうち譜面ごとに一番良い並びを出します。. は 2 つ以上）</span>
         <span v-else-if="binLoading">自由入力の順位データを読み込み中…</span>
         <template v-else>
           <span class="tabular-nums">{{ rows.length }} 譜面</span>
@@ -212,7 +257,7 @@ const levelLabel = (l: number) => `☆${l}`;
           <span class="pos tabular-nums">{{ n + 1 }}</span>
           <span class="lv tabular-nums" :class="v.row.d === '10' ? 'leg' : 'ano'">{{ levelLabel(v.row.l) }} {{ diffLabel(v.row.d) }}</span>
           <button type="button" class="title" :title="`${v.row.t} を譜面分析で開く（${v.pattern} で譜面再生）`" @click="emit('open', v.row.x, v.pattern)">{{ v.row.t }}</button>
-          <PatternChips v-if="mode === 'rran'" :pattern="v.pattern" small class="chips" />
+          <PatternChips v-if="mode === 'rran' || (mode === 'free' && freeQuery?.wild)" :pattern="v.pattern" small class="chips" />
           <span class="rank tabular-nums">
             <span v-if="v.rank <= TOP10" class="top-badge">上位10%</span>
             {{ v.rankTo ? `${v.rank}〜${v.rankTo}` : v.rank }}位
@@ -225,7 +270,7 @@ const levelLabel = (l: number) => `☆${l}`;
 
       <p class="mt-4 text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
         {{ summary.generatedAt }} 時点の評価基準で計算した {{ summary.charts.length }} 譜面（textage の譜面データが手元にある ANOTHER / LEGGENDARIA）。
-        R乱は 12 通り（正規・MIRROR をずらしたもの）のうち一番良い並びです。自由入力の順位は約 20 位刻みの幅で表示します。
+        R乱は 12 通り（正規・MIRROR をずらしたもの）のうち一番良い並びです。自由入力の順位は約 20 位刻みの幅で表示します。自由入力で . を入れたレーン（2 つ以上）はワイルドカードになり、残りの鍵盤の入れ方のうち譜面ごとに一番良い並びと順位を出します。
         曲名を押すと譜面分析タブでその譜面を開きます（配置評価で細かい内訳を確認できます）。
       </p>
     </template>
