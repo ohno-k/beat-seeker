@@ -18,6 +18,9 @@
  * - 皿と同時なのに逆の手: 単発の皿と同じタイミングの鍵盤が、皿を回さない方の手に来た数（皿側の手なら皿＋1 のように一緒に取れる）
  * - 連皿中に皿側の手: 連続スクラッチ（BPM 140 の 16 分以上の間隔で 3 回以上続く皿）の最中の鍵盤が、皿側の手に来た数
  * - 皿の前後に皿側の手: 皿と同時ではないが前後 {@link SCRATCH_WINDOW} 秒に皿がある鍵盤が、皿側の手に来た数（連皿の最中は除く）
+ * - 皿＋3 の前後に 1・2: 皿と同時にレーン 3 が来た打鍵（皿＋3。左手が皿と 3 に開いたまま）から、皿側の手の打鍵（と皿）が 16 分以上の速さ
+ *   （{@link LINK16_TICKS}）で途切れずにつながる流れの中で、その前か後ろに来たレーン 1・2 の鍵盤の数
+ *   （S+3 → 1 → 2 → S+3 のような 3 バスの取りにくさ。2026-10-04 ユーザー判断で追加。{@link countScratch3}）
  * - 割れない（12 分以上）: 12 分以上の速さ（{@link FAST_TICKS}。2026-10-03 に 16 分から広げた）で続く 2 つの打鍵で、後ろの打鍵のうち、前の打鍵と同じ手に来た鍵盤の数。
  *   1P では交互の表（皿を回さない手の 45⇔67・57⇔46・47⇔56、皿側の手の 13⇔2・1⇔23・12⇔3）に当たる交互は、やりやすさの重さ（順に 0・0.5・1）を掛けて数える。
  *   階段（{@link markStairs}）も数えない。24 分以上の速さ（{@link FAST24_TICKS}）の打鍵は、同じ手が 3 打以上続いたときだけ数える
@@ -118,13 +121,14 @@ const CN_HARD_LANES = [3, 4, 6];
 
 /** 減点の形（表示順）。値は該当するノーツの数 */
 export const PENALTY_KEYS = [
-  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'unsplit16', 'fastMove', 'trill', 'foldStair', 'jackClash', 'cnHold', 'uneven',
+  'scratchSimulOff', 'streamSameHand', 'scratchNear', 'scratch3', 'unsplit16', 'fastMove', 'trill', 'foldStair', 'jackClash', 'cnHold', 'uneven',
 ] as const;
 export type PenaltyKey = typeof PENALTY_KEYS[number];
 export const PENALTY_LABELS: Record<PenaltyKey, string> = {
   scratchSimulOff: '皿と同時なのに逆の手',
   streamSameHand: '連皿中に皿側の手',
   scratchNear: '皿の前後に皿側の手',
+  scratch3: '皿＋3 の前後に 1・2',
   unsplit16: '割れない（12 分以上）',
   fastMove: '片手の速い移動',
   trill: 'トリル（6⇔7・1⇔3・47⇔56）',
@@ -194,6 +198,8 @@ interface Prepared {
   chordWeights: Float64Array;
   /** 和音 c が前の和音と 16 分以上の速さ（{@link LINK16_TICKS}）でつながるか（ビット 1）、次の和音とつながるか（ビット 2） */
   link16: Uint8Array;
+  /** 和音と、鍵盤の無い皿だけの打鍵を時刻順に並べたもの（chord = chords の添字、皿だけなら -1。scratch = 同じ tick に皿がある） */
+  timeline: { chord: number; scratch: boolean; tick: number; time: number }[];
   /** 鍵盤の組 (a, b) の 16 分縦連の衝突の量（a に 16 分縦連、b に一緒に押さない連打。難所の重みつき）。並びによらない */
   clashPair: number[][];
   /** CN（区間をつないだ 1 本）ごとの鍵盤と、押している間に来る打鍵の数（鍵盤ごと。添字 0 = 皿） */
@@ -246,6 +252,19 @@ function prepare(tl: ChartTimeline): Prepared {
       pairKind[c] = gap <= FAST24_TICKS + 1e-6 ? 2 : 1;
     }
   }
+
+  // 皿＋3 の判定用: 和音（同じ tick に皿があるか）と、鍵盤の無い皿だけの打鍵を時刻順に
+  const chordTicks = new Set(chords.map(([i]) => Math.round(events[i].tick)));
+  const timeline: Prepared['timeline'] = chords.map(([i], c) => (
+    { chord: c, scratch: scratchTicks.has(Math.round(events[i].tick)), tick: events[i].tick, time: events[i].time }));
+  const scratchOnly = new Set<number>();
+  for (const h of scratchHits) {
+    const t = Math.round(h.tick);
+    if (chordTicks.has(t) || scratchOnly.has(t)) continue;
+    scratchOnly.add(t);
+    timeline.push({ chord: -1, scratch: true, tick: h.tick, time: h.time });
+  }
+  timeline.sort((a, b) => a.tick - b.tick);
 
   // 難所の重み: 和音ごとに周り ±DENSITY_HALF 秒のノーツ数（鍵盤と皿）を譜面内の最大で割って HARD_POWER 乗
   const allTimes = [...events.map(e => e.time), ...scratchTimes].sort((a, b) => a - b);
@@ -307,7 +326,7 @@ function prepare(tl: ChartTimeline): Prepared {
       for (let b = 1; b <= 7; b++) if (b !== a) clashPair[a][b] += Math.min(W.jack16[a], W.repApart[a][b]);
     }
   }
-  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, link16, clashPair, holds };
+  return { events, chords, simulScratch, inStream, nearScratch, pairs16, pairKind, chordWeights, link16, timeline, clashPair, holds };
 }
 
 /**
@@ -472,7 +491,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
   for (let key = 1; key <= 7; key++) handOfKey[key] = laneOf[key] <= SCRATCH_HAND_LANES ? 0 : 1;
 
   const m: RandomMetrics = {
-    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, unsplit16: 0, fastMove: 0, trill: 0, foldStair: 0, jackClash: 0, cnHold: 0, uneven: 0,
+    scratchSimulOff: 0, streamSameHand: 0, scratchNear: 0, scratch3: 0, unsplit16: 0, fastMove: 0, trill: 0, foldStair: 0, jackClash: 0, cnHold: 0, uneven: 0,
   };
   // 和音ごとの、手ごとのレーン（[0] = 皿側の手、[1] = もう一方の手）
   const handLanes: [number[], number[]][] = new Array(chords.length);
@@ -549,6 +568,7 @@ function measure(prep: Prepared, pattern: string, side: 1 | 2): RandomMetrics {
     if (hand === 0) m.cnHold += h.during[0];
   }
   m.uneven = countUneven(prep, laneOf);
+  m.scratch3 = countScratch3(prep, laneOf);
   // 難所の重みで小数になるので、表示と同点の判定のため小数 3 桁にそろえる
   for (const k of PENALTY_KEYS) m[k] = Math.round(m[k] * 1000) / 1000;
   return m;
@@ -687,6 +707,44 @@ function countUneven(prep: Prepared, laneOf: number[]): number {
     const merged = [...pl.map(v => [v, 0]), ...ls.map(v => [v, 1])].sort((x, y) => x[0] - y[0]);
     const mesh = merged.every((x, n) => n === 0 || (x[1] !== merged[n - 1][1] && x[0] !== merged[n - 1][0]));
     if (!(step > 0 && step === equalStep(pl) && mesh)) total += size * w[c];
+  }
+  return total;
+}
+
+/**
+ * 皿＋3 の前後に 1・2 の数（2026-10-04 ユーザー判断）。皿側の手の打鍵（皿側の手のレーンを含む和音）と皿を時刻順にたどり、
+ * 16 分以上の速さ（{@link LINK16_TICKS}）で途切れずにつながる流れの中に、皿と同時にレーン 3（1P 換算）が来た打鍵があれば、
+ * その前後のレーン 1・2 の鍵盤を難所の重みつきで数える（皿＋3 の打鍵そのものは数えない）。
+ * 皿と 3 を一緒に押すと左手が皿と 3 に開いたままになり、その間の 1・2 を 16 分で押すのは取りにくい（S+3 → 1 → 2 → S+3）。
+ */
+function countScratch3(prep: Prepared, laneOf: number[]): number {
+  const { events, chords, chordWeights: w, timeline } = prep;
+  // 皿側の手の打鍵（と皿）だけを並べる: 和音の添字、レーン 1・2 の鍵盤の数、皿＋3 か
+  const items: { it: Prepared['timeline'][number]; n12: number; s3: boolean }[] = [];
+  for (const it of timeline) {
+    let n12 = 0, has3 = false, any = false;
+    if (it.chord >= 0) {
+      const [i, j] = chords[it.chord];
+      for (let k = i; k < j; k++) {
+        const l = laneOf[events[k].key];
+        if (l > SCRATCH_HAND_LANES) continue;
+        any = true;
+        if (l === SCRATCH_HAND_LANES) has3 = true; else n12++;
+      }
+    }
+    if (!any && !it.scratch) continue;
+    items.push({ it, n12, s3: it.scratch && has3 });
+  }
+  const linked = (a: number, b: number) => gapTicksOf(items[a].it, items[b].it) <= LINK16_TICKS + 1e-6;
+  // 流れの中で、前（after = 後ろ）に皿＋3 があるか
+  const before = new Uint8Array(items.length), after = new Uint8Array(items.length);
+  for (let n = 1; n < items.length; n++) if (linked(n - 1, n)) before[n] = items[n - 1].s3 || before[n - 1] ? 1 : 0;
+  for (let n = items.length - 2; n >= 0; n--) if (linked(n, n + 1)) after[n] = items[n + 1].s3 || after[n + 1] ? 1 : 0;
+  let total = 0;
+  for (let n = 0; n < items.length; n++) {
+    const { it, n12, s3 } = items[n];
+    if (n12 === 0 || s3) continue;
+    if (before[n] || after[n]) total += n12 * w[it.chord];
   }
   return total;
 }
