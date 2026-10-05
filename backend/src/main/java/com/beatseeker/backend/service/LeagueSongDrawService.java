@@ -2,10 +2,14 @@ package com.beatseeker.backend.service;
 
 import com.beatseeker.backend.entity.DifficultyRank;
 import com.beatseeker.backend.entity.DifficultyRankSong;
+import com.beatseeker.backend.entity.LeagueMember;
 import com.beatseeker.backend.entity.LeagueSong;
+import com.beatseeker.backend.entity.LeagueSongBan;
 import com.beatseeker.backend.entity.LeagueWeek;
 import com.beatseeker.backend.entity.SongDefinition;
 import com.beatseeker.backend.repository.DifficultyRankRepository;
+import com.beatseeker.backend.repository.LeagueMemberRepository;
+import com.beatseeker.backend.repository.LeagueSongBanRepository;
 import com.beatseeker.backend.repository.LeagueSongRepository;
 import com.beatseeker.backend.repository.SongDefinitionRepository;
 import org.springframework.stereotype.Service;
@@ -26,6 +30,9 @@ import java.util.*;
  *    タイトル末尾 "[L]" が LEGGENDARIA）。スコアレート計算のため notes 判明済みも必須。
  *  - 直近 8 週の同 DIVISION の出題曲（両ラダー・draft 週含む）を除外して重複を避ける。
  *    除外の結果プールが 3 曲を割る場合は段階的に緩和する（重複除外解除 → 難易度表全体へ拡大）。
+ *  - <b>楽曲 BAN</b>（2026-10-05 ユーザー指示）: グループのメンバーがその卓の DIVISION に登録した BAN
+ *    （{@link LeagueSongBan}）を除いて選ぶ。全員の BAN を除くと 3 曲に足りないときは、
+ *    BAN した人数が少ない曲から補う（その枠はフォールバックの印）。
  *
  * <p><b>各プレイヤーのスコアは一切参照しない</b>（2026-09-21 ユーザー指示で撤廃）。
  * 撤廃前は「② グループ全員が未プレー ∪ ③ 2 人以上がプレー済みで自己ベストレートが拮抗」を
@@ -54,16 +61,22 @@ public class LeagueSongDrawService {
     private final SongDefinitionRepository songDefinitionRepository;
     private final DifficultyRankRepository difficultyRankRepository;
     private final LeagueSongRepository leagueSongRepository;
+    private final LeagueSongBanRepository leagueSongBanRepository;
+    private final LeagueMemberRepository leagueMemberRepository;
 
     /**
      * 【コンストラクタ】 Spring が依存を注入する。
      */
     public LeagueSongDrawService(SongDefinitionRepository songDefinitionRepository,
                                  DifficultyRankRepository difficultyRankRepository,
-                                 LeagueSongRepository leagueSongRepository) {
+                                 LeagueSongRepository leagueSongRepository,
+                                 LeagueSongBanRepository leagueSongBanRepository,
+                                 LeagueMemberRepository leagueMemberRepository) {
         this.songDefinitionRepository = songDefinitionRepository;
         this.difficultyRankRepository = difficultyRankRepository;
         this.leagueSongRepository = leagueSongRepository;
+        this.leagueSongBanRepository = leagueSongBanRepository;
+        this.leagueMemberRepository = leagueMemberRepository;
     }
 
     /**
@@ -96,7 +109,27 @@ public class LeagueSongDrawService {
     @Transactional
     public List<LeagueSong> drawSongsForGroup(LeagueWeek week, int tier, int groupIndex) {
         leagueSongRepository.deleteByWeekAndTierAndGroupIndex(week, tier, groupIndex);
-        return saveDrawn(week, tier, groupIndex, selectSongs(tier, week.getStartsAt(), Set.of()));
+        // グループのメンバーがこの卓の DIVISION に登録した BAN を除いて選ぶ
+        List<Long> userIds = leagueMemberRepository.findByWeekAndTierAndGroupIndex(week, tier, groupIndex).stream()
+                .map(LeagueMember::getUser).filter(Objects::nonNull).map(u -> u.getId()).toList();
+        return saveDrawn(week, tier, groupIndex,
+                selectSongs(tier, week.getStartsAt(), Set.of(), banCountsFor(tier, userIds)));
+    }
+
+    /**
+     * 【メソッドの役割】 指定ユーザーたちが指定 DIVISION に登録した BAN を、タイトルごとの人数にまとめる。
+     *
+     * @param tier    卓の DIVISION
+     * @param userIds グループのメンバー
+     * @return タイトル → BAN した人数
+     */
+    public Map<String, Integer> banCountsFor(int tier, Collection<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) return Map.of();
+        Map<String, Integer> counts = new HashMap<>();
+        for (LeagueSongBan b : leagueSongBanRepository.findByTierAndUserIds(tier, userIds)) {
+            counts.merge(b.getTitle(), 1, Integer::sum);
+        }
+        return counts;
     }
 
     /**
@@ -112,6 +145,21 @@ public class LeagueSongDrawService {
      * @return 選定した課題曲（スロット順、3 件）。緩和で埋めた枠には印が付く
      */
     public List<DrawnSong> selectSongs(int tier, LocalDateTime referenceStart, Set<String> alsoExclude) {
+        return selectSongs(tier, referenceStart, alsoExclude, Map.of());
+    }
+
+    /**
+     * 【メソッドの役割】 楽曲 BAN を考慮して課題曲 3 曲を選定して返す（<b>永続化しない</b>）。
+     *
+     * 直近出題を除いた候補をシャッフルし、BAN した人数の少ない順に安定ソートしてから先頭の 3 曲を採る
+     * ＝誰も BAN していない曲だけで足りればその中のランダム、足りなければ BAN した人数が少ない曲から補う。
+     * BAN された曲で埋めた枠はフォールバックの印を付ける。
+     *
+     * @param banCounts タイトル → グループ内で BAN した人数（{@link #banCountsFor}）
+     */
+    public List<DrawnSong> selectSongs(int tier, LocalDateTime referenceStart, Set<String> alsoExclude,
+                                       Map<String, Integer> banCounts) {
+        Comparator<SongDefinition> byBans = Comparator.comparingInt(sd -> banCounts.getOrDefault(sd.getTitle(), 0));
         // 帯のプールが薄い場合は難易度表全体（Lv11 以上）へ拡大する。その階級の想定難易度から
         // 外れるので、拡大したときは選ばれた曲すべてをフォールバック扱いにする。
         Map<String, SongDefinition> masterIndex = buildMasterIndex();
@@ -133,17 +181,20 @@ public class LeagueSongDrawService {
             if (!recent.contains(sd.getTitle())) candidates.add(sd);
         }
         Collections.shuffle(candidates);
+        candidates.sort(byBans); // 安定ソート: BAN 人数が同じ曲の中ではランダムのまま
 
         List<DrawnSong> chosen = new ArrayList<>();
         Set<String> used = new HashSet<>();
         for (SongDefinition sd : candidates) {
             if (chosen.size() >= SONGS_PER_WEEK) break;
-            if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, poolWidened));
+            boolean banned = banCounts.getOrDefault(sd.getTitle(), 0) > 0;
+            if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, poolWidened || banned));
         }
         // 直近出題を除くと 3 曲に満たない場合だけ、再登板を許して埋める（フォールバックの印）。
         if (chosen.size() < SONGS_PER_WEEK) {
             List<SongDefinition> rest = new ArrayList<>(pool);
             Collections.shuffle(rest);
+            rest.sort(byBans);
             for (SongDefinition sd : rest) {
                 if (chosen.size() >= SONGS_PER_WEEK) break;
                 if (used.add(sd.getTitle())) chosen.add(new DrawnSong(sd, true));
@@ -192,6 +243,48 @@ public class LeagueSongDrawService {
             rawPool = buildPool(masterIndex, 0, 9999); // プールが薄い場合は難易度表全体（Lv11 以上）へ拡大
         }
         return uniqueByTitle(rawPool);
+    }
+
+    /** BAN の候補 1 曲（プールの譜面と、その難易度表のランク値）。 */
+    public record PoolSong(SongDefinition song, String rankValue) {
+    }
+
+    /**
+     * 【メソッドの役割】 楽曲 BAN の候補＝指定 DIVISION の選曲プールを、難易度表のランク値つきで返す。
+     *
+     * {@link #poolForTier} と同じ譜面（難易度帯の全曲・タイトル重複なし。直近出題の除外はかけない）。
+     *
+     * @param tier DIVISION（0=LEGEND .. 10）
+     * @return 候補（難易度表のランク順）
+     */
+    public List<PoolSong> banPoolForTier(int tier) {
+        Map<String, SongDefinition> masterIndex = buildMasterIndex();
+        int[] band = rankBandTenths(tier);
+        List<PoolSong> out = collectPool(masterIndex, band[0], band[1]);
+        if (out.stream().map(ps -> ps.song().getTitle()).distinct().count() < SONGS_PER_WEEK) {
+            out = collectPool(masterIndex, 0, 9999);
+        }
+        LinkedHashMap<String, PoolSong> byTitle = new LinkedHashMap<>();
+        for (PoolSong ps : out) byTitle.putIfAbsent(ps.song().getTitle(), ps);
+        return new ArrayList<>(byTitle.values());
+    }
+
+    /** {@link #buildPool} と同じ絞り込みで、ランク値も一緒に返す。 */
+    private List<PoolSong> collectPool(Map<String, SongDefinition> masterIndex, int minTenths, int maxTenths) {
+        List<PoolSong> pool = new ArrayList<>();
+        for (DifficultyRank rank : difficultyRankRepository.findByRevisionOrderBySortOrderAsc("active")) {
+            int tenths = parseTenths(rank.getRankValue());
+            if (tenths < 0 || tenths < minTenths || tenths > maxTenths) continue;
+            for (DifficultyRankSong drs : rank.getSongs()) {
+                String raw = drs.getSongTitle();
+                if (raw == null) continue;
+                boolean legg = raw.endsWith("[L]");
+                String title = legg ? raw.substring(0, raw.length() - 3) : raw;
+                SongDefinition sd = masterIndex.get(title + "|" + (legg ? "10" : "4"));
+                if (sd != null) pool.add(new PoolSong(sd, rank.getRankValue()));
+            }
+        }
+        return pool;
     }
 
     /**

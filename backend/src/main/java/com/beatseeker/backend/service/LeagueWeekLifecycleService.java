@@ -79,7 +79,7 @@ public class LeagueWeekLifecycleService {
     public static final int AUTO_DEACTIVATE_AFTER = 3;
 
     /** 週の開始時刻（JST・月曜）。 */
-    static final int START_HOUR = 12;
+    public static final int START_HOUR = 12;
     /** 週の終了時刻（JST・日曜）。 */
     static final int END_HOUR = 21;
 
@@ -1109,8 +1109,11 @@ public class LeagueWeekLifecycleService {
             List<Map<String, Object>> groupList = new ArrayList<>();
             for (int gi = 0; gi < groups.size(); gi++) {
                 List<Seat> g = groups.get(gi);
+                // 本抽選と同じく、グループのメンバーがこの卓の DIVISION に登録した楽曲 BAN を除く
+                Map<String, Integer> bans = songDrawService.banCountsFor(host,
+                        g.stream().map(s -> s.entry().getUser().getId()).toList());
                 List<LeagueSongDrawService.DrawnSong> songs =
-                        songDrawService.selectSongs(host, refStart, usedInTier);
+                        songDrawService.selectSongs(host, refStart, usedInTier, bans);
                 for (LeagueSongDrawService.DrawnSong ds : songs) usedInTier.add(ds.song().getTitle());
                 groupList.add(buildPreviewGroup(gi, g, songs));
             }

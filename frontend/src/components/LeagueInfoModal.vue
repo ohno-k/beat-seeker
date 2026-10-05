@@ -85,6 +85,14 @@ const flowSteps = [
   'league.infoModal.flow.move',
 ];
 
+// ─── 楽曲 BAN: 流れ図 ─────────────────────────────────────────
+/** 「BAN を登録 → 抽選（全員の BAN を除外）→ 課題曲3曲」の 3 ステップ。 */
+const banFlowSteps = [
+  { label: 'league.infoModal.banFlow.register', sub: 'league.infoModal.banFlow.registerSub' },
+  { label: 'league.infoModal.banFlow.draw', sub: 'league.infoModal.banFlow.drawSub' },
+  { label: 'league.infoModal.banFlow.songs', sub: 'league.infoModal.banFlow.songsSub' },
+];
+
 // ─── DIVISION: 難易度帯レンジ図 ───────────────────────────────
 /**
  * DIVISION ごとの「初回配属 BEAT-TIER」と「課題曲の難易度帯（非公式難易度 ☆・0.1 単位の整数）」。
@@ -381,6 +389,39 @@ const figureClass = 'mt-3 rounded-xl border border-slate-200 dark:border-slate-7
                 <span class="text-[10px] tabular-nums text-right text-slate-600 dark:text-slate-300 whitespace-nowrap">{{ rangeLabel(d) }}</span>
               </div>
             </div>
+          </section>
+
+          <!-- 3.5 楽曲 BAN（2026-10-05 追加）: 登録 → 抽選で除外 → 課題曲 の流れ図 -->
+          <section>
+            <h4 :class="sectionTitleClass">
+              <span class="w-1.5 h-5 bg-indigo-600 dark:bg-indigo-500 rounded-full"></span>
+              {{ t('league.infoModal.banTitle') }}
+            </h4>
+            <p :class="leadClass">{{ t('league.infoModal.ban1') }}</p>
+            <div :class="figureClass">
+              <div class="flex flex-wrap items-center justify-center gap-2">
+                <template v-for="(step, i) in banFlowSteps" :key="step.label">
+                  <svg v-if="i > 0" class="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                  <div
+                    class="px-3 py-1.5 rounded-lg text-center"
+                    :class="i === banFlowSteps.length - 1
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200'"
+                  >
+                    <div class="text-xs font-bold whitespace-nowrap">{{ t(step.label) }}</div>
+                    <div class="text-[10px] leading-tight opacity-80 whitespace-nowrap">{{ t(step.sub) }}</div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <ul class="mt-2 space-y-1">
+              <li v-for="k in ['league.infoModal.ban2', 'league.infoModal.ban3', 'league.infoModal.ban4']" :key="k" :class="[noteClass, 'pl-4 relative']">
+                <span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                {{ t(k) }}
+              </li>
+            </ul>
           </section>
 
           <!-- 4. 有効な記録（ライン）+ ライン図 -->

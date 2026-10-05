@@ -4,6 +4,8 @@ import com.beatseeker.backend.entity.*;
 import com.beatseeker.backend.repository.*;
 import com.beatseeker.backend.service.LeagueDivision;
 import com.beatseeker.backend.service.LeagueService;
+import com.beatseeker.backend.service.LeagueSongBanService;
+import com.beatseeker.backend.service.LeagueSongDrawService;
 import com.beatseeker.backend.service.LeagueStandingsService;
 import com.beatseeker.backend.util.JstTime;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,8 @@ import java.util.stream.Collectors;
  *  - GET  /api/league/overview   … 進行中の週の階級/グループ構成
  *  - GET  /api/league/history    … 自分の過去週成績
  *  - GET  /api/league/news       … 直近の締め済み週の昇降格ニュース（全ユーザー）
+ *  - GET  /api/league/bans       … 楽曲 BAN の候補と自分の登録（DIVISION ごと）
+ *  - PUT  /api/league/bans       … 楽曲 BAN の登録（DIVISION ごとに置き換え）
  */
 @RestController
 @RequestMapping("/api/league")
@@ -49,6 +53,8 @@ public class LeagueController {
     private final LeagueEntryRepository leagueEntryRepository;
     /** 前作の最終 PT（ティアアイコンの外枠用）。 */
     private final com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService;
+    private final LeagueSongBanService songBanService;
+    private final LeagueSongDrawService songDrawService;
 
     /** 昇降格ニュースで既定でさかのぼる週数。 */
     private static final int NEWS_DEFAULT_WEEKS = 4;
@@ -63,8 +69,12 @@ public class LeagueController {
                             LeagueMemberRepository leagueMemberRepository,
                             LeagueSongRepository leagueSongRepository,
                             LeagueEntryRepository leagueEntryRepository,
-                            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService) {
+                            com.beatseeker.backend.service.PreviousVersionPtService previousVersionPtService,
+                            LeagueSongBanService songBanService,
+                            LeagueSongDrawService songDrawService) {
         this.previousVersionPtService = previousVersionPtService;
+        this.songBanService = songBanService;
+        this.songDrawService = songDrawService;
         this.userRepository = userRepository;
         this.leagueService = leagueService;
         this.standingsService = standingsService;
@@ -525,6 +535,109 @@ public class LeagueController {
             return Math.min(LeagueDivision.LOWEST, from + 1);
         }
         return from;
+    }
+
+    /**
+     * 【メソッドの役割】 楽曲 BAN の候補（指定 DIVISION の課題曲の候補）と、自分の登録を返す。
+     *
+     * @param auth 認証情報
+     * @param tier DIVISION（省略時は自分のホーム DIVISION）
+     * @return {@code {tier, homeTier, maxBans, locked, lockMessage, counts, pool:[{title,difficultyName,level,rank}], banned:[{title,difficultyName,inPool}]}}
+     */
+    @GetMapping("/bans")
+    public ResponseEntity<?> bans(Authentication auth, @RequestParam(required = false) Integer tier) {
+        User user = getUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "ログインが必要です"));
+        }
+        Integer homeTier = homeTierOf(user);
+        if (homeTier == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "リーグに参加すると楽曲 BAN を登録できます"));
+        }
+        int t = tier != null ? tier : homeTier;
+        if (!LeagueDivision.isValid(t)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "DIVISION の指定が正しくありません"));
+        }
+        List<LeagueSongDrawService.PoolSong> pool = songDrawService.banPoolForTier(t);
+        Set<String> poolTitles = pool.stream().map(ps -> ps.song().getTitle()).collect(Collectors.toSet());
+        List<Map<String, Object>> poolOut = new ArrayList<>();
+        for (LeagueSongDrawService.PoolSong ps : pool) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("title", ps.song().getTitle());
+            m.put("difficultyName", com.beatseeker.backend.service.LeagueChartNotation.codeToName(ps.song().getDifficulty()));
+            m.put("level", ps.song().getLevel());
+            m.put("rank", ps.rankValue());
+            poolOut.add(m);
+        }
+        List<Map<String, Object>> banned = new ArrayList<>();
+        for (LeagueSongBan b : songBanService.bansOf(user, t)) {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("title", b.getTitle());
+            m.put("difficultyName", b.getDifficultyName());
+            // 難易度表の改訂で候補から外れた曲は抽選にも出ないので、画面で印を付ける
+            m.put("inPool", poolTitles.contains(b.getTitle()));
+            banned.add(m);
+        }
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("tier", t);
+        result.put("homeTier", homeTier);
+        result.put("maxBans", LeagueSongBanService.MAX_BANS);
+        result.put("locked", leagueService.isRegistrationLocked());
+        result.put("lockMessage", leagueService.isRegistrationLocked() ? banLockMessage() : null);
+        result.put("counts", songBanService.countsByTier(user));
+        result.put("pool", poolOut);
+        result.put("banned", banned);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 【メソッドの役割】 指定 DIVISION の楽曲 BAN を置き換える（最大 {@link LeagueSongBanService#MAX_BANS} 曲）。
+     *
+     * @param auth 認証情報
+     * @param req  {@code {"tier": 3, "titles": ["曲名", ...]}}
+     * @return 保存後の BAN
+     */
+    @PutMapping("/bans")
+    public ResponseEntity<?> saveBans(Authentication auth, @RequestBody BanRequest req) {
+        User user = getUser(auth);
+        if (user == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "ログインが必要です"));
+        }
+        if (homeTierOf(user) == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "リーグに参加すると楽曲 BAN を登録できます"));
+        }
+        if (req == null || req.tier() == null || !LeagueDivision.isValid(req.tier())) {
+            return ResponseEntity.badRequest().body(Map.of("error", "DIVISION の指定が正しくありません"));
+        }
+        if (leagueService.isRegistrationLocked()) {
+            return ResponseEntity.badRequest().body(Map.of("error", banLockMessage()));
+        }
+        try {
+            List<LeagueSongBan> saved = songBanService.replaceBans(user, req.tier(),
+                    req.titles() != null ? req.titles() : List.of());
+            return ResponseEntity.ok(Map.of("tier", req.tier(), "count", saved.size(),
+                    "titles", saved.stream().map(LeagueSongBan::getTitle).toList()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** 楽曲 BAN の登録リクエスト。 */
+    public record BanRequest(Integer tier, List<String> titles) {
+    }
+
+    /** 事前編成〜開始の間（月曜 0:00〜12:00）に BAN を編集しようとしたときの案内。 */
+    private String banLockMessage() {
+        return "今週の課題曲は日曜 23:59 までの BAN で抽選済みです。"
+                + com.beatseeker.backend.service.LeagueWeekLifecycleService.START_HOUR + ":00 の開始後に次週分を編集できます。";
+    }
+
+    /** スコアリーグの自分のホーム DIVISION（未参加なら null。休止中も参加時の DIVISION を返す）。 */
+    private Integer homeTierOf(User user) {
+        return leagueService.myEntries(user).stream()
+                .filter(e -> "score".equals(e.getLadderType()) && LeagueDivision.isValid(e.getCurrentTier()))
+                .map(LeagueEntry::getCurrentTier)
+                .findFirst().orElse(null);
     }
 
     /** 表示名（未設定なら IIDX ID）。 */

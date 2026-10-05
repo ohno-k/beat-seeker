@@ -19,6 +19,7 @@ import { useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import LeagueInfoModal from '../components/LeagueInfoModal.vue';
 import LeagueRankingModal from '../components/LeagueRankingModal.vue';
+import LeagueBanModal from '../components/LeagueBanModal.vue';
 import LeaguePointGauge from '../components/LeaguePointGauge.vue';
 import LeagueStandingsTable from '../components/LeagueStandingsTable.vue';
 import RankIcon from '../components/RankIcon.vue';
@@ -87,6 +88,8 @@ const openNewsWeekIds = ref<number[]>([]);
 
 /** ルール説明モーダルの開閉。 */
 const showInfo = ref(false);
+/** 楽曲 BAN モーダルの開閉（DIVISION 配属済みの参加者だけ）。 */
+const showBan = ref(false);
 /** DIVISION 別ランキングモーダルの開閉。 */
 const showRanking = ref(false);
 /** 管理者 overview（管理者のみ取得）。 */
@@ -866,6 +869,18 @@ onUnmounted(() => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V3H8v8M4 21h16M6 21v-6h12v6M9 7h6" />
           </svg>
           {{ t('league.rankingModal.open') }}
+        </button>
+        <!-- 楽曲 BAN（課題曲に出てほしくない曲を DIVISION ごとに最大 20 曲）。DIVISION 配属済みの人だけ。 -->
+        <button
+          v-if="isLoggedIn && myEntry?.currentTier != null"
+          class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border border-rose-300 dark:border-rose-700 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors"
+          @click="showBan = true"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="12" r="9" stroke-width="2" />
+            <path stroke-linecap="round" stroke-width="2" d="M5.6 5.6l12.8 12.8" />
+          </svg>
+          {{ t('league.banModal.open') }}
         </button>
       </div>
       <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t('league.subtitle') }}</p>
@@ -1770,6 +1785,7 @@ onUnmounted(() => {
     <LeagueInfoModal v-if="showInfo" @close="showInfo = false" />
 
     <!-- DIVISION 別ランキングモーダル -->
+    <LeagueBanModal v-if="showBan" @close="showBan = false" />
     <LeagueRankingModal v-if="showRanking" :ladder="ladder" :my-user-id="user?.id" @close="showRanking = false" />
   </div>
 </template>

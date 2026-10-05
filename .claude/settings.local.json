@@ -79,7 +79,13 @@
       "Bash(node /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/rep.js views/StrategyCardView.vue /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/sc.txt)",
       "Bash(awk '/<style/,/<\\\\/style>/' views/WrappedView.vue)",
       "Bash(node \"C:/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/2891b1f5-818b-4382-9d29-36355eb5a715/scratchpad/pd.cjs\")",
-      "Bash(node __TRACKED_VAR__/rep.cjs views/SkillTreeView.vue __TRACKED_VAR__/skill.txt)"
+      "Bash(node __TRACKED_VAR__/rep.cjs views/SkillTreeView.vue __TRACKED_VAR__/skill.txt)",
+      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process -Filter \"Name='\\\\''node.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*build-random-ranking*'\\\\'' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; '\\\\''stopped '\\\\'' + $_.ProcessId }')",
+      "Bash(cd /c/Users/oonok/beat-seeker/frontend/src && cat composables/useAdmin.ts | head -40; ls \"/c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/\" | grep shot; sed -n 1,40p \"/c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/shot-start.mjs\")",
+      "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad//**)",
+      "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/**)",
+      "Bash(sed -n 40,100p \"/c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/shot-start.mjs\")",
+      "Bash(sed -e 's/id: 999999, iidxId: '\\\\''0000-0000'\\\\''/id: 18, iidxId: '\\\\''5787-1145'\\\\''/' /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/shot-start.mjs)"
     ]
   }
 }

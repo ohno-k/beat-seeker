@@ -382,6 +382,36 @@ export interface LeaguePreview {
  * - 管理系（差し替え・再抽選・週次手動実行）はサーバ側で管理者判定される（403 が返る）。
  * - 状態は呼び出し側（LeagueView）が保持する。ここは fetch 関数と loading フラグのみ。
  */
+/** 楽曲 BAN の候補 1 曲（その DIVISION の課題曲の候補）。 */
+export interface LeagueBanPoolSong {
+  title: string;
+  difficultyName: string;
+  level: number | null;
+  /** 非公式難易度表のランク値（"12.3" など） */
+  rank: string;
+}
+
+/** 登録済みの BAN 1 曲。inPool = 今もその DIVISION の候補にあるか（難易度表の改訂で外れると false＝抽選にも出ない）。 */
+export interface LeagueBannedSong {
+  title: string;
+  difficultyName: string | null;
+  inPool: boolean;
+}
+
+/** 楽曲 BAN モーダルのデータ（DIVISION ごと）。 */
+export interface LeagueBans {
+  tier: number;
+  homeTier: number;
+  maxBans: number;
+  /** 事前編成〜開始（月曜 0:00〜12:00）は編集できない */
+  locked: boolean;
+  lockMessage: string | null;
+  /** DIVISION → 登録数（登録の無い DIVISION は含まない） */
+  counts: Record<string, number>;
+  pool: LeagueBanPoolSong[];
+  banned: LeagueBannedSong[];
+}
+
 export function useLeague() {
   const { authHeaders } = useAuth();
 
@@ -718,8 +748,28 @@ export function useLeague() {
     if (!res.ok) await raise(res, '編成の適用に失敗しました');
   };
 
+  /** 楽曲 BAN の候補と自分の登録を取得する（tier 省略時はホーム DIVISION）。 */
+  const fetchBans = async (tier?: number): Promise<LeagueBans> => {
+    const q = tier != null ? `?tier=${tier}` : '';
+    const res = await fetch(`${API_BASE}/api/league/bans${q}`, { headers: authHeaders() });
+    if (!res.ok) await raise(res, '楽曲 BAN の取得に失敗しました');
+    return (await res.json()) as LeagueBans;
+  };
+
+  /** 指定 DIVISION の楽曲 BAN を置き換える。 */
+  const saveBans = async (tier: number, titles: string[]): Promise<void> => {
+    const res = await fetch(`${API_BASE}/api/league/bans`, {
+      method: 'PUT',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ tier, titles }),
+    });
+    if (!res.ok) await raise(res, '楽曲 BAN の保存に失敗しました');
+  };
+
   return {
     isLoading,
+    fetchBans,
+    saveBans,
     fetchMe,
     fetchMeStatus,
     join,
