@@ -53,6 +53,7 @@ import FriendTimeline from './components/FriendTimeline.vue';
 import NotificationBox from './components/NotificationBox.vue';
 import OnboardingModal from './components/OnboardingModal.vue';
 import LeaguePushPromptModal from './components/LeaguePushPromptModal.vue';
+import LeagueResultModal from './components/LeagueResultModal.vue';
 import ShareImportModal from './components/ShareImportModal.vue';
 // サポーター限定タブ（譜面分析 / スコアペア散布図）を非サポーターが開いたときのロック画面。
 import SupporterLock from './components/SupporterLock.vue';
@@ -2082,6 +2083,9 @@ const handleUnifiedClose = async () => {
 
     <!-- アップデート告知モーダル（ログイン後・未読の告知があれば1回だけ表示） -->
     <LeaguePushPromptModal />
+
+    <!-- リーグの週が締まった後、最初に開いたときに自分の結果を見せて X へポストできるようにする -->
+    <LeagueResultModal />
 
     <!-- 共有/選択した画像を曲名検索して保存するモーダル（PWA Share Target の受け皿） -->
     <ShareImportModal

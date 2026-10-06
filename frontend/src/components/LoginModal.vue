@@ -19,6 +19,7 @@ import { useAuth } from '../composables/useAuth';
 import { useI18n } from '../composables/useI18n';
 import { useModalEscape } from '../composables/useModalEscape';
 import { DAN_RANK_OPTIONS, ARENA_RANKS } from '../composables/constants';
+import { displayNameFits } from '../utils/displayName';
 
 const { t } = useI18n();
 
@@ -127,6 +128,9 @@ const handleSubmit = async () => {
     } else {
       if (!displayName.value.trim()) {
         throw new Error(t('auth.usernameRequired'));
+      }
+      if (!displayNameFits(displayName.value)) {
+        throw new Error(t('profile.displayNameTooLong'));
       }
         await registerUser({
           iidxId: inputIidxId.value,

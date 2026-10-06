@@ -327,7 +327,12 @@ public class LeagueController {
                     row.put("startsAt", JstTime.fromJst(m.getWeek().getStartsAt()));
                     row.put("endsAt", JstTime.fromJst(m.getWeek().getEndsAt()));
                     row.put("tier", m.getTier());
+                    row.put("homeTier", m.getHomeTier() != null ? m.getHomeTier() : m.getTier());
+                    row.put("role", m.getRole());
                     row.put("groupIndex", m.getGroupIndex());
+                    // 結果共有（「8人中2位」）用のグループ人数。履歴は週数ぶんしか無いので 1 行 1 クエリで足りる。
+                    row.put("groupSize", leagueMemberRepository
+                            .findByWeekAndTierAndGroupIndex(m.getWeek(), m.getTier(), m.getGroupIndex()).size());
                     row.put("finalRank", m.getFinalRank());
                     row.put("movement", m.getMovement());
                     row.put("pointDelta", m.getPointDelta());

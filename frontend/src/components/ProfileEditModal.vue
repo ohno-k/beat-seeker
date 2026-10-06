@@ -20,6 +20,7 @@ import { useI18n } from '../composables/useI18n';
 import { useToast } from '../composables/useToast';
 import { useModalEscape } from '../composables/useModalEscape';
 import { DAN_RANK_OPTIONS, ARENA_RANKS } from '../composables/constants';
+import { displayNameFits } from '../utils/displayName';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -94,6 +95,10 @@ const handleUpdate = async () => {
 
   if (!displayName.value.trim()) {
     errorMsg.value = t('profile.displayNameRequired');
+    return;
+  }
+  if (!displayNameFits(displayName.value)) {
+    errorMsg.value = t('profile.displayNameTooLong');
     return;
   }
 

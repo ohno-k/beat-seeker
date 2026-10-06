@@ -158,7 +158,12 @@ export interface LeagueHistoryRow {
   startsAt: string;
   endsAt: string;
   tier: number;
+  /** ホーム DIVISION（昇降格の起点）。挑戦/防衛で別の卓に着席した週は tier と異なる。 */
+  homeTier?: number;
+  role?: 'normal' | 'challenge' | 'defense';
   groupIndex: number;
+  /** その週のグループ人数（「8人中2位」の表示用）。 */
+  groupSize?: number;
   finalRank: number | null;
   movement: 'promote' | 'stay' | 'relegate' | null;
   /** その週の順位によるポイント増減。 */
