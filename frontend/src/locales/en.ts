@@ -740,7 +740,6 @@ export const en = {
   'profile.saving': 'Saving...',
   'profile.updateSuccess': 'Profile updated!',
   'profile.displayNameRequired': 'Please enter a display name.',
-  'profile.displayNameTooLong': 'Display name is too long (up to 24 half-width or 12 full-width characters).',
   'profile.currentPasswordRequired': 'Enter current password to change password.',
   'profile.passwordMismatch': 'New passwords do not match.',
   'profile.passwordTooShort': 'New password must be at least 4 characters.',

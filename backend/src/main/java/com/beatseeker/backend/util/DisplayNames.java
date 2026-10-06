@@ -5,10 +5,8 @@ package com.beatseeker.backend.util;
  *
  * <p>表示幅は全角 1 文字 = 2、半角 1 文字 = 1 で数える（全角 12 文字 / 半角 24 文字まで）。
  * 2026-10 時点で本番には 80 文字超の表示名があり、ランキングやリーグの表が崩れていたため導入した。
- * 新規登録・プロフィール更新ではこの上限で弾き、既存の長い名前は API の出力時に省略する
- * ({@code JacksonJstConfig} の表示名シリアライザ)。
- *
- * <p>フロントの {@code utils/displayName.ts} と同じ規則で数えること。
+ * 名前の入力自体は制限せず（短くするよう求めない）、API の出力時にだけ省略する
+ * ({@code DisplayNameJacksonConfig})。
  */
 public final class DisplayNames {
 

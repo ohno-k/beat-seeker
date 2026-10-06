@@ -739,7 +739,6 @@ export const ko = {
   'profile.saving': '저장 중...',
   'profile.updateSuccess': '프로필을 업데이트했습니다!',
   'profile.displayNameRequired': '표시명을 입력해주세요.',
-  'profile.displayNameTooLong': '표시명이 너무 깁니다 (전각 12자・반각 24자까지).',
   'profile.currentPasswordRequired': '비밀번호를 변경하려면 현재 비밀번호를 입력해주세요.',
   'profile.passwordMismatch': '새 비밀번호가 일치하지 않습니다.',
   'profile.passwordTooShort': '새 비밀번호는 4자 이상으로 입력해주세요.',

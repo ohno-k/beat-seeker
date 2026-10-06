@@ -745,7 +745,6 @@ export const ja = {
   'profile.saving': '保存中...',
   'profile.updateSuccess': 'プロフィールを更新しました！',
   'profile.displayNameRequired': '表示名を入力してください。',
-  'profile.displayNameTooLong': '表示名が長すぎます（全角12文字・半角24文字まで）。',
   'profile.currentPasswordRequired': 'パスワードを変更するには、現在のパスワードを入力してください。',
   'profile.passwordMismatch': '新しいパスワードが一致しません。',
   'profile.passwordTooShort': '新しいパスワードは4文字以上で入力してください。',

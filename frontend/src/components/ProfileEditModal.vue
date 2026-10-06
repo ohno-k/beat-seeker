@@ -20,7 +20,6 @@ import { useI18n } from '../composables/useI18n';
 import { useToast } from '../composables/useToast';
 import { useModalEscape } from '../composables/useModalEscape';
 import { DAN_RANK_OPTIONS, ARENA_RANKS } from '../composables/constants';
-import { displayNameFits } from '../utils/displayName';
 
 const { t } = useI18n();
 const toast = useToast();
@@ -97,11 +96,6 @@ const handleUpdate = async () => {
     errorMsg.value = t('profile.displayNameRequired');
     return;
   }
-  if (!displayNameFits(displayName.value)) {
-    errorMsg.value = t('profile.displayNameTooLong');
-    return;
-  }
-
   // パスワード変更用 3 入力がいずれか埋まっている場合のみ、厳しめにバリデーション。
   if (newPassword.value || currentPassword.value || newPasswordConfirm.value) {
     if (!currentPassword.value) {

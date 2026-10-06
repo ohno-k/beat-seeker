@@ -4,7 +4,6 @@ import com.beatseeker.backend.config.JwtUtil;
 import com.beatseeker.backend.entity.User;
 import com.beatseeker.backend.repository.UserRepository;
 import com.beatseeker.backend.service.EmailService;
-import com.beatseeker.backend.util.DisplayNames;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,9 +38,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
-    /** 表示名が {@link DisplayNames#MAX_WIDTH} を超えたときのエラーメッセージ。 */
-    private static final String NAME_TOO_LONG_MESSAGE = "表示名が長すぎます（全角12文字・半角24文字まで）。";
 
     /** ユーザー永続化 Repository。 */
     private final UserRepository userRepository;
@@ -80,9 +76,6 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {
-        if (!DisplayNames.fits(request.displayName())) {
-            return ResponseEntity.badRequest().body(Map.of("message", NAME_TOO_LONG_MESSAGE));
-        }
         try {
             // 既に同 IIDX ID で登録されている場合は 409 を返して重複を防ぐ
             if (userRepository.findByIidxId(request.iidxId()).isPresent()) {
@@ -242,10 +235,6 @@ public class AuthController {
         String iidxId = (String) auth.getPrincipal();
         User user = userRepository.findByIidxId(iidxId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!DisplayNames.fits(request.displayName())) {
-            return ResponseEntity.badRequest().body(Map.of("message", NAME_TOO_LONG_MESSAGE));
-        }
 
         // ── パスワード変更ロジック ─────────────────────────
         // currentPassword と newPassword が両方揃っているときだけ実行
