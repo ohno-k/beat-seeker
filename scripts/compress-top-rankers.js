@@ -9,7 +9,7 @@ const zlib = require('zlib');
 const SRC = path.join(__dirname, 'top-rankers-data');
 const DST = path.resolve(__dirname, '..', 'backend', 'src', 'main', 'resources', 'top-rankers-data');
 
-// Version definitions mirror scrape-top-rankers.js. Version 0 is the
+// Version definitions mirror scrape-top-rankers.js (33+ come from scrape-top-rankers-eagate.js). Version 0 is the
 // virtual "歴代" version produced by merge-all-top-rankers.js.
 const VERSIONS = [
   { num: 0,  name: '歴代' },
@@ -24,6 +24,8 @@ const VERSIONS = [
   { num: 25, name: 'CANNON BALLERS' },  { num: 26, name: 'Rootage' },       { num: 27, name: 'HEROIC VERSE' },
   { num: 28, name: 'BISTROVER' },       { num: 29, name: 'CastHour' },      { num: 30, name: 'RESIDENT' },
   { num: 31, name: 'EPOLIS' },          { num: 32, name: 'Pinky Crush' },
+  // 33 以降は masaoblue に無いので scrape-top-rankers-eagate.js で eagate 公式から取得する。
+  { num: 33, name: 'Sparkle Shower' },
 ];
 
 if (!fs.existsSync(DST)) fs.mkdirSync(DST, { recursive: true });

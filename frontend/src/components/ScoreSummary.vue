@@ -126,6 +126,32 @@
             </div>
           </div>
 
+          <!-- 記録保持者（DJ NAME）フィルタ。TOP ランカー仮想プロフィール閲覧時のみ。記録数の多い順に並べる -->
+          <div v-if="props.viewingMode === 'topRanker' && djNameOptions.length > 0" class="relative w-full md:w-44">
+            <button
+              @click.stop="toggleDropdown('djName')"
+              class="flex items-center justify-between w-full px-3 py-1.5 sm:py-2 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors hover:bg-white dark:hover:bg-slate-800"
+              :title="filterDjName.length > 0 ? filterDjName.join(', ') : 'DJ NAME'"
+            >
+              <span class="truncate">{{ filterDjName.length > 0 ? filterDjName.join(', ') : 'DJ NAME' }}</span>
+              <svg class="h-4 w-4 text-slate-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div v-if="openDropdown === 'djName'" class="absolute z-20 mt-1 w-60 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-2 max-h-80 overflow-y-auto animate-fade-in">
+              <label v-for="o in djNameOptions" :key="o.name" class="flex items-center px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  :checked="isSelected(filterDjName, o.name)"
+                  @change="toggleFilterValue(filterDjName, o.name)"
+                  class="h-4 w-4 text-blue-600 rounded border-slate-300 dark:border-slate-600 focus:ring-blue-500 dark:focus:ring-blue-600 transition-all cursor-pointer bg-white dark:bg-slate-900"
+                >
+                <span class="ml-3 text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors truncate">{{ o.name }}</span>
+                <span class="ml-auto pl-2 text-[11px] tabular-nums text-slate-400 dark:text-slate-500 shrink-0">{{ o.count }}</span>
+              </label>
+            </div>
+          </div>
+
           <!-- 歴代ベスト作品フィルタ（歴代自己ベストスコアを出した作品で絞り込む）。過去作を取り込み済みの本人閲覧時のみ表示。 -->
           <div v-if="canFilterBestVersion" class="relative w-full md:w-44">
             <button
@@ -1673,6 +1699,13 @@ const filterClearType = ref<string[]>([]);
 const filterBestVersion = ref<string[]>([]);
 /** 0 点譜面を非表示にするトグル。未プレイ曲を隠したい場合に使う。 */
 const hideZeroScore = ref(false);
+/** 記録保持者（DJ NAME）フィルタ。TOP ランカー仮想プロフィール閲覧時のみ使う。空配列は「全て」。 */
+const filterDjName = ref<string[]>([]);
+// 別の地域・作品の TOP ランカーへ切り替えたら、前の地域の DJ 名で絞り込んだままにしない。
+watch(() => props.viewingMode, () => { filterDjName.value = []; });
+watch(() => props.scores, () => {
+  if (filterDjName.value.length > 0) filterDjName.value = [];
+});
 
 /** 現在開いているドロップダウン名。null は閉じた状態。 */
 const openDropdown = ref<string | null>(null);
@@ -1753,6 +1786,13 @@ const appliedFilterChips = computed<Array<{ id: string; label: string; remove: (
       remove: () => { filterBestVersion.value = filterBestVersion.value.filter(x => x !== v); },
     });
   });
+  filterDjName.value.forEach((name) => {
+    chips.push({
+      id: `djName:${name}`,
+      label: `DJ: ${name}`,
+      remove: () => { filterDjName.value = filterDjName.value.filter(x => x !== name); },
+    });
+  });
   if (hideZeroScore.value) {
     chips.push({
       id: 'hideZero',
@@ -1771,6 +1811,7 @@ const clearAllFilters = () => {
   filterDjLevel.value = [];
   filterClearType.value = [];
   filterBestVersion.value = [];
+  filterDjName.value = [];
   hideZeroScore.value = false;
 };
 
@@ -3402,7 +3443,7 @@ watch(isLoggedIn, (val) => { if (val) fetchSongRanks(); });
 
 /** フィルタ/ソート/件数のどれかが変わったらページ番号を 1 に戻す（UX 改善）。 */
 watch(
-  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterBestVersion, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
+  [searchQuery, filterDifficulty, filterLevel, filterDjLevel, filterClearType, filterBestVersion, filterDjName, hideZeroScore, viewMode, sortKey, sortOrder, itemsPerPage],
   () => {
     currentPage.value = 1;
   },
@@ -3467,6 +3508,27 @@ const toggleSort = (key: SortKey) => {
  *         - djLevel:     AAA→F→--- の順位マップで比較。
  *         - songRank:    未知は 999999 扱いで末尾送り。
  */
+/** TOP ランカー行の記録保持者名（空なら '(不明)'）。フィルタの選択肢と判定で同じ表記にそろえる。 */
+const djNameOf = (r: { djName?: string | null }) => (r.djName && r.djName.trim()) || '(不明)';
+
+/**
+ * 【computed の役割】 DJ NAME フィルタの選択肢。表示中モード（BEAT / RATE）の行に出てくる
+ * 記録保持者を、スコアのある記録数の多い順に並べる。
+ */
+const djNameOptions = computed(() => {
+  if (props.viewingMode !== 'topRanker') return [];
+  const base = viewMode.value === 'rate' ? rateViewRecords.value : viewRecords.value;
+  const counts = new Map<string, number>();
+  for (const r of base) {
+    if (!(r.score > 0)) continue;
+    const name = djNameOf(r);
+    counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+});
+
 const filteredScores = computed(() => {
   let result = viewMode.value === 'rate' ? [...rateViewRecords.value] : [...viewRecords.value];
 
@@ -3497,9 +3559,13 @@ const filteredScores = computed(() => {
     ));
   }
 
+  if (filterDjName.value.length > 0) {
+    result = result.filter(r => filterDjName.value.includes(djNameOf(r)));
+  }
+
   const query = searchQuery.value.toLowerCase().trim();
   if (query) {
-    result = result.filter(record => 
+    result = result.filter(record =>
       record.title.toLowerCase().includes(query) ||
       record.artist.toLowerCase().includes(query) ||
       record.genre.toLowerCase().includes(query) ||

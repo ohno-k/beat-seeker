@@ -91,7 +91,8 @@
 
 | スクリプト | 用途 |
 |------------|------|
-| [scripts/scrape-top-rankers.js](scripts/scrape-top-rankers.js) | `masaoblue/iidx-top-rankers-viewer` から全バージョン×全都道府県の CSV をダウンロード。再開可能。 |
+| [scripts/scrape-top-rankers.js](scripts/scrape-top-rankers.js) | `masaoblue/iidx-top-rankers-viewer` から全バージョン×全都道府県の CSV をダウンロード（1〜32 のみ）。再開可能。 |
+| [scripts/scrape-top-rankers-eagate.js](scripts/scrape-top-rankers-eagate.js) | 33 Sparkle Shower 以降の TOP RANKER を eagate 公式（`/game/2dx/{ver}/ranking/json/topranker.html`、ログイン不要）から取得し、同じ CSV 形式で `scripts/top-rankers-data/{ver}/` に保存。引数で作品番号（既定 33）。再開可能。 |
 | [scripts/merge-all-top-rankers.js](scripts/merge-all-top-rankers.js) | バージョン跨ぎで「歴代ベスト」CSV を生成（`scripts/top-rankers-data/0/` に出力）。 |
 | [scripts/compress-top-rankers.js](scripts/compress-top-rankers.js) | 全 CSV を gzip 化し `backend/src/main/resources/top-rankers-data/` に配置。`manifest.json` も生成。 |
 | [scripts/backfill-rate-tier.js](scripts/backfill-rate-tier.js) | 全ユーザーの `score_history_logs` の `total_rate_pt` を再計算して DB 更新。 |
@@ -104,7 +105,8 @@
 ```bash
 # Top-Rankers 初回セットアップ
 node scripts/probe.js                       # 1. 存在確認
-node scripts/scrape-top-rankers.js          # 2. CSVダウンロード
+node scripts/scrape-top-rankers.js          # 2. CSVダウンロード（1〜32）
+node scripts/scrape-top-rankers-eagate.js 33 # 2b. 33 以降は eagate 公式から
 node scripts/merge-all-top-rankers.js       # 3. 歴代ベスト作成
 node scripts/compress-top-rankers.js        # 4. gzip圧縮して backend resources へ配置
 

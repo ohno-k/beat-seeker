@@ -78,7 +78,7 @@ function mergePrefecture(prefNum) {
   // title -> { version: string, diffs: [{score, dj, region}, ...] }
   const songs = new Map();
 
-  for (let v = 1; v <= 32; v++) {
+  for (let v = 1; v <= 33; v++) {
     const fname = csvFilenameFor(v, prefNum);
     const filePath = path.join(SRC, String(v), fname);
     if (!fs.existsSync(filePath)) continue;

@@ -237,6 +237,12 @@ export const ko = {
   'dashboard.lv12MaxMinusRate': '☆12 MAX-율',
   'dashboard.maxMinusHint': '스코어 레이트 94.45% 이상',
   'dashboard.whatIsBeatTier': 'Beat-Tier란?',
+  'dashboard.beatDjTitle': 'BEAT-PT 대상 보면의 베스트 보유자',
+  'dashboard.beatDjOpen': '대상 플레이어 {n}명 보기',
+  'dashboard.beatDjNote': 'BEAT-PT 대상 {charts}보면 중 베스트 보유 수가 많은 순',
+  'dashboard.beatDjColAll': '보유 수',
+  'dashboard.beatDjColTop100': 'TOP100 내',
+  'dashboard.beatDjSongs': '{n}곡',
   'dashboard.whatIsRateTier': 'Rate-Tier란?',
 
   'activity.title': '전체 소식',

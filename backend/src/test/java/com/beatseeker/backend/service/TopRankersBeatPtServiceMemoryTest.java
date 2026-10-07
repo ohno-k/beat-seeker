@@ -141,7 +141,8 @@ class TopRankersBeatPtServiceMemoryTest {
         // 17 カラム未満の行（ANOTHER/LEGGENDARIA 列を持たない古い曲の行。全体の約 1/3）は
         // リファクタリング前から本番コードが丸ごとスキップしており、この数はその除外後の値。
         // 同梱データを差し替えたら更新すること。
-        assertEquals(2_121_084L, totalEntries, "検証したエントリ総数が想定と違う");
+        // 2026-10-07: 33 Sparkle Shower（eagate 公式から取得）を追加して 2,121,084 → 2,509,979。
+        assertEquals(2_509_979L, totalEntries, "検証したエントリ総数が想定と違う");
     }
 
     /**
