@@ -24,6 +24,7 @@ const VERSIONS = [
   { num: 25, name: 'CANNON BALLERS' },  { num: 26, name: 'Rootage' },       { num: 27, name: 'HEROIC VERSE' },
   { num: 28, name: 'BISTROVER' },       { num: 29, name: 'CastHour' },      { num: 30, name: 'RESIDENT' },
   { num: 31, name: 'EPOLIS' },          { num: 32, name: 'Pinky Crush' },
+  { num: 33, name: 'Sparkle Shower' },
 ];
 
 if (!fs.existsSync(DST)) fs.mkdirSync(DST, { recursive: true });

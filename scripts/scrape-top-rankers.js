@@ -1,10 +1,14 @@
 // Scrape all CSVs from https://masaoblue.github.io/iidx-top-rankers-viewer
 // Data is stored as /versions/{N}/{N}_{shortName}_TOPRANKER_{pref2}_{prefName}.csv
-// Supports version num 1..32 and prefecture num 0..59.
+// Supports version num 1..33 and prefecture num 0..59.
 //
 // Run: node scripts/scrape-top-rankers.js
 // Stores downloaded CSVs under scripts/top-rankers-data/{version}/...
 // Skips files already downloaded (resume-safe).
+//
+// Options:
+//   --short-name=33:XXX   override a version's shortName used in the viewer's file names
+//                         (e.g. if the viewer names v33 files differently from the default below)
 
 const fs = require('fs');
 const path = require('path');
@@ -46,7 +50,17 @@ const VERSIONS = [
   { num: 30, name: 'RESIDENT',         shortName: 'RESI'  },
   { num: 31, name: 'EPOLIS',           shortName: 'EPO'   },
   { num: 32, name: 'Pinky Crush',      shortName: 'Pinky' },
+  // v33: the viewer's file-name shortName is unverified; override with --short-name=33:XXX if every file 404s.
+  { num: 33, name: 'Sparkle Shower',   shortName: 'Sparkle' },
 ];
+
+for (const arg of process.argv.slice(2)) {
+  const m = arg.match(/^--short-name=(\d+):(.+)$/);
+  if (!m) continue;
+  const v = VERSIONS.find(x => x.num === Number(m[1]));
+  if (!v) throw new Error(`Unknown version num in ${arg}`);
+  v.shortName = m[2];
+}
 
 // Prefecture names, index = prefecture num. Source: module 39399 v_ export.
 const PREFECTURE_NAMES = [
@@ -179,6 +193,15 @@ async function main() {
   await Promise.all(Array.from({ length: concurrency }, (_, i) => worker(i)));
 
   fs.writeFileSync(path.join(OUT_DIR, 'missing.json'), JSON.stringify(missingList, null, 2));
+  // A version whose every attempted file is missing usually means a wrong shortName (or not yet published).
+  for (const v of VERSIONS) {
+    const attempted = tasks.filter(t => t.version === v.num).length;
+    const miss = missingList.filter(t => t.version === v.num).length;
+    if (attempted > 0 && miss === attempted) {
+      console.warn(`WARN: all ${attempted} files for v${v.num} (${v.name}, shortName=${v.shortName}) returned 404. ` +
+        `Check the viewer's file names and retry with --short-name=${v.num}:XXX`);
+    }
+  }
   console.log(`DONE: ok=${success}, skipped=${skipped}, missing=${missing}, failed=${failed}, total=${tasks.length}`);
 }
 

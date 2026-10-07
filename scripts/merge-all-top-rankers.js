@@ -30,6 +30,7 @@ const PREFECTURE_NUM_OVERRIDE = {
   22: { 56: 51, 59: 53 }, 21: { 56: 51, 59: 53 },
 };
 
+const LATEST_VERSION = 33; // Sparkle Shower. Keep in sync with scrape-top-rankers.js VERSIONS.
 const DIFF_COUNT = 5; // BEGINNER, NORMAL, HYPER, ANOTHER, LEGGENDARIA
 const HEADER =
   'バージョン,タイトル,' +
@@ -78,7 +79,7 @@ function mergePrefecture(prefNum) {
   // title -> { version: string, diffs: [{score, dj, region}, ...] }
   const songs = new Map();
 
-  for (let v = 1; v <= 32; v++) {
+  for (let v = 1; v <= LATEST_VERSION; v++) {
     const fname = csvFilenameFor(v, prefNum);
     const filePath = path.join(SRC, String(v), fname);
     if (!fs.existsSync(filePath)) continue;

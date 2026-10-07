@@ -179,7 +179,7 @@ public class TopRankersBeatPtService {
     /**
      * 1 曲 1 難易度分のランカー列を、スコア降順で列指向に保持する不変オブジェクト。
      *
-     * versionNum（0〜32）と prefectureFileNum（0〜47）はいずれも短い整数なので
+     * versionNum（0〜33）と prefectureFileNum（0〜47）はいずれも短い整数なので
      * {@code short} に格納する（{@link SongScoreColumnBuilder#add} で範囲を検証済み）。
      */
     private record SongScoreColumn(int[] scores, short[] versionNums,
