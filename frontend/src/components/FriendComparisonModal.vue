@@ -13,6 +13,8 @@
  * props:
  *  - friend: 比較相手（バーチャル時は負の ID のダミー Friend）
  *  - virtualArea: バーチャルライバル時の取得元（versionNum + prefectureFileNum）
+ *  - pastSelf: 「前作の自分」と比べるときの作品（管理者専用）。前作側は CSV 読み込み日を選んで
+ *    その時点のスコアでも比べられる（GET /api/scores/past/self-comparison）
  *  - isOpen: モーダル開閉
  * emits:
  *  - close: 閉じる
@@ -23,6 +25,8 @@ import { useScores } from '../composables/useScores';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import type { ScoreData } from '../types/ScoreData';
 import FriendComparisonChartModal from './FriendComparisonChartModal.vue';
+import { useAuth, API_BASE } from '../composables/useAuth';
+import { formatJstDateTime } from '../utils/jstTime';
 
 /** グラフモーダルが対象とする集計単位の指定。 'rank:12.0' で非公式難易度を指定。 */
 type ChartScope = 'overall' | 'lv10minus' | 'lv11' | 'lv12' | `rank:${string}`;
@@ -30,6 +34,8 @@ type ChartScope = 'overall' | 'lv10minus' | 'lv11' | 'lv12' | `rank:${string}`;
 const props = defineProps<{
   friend: Friend;
   virtualArea?: { versionNum: number; prefectureFileNum: number } | null;
+  /** 「前作の自分」との比較時のみ。比べる作品バージョン。 */
+  pastSelf?: { version: number } | null;
   isOpen: boolean;
 }>();
 
@@ -39,6 +45,63 @@ const emit = defineEmits<{
 
 const { fetchFriendScores, isLoading: isFriendLoading } = useFriends();
 const { fetchMyScores, fetchTopRankerProfile, isFetching: isMyLoading } = useScores();
+const { authHeaders } = useAuth();
+
+/** 相手側の短い呼び名（サマリー・表の列見出し用）。 */
+const opponentLabel = computed(() => props.pastSelf ? '前作' : 'FRIEND');
+
+/** 前作の自分との比較: CSV 読み込み日の選択肢（新しい順）。 */
+const pastImportDates = ref<{ id: number; uploadedAt: string; updatedCount: number | null }[]>([]);
+/** 前作の自分との比較: 選んでいる CSV 読み込み日（成長記録の ID）。'' は最終スコア。 */
+const pastAsOf = ref<number | ''>('');
+/** 前作の自分との比較: 前作側の取得中フラグ。 */
+const isPastLoading = ref(false);
+
+/** 【関数の役割】 前作の CSV 読み込み日の一覧を取得する（取得失敗時は最終スコアだけ選べる）。 */
+const loadPastImportDates = async (version: number) => {
+  const res = await fetch(`${API_BASE}/api/scores/past/self-comparison/import-dates?version=${version}`, { headers: authHeaders() });
+  pastImportDates.value = res.ok ? await res.json() : [];
+};
+
+/** 【関数の役割】 前作側のスコア（最終 or 選んだ CSV 読み込み日の時点）を取得する。 */
+const fetchPastSelfScores = async (version: number, asOf: number | ''): Promise<any[]> => {
+  const q = asOf === '' ? '' : `&asOf=${asOf}`;
+  const res = await fetch(`${API_BASE}/api/scores/past/self-comparison?version=${version}${q}`, { headers: authHeaders() });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.message || '前作スコアの取得に失敗しました');
+  }
+  const body = await res.json();
+  return body.records ?? [];
+};
+
+/**
+ * 【関数の役割】 前作側のレコードの★を今作の★に揃える。
+ * ★は作品間で変わることがあり、そのままだとレベル帯の絞り込みで片側だけ外れてしまうため。
+ * 今作に無い譜面（削除曲など）は前作の★のまま残す。
+ */
+const alignLevelsToCurrent = (past: ScoreRecord[], current: ScoreRecord[]): ScoreRecord[] => {
+  const levels = new Map(current.map(s => [`${s.title}_${s.difficultyName}`, s.difficultyLevel]));
+  return past.map(s => {
+    const lv = levels.get(`${s.title}_${s.difficultyName}`);
+    return lv != null ? { ...s, difficultyLevel: lv } : s;
+  });
+};
+
+/** 【関数の役割】 CSV 読み込み日を切り替えたときに前作側だけを取り直す。 */
+const reloadPastSide = async () => {
+  if (!props.pastSelf) return;
+  error.value = null;
+  isPastLoading.value = true;
+  try {
+    const past = await fetchPastSelfScores(props.pastSelf.version, pastAsOf.value);
+    friendProcessedScores.value = alignLevelsToCurrent(flattenScores(groupScores(past)), myProcessedScores.value);
+  } catch (e: any) {
+    error.value = e.message;
+  } finally {
+    isPastLoading.value = false;
+  }
+};
 
 /** 自分の ScoreRecord（flatten 済み）。 */
 const myProcessedScores = ref<ScoreRecord[]>([]);
@@ -48,7 +111,7 @@ const friendProcessedScores = ref<ScoreRecord[]>([]);
 const error = ref<string | null>(null);
 
 /** 自分 or 相手どちらかが取得中なら true。スピナー表示用。 */
-const isLoading = computed(() => isFriendLoading.value || isMyLoading.value);
+const isLoading = computed(() => isFriendLoading.value || isMyLoading.value || isPastLoading.value);
 
 /**
  * 【関数の役割】 自分と相手のスコアを並列取得し、flatten 済み配列に格納する。
@@ -64,7 +127,21 @@ const loadData = async () => {
     friendId: props.friend.id,
   });
   try {
-    if (props.virtualArea) {
+    if (props.pastSelf) {
+      const version = props.pastSelf.version;
+      isPastLoading.value = true;
+      try {
+        const [myRaw, past] = await Promise.all([
+          fetchMyScores(),
+          fetchPastSelfScores(version, pastAsOf.value),
+          loadPastImportDates(version),
+        ]);
+        myProcessedScores.value = flattenScores(myRaw);
+        friendProcessedScores.value = alignLevelsToCurrent(flattenScores(groupScores(past)), myProcessedScores.value);
+      } finally {
+        isPastLoading.value = false;
+      }
+    } else if (props.virtualArea) {
       console.log('[FriendComparisonModal] virtual path', props.virtualArea);
       const [myRaw, topRanker] = await Promise.all([
         fetchMyScores(),
@@ -394,6 +471,23 @@ const openRankChart = (rank: string, ev: Event) => {
           <div v-else class="space-y-6 sm:space-y-8">
             <!-- フィルタートグル群（レベルチェック + 両者プレイ済み）。狭幅では行ごとに折り返してタップ領域を確保 -->
             <div class="flex flex-wrap items-center justify-start sm:justify-end gap-x-3 gap-y-2 sm:gap-4">
+              <!-- 前作の自分との比較: 前作側の CSV 読み込み日 -->
+              <template v-if="pastSelf">
+                <label class="flex items-center gap-2">
+                  <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">前作の CSV 読み込み日</span>
+                  <select
+                    v-model="pastAsOf"
+                    @change="reloadPastSide"
+                    class="text-xs sm:text-sm font-bold rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 px-2 py-1"
+                  >
+                    <option value="">最終（前作スコア）</option>
+                    <option v-for="d in pastImportDates" :key="d.id" :value="d.id">
+                      {{ formatJstDateTime(d.uploadedAt) }}（{{ d.updatedCount ?? 0 }} 譜面更新）
+                    </option>
+                  </select>
+                </label>
+                <span class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-600"></span>
+              </template>
               <!-- レベル選択チェックボックス (ANOTHER/LEGGENDARIA 譜面のみ集計) -->
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300">公式レベル</span>
@@ -451,6 +545,7 @@ const openRankChart = (rank: string, ev: Event) => {
                     {{ summaryLabel(key) }}
                   </h3>
                   <button
+                    v-if="!pastSelf"
                     type="button"
                     @click="openSummaryChart(key, $event)"
                     class="p-1 rounded-md text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
@@ -477,7 +572,7 @@ const openRankChart = (rank: string, ev: Event) => {
                   </div>
                   <div v-if="!showBothPlayedOnly" class="flex flex-col bg-red-50 dark:bg-red-900/20 rounded-lg py-1">
                     <span class="text-base sm:text-lg text-red-400/80">{{ stats.friendOnly }}</span>
-                    <span class="text-[8px] text-red-400 dark:text-red-500">FRIEND</span>
+                    <span class="text-[8px] text-red-400 dark:text-red-500">{{ opponentLabel }}</span>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xl sm:text-2xl text-red-500 dark:text-red-400">{{ stats.loss }}</span>
@@ -511,7 +606,7 @@ const openRankChart = (rank: string, ev: Event) => {
                       <th class="p-2 sm:p-4 text-center">WIN</th>
                       <th v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center bg-blue-50/50 dark:bg-blue-900/10">YOU</th>
                       <th class="p-2 sm:p-4 text-center">DRAW</th>
-                      <th v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center bg-red-50/50 dark:bg-red-900/10">FRIEND</th>
+                      <th v-if="!showBothPlayedOnly" class="p-2 sm:p-4 text-center bg-red-50/50 dark:bg-red-900/10">{{ opponentLabel }}</th>
                       <th class="p-2 sm:p-4 text-center">LOSS</th>
                     </tr>
                   </thead>
@@ -528,6 +623,7 @@ const openRankChart = (rank: string, ev: Event) => {
                             </svg>
                             <span class="text-slate-800 dark:text-slate-200 whitespace-nowrap">{{ rank }}</span>
                             <button
+                              v-if="!pastSelf"
                               type="button"
                               @click="openRankChart(rank, $event)"
                               class="ml-auto p-1 rounded-md text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors shrink-0"
@@ -605,7 +701,7 @@ const openRankChart = (rank: string, ev: Event) => {
                             <div v-if="stats.friendOnlySongs.length > 0" class="space-y-2">
                               <h4 class="text-[10px] font-bold text-red-400 flex items-center gap-1">
                                 <span class="w-1 h-3 bg-red-300 rounded-full"></span>
-                                FRIEND Only ({{ stats.friendOnlySongs.length }})
+                                {{ opponentLabel }} Only ({{ stats.friendOnlySongs.length }})
                               </h4>
                               <div class="space-y-1">
                                 <div v-for="s in stats.friendOnlySongs" :key="s.title" class="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-red-50 dark:border-red-900/10 text-xs text-slate-500">
@@ -630,7 +726,9 @@ const openRankChart = (rank: string, ev: Event) => {
               <div class="text-[11px] sm:text-xs text-blue-700 dark:text-blue-300 font-bold leading-relaxed min-w-0">
                 <p>・集計対象は ANOTHER / LEGGENDARIA 譜面のみ。BEGINNER / NORMAL / HYPER は除外しています。</p>
                 <p>・WIN/DRAW/LOSS: 両者がプレイ済みの楽曲のEX-SCORE比較</p>
-                <p>・YOU Only: 自分のみプレイ済み / FRIEND Only: 相手のみプレイ済み</p>
+                <p v-if="pastSelf">・YOU Only: 今作のみプレイ済み / 前作 Only: 前作のみプレイ済み</p>
+                <p v-else>・YOU Only: 自分のみプレイ済み / FRIEND Only: 相手のみプレイ済み</p>
+                <p v-if="pastSelf">・前作側は CSV 読み込み日を選ぶと、その取り込みを終えた時点のスコアで比べます（成長記録の更新内容から復元）。</p>
                 <p>・両者未プレイの楽曲は集計から除外して表示しています。</p>
               </div>
             </div>
@@ -649,6 +747,7 @@ const openRankChart = (rank: string, ev: Event) => {
 
   <!-- 勝敗の変遷グラフ（サマリーカード / 非公式難易度行のグラフボタンから開く） -->
   <FriendComparisonChartModal
+    v-if="!pastSelf"
     :is-open="isChartModalOpen"
     :friend="friend"
     :virtual-area="virtualArea"
