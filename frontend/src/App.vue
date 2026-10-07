@@ -63,6 +63,7 @@ const ArenaView = defineAsyncComponent(() => import('./views/ArenaView.vue'));
 const TierVotingView = defineAsyncComponent(() => import('./views/TierVotingView.vue'));
 const ArcadeAssistView = defineAsyncComponent(() => import('./views/ArcadeView.vue'));
 const SongAverageView = defineAsyncComponent(() => import('./views/SongAverageView.vue'));
+const TopRankerSummaryView = defineAsyncComponent(() => import('./views/TopRankerSummaryView.vue'));
 const DifficultyTableView = defineAsyncComponent(() => import('./views/DifficultyTableView.vue'));
 // 譜面分析（スコア予測）/ スコアペア散布図: どちらもサポーター限定タブ。
 // 非サポーターには SupporterLock を出すので、本体チャンクはサポーターだけがフェッチする。
@@ -306,8 +307,8 @@ const isCmdkOpen = ref(false);
 const availableCmdkTabIds = computed<string[]>(() => {
   const ALL = [
     'dashboard', 'table', 'profile', 'ranking', 'score-roadmap', 'friends', 'history', 'arena',
-    'arcade-assist', 'tier-voting', 'song-avg', 'diff-table', 'rank-comparison',
-    'score-prediction', 'score-scatter', 'changelog', 'about',
+    'arcade-assist', 'song-avg', 'diff-table', 'rank-comparison',
+    'top-rankers', 'score-prediction', 'score-scatter', 'changelog', 'about',
   ];
   // Sidebar.vue navigationItems と同じ判定
   const REQUIRES_AUTH = new Set(['score-roadmap', 'profile', 'friends', 'history', 'arena', 'arcade-assist', 'score-prediction', 'score-scatter']);
@@ -379,7 +380,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-spectrum' | 'score-roadmap' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-spectrum' | 'score-roadmap' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores' | 'top-rankers'>('dashboard')
 
 // 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
 // （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
@@ -438,6 +439,7 @@ const activeTabLabel = computed<string>(() => {
     'score-spectrum': t('nav.scoreSpectrum'),
     'score-roadmap': t('nav.scoreRoadmap'),
     'score-prediction': t('nav.scorePrediction'),
+    'top-rankers': t('nav.topRankers'),
     'score-scatter': t('nav.scoreScatter'),
     'popular-songs': t('nav.popularSongs'),
     'skill-tree': t('nav.skillTree'),
@@ -812,6 +814,7 @@ onMounted(() => {
     // サポーター限定の分析タブ（直接アクセス・ブックマーク用）。
     '/score-prediction': 'score-prediction',
     '/score-scatter': 'score-scatter',
+    '/top-rankers': 'top-rankers',
     // 作品別スコア一覧から戻ったときに書き戻す URL。リロードでもプロフィールに着地させる。
     '/profile': 'profile',
   };
@@ -2442,6 +2445,11 @@ const handleUnifiedClose = async () => {
         <!-- ARCADE アシスト（ログイン必須） -->
         <template v-else-if="activeTab === 'arcade-assist'">
           <ArcadeAssistView class="w-full max-w-lg mx-auto animate-fade-in" />
+        </template>
+
+        <!-- TOP RANKER まとめ（作品×地域の仮想ユーザー一覧）。行クリックで仮想プロフィールへ -->
+        <template v-else-if="activeTab === 'top-rankers'">
+          <TopRankerSummaryView class="w-full max-w-5xl mx-auto animate-fade-in" @view-top-ranker="handleViewTopRanker" />
         </template>
 
         <!-- 曲別平均スコア閲覧 -->

@@ -68,21 +68,6 @@
           Next: {{ nextRankInfo.nextRank.name }} {{ nextRankInfo.nextRank.tier || '' }}<br/>
           {{ t('dashboard.remaining') }} ({{ nextRankInfo.nextRank.minPoints - displayBeatPt > 0 ? (nextRankInfo.nextRank.minPoints - displayBeatPt).toFixed(1) : 0 }} pt)
         </p>
-        <!-- DJ Name pie (topRanker only) -->
-        <!-- 一覧は件数が多くなるのでモーダルに出す。カードには円グラフと開くボタンだけ置く -->
-        <button
-          v-if="isTopRankerView && beatTierDjPie.length > 0"
-          type="button"
-          class="group w-full mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 z-10 flex items-center justify-center gap-4"
-          @click="showBeatDjModal = true"
-        >
-          <svg viewBox="0 0 100 100" class="w-20 h-20 shrink-0" role="img" :aria-label="t('dashboard.beatDjTitle')">
-            <path v-for="(slice, i) in beatTierDjPie" :key="i" :d="slice.path" :fill="slice.color" stroke="white" stroke-width="0.5" />
-          </svg>
-          <span class="text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:underline">
-            {{ t('dashboard.beatDjOpen', { n: beatTierDjRows.length }) }}
-          </span>
-        </button>
       </div>
 
       <!-- Rate-Tier (全難度 ANOTHER/LEGGENDARIA) -->
@@ -250,51 +235,6 @@
     <!-- Info Modal -->
     <BeatTierInfoModal v-if="showInfoModal" @close="showInfoModal = false" />
     <RateTierInfoModal v-if="showRateInfoModal" @close="showRateInfoModal = false" />
-
-    <!-- TOP ランカー閲覧時: BEAT-PT 対象譜面のベスト保持者一覧 -->
-    <Teleport to="body">
-      <div
-        v-if="showBeatDjModal"
-        class="fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 animate-fade-in"
-        @click.self="showBeatDjModal = false"
-      >
-        <div class="w-full max-w-md max-h-[85vh] flex flex-col bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 shadow-xl">
-          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-start justify-between gap-3">
-            <div>
-              <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">{{ t('dashboard.beatDjTitle') }}</h3>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{{ t('dashboard.beatDjNote', { charts: beatTierEligibleCount }) }}</p>
-            </div>
-            <button @click="showBeatDjModal = false" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-all" :aria-label="t('common.close')">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div class="flex-1 overflow-y-auto">
-            <table class="w-full text-xs">
-              <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">
-                <tr>
-                  <th class="px-3 py-2 text-right font-bold w-10">#</th>
-                  <th class="px-3 py-2 text-left font-bold">DJ NAME</th>
-                  <th class="px-3 py-2 text-right font-bold whitespace-nowrap">{{ t('dashboard.beatDjColAll') }}</th>
-                  <th class="px-3 py-2 text-right font-bold whitespace-nowrap">{{ t('dashboard.beatDjColTop100') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, i) in beatTierDjRows" :key="row.name" class="border-t border-slate-100 dark:border-slate-700/60">
-                  <td class="px-3 py-1.5 text-right tabular-nums text-slate-400">{{ i + 1 }}</td>
-                  <td class="px-3 py-1.5 font-bold text-slate-700 dark:text-slate-200 break-all">
-                    <span class="inline-block w-2.5 h-2.5 rounded-sm mr-1.5 align-middle" :style="{ backgroundColor: row.color ?? 'transparent' }"></span>{{ row.name }}
-                  </td>
-                  <td class="px-3 py-1.5 text-right tabular-nums text-slate-700 dark:text-slate-200">{{ t('dashboard.beatDjSongs', { n: row.count }) }}</td>
-                  <td class="px-3 py-1.5 text-right tabular-nums text-slate-500 dark:text-slate-400">{{ row.top100 > 0 ? t('dashboard.beatDjSongs', { n: row.top100 }) : '-' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
 
@@ -415,50 +355,6 @@ function buildPieSlices(entries: { name: string; count: number }[]) {
     };
   });
 }
-
-/**
- * 【computed の役割】 TOP ランカー閲覧時の Beat-Tier DJ 名円グラフ。
- * beatTierPoints 降順 TOP100 譜面を DJ 名でグループ化し、件数比率の円グラフに変換する。
- */
-const beatTierDjPie = computed(() => {
-  if (!isTopRankerView.value) return [];
-  const top100 = [...allFlattenedScores.value]
-    .filter(s => s.beatTierPoints > 0)
-    .sort((a, b) => b.beatTierPoints - a.beatTierPoints)
-    .slice(0, 100);
-  const counts = new Map<string, number>();
-  for (const s of top100) {
-    const name = (s.djName && s.djName.trim()) || '(不明)';
-    counts.set(name, (counts.get(name) || 0) + 1);
-  }
-  const entries = Array.from(counts.entries())
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
-  return buildPieSlices(entries);
-});
-
-/** 【computed の役割】 BEAT-PT 対象譜面（beatTierPoints > 0）。TOP ランカー閲覧時のみ使う。 */
-const beatTierEligible = computed(() =>
-  isTopRankerView.value ? allFlattenedScores.value.filter(s => s.beatTierPoints > 0) : []);
-const beatTierEligibleCount = computed(() => beatTierEligible.value.length);
-
-/**
- * 【computed の役割】 ベスト保持者一覧モーダルの行。
- * BEAT-PT 対象譜面すべてを DJ 名で数え、保持譜面数の降順に並べる。
- * TOP100 入り数と円グラフの色も併記する（TOP100 に入っていない人は色なし）。
- */
-const beatTierDjRows = computed(() => {
-  const all = new Map<string, number>();
-  for (const s of beatTierEligible.value) {
-    const name = (s.djName && s.djName.trim()) || '(不明)';
-    all.set(name, (all.get(name) || 0) + 1);
-  }
-  const top100 = new Map(beatTierDjPie.value.map(sl => [sl.name, sl]));
-  return Array.from(all.entries())
-    .map(([name, count]) => ({ name, count, top100: top100.get(name)?.count ?? 0, color: top100.get(name)?.color }))
-    .sort((a, b) => b.count - a.count || b.top100 - a.top100 || a.name.localeCompare(b.name));
-});
-const showBeatDjModal = ref(false);
 
 /**
  * 【computed の役割】 TOP ランカー閲覧時の Rate-Tier DJ 名円グラフ。
