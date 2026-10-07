@@ -142,7 +142,8 @@ class TopRankersBeatPtServiceMemoryTest {
         // リファクタリング前から本番コードが丸ごとスキップしており、この数はその除外後の値。
         // 同梱データを差し替えたら更新すること。
         // 2026-10-07: 33 Sparkle Shower（eagate 公式から取得）を追加して 2,121,084 → 2,509,979。
-        assertEquals(2_509_979L, totalEntries, "検証したエントリ総数が想定と違う");
+        // 同日、歴代合算で曲名の表記揺れを束ねて重複行が消え 2,507,715。
+        assertEquals(2_507_715L, totalEntries, "検証したエントリ総数が想定と違う");
     }
 
     /**

@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { normalizeTitle } = require('./top-rankers-title-fixes');
 
 const SRC = path.join(__dirname, 'top-rankers-data');
 const OUT_DIR = path.join(SRC, '0');
@@ -90,7 +91,8 @@ function mergePrefecture(prefNum) {
       const cols = splitCsvLine(line);
       if (cols.length < 2 + DIFF_COUNT * 3) continue;
       const version = cols[0];
-      const title = cols[1];
+      // 過去作 CSV は旧表記・末尾空白のままなので、v33 以降（取得時に補正済み）と同じ曲に束ねる。
+      const title = normalizeTitle(cols[1]);
       if (!title) continue;
       let entry = songs.get(title);
       if (!entry) {

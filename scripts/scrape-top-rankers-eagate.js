@@ -30,22 +30,8 @@ const HEADER =
   'ANOTHER EXスコア,ANOTHER DJName,ANOTHER 都道府県,' +
   'LEGGENDARIA EXスコア,LEGGENDARIA DJName,LEGGENDARIA 都道府県';
 
-// eagate の TOP RANKER 表記 → 公式スコア CSV（= DB の song_definitions）表記。
-// 曲名は公式 CSV 表記が正なので、ここで寄せておかないと BEAT-PT 集計で譜面が引けずに落ちる。
-// 前後の空白（"Nyan Nyan University " など）は normalizeTitle で一律に落とす。
-const TITLE_FIXES = {
-  'Blind Justice ～Torn souls, Hurt Faiths ～': 'Blind Justice ～Torn souls， Hurt Faiths ～',
-  'ROCK女 feat. 大山愛未, Ken': 'ROCK女 feat. 大山愛未， Ken',
-  'Praludium': 'Präludium',
-  'Geirskogul': 'Geirskögul',
-  '!Viva!': '¡Viva!',
-  'ZEИITH': 'ZENITH',
-};
-
-function normalizeTitle(raw) {
-  const t = decodeEntities(raw).trim();
-  return TITLE_FIXES[t] ?? t;
-}
+// 曲名の表記揺れ補正は歴代合算と共通（top-rankers-title-fixes.js）。
+const { normalizeTitle } = require('./top-rankers-title-fixes');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -115,7 +101,7 @@ async function fetchWithRetry(prefId, seriesId) {
 function rowsToCsv(seriesName, list) {
   const lines = [];
   for (const r of list) {
-    const cells = [csvEscape(seriesName), csvEscape(normalizeTitle(r.music))];
+    const cells = [csvEscape(seriesName), csvEscape(normalizeTitle(decodeEntities(r.music)))];
     for (let d = 0; d < 5; d++) {
       const score = Number(r[`score_${d}`]) || 0;
       cells.push(String(score));

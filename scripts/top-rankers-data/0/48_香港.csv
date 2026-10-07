@@ -356,7 +356,7 @@ GOLD,CROSSROAD ～Left Story～,0,,-,1111,NOB,香港,1725,KAMEAS,香港,2182,TKC
 GOLD,CaptivAte～誓い～,0,,-,1226,BASH,香港,1933,QIED,香港,2216,NPC-NA,香港,0,,-
 GOLD,CaptivAte～裁き～,420,NOB,香港,827,REISEN,香港,1282,ONION,香港,1767,TKC-04,香港,0,,-
 GOLD,Candy Galy,0,,-,1482,KAMEAS,香港,2487,NPC-R.,香港,3534,TKC-04,香港,0,,-
-GOLD,"Blind Justice ～Torn souls, Hurt Faiths ～",0,,-,1289,BILLY,香港,1903,GORENG,香港,2454,BRUH,香港,0,,-
+GOLD,Blind Justice ～Torn souls， Hurt Faiths ～,0,,-,1289,BILLY,香港,1903,GORENG,香港,2454,BRUH,香港,0,,-
 GOLD,ANDROMEDA II,0,,-,946,.,香港,1845,GORENG,香港,2452,TKC-04,香港,0,,-
 GOLD,Air Bell,0,,-,940,NOB,香港,1332,YOUKA,香港,1704,CLOO,香港,0,,-
 DJ TROOPERS,走馬灯 -The Last Song-,0,,-,509,HOHOUS,香港,896,NOB,香港,1338,1664,香港,0,,-
@@ -443,7 +443,7 @@ EMPRESS,HYPERION,0,,-,1051,AKINA*,香港,2058,G.17BA,香港,2711,NPC-04,香港,0
 EMPRESS,Go Beyond!!,535,AKINA*,香港,1030,NOB,香港,1731,NPC-04,香港,2147,NPC-G.,香港,0,,-
 EMPRESS,Fly Above,0,,-,953,AKINA*,香港,1606,NPC-R.,香港,2028,MEWEAK,香港,0,,-
 EMPRESS,Flash Back 90's,0,,-,873,HOHOUS,香港,1819,USAO-2,香港,2308,FONGA,香港,2889,NPC-G.,香港
-EMPRESS,Cyber Force -DJ Yoshitaka Remix- ,0,,-,857,ED,香港,1784,FEOWER,香港,2513,BRUH,香港,0,,-
+EMPRESS,Cyber Force -DJ Yoshitaka Remix-,0,,-,1062,NOB,香港,1795,USAO-2,香港,2513,BRUH,香港,0,,-
 EMPRESS,Colorful Cookie,663,NPC-04,香港,1124,CPL,香港,2232,LOKKAR,香港,3471,G.17BA,香港,0,,-
 EMPRESS,CaptivAte2～覚醒～,244,HOHOUS,香港,1067,RAITO.,香港,1672,USAO-2,香港,2371,NPC-06,香港,0,,-
 EMPRESS,BRIDAL FESTIVAL !!!,0,,-,910,HOHOUS,香港,1489,ONION,香港,2098,CLOO,香港,0,,-
@@ -672,7 +672,7 @@ tricoro,rumrum triplets,0,,-,927,BASH,香港,2013,G.17BA,香港,3036,G.17BA,香�
 tricoro,Re:GENERATION,240,HOHOUS,香港,917,CNOYEH,香港,1557,G.17BA,香港,2257,NPC-G.,香港,0,,-
 tricoro,Rainbow after snow,0,,-,719,HOHOUS,香港,1459,SUCCU?,香港,2170,NPC-G.,香港,0,,-
 tricoro,Proof of the existence,0,,-,1092,ME-ME,香港,2023,USAO-2,香港,3214,TKC-04,香港,0,,-
-tricoro,Praludium,0,,-,688,HOHOUS,香港,1379,FEOWER,香港,2259,TKC-04,香港,0,,-
+tricoro,Präludium,0,,-,688,HOHOUS,香港,1423,NPC-R.,香港,2259,TKC-04,香港,0,,-
 tricoro,POINT ZERO,0,,-,714,HOHOUS,香港,1263,NIKEDD,香港,2084,NPC-04,香港,0,,-
 tricoro,planarian,0,,-,694,MSTLUD,香港,1639,MSTLUD,香港,2523,NPC-06,香港,0,,-
 tricoro,Plan 8,0,,-,1117,NOB,香港,2163,LOKKAR,香港,3153,CLOO,香港,0,,-
@@ -758,7 +758,7 @@ SPADA,invoker,0,,-,1088,NOB,香港,1967,TKC-04,香港,3176,TKC-04,香港,3537,G.
 SPADA,into the battlefield,0,,-,715,HOHOUS,香港,1427,G.17BA,香港,2348,NPC-01,香港,0,,-
 SPADA,INSOMNIA,0,,-,788,HOHOUS,香港,1810,NPC-01,香港,3179,TKC-04,香港,0,,-
 SPADA,Insane Techniques,0,,-,740,.,香港,1278,G.17BA,香港,2431,CLOO,香港,0,,-
-SPADA,Idola ,0,,-,1087,ED,香港,2186,LUMI,香港,3497,YOUKA,香港,0,,-
+SPADA,Idola,0,,-,1110,WACHA,香港,2231,BBB,香港,3570,NPC-G.,香港,0,,-
 SPADA,I will be back -オレは帰ってきた-,0,,-,971,BASH,香港,1857,BILLY,香港,2877,NPC-04,香港,0,,-
 SPADA,Hypersonik,0,,-,997,NOB,香港,1652,NOB,香港,2498,NPC-G.,香港,0,,-
 SPADA,HYENA,0,,-,1092,BASH,香港,1903,.,香港,2781,CLOO,香港,3681,NPC-G.,香港
@@ -817,7 +817,7 @@ PENDUAL,TA・DA ☆ YO・SHI,0,,-,1093,HANABI,香港,1565,NOB,香港,2291,1664,�
 PENDUAL,Symmetry,0,,-,1139,NOB,香港,2048,FEOWER,香港,3260,CLOO,香港,0,,-
 PENDUAL,Sweet Radar,0,,-,659,HOHOUS,香港,1364,NPC-04,香港,2022,1664,香港,0,,-
 PENDUAL,SpaceLand☆TOYBOX,0,,-,1079,NOB,香港,1716,NPC-R.,香港,2928,CLOO,香港,0,,-
-PENDUAL,Sounds Of Summer ,0,,-,1194,KAMEAS,香港,2042,CNOYEA,香港,2905,YOUKA,香港,0,,-
+PENDUAL,Sounds Of Summer,0,,-,1194,KAMEAS,香港,2077,USAO-2,香港,2974,CLOO,香港,0,,-
 PENDUAL,Shooting Fireball,0,,-,950,AKINA*,香港,2275,NPC-01,香港,3889,CLOO,香港,0,,-
 PENDUAL,Scars of FAUNA,0,,-,816,AKINA*,香港,1685,G.17BA,香港,2871,TKC-04,香港,0,,-
 PENDUAL,Scarlet Moon,0,,-,1024,FEOWER,香港,1968,TKC-04,香港,2733,TKC-04,香港,0,,-
@@ -826,7 +826,7 @@ PENDUAL,SAMSARA,0,,-,831,HOHOUS,香港,1446,DJCLOO,香港,2029,BRUH,香港,0,,-
 PENDUAL,Sakura Mirage,0,,-,951,NOB,香港,1355,G.17BA,香港,2295,TKC-04,香港,0,,-
 PENDUAL,Reflux,0,,-,757,FEOWER,香港,1561,USAO-2,香港,2974,TKC-04,香港,0,,-
 PENDUAL,Realize Maze,0,,-,1230,NOB,香港,2061,NPC-04,香港,2957,TKC-04,香港,0,,-
-PENDUAL,Rave*it!! Rave*it!! ,0,,-,944,TKC*,香港,1639,NOB,香港,3186,ROTTEN,香港,0,,-
+PENDUAL,Rave*it!! Rave*it!!,0,,-,995,NOB,香港,1698,NPC-04,香港,3244,DJCLOO,香港,0,,-
 PENDUAL,PENDUAL TALISMAN,0,,-,1022,FEOWER,香港,1607,IPX970,香港,2581,CLOO,香港,0,,-
 PENDUAL,On My Wings(Hardstyle IIDX),0,,-,887,KAMEAS,香港,1261,NPC-04,香港,1967,CPU6,香港,0,,-
 PENDUAL,No Tears,0,,-,1176,USAO-2,香港,2099,G.17BA,香港,2524,NPC-G.,香港,0,,-
@@ -846,13 +846,13 @@ PENDUAL,Gravigazer,0,,-,948,NOB,香港,1821,NPC-01,香港,2974,TKC-04,香港,0,,
 PENDUAL,Flashes,0,,-,919,ME-ME,香港,1789,NPC-G.,香港,3284,NPC-G.,香港,4092,NPC-G.,香港
 PENDUAL,FANTASTIC THREE,0,,-,1268,BBB,香港,2186,TMHGKG,香港,3179,NPC-G.,香港,0,,-
 PENDUAL,fallen leaves -IIDX edition-,0,,-,1149,NOB,香港,2044,OZMA,香港,3391,TKC-04,香港,0,,-
-PENDUAL,Erosion Mark  ,0,,-,777,HOHOUS,香港,1518,G.17BA,香港,2140,G.17BA,香港,0,,-
+PENDUAL,Erosion Mark,0,,-,777,HOHOUS,香港,1518,G.17BA,香港,2161,NPC-04,香港,0,,-
 PENDUAL,entelecheia,0,,-,982,BASH,香港,2111,BRUH,香港,3259,NPC-G.,香港,0,,-
 PENDUAL,EBONY & IVORY,0,,-,1043,NOB,香港,1727,NPC-04,香港,2978,TKC-04,香港,3553,G.17BA,香港
 PENDUAL,Discloze,0,,-,935,NOB,香港,1608,BILLY,香港,2595,TKC-04,香港,0,,-
 PENDUAL,Despair of ELFERIA,0,,-,1238,G.17BA,香港,2446,TKC-04,香港,4080,TKC-04,香港,0,,-
 PENDUAL,Cosmic Cat,0,,-,895,ME-ME,香港,1652,KAMEAS,香港,2269,TKC-04,香港,3216,NPC-G.,香港
-PENDUAL,COLOSSEUM ,0,,-,568,HOHOUS,香港,1198,NOB,香港,2280,ARAI,香港,0,,-
+PENDUAL,COLOSSEUM,0,,-,568,HOHOUS,香港,1220,NPC-04,香港,2281,TKC-04,香港,0,,-
 PENDUAL,cinder,0,,-,795,BASH,香港,2019,NPC-04,香港,3115,TKC-04,香港,0,,-
 PENDUAL,Chronos,0,,-,817,NOB,香港,1338,RAITO.,香港,2340,TKC-04,香港,2925,CLOO,香港
 PENDUAL,Chrono Diver -PENDULUMs-,554,HOHOUS,香港,1400,G.17BA,香港,2665,DJCLOO,香港,4279,TKC-04,香港,0,,-
@@ -1038,7 +1038,7 @@ SINOBUZ,AO-∞,0,,-,1077,NOB,香港,1847,TKC-04,香港,2686,TKC-04,香港,0,,-
 SINOBUZ,Amazing Mirage,374,HOHOUS,香港,885,MSTLUD,香港,1700,GAYSEX,香港,2590,1664,香港,3261,NPC-G.,香港
 SINOBUZ,(This Is Not) The Angels,0,,-,581,AKINA*,香港,1406,V,香港,2679,CLOO,香港,0,,-
 SINOBUZ,#MAGiCVLGiRL_TRVP_B3VTZ,0,,-,1136,NOB,香港,1958,NPC-11,香港,3407,TKC-04,香港,0,,-
-SINOBUZ,!Viva!,0,,-,949,NOB,香港,1599,G.17BA,香港,1987,TKC-04,香港,0,,-
+SINOBUZ,¡Viva!,0,,-,949,NOB,香港,1599,G.17BA,香港,1987,TKC-04,香港,0,,-
 CANNON BALLERS,草原の王女-軌跡を辿って-,0,,-,692,NOB,香港,1186,NPC-69,香港,2298,DONDIE,香港,0,,-
 CANNON BALLERS,純真可憐デザイア,253,HOHOUS,香港,825,IODIDE,香港,1616,NPC-04,香港,2323,TKC-04,香港,2965,NPC-G.,香港
 CANNON BALLERS,神謳 -RESONANCE-,0,,-,1372,NPC-04,香港,2475,FEOWER,香港,3985,NPC-G.,香港,0,,-
@@ -1186,7 +1186,7 @@ Rootage,Serious?,0,,-,561,NOB,香港,1173,NOB,香港,2163,G.17BA,香港,0,,-
 Rootage,R∞tAge,525,AKINA*,香港,1049,AKINA*,香港,1637,G.17BA,香港,2928,CLOO,香港,0,,-
 Rootage,ruin of opals,0,,-,960,NOB,香港,1915,CPU6,香港,3090,TKC-04,香港,0,,-
 Rootage,ROZA DE ANDALUCIA,0,,-,1170,AKINA*,香港,1947,FKPOPO,香港,2921,G.17BA,香港,0,,-
-Rootage,"ROCK女 feat. 大山愛未, Ken",0,,-,1047,NOB,香港,1757,OZMA,香港,2707,NPC-04,香港,0,,-
+Rootage,ROCK女 feat. 大山愛未， Ken,0,,-,1047,NOB,香港,1757,OZMA,香港,2707,NPC-04,香港,0,,-
 Rootage,REPLAY,0,,-,902,NOB,香港,1563,CALFOY,香港,2239,RIICHI,香港,0,,-
 Rootage,Red. by Jack Trance,0,,-,1459,NOB,香港,2137,NPC-G.,香港,3521,G.17BA,香港,0,,-
 Rootage,Re:Story,0,,-,426,HOHOUS,香港,1047,AYA*,香港,1902,ROTTEN,香港,0,,-
@@ -1219,7 +1219,7 @@ Rootage,GO OVER WITH GLARE -ROOTAGE 26-,0,,-,1038,NOB,香港,2234,ROTTEN,香港,
 Rootage,Glory,0,,-,756,NOB,香港,1628,G.17BA,香港,2298,NPC-G.,香港,0,,-
 Rootage,GIGA THRASH,0,,-,1215,KAMEAS,香港,1826,G.17BA,香港,2679,CLOO,香港,0,,-
 Rootage,GENE,0,,-,1263,G.17BA,香港,1953,ROTTEN,香港,4302,NPC-G.,香港,3505,NPC-G.,香港
-Rootage,Geirskogul,0,,-,1054,NOB,香港,1567,NOB,香港,2220,TKC-04,香港,0,,-
+Rootage,Geirskögul,0,,-,1054,NOB,香港,1567,NOB,香港,2220,TKC-04,香港,0,,-
 Rootage,Garuda,0,,-,991,NOB,香港,1626,NPC-01,香港,2544,TKC-04,香港,0,,-
 Rootage,EVANESCENT,0,,-,1173,DOKO,香港,2312,LAI-,香港,3560,NPC-G.,香港,0,,-
 Rootage,Ember Lights,0,,-,914,AKINA*,香港,1638,CPU6,香港,2696,CLOO,香港,3090,NPC-G.,香港
@@ -1235,7 +1235,7 @@ Rootage,CODE:0,0,,-,1395,NOB,香港,2110,USAO-2,香港,2760,NPC-G.,香港,3373,T
 Rootage,Catch Our Fire!,0,,-,1300,NOB,香港,2209,REISEN,香港,3664,TKC-04,香港,0,,-
 Rootage,Carry Me Away,525,AKINA*,香港,1103,G.17BA,香港,1827,TKC-04,香港,3162,TKC-04,香港,0,,-
 Rootage,Carmina,520,NOB,香港,1241,REISEN,香港,2334,YUKARI,香港,3714,NPC-G.,香港,0,,-
-Rootage,BLOSSOM,0,,-,1053,LUMI,香港,1636,NPC-04,香港,2509,TKC-04,香港,0,,-
+Rootage,BLO§OM,0,,-,1053,LUMI,香港,1636,NPC-04,香港,2509,TKC-04,香港,0,,-
 Rootage,BLACK JACKAL,0,,-,830,AKINA*,香港,1587,G.17BA,香港,2305,TKC-04,香港,0,,-
 Rootage,Angels & Demons,0,,-,840,HOHOUS,香港,1745,G.17BA,香港,2360,G.17BA,香港,0,,-
 Rootage,AGAiN,0,,-,963,87XO!R,香港,1569,IODIDE,香港,2246,ONION,香港,0,,-
@@ -1469,7 +1469,6 @@ BISTROVER,-65℃,0,,-,1381,FEOWER,香港,2222,REISEN,香港,3713,TKC-04,香港,0
 HAPPY SKY,mind the gap,0,,-,714,NOB,香港,1017,NOB,香港,1563,CLOO,香港,0,,-
 SIRIUS,Do Back Burn,0,,-,696,AKINA*,香港,1342,NOB,香港,2092,CLOO,香港,0,,-
 Lincle,GIGANT,0,,-,571,AKINA*,香港,1142,NOB,香港,1756,ONION,香港,2918,TKC-04,香港
-PENDUAL,Sounds Of Summer,0,,-,1173,ME-ME,香港,2077,USAO-2,香港,2974,CLOO,香港,0,,-
 CastHour,黒紅掬い,0,,-,658,AKINA*,香港,1209,NPC-04,香港,1811,NPC-04,香港,0,,-
 CastHour,青の洞窟,0,,-,888,NOB,香港,1955,QIED,香港,3122,NPC-G.,香港,0,,-
 CastHour,雪上断火,0,,-,954,NOB,香港,1826,NPC-11,香港,2947,CLOO,香港,0,,-
@@ -1568,18 +1567,12 @@ CastHour,ABSOLUTE EVIL,246,NOB,香港,1163,NOB,香港,2230,TKC-04,香港,3407,NP
 CastHour,808monkey,0,,-,751,AKINA*,香港,1158,QIED,香港,1799,G.17BA,香港,0,,-
 CastHour,2 Beasts Unchained,0,,-,1466,NOB,香港,2189,NPC-01,香港,3425,G.17BA,香港,0,,-
 CastHour,10000 MILES AWAY,0,,-,1020,AKINA*,香港,1652,NPC-08,香港,2926,G.17BA,香港,0,,-
-BISTROVER,smooooch・∀・ (Snail's House Remix) ,0,,-,731,SORA..,香港,1521,NOB,香港,2289,DONDIE,香港,0,,-
 BISTROVER,POLKAMANIA,428,AKINA*,香港,956,NOB,香港,1810,V,香港,2912,TKC-04,香港,3672,NPC-G.,香港
 7th style,MAX 300,0,,-,1079,NOB,香港,1879,NPC-01,香港,2758,G.17BA,香港,0,,-
 9th style,fun,0,,-,569,NOB,香港,1053,NOB,香港,1819,NPC-G.,香港,0,,-
 DistorteD,DEEP ROAR,0,,-,962,CALFOY,香港,1415,ONION,香港,2751,TKC-04,香港,0,,-
 EMPRESS,THE SHINING POLARIS(kors k mix),0,,-,1257,NOB,香港,2074,TKC-04,香港,3198,G.17BA,香港,0,,-
-EMPRESS,Cyber Force -DJ Yoshitaka Remix-,0,,-,1062,NOB,香港,1795,USAO-2,香港,2482,NPC-04,香港,0,,-
 tricoro,Reflection Into the EDEN,0,,-,772,NOB,香港,1415,NOB,香港,2150,NPC-G.,香港,0,,-
-SPADA,Idola,0,,-,1110,WACHA,香港,2231,BBB,香港,3570,NPC-G.,香港,0,,-
-PENDUAL,Rave*it!! Rave*it!!,0,,-,995,NOB,香港,1698,NPC-04,香港,3244,DJCLOO,香港,0,,-
-PENDUAL,Erosion Mark,0,,-,754,BASH,香港,1436,NOB,香港,2161,NPC-04,香港,0,,-
-PENDUAL,COLOSSEUM,0,,-,554,KUSOGE,香港,1220,NPC-04,香港,2281,TKC-04,香港,0,,-
 RESIDENT,響花水月,0,,-,1174,NOB,香港,1926,TKC-04,香港,2930,TKC-04,香港,0,,-
 RESIDENT,雨のちパノラマセカイ,0,,-,797,NOB,香港,1402,NPC-04,香港,2213,NPC-G.,香港,0,,-
 RESIDENT,輪廻の鴉,0,,-,1000,NOB,香港,1773,NPC-04,香港,2738,NPC-04,香港,0,,-
@@ -1587,7 +1580,7 @@ RESIDENT,罪過の聖堂,0,,-,713,NOB,香港,1201,NPC-11,香港,1991,CLOO,香港
 RESIDENT,神のシナリオ,0,,-,1155,BBB,香港,1721,NPC-04,香港,3203,G.17BA,香港,0,,-
 RESIDENT,神っぽいな,369,NOB,香港,756,NOB,香港,1428,NPC-04,香港,2113,NPC-G.,香港,3017,G.17BA,香港
 RESIDENT,真夜中のバベル,0,,-,701,NOB,香港,1167,NPC-04,香港,1709,G.17BA,香港,0,,-
-RESIDENT,異心前進♪ぴょんぴょんぴょん ,0,,-,1088,NOB,香港,1644,GORENG,香港,2494,NPC-04,香港,0,,-
+RESIDENT,異心前進♪ぴょんぴょんぴょん,0,,-,1088,NOB,香港,1664,NPC-R.,香港,2494,NPC-04,香港,0,,-
 RESIDENT,生きるよすが,431,NOB,香港,936,NPC-04,香港,1484,CNOYEH,香港,2485,NPC-11,香港,0,,-
 RESIDENT,湘南ロンリーMIDNIGHT RAIN,0,,-,947,NOB,香港,1790,NPC-04,香港,2846,TKC-04,香港,0,,-
 RESIDENT,楽園追放,0,,-,913,NOB,香港,1538,NOB,香港,2378,TKC-04,香港,0,,-
@@ -1693,7 +1686,6 @@ RESIDENT,#CMFLG,0,,-,1157,NOB,香港,2313,NPC-04,香港,3403,G.17BA,香港,0,,-
 9th style,Logic Board,0,,-,1024,NOB,香港,1799,DONDIE,香港,2310,TKC-04,香港,0,,-
 PENDUAL,GUILTY,0,,-,969,NOB,香港,1500,NOB,香港,1879,TKC-04,香港,2967,NPC-G.,香港
 CANNON BALLERS,共犯ヘヴンズコード,0,,-,476,BASH,香港,1147,ED,香港,2254,DONDIE,香港,0,,-
-RESIDENT,異心前進♪ぴょんぴょんぴょん,0,,-,1026,CHICKN,香港,1664,NPC-R.,香港,2489,NPC-G.,香港,0,,-
 EPOLIS,電腦都市,0,,-,1373,NOB,香港,2235,ONION,香港,3349,NPC-G.,香港,0,,-
 EPOLIS,電子になりたい,0,,-,839,NOB,香港,1424,GAYSEX,香港,1998,DJCLOO,香港,0,,-
 EPOLIS,電光,0,,-,1036,NOB,香港,1857,TKC-04,香港,3033,G.17BA,香港,0,,-
@@ -1916,12 +1908,7 @@ Pinky Crush,Arcanos,0,,-,656,NOB,香港,1181,NPC-R.,香港,1980,G.17BA,香港,0,
 Pinky Crush,Aqvion,0,,-,1157,.,香港,1912,USAO-2,香港,3480,NPC-G.,香港,0,,-
 Pinky Crush,ADAMANT,0,,-,1114,NOB,香港,1932,NPC-G.,香港,3004,G.17BA,香港,0,,-
 Pinky Crush,1116,0,,-,1105,NOB,香港,2012,NPC-R.,香港,3025,G.17BA,香港,0,,-
-GOLD,Blind Justice ～Torn souls， Hurt Faiths ～,0,,-,1104,01NITO,香港,1896,USAO-2,香港,2431,LOKKAR,香港,0,,-
 Lincle,KYAMISAMA ONEGAI!,0,,-,662,.,香港,1080,.,香港,2100,NPC-G.,香港,3034,NPC-G.,香港
-tricoro,Präludium,0,,-,542,FDEEEE,香港,1423,NPC-R.,香港,2259,NPC-G.,香港,0,,-
-SINOBUZ,¡Viva!,0,,-,699,MARK57,香港,1436,GNGU,香港,1982,NPC-G.,香港,0,,-
-Rootage,Geirskögul,0,,-,0,,-,1382,PS!?,香港,2112,IODIDE,香港,0,,-
-Rootage,ROCK女 feat. 大山愛未， Ken,0,,-,941,ED,香港,1660,.,香港,2611,REISEN,香港,0,,-
 Pinky Crush,オッドラヴィ,335,YKDRM,香港,804,IIDX33,香港,1585,AQUA,香港,2521,NPC-G.,香港,0,,-
 Sparkle Shower,2 Be Continued,0,,-,1025,.,香港,1978,NPCLOO,香港,3604,NPC-G.,香港,0,,-
 Sparkle Shower,A Certified Rave Moment,0,,-,978,.,香港,1721,YUU-,香港,2726,FONGA,香港,0,,-
