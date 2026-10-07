@@ -7,6 +7,7 @@
  *  - 「比較する」ボタンで FriendComparisonModal を開く
  *  - 名前クリックで親に `view-user` / `view-top-ranker` を emit してダッシュボード遷移
  *  - フレンド検索モーダル（FriendSearchModal）も内包
+ *  - 管理者のみ: 「前作の自分」と勝敗比較する（FriendComparisonModal の pastSelf モード）
  *
  * emits:
  *  - view-user: 通常ユーザープロフの閲覧要求
@@ -20,6 +21,8 @@ import FriendComparisonModal from './FriendComparisonModal.vue';
 import RankIcon from './RankIcon.vue';
 import { getRankInfo, previousTierFrame } from '../utils/beatTier';
 import { formatJstDateTime } from '../utils/jstTime';
+import { useAdmin } from '../composables/useAdmin';
+import { CURRENT_VERSION, versionName } from '../utils/iidxVersions';
 
 const emit = defineEmits<{
   'view-user': [user: { id: number; displayName: string; iidxId: string }],
@@ -35,6 +38,8 @@ const isComparisonModalOpen = ref(false);
 const selectedFriend = ref<Friend | null>(null);
 /** バーチャルライバル時のみ有効。どの地域 TOP か特定するキー。 */
 const selectedVirtualArea = ref<{ versionNum: number; prefectureFileNum: number } | null>(null);
+/** 前作の自分との比較時のみ有効。比べる作品。 */
+const selectedPastSelf = ref<{ version: number } | null>(null);
 /** 削除中のフレンド ID（ボタンをスピナー化）。 */
 const removingId = ref<number | null>(null);
 
@@ -48,10 +53,15 @@ const isLoaded = ref(false);
 /** フレンドかバーチャルライバルが 1 人以上いるか。 */
 const hasAnyRival = computed(() => friends.value.length > 0 || virtualRivals.value.length > 0);
 
+const { isAdmin } = useAdmin();
+/** 前作（現行作の 1 つ前）のバージョン番号。 */
+const previousVersion = CURRENT_VERSION - 1;
+
 /** 通常フレンドとの比較モーダルを開く。 */
 const openComparison = (friend: Friend) => {
   selectedFriend.value = friend;
   selectedVirtualArea.value = null;
+  selectedPastSelf.value = null;
   isComparisonModalOpen.value = true;
 };
 
@@ -69,12 +79,31 @@ const openVirtualComparison = (rival: VirtualRival) => {
     totalBeatPt: rival.totalBeatPt,
   };
   selectedVirtualArea.value = { versionNum: rival.versionNum, prefectureFileNum: rival.prefectureFileNum };
+  selectedPastSelf.value = null;
   isComparisonModalOpen.value = true;
   console.log('[Friends] openVirtualComparison set', {
     selectedFriend: selectedFriend.value,
     selectedVirtualArea: selectedVirtualArea.value,
     isOpen: isComparisonModalOpen.value,
   });
+};
+
+/**
+ * 【関数の役割】 「前作の自分」との比較モーダルを開く（管理者専用）。
+ * 比較モーダルは Friend 型を受け取るため、表示名だけを持つダミー Friend を渡す。
+ * ID は 0 にしてフレンド・バーチャルライバル（負数）と被らないようにする。
+ */
+const openPastSelfComparison = () => {
+  selectedFriend.value = {
+    id: 0,
+    displayName: `前作の自分（${versionName(previousVersion)}）`,
+    iidxId: '',
+    lastUploadedAt: null,
+    totalBeatPt: 0,
+  };
+  selectedVirtualArea.value = null;
+  selectedPastSelf.value = { version: previousVersion };
+  isComparisonModalOpen.value = true;
 };
 
 /** 【関数の役割】 フレンド削除。confirm ダイアログで確認してから実行。 */
@@ -155,6 +184,23 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         フレンド追加
+      </button>
+    </div>
+
+    <!-- 管理者のみ: 前作の自分との勝敗比較 -->
+    <div v-if="isAdmin" class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-800 p-4 rounded-md border border-emerald-200/60 dark:border-emerald-800/40">
+      <div class="min-w-0">
+        <p class="font-bold text-slate-900 dark:text-white">前作の自分（{{ versionName(previousVersion) }}）</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">今作のスコアで前作の自分と勝敗比較します。前作側は CSV 読み込み日を指定できます。<span class="text-emerald-600 dark:text-emerald-400 font-bold">管理者のみ</span></p>
+      </div>
+      <button
+        @click="openPastSelfComparison"
+        class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-md text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        比較する
       </button>
     </div>
 
@@ -330,6 +376,7 @@ const handleVirtualNameClick = (rival: VirtualRival) => {
       :is-open="isComparisonModalOpen"
       :friend="selectedFriend"
       :virtual-area="selectedVirtualArea"
+      :past-self="selectedPastSelf"
       @close="isComparisonModalOpen = false"
     />
   </div>
