@@ -73,7 +73,10 @@ public class RandomPairVote {
     @Column(nullable = false, length = 8)
     private String choice;
 
-    /** 2 つの並びの選び方: close（今の評価で僅差）/ random（無作為）/ offmir（正規・MIRROR と比べる） */
+    /**
+     * 2 つの並びの選び方: close（今の評価で僅差）/ random（無作為）/ offmir（正規・MIRROR と比べる）、
+     * 確認問題の obvious（上位 1% と下位 1%）/ repeat（前の問題の左右を入れ替えた出し直し）
+     */
     @Column(length = 16)
     private String strategy;
 
@@ -84,7 +87,11 @@ public class RandomPairVote {
     @Column(name = "model_right")
     private Double modelRight;
 
-    /** 画像を出してから答えるまでのミリ秒（迷った度合いの目安） */
+    /** 確認問題 repeat のとき、出し直した元の回答の ID */
+    @Column(name = "repeat_of")
+    private Long repeatOf;
+
+    /** 問題を出してから答えるまでのミリ秒（速すぎる回答は学習で除く） */
     @Column(name = "response_ms")
     private Integer responseMs;
 

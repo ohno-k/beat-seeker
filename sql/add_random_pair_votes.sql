@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS random_pair_votes (
     model_left DOUBLE PRECISION,
     model_right DOUBLE PRECISION,
     response_ms INTEGER,
+    repeat_of BIGINT,
     created_at TIMESTAMP NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_random_pair_votes_user_id ON random_pair_votes (user_id);
+ALTER TABLE random_pair_votes ADD COLUMN IF NOT EXISTS repeat_of BIGINT;

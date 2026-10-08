@@ -17,6 +17,12 @@
  *   （c0 = 全部同じ係数で当てはめたときの係数）。λ は交差検証で選ぶ。ランキングは係数の比だけで決まるので、
  *   書き出すときは平均 1 にそろえる。
  *
+ * 適当に押した回答への対策（{@link reliabilityOf}）:
+ * - 問題を出してから {@link MIN_RESPONSE_MS} ミリ秒未満の回答は、見ていないものとして使わない（管理者を除く）
+ * - 人ごとの信頼度で回答の重みを決める（管理者の回答は 1 のまま）。確認問題（obvious = 上位 1% と下位 1%、
+ *   repeat = 前の問題の左右を入れ替えた出し直し）の正解率、左右どちらかばかり選ぶ偏り、速すぎる回答の割合から決め、
+ *   0 の人の回答は使わない。確認問題の obvious は今の評価から作った答えなので、学習には入れない
+ *
  * 検証: 譜面ごとに 5 つに分けた交差検証で、学習に使っていない回答の正解率（同じくらいを除く）と対数損失を、
  * 「全部同じ係数」と比べる。オプション投票の一致率（正規と MIRROR の票の多い方を当てられるか）も出す。
  * --write のときも、回答が {@link MIN_HUMAN} 件以上あり、学習後の方が正解率・対数損失とも良いときだけ書く（--force で強制）。
@@ -68,6 +74,7 @@ type Vote = {
   id: number; textage: string; title: string; difficulty: string; side: number;
   patternLeft: string; patternRight: string; startTime: number; endTime: number;
   choice: 'LEFT' | 'RIGHT' | 'SAME' | 'SKIP'; strategy?: string; modelLeft?: number; modelRight?: number;
+  userId?: number; responseMs?: number | null; repeatOf?: number | null; trusted?: boolean;
 };
 type OptionVoteRow = { title: string; difficultyName: string; counts: Record<string, number> };
 type Exported = { votes: Vote[]; optionVotes: OptionVoteRow[] };
@@ -138,17 +145,92 @@ function toX(left: Record<string, number>, right: Record<string, number>): Float
   return Float64Array.from(KEYS, k => (right[k] - left[k]) / scale);
 }
 
+// ── 適当に押した回答への対策 ────────────────────────────
+/** これより速い回答（ミリ秒）は見ていないものとして使わない */
+const MIN_RESPONSE_MS = 1500;
+/** 確認問題の正解率の事前の見込み（正解 4・不正解 1 回ぶん。少ない確認問題で重みが振れないように） */
+const CHECK_PRIOR_PASS = 4, CHECK_PRIOR_N = 5;
+/** 左右の偏りを見始める回答数 */
+const SIDE_MIN_ANSWERS = 20;
+
+type Reliability = {
+  userId: number; trusted: boolean; answers: number; fast: number; leftShare: number | null;
+  checks: number; passed: number; weight: number; reasons: string[];
+};
+const isFast = (v: Vote) => !v.trusted && v.responseMs != null && v.responseMs < MIN_RESPONSE_MS;
+
+/**
+ * 人ごとの信頼度（0〜1）。次の 3 つを掛けたもの（管理者は 1）
+ * - 確認問題: 正解率（事前の見込みつき）が 0.8 以上で 1、0.5（当てずっぽう）以下で 0、その間は比例
+ *   （obvious は上位の並びを選べば正解、repeat は元の問題と同じ並びを選べば正解。同じくらいは半分）
+ * - 左右の偏り: {@link SIDE_MIN_ANSWERS} 件以上で、片側が 70% 以下なら 1、95% 以上なら 0（左右はくじで決めているので普通は半々）
+ * - 速すぎる回答の割合: 1 − 割合（速すぎる回答そのものは別に除く）
+ */
+function reliabilityOf(votes: Vote[]): Map<number, Reliability> {
+  const byId = new Map(votes.map(v => [v.id, v]));
+  const byUser = new Map<number, Vote[]>();
+  for (const v of votes) {
+    if (v.choice === 'SKIP') continue;
+    const list = byUser.get(v.userId ?? -1) ?? [];
+    list.push(v);
+    byUser.set(v.userId ?? -1, list);
+  }
+  const out = new Map<number, Reliability>();
+  for (const [userId, list] of byUser) {
+    const trusted = list.some(v => v.trusted);
+    const fast = list.filter(isFast).length;
+    const ok = list.filter(v => !isFast(v));
+    const decisive = ok.filter(v => v.choice === 'LEFT' || v.choice === 'RIGHT');
+    const left = decisive.filter(v => v.choice === 'LEFT').length;
+    let checks = 0, passed = 0;
+    for (const v of ok) {
+      if (v.strategy === 'obvious' && v.modelLeft != null && v.modelRight != null && v.modelLeft !== v.modelRight) {
+        checks++;
+        if (v.choice === 'SAME') passed += 0.5;
+        else if ((v.choice === 'LEFT') === (v.modelLeft < v.modelRight)) passed++;
+      } else if (v.strategy === 'repeat' && v.repeatOf != null) {
+        const orig = byId.get(v.repeatOf);
+        if (!orig || orig.choice === 'SKIP' || orig.userId !== v.userId) continue;
+        checks++;
+        // 左右を入れ替えて出しているので、同じ並びを選んでいれば左右は逆になる
+        if (v.choice === 'SAME' || orig.choice === 'SAME') passed += 0.5;
+        else if (v.choice !== orig.choice) passed++;
+      }
+    }
+    const reasons: string[] = [];
+    const passRate = (passed + CHECK_PRIOR_PASS) / (checks + CHECK_PRIOR_N);
+    const checkFactor = Math.min(1, Math.max(0, (passRate - 0.5) / 0.3));
+    if (checkFactor < 1) reasons.push(`確認問題 ${passed}/${checks}`);
+    const leftShare = decisive.length ? left / decisive.length : null;
+    let sideFactor = 1;
+    if (leftShare != null && decisive.length >= SIDE_MIN_ANSWERS) {
+      const bias = Math.abs(leftShare - 0.5);
+      sideFactor = Math.min(1, Math.max(0, 1 - (bias - 0.2) / 0.25));
+      if (sideFactor < 1) reasons.push(`${leftShare > 0.5 ? '左' : '右'}ばかり ${(Math.max(leftShare, 1 - leftShare) * 100).toFixed(0)}%`);
+    }
+    const fastFactor = 1 - fast / list.length;
+    if (fast > 0) reasons.push(`速すぎ ${fast} 件`);
+    const weight = trusted ? 1 : Math.round(checkFactor * sideFactor * fastFactor * 1000) / 1000;
+    out.set(userId, { userId, trusted, answers: list.length, fast, leftShare, checks, passed, weight, reasons });
+  }
+  return out;
+}
+
 const exported = await loadExport();
+const reliability = reliabilityOf(exported.votes);
 const pairs: Pair[] = [];
-let skippedVotes = 0;
+let skippedVotes = 0, fastVotes = 0, zeroWeightVotes = 0;
 for (const v of exported.votes) {
-  if (v.choice === 'SKIP') continue;
+  if (v.choice === 'SKIP' || v.strategy === 'obvious') continue;
+  if (isFast(v)) { fastVotes++; continue; }
+  const userWeight = reliability.get(v.userId ?? -1)?.weight ?? 1;
+  if (userWeight <= 0) { zeroWeightVotes++; continue; }
   const sc = await scorerOf(v.textage, v.side === 2 ? 2 : 1);
   if (!sc) { skippedVotes++; continue; }
   const win: [number, number][] = [[v.startTime, v.endTime]];
   const [l] = sc(v.patternLeft, win);
   const [r] = sc(v.patternRight, win);
-  pairs.push({ x: toX(l, r), y: v.choice === 'LEFT' ? 1 : v.choice === 'RIGHT' ? 0 : 0.5, w: 1, group: v.textage, human: true, strategy: v.strategy });
+  pairs.push({ x: toX(l, r), y: v.choice === 'LEFT' ? 1 : v.choice === 'RIGHT' ? 0 : 0.5, w: userWeight, group: v.textage, human: true, strategy: v.strategy });
 }
 
 // オプション投票（弱い正解）: 正規と MIRROR の票がある譜面
@@ -267,17 +349,19 @@ function solve(A: Float64Array[], y: number[]): number[] {
 
 /** 正解率（はっきり答えた比較だけ。予測が同点なら 0.5）と対数損失 */
 function evaluate(data: Pair[], beta: (p: Pair) => Float64Array) {
-  let n = 0, hit = 0, ll = 0, lw = 0;
+  let n = 0, hit = 0, ll = 0, lw = 0, aw = 0;
   for (const p of data) {
     const z = dot(beta(p), p.x);
     const q = Math.min(1 - 1e-9, Math.max(1e-9, sigmoid(z)));
     ll += -p.w * (p.y * Math.log(q) + (1 - p.y) * Math.log(1 - q));
     lw += p.w;
     if (p.y === 0.5) continue;
+    // 正解率も信頼度の重みつき（n は問題の数）
     n++;
-    if (Math.abs(z) < 1e-12) hit += 0.5; else if ((z > 0) === (p.y > 0.5)) hit++;
+    aw += p.w;
+    if (Math.abs(z) < 1e-12) hit += 0.5 * p.w; else if ((z > 0) === (p.y > 0.5)) hit += p.w;
   }
-  return { n, accuracy: n ? hit / n : null, logLoss: lw ? ll / lw : null };
+  return { n, accuracy: aw ? hit / aw : null, logLoss: lw ? ll / lw : null };
 }
 
 /** 譜面ごとに分けた交差検証。学習に使っていない比較での予測を集める */
@@ -336,7 +420,17 @@ function currentRankingVsVotes() {
 // ── 実行 ────────────────────────────────────────────────
 const humanDecisive = pairs.filter(p => p.human && p.y !== 0.5).length;
 const weakCount = pairs.filter(p => !p.human).length;
-console.log(`回答 ${exported.votes.length} 件（使う ${pairs.filter(p => p.human).length}、うち同じくらい以外 ${humanDecisive}、譜面を取れず除外 ${skippedVotes}）`);
+console.log(`回答 ${exported.votes.length} 件（使う ${pairs.filter(p => p.human).length}、うち同じくらい以外 ${humanDecisive}、`
+  + `速すぎて除外 ${fastVotes}、信頼度 0 の人で除外 ${zeroWeightVotes}、譜面を取れず除外 ${skippedVotes}。スキップと確認問題 obvious は使わない）`);
+const users = [...reliability.values()].sort((a, b) => a.weight - b.weight || b.answers - a.answers);
+if (users.length) {
+  console.log('\n■ 人ごとの信頼度（低い順。重み 1 = そのまま使う、0 = 使わない）');
+  for (const u of users.slice(0, 30)) {
+    console.log(`  ユーザー ${String(u.userId).padStart(5)}${u.trusted ? '（管理者）' : ''}: 重み ${u.weight.toFixed(2)}  回答 ${u.answers}`
+      + `  左 ${u.leftShare == null ? '—' : (u.leftShare * 100).toFixed(0) + '%'}  確認問題 ${u.passed}/${u.checks}${u.reasons.length ? '  ← ' + u.reasons.join('、') : ''}`);
+  }
+  if (users.length > 30) console.log(`  …ほか ${users.length - 30} 人`);
+}
 console.log(`オプション投票: 票のある譜面 ${weakCharts.length}、正規と MIRROR の比較に使う ${weakCount}（譜面を取れず除外 ${weakSkipped}）`);
 
 const now = currentRankingVsVotes();
@@ -362,7 +456,7 @@ if (Object.keys(byStrategy).length) {
 const report: Record<string, unknown> = {
   generatedAt: new Date(Date.now() + 9 * 3600 * 1000).toISOString().replace('T', ' ').slice(0, 16),
   votes: exported.votes.length, humanPairs: pairs.filter(p => p.human).length, humanDecisive, weakPairs: weakCount,
-  currentRankingVsVotes: now, byStrategy,
+  currentRankingVsVotes: now, byStrategy, fastVotes, zeroWeightVotes, reliability: users,
 };
 
 if (pairs.length < FOLDS * 2) {

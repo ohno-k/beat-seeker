@@ -25,7 +25,8 @@ import type { PairQuestion } from '../utils/randomPairQuestion';
 type Choice = 'LEFT' | 'RIGHT' | 'SAME' | 'SKIP';
 type LevelGroup = '12' | '11' | 'low';
 interface SummaryRow { t: string; d: string; l: number; x: string; g: LevelGroup }
-interface Prepared { row: SummaryRow; tl: ChartTimeline; q: PairQuestion }
+/** 1 問。repeatOf = 確認問題（前の問題の左右を入れ替えた出し直し）のとき、元の回答の ID */
+interface Prepared { row: SummaryRow; tl: ChartTimeline; q: PairQuestion; repeatOf?: number }
 
 /** 先に作っておく問題の数 */
 const PREFETCH = 2;
@@ -49,6 +50,14 @@ const saving = ref(false);
 const message = ref('');
 const count = ref<number | null>(null);
 const history: { id: number; prepared: Prepared; agreed: boolean | null }[] = [];
+/**
+ * 確認問題（repeat）: 左右どちらかを選んだ問題を覚えておき、REPEAT_GAP 問以上あとに REPEAT_SHARE の確率で
+ * 左右を入れ替えて出し直す（各問題 1 回まで）。同じ方を選び直せていれば落ち着いて見ている。答えの比べ方は学習スクリプト側
+ */
+const REPEAT_SHARE = 0.05;
+const REPEAT_GAP = 5;
+const repeatable: { id: number; prepared: Prepared; at: number }[] = [];
+let answeredCount = 0;
 const canUndo = ref(false);
 /** この画面を開いてからの、今の評価との一致（同じくらい・スキップと、今の評価が同点の問題は除く） */
 const agree = ref({ n: 0, hit: 0 });
@@ -117,6 +126,19 @@ async function fill() {
 }
 
 function show() {
+  const ready = repeatable.filter(r => answeredCount - r.at >= REPEAT_GAP);
+  if (ready.length > 0 && Math.random() < REPEAT_SHARE) {
+    const r = ready[Math.floor(Math.random() * ready.length)];
+    repeatable.splice(repeatable.indexOf(r), 1);
+    const q = r.prepared.q;
+    current.value = {
+      ...r.prepared,
+      q: { ...q, patternLeft: q.patternRight, patternRight: q.patternLeft, modelLeft: q.modelRight, modelRight: q.modelLeft, strategy: 'repeat' },
+      repeatOf: r.id,
+    };
+    shownAt = performance.now();
+    return;
+  }
   current.value = queue.shift() ?? null;
   shownAt = performance.now();
   void fill();
@@ -192,7 +214,7 @@ async function answer(choice: Choice) {
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         textage: p.row.x, title: p.row.t, difficulty: p.row.d, level: p.row.l, side: side.value,
-        ...p.q, choice, responseMs: Math.round(performance.now() - shownAt),
+        ...p.q, choice, repeatOf: p.repeatOf ?? null, responseMs: Math.round(performance.now() - shownAt),
       }),
     });
     if (!res.ok) throw new Error(String(res.status));
@@ -204,6 +226,11 @@ async function answer(choice: Choice) {
       agree.value = { n: agree.value.n + 1, hit: agree.value.hit + (agreed ? 1 : 0) };
     }
     history.push({ id: data.id, prepared: p, agreed });
+    answeredCount++;
+    if ((choice === 'LEFT' || choice === 'RIGHT') && p.q.strategy !== 'repeat' && p.q.strategy !== 'obvious') {
+      repeatable.push({ id: data.id, prepared: p, at: answeredCount });
+      if (repeatable.length > 50) repeatable.shift();
+    }
     if (history.length > 20) history.shift();
     canUndo.value = true;
     show();
@@ -224,6 +251,9 @@ async function undo() {
     if (!res.ok) throw new Error(String(res.status));
     count.value = (await res.json()).count;
     history.pop();
+    answeredCount = Math.max(0, answeredCount - 1);
+    const ri = repeatable.findIndex(r => r.id === last.id);
+    if (ri >= 0) repeatable.splice(ri, 1);
     canUndo.value = history.length > 0;
     if (last.agreed !== null) agree.value = { n: agree.value.n - 1, hit: agree.value.hit - (last.agreed ? 1 : 0) };
     if (current.value) queue.unshift(current.value);
