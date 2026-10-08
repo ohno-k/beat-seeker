@@ -44,100 +44,99 @@
                 <span class="w-1.5 h-6 bg-blue-600 dark:bg-blue-500 rounded-full"></span>
                 {{ t('beatTierInfo.whatIsTitle') }}
               </h4>
-              <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium" v-html="t('beatTierInfo.whatIsDesc')"></p>
+              <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-medium mb-5" v-html="t('beatTierInfo.whatIsDesc')"></p>
+              <TierInfoFlow accent="blue" :steps="flowSteps" />
             </section>
 
-            <section class="bg-slate-900 dark:bg-slate-950 rounded-md p-8 text-white relative overflow-hidden border border-slate-700 dark:border-slate-800 transition-colors duration-200">
-              <h4 class="text-[10px] font-bold mb-6 text-slate-400 dark:text-slate-500">Calculation Formula</h4>
-              <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
-                <div class="flex-1 text-center md:text-left">
-                  <p class="text-4xl font-bold mb-2 tracking-tight text-blue-400 dark:text-blue-300">Beat-PT = Rate%^1.3 × Weight + Bonus</p>
-                  <p class="text-xs font-bold text-slate-400 dark:text-slate-500 leading-relaxed" v-html="t('beatTierInfo.formulaDesc')"></p>
+            <!-- 計算式（式を項ごとに分解 + 2 つのグラフ） -->
+            <section class="bg-slate-900 dark:bg-slate-950 rounded-md text-white border border-slate-700 dark:border-slate-800 formula-card">
+              <h4 class="text-[10px] font-bold mb-4 text-slate-400 dark:text-slate-500">Calculation Formula</h4>
+
+              <div class="formula-terms">
+                <span class="formula-lhs text-blue-300">Beat-PT <span class="formula-op">=</span></span>
+                <div class="term">
+                  <p class="term-main text-blue-300">Rate%<sup>1.3</sup></p>
+                  <p class="term-sub">{{ t('beatTierInfo.termRate') }}</p>
                 </div>
-                <div class="h-px md:h-20 w-full md:w-px bg-slate-700 dark:bg-slate-800"></div>
-                <div class="flex-1 text-sm font-bold text-slate-300 dark:text-slate-400 leading-relaxed">
-                  <p>• {{ t('beatTierInfo.weightDesc') }}</p>
-                  <p class="text-blue-400/80 dark:text-blue-300/80 mt-1">{{ t('beatTierInfo.finalPointsDesc') }}</p>
+                <span class="formula-op">×</span>
+                <div class="term">
+                  <p class="term-main text-blue-300">Weight</p>
+                  <p class="term-sub">{{ t('beatTierInfo.termWeight') }}</p>
                 </div>
+                <span class="formula-op">+</span>
+                <div class="term">
+                  <p class="term-main text-amber-300">Bonus</p>
+                  <p class="term-sub">{{ t('beatTierInfo.termBonus') }}</p>
+                </div>
+              </div>
+
+              <p class="text-xs font-bold text-slate-400 leading-relaxed mt-5" v-html="t('beatTierInfo.formulaDesc')"></p>
+
+              <div class="charts">
+                <!-- グラフ1: スコアレート → Beat-PT（例の難易度で 1 本） -->
+                <figure class="chart-box">
+                  <figcaption class="chart-title">{{ t('beatTierInfo.curveTitle', { rank: CURVE_RANK }) }}</figcaption>
+                  <svg :viewBox="`0 0 ${CW} ${CH}`" class="chart-svg" role="img" :aria-label="t('beatTierInfo.curveTitle', { rank: CURVE_RANK })">
+                    <defs>
+                      <linearGradient id="beatCurveFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.35" />
+                        <stop offset="100%" stop-color="#60a5fa" stop-opacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <g v-for="v in curveYTicks" :key="'y' + v">
+                      <line :x1="PL" :x2="CW - PR" :y1="cy(v)" :y2="cy(v)" stroke="#1e293b" />
+                      <text :x="PL - 5" :y="cy(v) + 3" text-anchor="end" font-size="9" fill="#64748b">{{ v }}</text>
+                    </g>
+                    <g v-for="r in [70, 80, 90, 100]" :key="'x' + r">
+                      <text :x="cx(r)" :y="CH - 6" text-anchor="middle" font-size="9" fill="#64748b">{{ r }}%</text>
+                    </g>
+                    <g v-for="b in bonusLines" :key="b.label">
+                      <line :x1="cx(b.rate)" :x2="cx(b.rate)" :y1="PT" :y2="CH - PB" stroke="#fbbf24" stroke-opacity="0.55" stroke-dasharray="3 3" />
+                      <text :x="cx(b.rate) - 3" :y="PT + 9" text-anchor="end" font-size="8.5" font-weight="700" fill="#fcd34d">{{ b.label }}</text>
+                      <text :x="cx(b.rate) - 3" :y="PT + 19" text-anchor="end" font-size="8" fill="#fcd34d" fill-opacity="0.75">+1%</text>
+                    </g>
+                    <path :d="curveArea" fill="url(#beatCurveFill)" />
+                    <path :d="curvePath" fill="none" stroke="#60a5fa" stroke-width="2.25" stroke-linejoin="round" />
+                    <circle :cx="cx(100)" :cy="cy(curveMax)" r="3" fill="#60a5fa" />
+                    <text :x="cx(100) - 5" :y="cy(curveMax) + 14" text-anchor="end" font-size="9" font-weight="700" fill="#bfdbfe">{{ curveMax.toFixed(1) }} pt</text>
+                  </svg>
+                </figure>
+
+                <!-- グラフ2: 非公式難易度ごとの重み -->
+                <figure class="chart-box">
+                  <figcaption class="chart-title">{{ t('beatTierInfo.weightChartTitle') }}</figcaption>
+                  <svg :viewBox="`0 0 ${CW} ${CH}`" class="chart-svg" role="img" :aria-label="t('beatTierInfo.weightChartTitle')">
+                    <g v-for="v in [0, 100, 200]" :key="'wy' + v">
+                      <line :x1="PL" :x2="CW - PR" :y1="wy(v)" :y2="wy(v)" stroke="#1e293b" />
+                      <text :x="PL - 5" :y="wy(v) + 3" text-anchor="end" font-size="9" fill="#64748b">{{ v }}</text>
+                    </g>
+                    <g v-for="(w, i) in weightBars" :key="w.rank">
+                      <rect :x="wx(i)" :y="wy(w.weight)" :width="wBarW" :height="wy(0) - wy(w.weight)" rx="1.5"
+                        :fill="w.rank === CURVE_RANK ? '#93c5fd' : '#3b82f6'" :fill-opacity="0.45 + 0.5 * (i / (weightBars.length - 1))" />
+                      <text v-if="w.rank.endsWith('.0') || w.rank.endsWith('.5')" :x="wx(i) + wBarW / 2" :y="CH - 6" text-anchor="middle" font-size="9" fill="#64748b">{{ w.rank }}</text>
+                      <text v-if="i === 0 || i === weightBars.length - 1" :x="wx(i) + wBarW / 2" :y="wy(w.weight) - 4" text-anchor="middle" font-size="9" font-weight="700" fill="#bfdbfe">{{ w.weight }}</text>
+                    </g>
+                  </svg>
+                </figure>
+              </div>
+
+              <div class="mt-5 pt-4 border-t border-slate-700/70 text-sm font-bold text-slate-300 leading-relaxed">
+                <p>{{ t('beatTierInfo.weightDesc') }}</p>
+                <p class="text-blue-400/80 dark:text-blue-300/80 mt-1">{{ t('beatTierInfo.finalPointsDesc') }}</p>
               </div>
             </section>
 
             <!-- ランク一覧ボード（階段を可視化） -->
-            <section class="space-y-8">
-              <div class="flex items-center justify-between">
+            <section>
+              <div class="flex items-center justify-between mb-4">
                 <h4 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <span class="w-1.5 h-6 bg-purple-600 dark:bg-purple-500 rounded-full"></span>
                   {{ t('beatTierInfo.rankBoardTitle') }}
                 </h4>
                 <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded transition-colors duration-200">Hierarchy</div>
               </div>
-
-              <!-- Premium Dark/Light Grid for Ranks -->
-              <div class="bg-white dark:bg-slate-950 rounded-md p-4 sm:p-10 border border-slate-200 dark:border-slate-800">
-                <div class="w-full space-y-12">
-                  
-                  <!-- Legend & Special Ranks -->
-                  <div class="flex items-center justify-center gap-12 border-b border-slate-200 dark:border-slate-800/50 pb-12">
-                    <div v-if="groupedRanks['Legend']" class="flex flex-col items-center group">
-                      <RankIcon :rank-name="'Legend'" size="lg" />
-                      <div class="mt-6 text-center">
-                        <p class="text-base font-bold text-amber-500 mb-1">Legend</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/50 px-3 py-1 rounded border border-slate-200 dark:border-slate-700">{{ groupedRanks['Legend'][0].minPoints.toLocaleString() }} pt</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Main Grid (Novice to Mythic) -->
-                  <!-- On Mobile: Vertical List. On xl (1280px+): Horizontal Row -->
-                  <div class="flex flex-col xl:flex-row justify-between gap-8 xl:gap-4 overflow-x-auto custom-scrollbar xl:overflow-visible pb-4 xl:pb-0">
-                    <div v-for="name in rankNames" :key="name" class="flex flex-col xl:items-center bg-slate-50 dark:bg-slate-900/50 xl:bg-transparent rounded-md p-4 xl:p-0">
-                      
-                      <!-- Header Row for this Rank on Mobile, Top Header on Desktop -->
-                      <div class="flex items-center xl:flex-col xl:space-y-6 mb-4 xl:mb-0">
-                        <div class="hidden xl:block w-px h-12 bg-slate-200 dark:bg-slate-800 xl:mb-6"></div>
-                        <p class="text-base xl:text-xs font-bold text-slate-700 dark:text-slate-300 xl:text-slate-500 xl:dark:text-slate-400 flex-1 xl:flex-none xl:h-4 xl:mb-4">{{ name }}</p>
-                      </div>
-                      
-                      <!-- Tiers Flow: Horizontal on mobile, vertical on desktop -->
-                      <div class="flex flex-row xl:flex-col items-center gap-4 xl:gap-0 xl:space-y-0 w-full overflow-x-auto xl:overflow-visible py-2 xl:py-0 custom-scrollbar">
-                        <!-- Tiers 5 to 1 (Descending) -->
-                        <div v-for="tier in 5" :key="tier" class="relative group shrink-0 xl:w-full">
-                          <div v-if="getRankForTier(name, 6 - tier)" class="flex flex-row xl:flex-col items-center">
-                             <!-- Small connecting lines -->
-                            <div v-if="tier > 1" class="hidden xl:block w-px h-6 bg-slate-200 dark:bg-slate-800/50 mb-2"></div>
-                            <div v-if="tier > 1" class="xl:hidden w-4 h-px bg-slate-200 dark:bg-slate-800/50 mr-4"></div>
-                            
-                            <div class="relative transition-all duration-300">
-                              <RankIcon :rank-name="name" :tier="6 - tier" size="md" />
-                              <!-- Hover Tooltip -->
-                              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover:opacity-100 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white p-3 rounded-md text-xs whitespace-nowrap z-30 pointer-events-none transition-all shadow-xl">
-                                <div class="flex flex-col items-center gap-1">
-                                  <span class="font-bold text-blue-600 dark:text-blue-400 text-sm">{{ name }} {{ 6 - tier }}</span>
-                                  <span class="font-bold text-slate-600 dark:text-slate-300">{{ getRankForTier(name, 6 - tier)?.minPoints.toLocaleString() }} pt</span>
-                                </div>
-                                <!-- Tooltip Arrow -->
-                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 w-2 h-2 bg-white dark:bg-slate-900 border-r border-b border-slate-200 dark:border-slate-700 rotate-45"></div>
-                              </div>
-                            </div>
-                            <div class="mt-3 xl:mt-3 ml-0 xl:ml-0 flex flex-col items-center gap-1 min-w-[3rem]">
-                              <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ 6 - tier }}</p>
-                              <p class="text-[10px] font-bold text-slate-500 tracking-tight">{{ (getRankForTier(name, 6 - tier)?.minPoints || 0) / 1000 }}k</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Beginner (Base) -->
-                  <div class="flex items-center justify-center pt-8 border-t border-slate-200 dark:border-slate-800/50">
-                    <div class="flex flex-col items-center opacity-70 hover:opacity-100 transition-all duration-300">
-                      <RankIcon :rank-name="'Beginner'" size="sm" />
-                      <p class="text-xs font-bold text-slate-500 dark:text-slate-400 mt-3">Beginner (0 pt)</p>
-                    </div>
-                  </div>
-
-                </div>
+              <div class="bg-white dark:bg-slate-950 rounded-md p-2 sm:p-4 border border-slate-200 dark:border-slate-800">
+                <TierRankLadder :grouped-ranks="groupedRanks" :rank-names="rankNames" scale="linear" />
               </div>
             </section>
           </div>
@@ -213,10 +212,11 @@
  */
 import { ref, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
-import { WEIGHTS, getGroupedRanks } from '../utils/beatTier';
+import { WEIGHTS, getGroupedRanks, calculatePoints, getMaxPoints, SCORE_RATE_TIER_C_MIN } from '../utils/beatTier';
 import { diffTable as diffTableRanksRef } from '../composables/useGameData';
 import { formatJstDate } from '../utils/jstTime';
-import RankIcon from './RankIcon.vue';
+import TierRankLadder from './TierRankLadder.vue';
+import TierInfoFlow from './TierInfoFlow.vue';
 
 const { t } = useI18n();
 defineEmits(['close']);
@@ -234,13 +234,68 @@ const groupedRanks = computed(() => getGroupedRanks());
 /** Beginner と Legend 以外のランク名（中間層）。表示順を一覧で固定。 */
 const rankNames = ['Mythic', 'Ancient', 'Master', 'Elite', 'Commander', 'Veteran', 'Expert', 'Advanced', 'Intermediate', 'Novice'];
 
-/**
- * 【関数の役割】 ランク名と tier から該当ランク情報を取得する。
- * 見つからない場合は undefined（階段の一部が欠けるケース）。
- */
-const getRankForTier = (name: string, tier: number) => {
-  return groupedRanks.value[name]?.find(r => r.tier === tier);
-};
+/** 「合計ポイントの決まり方」3 ステップ図の文言。 */
+const flowSteps = computed(() => [1, 2, 3].map(i => ({
+  title: t(`beatTierInfo.flow${i}Title`),
+  desc: t(`beatTierInfo.flow${i}Desc`),
+})));
+
+// ── 計算式カードのグラフ（SVG 座標系。カードは常に暗色なので色は固定値） ──
+const CW = 320;
+const CH = 170;
+const PL = 30;
+const PR = 10;
+const PT = 10;
+const PB = 22;
+/** スコアレート曲線の例に使う非公式難易度。 */
+const CURVE_RANK = '12.0';
+const CURVE_Y_MAX = 180;
+const curveYTicks = [0, 60, 120, 180];
+const RATE_MIN = 2 / 3 * 100;
+
+const cx = (rate: number) => PL + (rate - RATE_MIN) / (100 - RATE_MIN) * (CW - PL - PR);
+const cy = (pt: number) => PT + (1 - pt / CURVE_Y_MAX) * (CH - PT - PB);
+
+/** ボーナスが付く境界（calculatePoints と同じ閾値）。 */
+const bonusLines = [
+  { label: 'AA', rate: 77.77 },
+  { label: 'AAA', rate: 88.88 },
+  { label: 'MAX-', rate: 94.44 },
+];
+
+/** 100% 時の Beat-PT（= weight × 1.03）。 */
+const curveMax = getMaxPoints(CURVE_RANK);
+
+/** 実際の calculatePoints を 0.05% 刻みで描く。ボーナス境界で段差になるので線を切る。 */
+const curveSamples = (() => {
+  const pts: { r: number; p: number; jump: boolean }[] = [];
+  let prev = -1;
+  for (let i = 0; ; i++) {
+    const r = Math.min(100, SCORE_RATE_TIER_C_MIN + 0.001 + i * 0.05);
+    const p = calculatePoints(r, CURVE_RANK);
+    const bonusCount = bonusLines.filter(b => r > b.rate).length;
+    pts.push({ r, p, jump: prev >= 0 && bonusCount !== prev });
+    prev = bonusCount;
+    if (r >= 100) break;
+  }
+  return pts;
+})();
+const curvePath = curveSamples
+  .map((s, i) => `${i === 0 || s.jump ? 'M' : 'L'}${cx(s.r).toFixed(1)},${cy(s.p).toFixed(1)}`)
+  .join(' ');
+const curveArea = `M${cx(curveSamples[0].r).toFixed(1)},${cy(0)} `
+  + curveSamples.map(s => `L${cx(s.r).toFixed(1)},${cy(s.p).toFixed(1)}`).join(' ')
+  + ` L${cx(100).toFixed(1)},${cy(0)} Z`;
+
+/** 重みの棒グラフ（WEIGHTS をそのまま並べる）。 */
+const weightBars = Object.entries(WEIGHTS)
+  .map(([rank, weight]) => ({ rank, weight }))
+  .sort((a, b) => parseFloat(a.rank) - parseFloat(b.rank));
+const W_Y_MAX = 200;
+const wSlot = (CW - PL - PR) / weightBars.length;
+const wBarW = wSlot * 0.72;
+const wx = (i: number) => PL + i * wSlot + (wSlot - wBarW) / 2;
+const wy = (v: number) => PT + (1 - v / W_Y_MAX) * (CH - PT - PB);
 
 /**
  * 【computed の役割】 非公式難易度表を「weight > 0 のランクだけ」に整形した配列。
@@ -296,5 +351,92 @@ const filteredSongGroups = computed(() => {
 
 .transition-hover {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── 計算式カード（output.css の sm: 上書き負けを避けるため scoped CSS でレイアウト） ── */
+.formula-card {
+  container-type: inline-size;
+  padding: 20px;
+}
+.formula-terms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 10px;
+}
+.formula-lhs {
+  font-size: 22px;
+  font-weight: 800;
+  width: 100%;
+  text-align: center;
+}
+.formula-op {
+  font-size: 20px;
+  font-weight: 700;
+  color: #64748b;
+}
+.term {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 180px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  background: rgb(30 41 59 / 0.7);
+  border: 1px solid rgb(51 65 85);
+  text-align: center;
+}
+.term-main {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.term-sub {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+.charts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.chart-box {
+  margin: 0;
+  padding: 10px 10px 4px;
+  border-radius: 8px;
+  background: rgb(2 6 23 / 0.5);
+  border: 1px solid rgb(30 41 59);
+}
+.chart-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 4px;
+}
+.chart-svg {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  height: auto;
+}
+@container (min-width: 560px) {
+  .formula-card {
+    padding: 28px;
+  }
+  .formula-lhs {
+    width: auto;
+    font-size: 26px;
+  }
+  .term-main {
+    font-size: 22px;
+  }
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 </style>
