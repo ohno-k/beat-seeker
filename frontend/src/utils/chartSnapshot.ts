@@ -1,7 +1,7 @@
 /**
  * chartSnapshot.ts
  *
- * 譜面の 1 区間を、指定の並びで 1 枚の静止画として canvas に描く（「どっちが押しやすい？」の比較画面用）。
+ * 譜面の 1 区間を、指定の並びで 1 枚の静止画として canvas に描く（配置アンケート「どっちが押しやすい？」用）。
  * 下が区間の始まり・上が終わりで、時間に比例した一定速度（ソフランでも詰まらない）。色とレーン幅は譜面再生（ChartPlayer.vue）と同じ。
  */
 import { assignLanes, type ChartTimeline } from './chartPlayback.ts';

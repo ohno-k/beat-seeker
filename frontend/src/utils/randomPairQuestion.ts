@@ -1,7 +1,7 @@
 /**
  * randomPairQuestion.ts
  *
- * 「どっちが押しやすい？」（管理者の比較画面 RandomCompareView）の 1 問を作る。
+ * 配置アンケート「どっちが押しやすい？」（components/RandomPairSurvey.vue）の 1 問を作る。
  * 譜面 1 つについて 2 つの並びと、見比べる区間（連続した数小節）を選ぶ。答えは減点の形ごとの係数の学習
  * （scripts/fit-random-weights.mts）に使うので、少ない問題数で係数が決まるよう次の 3 通りを混ぜる。
  *

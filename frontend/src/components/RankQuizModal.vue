@@ -18,8 +18,12 @@ import { useRankQuiz, type ReviewPoolItem } from '../composables/useRankQuiz';
 import { useModalEscape } from '../composables/useModalEscape';
 import { flattenScores, type ScoreRecord } from '../utils/scoreData';
 import type { ScoreData } from '../types/ScoreData';
+import RandomPairSurvey from './RandomPairSurvey.vue';
 
 const props = defineProps<{ open: boolean }>();
+
+/** タブ: 非公式難易度クイズ / 配置アンケート（RANDOM の「どっちが押しやすい？」。当たり配置ランキングの学習用） */
+const tab = ref<'quiz' | 'survey'>('quiz');
 const emit = defineEmits<{ (e: 'close'): void }>();
 
 const { progress, fetchProgress, submitAnswer, levelProgressPct } = useRankQuiz();
@@ -298,7 +302,7 @@ const sessionLeveledUp = computed(() => {
       >
         <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="$emit('close')"></div>
 
-        <div class="relative bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div class="relative bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 shadow-xl w-full max-h-[90vh] overflow-y-auto" :class="tab === 'survey' ? 'max-w-xl' : 'max-w-md'">
           <!-- ヘッダ: タイトル + Lv/XP + 閉じる -->
           <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
             <div class="w-9 h-9 bg-indigo-600 rounded-md flex items-center justify-center text-white shrink-0">
@@ -328,8 +332,24 @@ const sessionLeveledUp = computed(() => {
             </button>
           </div>
 
+          <!-- タブ -->
+          <div class="flex border-b border-slate-100 dark:border-slate-700 text-xs font-bold">
+            <button
+              v-for="tb in ([['quiz', '難易度クイズ'], ['survey', '配置アンケート']] as const)" :key="tb[0]"
+              type="button"
+              class="flex-1 py-2 border-b-2 transition-colors"
+              :class="tab === tb[0] ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700'"
+              @click="tab = tb[0]"
+            >{{ tb[1] }}</button>
+          </div>
+
+          <!-- 配置アンケート -->
+          <div v-if="tab === 'survey'" class="p-5">
+            <RandomPairSurvey />
+          </div>
+
           <!-- 本体 -->
-          <div class="p-5">
+          <div v-else class="p-5">
             <!-- エラー or 空状態 -->
             <div v-if="initError" class="text-center py-10 text-sm text-slate-500 dark:text-slate-400">
               {{ initError }}

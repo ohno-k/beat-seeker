@@ -14,7 +14,7 @@ public interface RandomPairVoteRepository extends JpaRepository<RandomPairVote, 
     /** 全回答を古い順に返す（学習用の書き出し）。 */
     List<RandomPairVote> findAllByOrderByIdAsc();
 
-    /** ユーザーの回答数（比較画面の進み具合）。 */
+    /** ユーザーの回答数（アンケートの回答数の表示）。 */
     long countByUser(User user);
 
     /** ユーザーの回答のうち、指定の答え（SKIP など）の数。 */

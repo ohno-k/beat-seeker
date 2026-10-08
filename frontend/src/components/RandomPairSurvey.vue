@@ -1,15 +1,18 @@
 <script setup lang="ts">
 /**
- * 【View の役割】 RANDOM の 2 つの並びを画像で見比べて「どっちが押しやすいか」を答える画面（管理者専用。URL /admin/random-compare）。
+ * 【コンポーネントの役割】 RANDOM の 2 つの並びを画像で見比べて「どっちが押しやすいか」を答えるアンケート
+ * （非公式難易度クイズのモーダルの「配置アンケート」タブ。ログイン中のユーザーなら誰でも答えられる）。
  *
  * 答えは当たり配置ランキングの減点の形ごとの係数を学習する正解データになる（scripts/fit-random-weights.mts）。
  * - 譜面は当たり配置ランキングの summary.json から、選んだレベル帯の中で無作為に選ぶ
  * - 2 つの並びと見せる区間は utils/randomPairQuestion.ts（Web Worker で計算）。次の問題を裏で先に作っておく
  * - 画像は utils/chartSnapshot.ts。下が区間の始まりで、時間に比例した一定速度
- * - 並びの番号と今の評価は、答えに影響しないよう既定では出さない
- * - 答えは 1 問ごとに POST /api/admin/random-pairs。直前の 1 問は取り消せる
+ * - 答えは 1 問ごとに POST /api/random-pairs。直前の 1 問は取り消せる
+ * - 管理者だけ: 並びの番号と今の評価の表示、今の評価との一致、学習用データの書き出し
+ *   （一般のユーザーには答えに影響しないよう出さない）
  *
  * 操作: 画像をクリック（または ← / →）で押しやすい方、↓ で同じくらい、S で判断できない（スキップ）、Z で直前の取り消し。
+ * キー操作はこのコンポーネントが表示されている間だけ効く（親はタブを切り替えたら v-if で外す）。
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { API_BASE, useAuth } from '../composables/useAuth';
@@ -24,13 +27,12 @@ type LevelGroup = '12' | '11' | 'low';
 interface SummaryRow { t: string; d: string; l: number; x: string; g: LevelGroup }
 interface Prepared { row: SummaryRow; tl: ChartTimeline; q: PairQuestion }
 
-/** 目標の回答数（進み具合の表示用） */
-const GOAL = 1000;
 /** 先に作っておく問題の数 */
 const PREFETCH = 2;
 
 const { isAdmin } = useAdmin();
-const { authHeaders } = useAuth();
+const { authHeaders, user } = useAuth();
+const isLoggedIn = computed(() => !!user.value);
 const { profileSide } = usePlaySide();
 const side = computed<1 | 2>(() => profileSide.value ?? 1);
 
@@ -151,7 +153,7 @@ async function answer(choice: Choice) {
   saving.value = true;
   message.value = '';
   try {
-    const res = await fetch(`${API_BASE}/api/admin/random-pairs`, {
+    const res = await fetch(`${API_BASE}/api/random-pairs`, {
       method: 'POST',
       headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
@@ -184,7 +186,7 @@ async function undo() {
   const last = history[history.length - 1];
   saving.value = true;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/random-pairs/${last.id}`, { method: 'DELETE', headers: authHeaders() });
+    const res = await fetch(`${API_BASE}/api/random-pairs/${last.id}`, { method: 'DELETE', headers: authHeaders() });
     if (!res.ok) throw new Error(String(res.status));
     count.value = (await res.json()).count;
     history.pop();
@@ -222,11 +224,9 @@ function onKey(e: KeyboardEvent) {
   if (map[k]) { e.preventDefault(); map[k](); }
 }
 
-const progress = computed(() => Math.min(100, ((count.value ?? 0) / GOAL) * 100));
-
 /** 管理者と分かったら（ログイン情報の読み込みを待って）1 回だけ始める */
 async function start() {
-  if (started || !isAdmin.value) return;
+  if (started || !isLoggedIn.value) return;
   started = true;
   try {
     const res = await fetch(`${import.meta.env.BASE_URL}data/random-ranking/summary.json`);
@@ -236,11 +236,11 @@ async function start() {
     loadError.value = '譜面の一覧（当たり配置ランキングのデータ）を読み込めませんでした';
     return;
   }
-  fetch(`${API_BASE}/api/admin/random-pairs/stats`, { headers: authHeaders() })
+  fetch(`${API_BASE}/api/random-pairs/stats`, { headers: authHeaders() })
     .then(r => (r.ok ? r.json() : null)).then(d => { if (d) count.value = d.count; }).catch(() => {});
   void fill();
 }
-watch(isAdmin, start);
+watch(isLoggedIn, start);
 onMounted(() => {
   window.addEventListener('keydown', onKey);
   window.addEventListener('resize', draw);
@@ -255,29 +255,23 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto p-4 sm:p-6 space-y-4">
-    <header class="space-y-1">
-      <h1 class="text-2xl font-bold text-slate-900 dark:text-white">どっちが押しやすい？（管理者）</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        同じ区間を 2 通りの RANDOM の並びで並べています。押しやすい方を選んでください。答えは当たり配置ランキングの学習に使います。
-      </p>
-    </header>
+  <div class="space-y-3">
+    <p class="text-xs text-slate-500 dark:text-slate-400">
+      同じ区間を 2 通りの RANDOM の並びで並べています。押しやすい方を選んでください。答えは当たり配置ランキングの精度を上げるのに使います。
+    </p>
 
-    <div v-if="!isAdmin" class="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-md border border-amber-200 dark:border-amber-900/30 text-sm">
-      この画面は管理者のみ利用できます。
+    <div v-if="!isLoggedIn" class="text-center py-10 text-sm text-slate-500 dark:text-slate-400">
+      ログインすると答えられます。
     </div>
 
     <template v-else>
       <!-- 進み具合と条件 -->
       <div class="space-y-2">
-        <div class="flex items-center justify-between text-sm font-semibold text-slate-600 dark:text-slate-300">
-          <span>回答 {{ count ?? '…' }} / {{ GOAL }}</span>
-          <span v-if="agree.n > 0" class="text-xs text-slate-400">今の評価との一致 {{ agree.hit }} / {{ agree.n }}</span>
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
+          <span>あなたの回答 {{ count ?? '…' }} 件</span>
+          <span v-if="isAdmin && agree.n > 0" class="text-slate-400">今の評価との一致 {{ agree.hit }} / {{ agree.n }}</span>
         </div>
-        <div class="h-1.5 bg-slate-200 dark:bg-slate-700 rounded">
-          <div class="h-full bg-indigo-500 rounded" :style="{ width: `${progress}%` }" />
-        </div>
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-slate-300">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-600 dark:text-slate-300">
           <label v-for="g in (['12', '11', 'low'] as const)" :key="g" class="flex items-center gap-1">
             <input v-model="levels[g]" type="checkbox" />{{ g === 'low' ? '☆10 以下' : `☆${g}` }}
           </label>
@@ -289,8 +283,10 @@ onBeforeUnmount(() => {
               <option :value="8">8 小節</option>
             </select>
           </label>
-          <label class="flex items-center gap-1"><input v-model="showPatterns" type="checkbox" />並びと今の評価を表示</label>
-          <button class="ml-auto underline" @click="exportData">学習用データを書き出す</button>
+          <template v-if="isAdmin">
+            <label class="flex items-center gap-1"><input v-model="showPatterns" type="checkbox" />並びと今の評価</label>
+            <button class="ml-auto underline" @click="exportData">学習用データを書き出す</button>
+          </template>
         </div>
       </div>
 
@@ -303,10 +299,10 @@ onBeforeUnmount(() => {
         <template v-else>
           <div class="text-center text-sm font-semibold text-slate-700 dark:text-slate-200">
             {{ current.row.t }}
-            <span class="text-xs text-slate-400">☆{{ current.row.l }} {{ current.row.d === '10' ? 'LEGGENDARIA' : 'ANOTHER' }}
+            <span class="block text-xs text-slate-400">☆{{ current.row.l }} {{ current.row.d === '10' ? 'LEGGENDARIA' : 'ANOTHER' }}
               ・ {{ current.q.startMeasure }}〜{{ current.q.endMeasure }} 小節（下から上へ）</span>
           </div>
-          <div class="flex justify-center gap-4">
+          <div class="flex justify-center gap-3">
             <button
               v-for="pos in (['LEFT', 'RIGHT'] as const)" :key="pos"
               class="flex flex-col items-center gap-1 rounded-lg p-1 border-2 border-transparent hover:border-indigo-400 focus:outline-none disabled:opacity-60"
@@ -315,13 +311,13 @@ onBeforeUnmount(() => {
             >
               <canvas :ref="el => { if (pos === 'LEFT') leftCanvas = el as HTMLCanvasElement; else rightCanvas = el as HTMLCanvasElement; }" class="rounded" />
               <span class="text-xs font-semibold text-slate-500">{{ pos === 'LEFT' ? '← 左' : '右 →' }}</span>
-              <span v-if="showPatterns" class="text-[11px] font-mono text-slate-400">
+              <span v-if="isAdmin && showPatterns" class="text-[11px] font-mono text-slate-400">
                 {{ pos === 'LEFT' ? current.q.patternLeft : current.q.patternRight }}
                 ・ {{ pos === 'LEFT' ? current.q.modelLeft : current.q.modelRight }}
               </span>
             </button>
           </div>
-          <div class="flex flex-wrap justify-center gap-2 text-sm">
+          <div class="flex flex-wrap justify-center gap-2 text-xs">
             <button class="px-3 py-1.5 rounded border border-slate-300 dark:border-slate-600" :disabled="saving" @click="answer('SAME')">同じくらい（↓）</button>
             <button class="px-3 py-1.5 rounded border border-slate-300 dark:border-slate-600" :disabled="saving" @click="answer('SKIP')">判断できない（S）</button>
             <button class="px-3 py-1.5 rounded border border-slate-300 dark:border-slate-600 disabled:opacity-40" :disabled="saving || !canUndo" @click="undo">直前を取り消す（Z）</button>

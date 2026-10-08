@@ -17,17 +17,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * 【クラスの役割】 RANDOM の 2 つの並びの「どっちが押しやすい？」の回答を保存・書き出す API（管理者専用）。
+ * 【クラスの役割】 RANDOM の 2 つの並びの「どっちが押しやすい？」の回答を保存・書き出す API。
  *
- * 管理者の比較画面（/admin/random-compare）が 1 問ごとに POST し、学習スクリプト
+ * 非公式難易度クイズのモーダルの「配置アンケート」タブ（RandomPairSurvey.vue）が 1 問ごとに POST し、学習スクリプト
  * （scripts/fit-random-weights.mts）が export で全回答とオプション投票の集計（弱い正解）をまとめて取り出す。
- * 判定は AdminAuthService。ログイン必須は SecurityConfig で掛ける。
+ * 回答はログイン中のユーザーなら誰でも、書き出しは管理者だけ（AdminAuthService）。ログイン必須は SecurityConfig で掛ける。
  *
  * エンドポイント:
- *  - POST   /api/admin/random-pairs        … 1 問分の回答を保存 → { id, count }
- *  - DELETE /api/admin/random-pairs/{id}   … 自分の回答を取り消す（直前の 1 問のやり直し）
- *  - GET    /api/admin/random-pairs/stats  … 自分の回答数 { count, skipped }
- *  - GET    /api/admin/random-pairs/export … { votes: [...], optionVotes: [{ title, difficultyName, counts }] }
+ *  - POST   /api/random-pairs        … 1 問分の回答を保存 → { id, count }
+ *  - DELETE /api/random-pairs/{id}   … 自分の回答を取り消す（直前の 1 問のやり直し）
+ *  - GET    /api/random-pairs/stats  … 自分の回答数 { count, skipped }
+ *  - GET    /api/admin/random-pairs/export … 管理者のみ。{ votes: [...], optionVotes: [{ title, difficultyName, counts }] }
  *  - GET    /api/external/v1/random-pairs/export … 同じ内容を個人 API トークン（期限なしで発行できる）で取る。
  *    学習スクリプトを毎晩などに自動で回す用（ログインの JWT は 7 日で切れるため）
  */
@@ -52,11 +52,11 @@ public class RandomPairVoteController {
     }
 
     /** 1 問分の回答を保存する。 */
-    @PostMapping("/api/admin/random-pairs")
+    @PostMapping("/api/random-pairs")
     @Transactional
     public ResponseEntity<?> save(Authentication auth, @RequestBody PairVoteRequest req) {
-        User me = adminOrNull(auth);
-        if (me == null) return forbidden();
+        User me = userOrNull(auth);
+        if (me == null) return ResponseEntity.status(401).build();
         if (req.textage() == null || req.textage().isBlank() || req.title() == null || req.difficulty() == null
                 || !isPattern(req.patternLeft()) || !isPattern(req.patternRight())
                 || req.patternLeft().equals(req.patternRight())
@@ -88,11 +88,11 @@ public class RandomPairVoteController {
     }
 
     /** 自分の回答を取り消す（無ければ何もしない）。 */
-    @DeleteMapping("/api/admin/random-pairs/{id}")
+    @DeleteMapping("/api/random-pairs/{id}")
     @Transactional
     public ResponseEntity<?> delete(Authentication auth, @PathVariable Long id) {
-        User me = adminOrNull(auth);
-        if (me == null) return forbidden();
+        User me = userOrNull(auth);
+        if (me == null) return ResponseEntity.status(401).build();
         randomPairVoteRepository.findById(id)
                 .filter(v -> v.getUser().getId().equals(me.getId()))
                 .ifPresent(randomPairVoteRepository::delete);
@@ -100,11 +100,11 @@ public class RandomPairVoteController {
     }
 
     /** 自分の回答数。 */
-    @GetMapping("/api/admin/random-pairs/stats")
+    @GetMapping("/api/random-pairs/stats")
     @Transactional(readOnly = true)
     public ResponseEntity<?> stats(Authentication auth) {
-        User me = adminOrNull(auth);
-        if (me == null) return forbidden();
+        User me = userOrNull(auth);
+        if (me == null) return ResponseEntity.status(401).build();
         return ResponseEntity.ok(Map.of(
                 "count", randomPairVoteRepository.countByUser(me),
                 "skipped", randomPairVoteRepository.countByUserAndChoice(me, "SKIP")));
@@ -174,10 +174,15 @@ public class RandomPairVoteController {
         return true;
     }
 
+    /** ログイン中のユーザー。未ログインなら null。 */
+    private User userOrNull(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof String iidxId)) return null;
+        return userRepository.findByIidxId(iidxId).orElse(null);
+    }
+
     /** ログイン中の管理者。管理者でなければ null。 */
     private User adminOrNull(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) return null;
-        User me = userRepository.findByIidxId((String) auth.getPrincipal()).orElse(null);
+        User me = userOrNull(auth);
         return me != null && adminAuthService.isAdmin(me) ? me : null;
     }
 

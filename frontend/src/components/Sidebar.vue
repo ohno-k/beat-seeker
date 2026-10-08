@@ -122,13 +122,6 @@ const goAdminUserComparison = () => {
   closeSidebar();
 };
 
-/** 【関数の役割】 管理者専用「どっちが押しやすい？」（URL `/admin/random-compare`）へ遷移する。 */
-const goAdminRandomCompare = () => {
-  window.history.replaceState({}, '', '/admin/random-compare');
-  emit('update:activeTab', 'admin-random-compare');
-  closeSidebar();
-};
-
 /** 【関数の役割】 アップロードボタン押下時、親にスコア取り込みを通知して閉じる。 */
 const handleUploadClick = () => {
   emit('upload');
@@ -368,16 +361,6 @@ watch(() => props.activeTab, (tab) => {
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     ユーザー間スコア比較
-                  </button>
-                  <button
-                    v-if="isAdmin && !viewingUserId"
-                    @click="goAdminRandomCompare"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-600"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                    どっちが押しやすい？
                   </button>
                   <button
                     @click="handleAction('logout')"

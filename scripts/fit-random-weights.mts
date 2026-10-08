@@ -5,7 +5,7 @@
  * 学習した係数は frontend/src/utils/randomWeights.ts に書き、ランキングは scripts/build-random-ranking.mts で作り直す。
  *
  * 正解データは 2 種類:
- * - 「どっちが押しやすい？」の回答（管理者の比較画面 /admin/random-compare。GET /api/admin/random-pairs/export）:
+ * - 「どっちが押しやすい？」の回答（クイズのモーダルの「配置アンケート」。GET /api/admin/random-pairs/export）:
  *   同じ区間を 2 つの並びで見比べた答え。区間の減点の形ごとの数を数え直して使う（評価の数え方を変えても学び直せる）
  * - オプション投票（弱い正解。同じ export に入っている）: 正規と MIRROR の票の比を、譜面全体の正規と MIRROR の比較の答えとみなす。
  *   票の割合をそのまま「正規の方が押しやすい確率」として使い、重みは回答より軽くする（--weak-weight）
