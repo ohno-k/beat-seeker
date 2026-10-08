@@ -4,10 +4,15 @@
  * 配置アンケート「どっちが押しやすい？」（components/RandomPairSurvey.vue）の 1 問を作る。
  * 譜面 1 つについて 2 つの並びと、見比べる区間（連続した数小節）を選ぶ。答えは減点の形ごとの係数の学習
  * （scripts/fit-random-weights.mts）に使うので、少ない問題数で係数が決まるよう次の 3 通りを混ぜる。
+ * 加えて、適当に押していないかを見る確認問題を混ぜる（どれも画面上は普通の問題と見分けがつかない）。
  *
  * - close（{@link CLOSE_SHARE}）: 今の評価では僅差なのに、減点の形の内訳が大きく違う 2 つ。今の評価が一番迷う組で、係数の比を決めるのに効く
  * - random（{@link RANDOM_SHARE}）: 無作為な 2 つ。偏りなく全体を見る（今の評価の当たり具合を測る基準にもなる）
- * - offmir（残り）: 正規か MIRROR と、無作為な並び。オプション投票（正規・MIRROR の票）と同じ物差しに乗せる
+ * - offmir（{@link OFFMIR_SHARE}）: 正規か MIRROR と、無作為な並び。オプション投票（正規・MIRROR の票）と同じ物差しに乗せる
+ * - obvious（残り）: 確認問題。5,040 通りの上位 1% と下位 1% の並びを、今の評価で差がはっきりする区間（{@link OBVIOUS_MIN_GAP}）で
+ *   見せる。普通に見ていれば上位の方を選ぶはず。差のはっきりする区間が無ければ random として出す。
+ *   答えは人ごとの信頼度を測るのにだけ使い、係数の学習には入れない（今の評価から作った答えなので）
+ * - repeat: 確認問題。前に答えた問題の左右を入れ替えて出し直す（RandomPairSurvey.vue が作る。ここでは作らない）
  *
  * 区間は、2 つの並びの減点の形ごとの差が一番大きい区間（の上位からくじ引き）。差の無い区間を見せても答えが学習に効かないため。
  * 重い計算（5,040 通りの評価）があるので、画面からは Web Worker（workers/randomPairWorker.ts）で呼ぶ。
@@ -15,7 +20,7 @@
 import type { ChartTimeline } from './chartPlayback.ts';
 import { evaluateRandom, makeWindowScorer, scoreOf, emptyMetrics, PENALTY_KEYS, type RandomMetrics } from './randomEval.ts';
 
-export type PairStrategy = 'close' | 'random' | 'offmir';
+export type PairStrategy = 'close' | 'random' | 'offmir' | 'obvious' | 'repeat';
 
 export interface PairQuestion {
   patternLeft: string;
@@ -31,8 +36,13 @@ export interface PairQuestion {
   modelRight: number;
 }
 
-const CLOSE_SHARE = 0.5;
+const CLOSE_SHARE = 0.45;
 const RANDOM_SHARE = 0.3;
+const OFFMIR_SHARE = 0.2;
+/** 確認問題（obvious）で、上位・下位とみなす割合 */
+const OBVIOUS_TAIL = 0.01;
+/** 確認問題で、区間の総合の差がこの割合（差 ÷ 平均）以上ある区間だけを使う */
+const OBVIOUS_MIN_GAP = 0.3;
 /** close で B を探す範囲（A の順位の前後）と、その中から試す数 */
 const CLOSE_NEIGHBORS = 150;
 const CLOSE_TRIES = 40;
@@ -61,7 +71,9 @@ export function makePairQuestion(tl: ChartTimeline, side: 1 | 2, measures: numbe
   const l1 = (a: RandomMetrics, b: RandomMetrics) => PENALTY_KEYS.reduce((s, k) => s + Math.abs(a[k] - b[k]), 0);
 
   const roll = rnd();
-  const strategy: PairStrategy = roll < CLOSE_SHARE ? 'close' : roll < CLOSE_SHARE + RANDOM_SHARE ? 'random' : 'offmir';
+  let strategy: PairStrategy = roll < CLOSE_SHARE ? 'close'
+    : roll < CLOSE_SHARE + RANDOM_SHARE ? 'random'
+    : roll < CLOSE_SHARE + RANDOM_SHARE + OFFMIR_SHARE ? 'offmir' : 'obvious';
   let a: string;
   let b: string;
   if (strategy === 'close') {
@@ -75,6 +87,10 @@ export function makePairQuestion(tl: ChartTimeline, side: 1 | 2, measures: numbe
       const d = l1(cands[ia].metrics, cands[ib].metrics);
       if (d > best) { best = d; b = cands[ib].pattern; }
     }
+  } else if (strategy === 'obvious') {
+    const tail = Math.max(1, Math.floor(cands.length * OBVIOUS_TAIL));
+    a = cands[Math.floor(rnd() * tail)].pattern;
+    b = cands[cands.length - 1 - Math.floor(rnd() * tail)].pattern;
   } else if (strategy === 'random') {
     a = pick(cands).pattern;
     b = randomPattern(a);
@@ -105,8 +121,25 @@ export function makePairQuestion(tl: ChartTimeline, side: 1 | 2, measures: numbe
     if (diff > 0) windows.push({ s, diff, sumA, sumB });
   }
   if (windows.length === 0) return null;
-  windows.sort((x, y) => y.diff - x.diff);
-  const w = pick(windows.slice(0, WINDOW_TOP));
+  let w: (typeof windows)[number];
+  if (strategy === 'obvious') {
+    // a（上位）の方が b（下位）よりはっきり押しやすい区間。無ければ普通の問題として出す
+    const gap = (x: (typeof windows)[number]) => {
+      const sa = scoreOf(x.sumA), sb = scoreOf(x.sumB);
+      return (sb - sa) / ((sa + sb) / 2 + 1);
+    };
+    const clear = windows.filter(x => gap(x) >= OBVIOUS_MIN_GAP).sort((x, y) => gap(y) - gap(x));
+    if (clear.length > 0) {
+      w = pick(clear.slice(0, WINDOW_TOP));
+    } else {
+      strategy = 'random';
+      windows.sort((x, y) => y.diff - x.diff);
+      w = pick(windows.slice(0, WINDOW_TOP));
+    }
+  } else {
+    windows.sort((x, y) => y.diff - x.diff);
+    w = pick(windows.slice(0, WINDOW_TOP));
+  }
 
   // 左右はくじで決める（左ばかり選ぶ癖が学習に入らないように）
   const swap = rnd() < 0.5;

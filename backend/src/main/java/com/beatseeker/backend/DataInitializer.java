@@ -270,7 +270,12 @@ public class DataInitializer implements ApplicationRunner {
                     "  model_left DOUBLE PRECISION," +
                     "  model_right DOUBLE PRECISION," +
                     "  response_ms INTEGER," +
+                    "  repeat_of BIGINT," +
                     "  created_at TIMESTAMP NOT NULL)"
+            ).executeUpdate();
+            // 確認問題（出し直し）の元の回答の ID。テーブルを先に作った環境向けに列だけ足す
+            entityManager.createNativeQuery(
+                    "ALTER TABLE random_pair_votes ADD COLUMN IF NOT EXISTS repeat_of BIGINT"
             ).executeUpdate();
             entityManager.createNativeQuery(
                     "CREATE INDEX IF NOT EXISTS idx_random_pair_votes_user_id ON random_pair_votes (user_id)"

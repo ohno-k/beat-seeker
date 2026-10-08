@@ -82,6 +82,7 @@ public class RandomPairVoteController {
         v.setModelLeft(req.modelLeft());
         v.setModelRight(req.modelRight());
         v.setResponseMs(req.responseMs());
+        v.setRepeatOf(req.repeatOf());
         v.setCreatedAt(LocalDateTime.now());
         randomPairVoteRepository.save(v);
         return ResponseEntity.ok(Map.of("id", v.getId(), "count", randomPairVoteRepository.countByUser(me)));
@@ -138,6 +139,9 @@ public class RandomPairVoteController {
             m.put("modelLeft", v.getModelLeft());
             m.put("modelRight", v.getModelRight());
             m.put("responseMs", v.getResponseMs());
+            m.put("repeatOf", v.getRepeatOf());
+            // 管理者の回答は信頼できるものとして学習で重みを下げない
+            m.put("trusted", adminAuthService.isAdmin(v.getUser()));
             m.put("createdAt", JstTime.toIsoString(v.getCreatedAt()));
             votes.add(m);
         }
@@ -194,6 +198,6 @@ public class RandomPairVoteController {
     public record PairVoteRequest(String textage, String title, String difficulty, Integer level, Integer side,
                                   String patternLeft, String patternRight, Double startTime, Double endTime,
                                   Integer startMeasure, Integer endMeasure, String choice, String strategy,
-                                  Double modelLeft, Double modelRight, Integer responseMs) {
+                                  Double modelLeft, Double modelRight, Integer responseMs, Long repeatOf) {
     }
 }
