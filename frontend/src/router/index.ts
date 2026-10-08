@@ -33,6 +33,7 @@ const ShareView = () => import('../views/ShareView.vue')
 const CompetitionAdminView = () => import('../views/CompetitionAdminView.vue')
 const CompetitionSummaryView = () => import('../views/CompetitionSummaryView.vue')
 const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.vue')
+const RandomCompareView = () => import('../views/RandomCompareView.vue')
 const PracticeMenuView = () => import('../views/PracticeMenuView.vue')
 const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
 const WrappedView = () => import('../views/WrappedView.vue')
@@ -123,6 +124,7 @@ const router = createRouter({
     // 管理者用: 任意の 2 ユーザー間のスコア勝敗比較。
     // useAdmin.isAdmin で表示ガード + サーバ側 /api/admin/** で実権限チェック。
     { path: '/admin/user-comparison', name: 'admin-user-comparison', component: AdminUserComparisonView },
+    { path: '/admin/random-compare', name: 'admin-random-compare', component: RandomCompareView },
     // 練習メニュー (週次カリキュラム): 検証段階のため管理者限定。
     // useAdmin.isAdmin で表示ガード + サーバ側 /api/training/** で実権限チェック。
     { path: '/training', name: 'training', component: PracticeMenuView },

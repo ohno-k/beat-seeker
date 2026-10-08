@@ -91,6 +91,8 @@ const WrappedView = defineAsyncComponent(() => import('./views/WrappedView.vue')
 const CompetitionAdminView = defineAsyncComponent(() => import('./views/CompetitionAdminView.vue'));
 // 管理者用 2 ユーザー比較画面: URL `/admin/user-comparison` での直接アクセス専用 (サイドバー導線なし)。
 const AdminUserComparisonView = defineAsyncComponent(() => import('./views/AdminUserComparisonView.vue'));
+// 管理者用「どっちが押しやすい？」: RANDOM の 2 つの並びを見比べる回答画面（当たり配置ランキングの学習用）。URL `/admin/random-compare`。
+const RandomCompareView = defineAsyncComponent(() => import('./views/RandomCompareView.vue'));
 // 練習メニュー (週次カリキュラム): 検証段階のため管理者限定。URL `/training`。
 const PracticeMenuView = defineAsyncComponent(() => import('./views/PracticeMenuView.vue'));
 // 大会参加者画面 (招待 URL 専用): `/competition/player/{token}` で直接アクセス。
@@ -380,7 +382,7 @@ const errorMsg = ref('');
  * 現在アクティブなタブ（= SPA 的な現在ルート）。
  * 文字列リテラルユニオンで厳密にタイピングし、どこか一箇所からでもタブ切替できるようにしている。
  */
-const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-spectrum' | 'score-roadmap' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'training' | 'past-version-scores' | 'top-rankers'>('dashboard')
+const activeTab = ref<'dashboard' | 'table' | 'profile' | 'history' | 'ranking' | 'changelog' | 'terms' | 'about' | 'manual' | 'friends' | 'timeline' | 'popular-songs' | 'arena' | 'league' | 'tier-voting' | 'arcade-assist' | 'song-avg' | 'diff-table' | 'score-prediction' | 'score-scatter' | 'skill-tree' | 'chart-list' | 'rank-comparison' | 'score-spectrum' | 'score-roadmap' | 'landing' | 'privacy-policy' | 'contact' | 'share' | 'competition-admin' | 'admin-user-comparison' | 'admin-random-compare' | 'training' | 'past-version-scores' | 'top-rankers'>('dashboard')
 
 // 【watch】 スコア一覧タブが要求されたら ScoreSummary を遅延マウントする。
 // （サイドバー / コマンドパレット等どの経路でタブが変わっても拾えるようここで一元化する）
@@ -449,6 +451,7 @@ const activeTabLabel = computed<string>(() => {
     about: t('nav.about'),
     manual: t('nav.manual'),
     'admin-user-comparison': 'ユーザー間スコア比較',
+    'admin-random-compare': 'どっちが押しやすい？',
     training: '練習メニュー',
     'past-version-scores': `${pastVersionScoresVersion.value} ${versionName(pastVersionScoresVersion.value)}`,
   };
@@ -810,6 +813,7 @@ onMounted(() => {
     '/league': 'league',
     '/competition-admin': 'competition-admin',
     '/admin/user-comparison': 'admin-user-comparison',
+    '/admin/random-compare': 'admin-random-compare',
     '/training': 'training',
     // サポーター限定の分析タブ（直接アクセス・ブックマーク用）。
     '/score-prediction': 'score-prediction',
@@ -2381,6 +2385,11 @@ const handleUnifiedClose = async () => {
              サイドバー導線なし。URL `/admin/user-comparison` 直叩き専用。 -->
         <template v-else-if="activeTab === 'admin-user-comparison'">
           <AdminUserComparisonView class="w-full animate-fade-in" />
+        </template>
+
+        <!-- 管理者専用: RANDOM の「どっちが押しやすい？」（当たり配置ランキングの学習用の回答）。URL `/admin/random-compare`。 -->
+        <template v-else-if="activeTab === 'admin-random-compare'">
+          <RandomCompareView class="w-full animate-fade-in" />
         </template>
 
         <!-- 練習メニュー: 週次カリキュラム。検証段階のため管理者のみ (サーバー側でも 403)。 -->

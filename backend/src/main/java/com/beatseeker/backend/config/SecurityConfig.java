@@ -156,6 +156,8 @@ public class SecurityConfig {
                                                 // 通知・管理系も要ログイン
                                                 .requestMatchers("/api/notifications/**").authenticated()
                                                 .requestMatchers("/api/admin/game-data/**").authenticated()
+                                                // RANDOM の「どっちが押しやすい？」の回答（管理者判定は Controller 側）
+                                                .requestMatchers("/api/admin/random-pairs/**").authenticated()
                                                 // お問い合わせチャット: ユーザー/運営とも要ログイン。
                                                 // 管理者エンドポイント (/api/support/admin/**) の管理者判定は Controller 側で行う。
                                                 .requestMatchers("/api/support/**").authenticated()

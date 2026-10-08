@@ -127,3 +127,6 @@ Thumbs.db
 /chart_cache/raw/
 /chart_cache/all_profiles.json
 /chart_cache/errors.json
+
+# --- 当たり配置の学習（scripts/fit-random-weights.mts）の再生データのキャッシュ。再取得できる ---
+data/random-learning/playback-cache.jsonl
