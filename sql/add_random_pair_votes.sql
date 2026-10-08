@@ -1,7 +1,7 @@
--- RANDOM の「どっちが押しやすい？」の回答（非公式難易度クイズのモーダルの「配置アンケート」）を保存するテーブル。
+-- RANDOM の「どっちが押しやすい？」の回答（サイドバーの「配置アンケート」）を保存するテーブル。
 -- 当たり配置ランキングの減点の形ごとの係数を学習する正解データ（scripts/fit-random-weights.mts）。
--- ※ application.yml の hibernate.ddl-auto=update でも自動作成されるが、
---   本番（ddl-auto=none）で明示適用するための手動マイグレーション。
+-- ※ 手で流す必要は無い。デプロイ時に hibernate.ddl-auto=update が作り、ddl-auto=none の環境でも
+--   起動時に DataInitializer（手順4.65）が同じ CREATE TABLE IF NOT EXISTS を流す。記録と手動確認用に残している。
 CREATE TABLE IF NOT EXISTS random_pair_votes (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id),
