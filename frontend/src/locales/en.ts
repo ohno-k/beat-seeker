@@ -453,7 +453,7 @@ export const en = {
   'beatTierInfo.weightChartTitle': 'Weight by unofficial difficulty',
   'beatTierInfo.formulaDesc': 'Beat-PT = Rate%^1.3 × Weight + Bonus',
   'beatTierInfo.formulaExplanation': 'Points are based on the score rate to the power of 1.3 and song weight. Bonuses (+1% each) are added for reaching AA, AAA, or MAX- ranks.',
-  'beatTierInfo.weightDesc': '• Weights range from 11.0 (150pt) to 13.0 (190pt) based on unofficial difficulty.',
+  'beatTierInfo.weightDesc': '• Weights range from 11.0 (145pt) to 13.1 (193pt) based on unofficial difficulty.',
   'beatTierInfo.finalPointsDesc': '* Your final score is the sum of your top 100 songs.',
   'beatTierInfo.rankBoardTitle': 'Rank Board',
   'beatTierInfo.songSearchPlaceholder': 'Search by song title...',

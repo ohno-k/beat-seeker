@@ -442,7 +442,7 @@ export const ja = {
   'beatTierInfo.curveTitle': 'スコアレートと Beat-PT（非公式 {rank} の例）',
   'beatTierInfo.weightChartTitle': '非公式難易度ごとの重み',
   'beatTierInfo.formulaDesc': 'スコアレートの1.3乗と譜面ごとの重み（Weight）による基本ポイントに対し、<br/>一定のランク（AA, AAA, MAX-）を達成するとさらにボーナス（各+1%）が加算されます。',
-  'beatTierInfo.weightDesc': '• 重みは非公式難易度に基づき、11.0 (150pt) 〜 13.0 (190pt) の範囲で設定されます。',
+  'beatTierInfo.weightDesc': '• 重みは非公式難易度に基づき、11.0 (145pt) 〜 13.1 (193pt) の範囲で設定されます。',
   'beatTierInfo.finalPointsDesc': '※ 全上位100曲の合計があなたの最終的なポイントになります。',
   'beatTierInfo.rankBoardTitle': 'ランクボード',
   'beatTierInfo.songSearchPlaceholder': '楽曲名で検索...',

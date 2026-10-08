@@ -452,7 +452,7 @@ export const ko = {
   'beatTierInfo.weightChartTitle': '비공식 난이도별 가중치',
   'beatTierInfo.formulaDesc': 'Beat-PT = Rate%^1.3 × Weight + Bonus',
   'beatTierInfo.formulaExplanation': '스코어 레이트의 1.3제곱과 보면별 가중치(Weight)에 의한 기본 포인트에 더해, 특정 랭크(AA, AAA, MAX-)를 달성하면 추가 보너스(각 +1%)가 가산됩니다.',
-  'beatTierInfo.weightDesc': '• 가중치는 비공식 난이도에 따라 11.0 (150pt) ~ 13.0 (190pt) 범위에서 설정됩니다.',
+  'beatTierInfo.weightDesc': '• 가중치는 비공식 난이도에 따라 11.0 (145pt) ~ 13.1 (193pt) 범위에서 설정됩니다.',
   'beatTierInfo.finalPointsDesc': '* 상위 100곡의 합계가 최종 포인트가 됩니다.',
   'beatTierInfo.rankBoardTitle': '랭크 보드',
   'beatTierInfo.songSearchPlaceholder': '곡 제목으로 검색...',
