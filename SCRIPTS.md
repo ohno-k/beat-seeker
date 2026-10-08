@@ -82,7 +82,7 @@
 | [add_is_public_column.sql](sql/add_is_public_column.sql) | `scores` テーブルに `is_public` カラムを追加するマイグレーション |
 | [cleanup_duplicates.sql](sql/cleanup_duplicates.sql) | 重複ユーザ削除（実行済み想定） |
 | [find_invalid_scores.sql](sql/find_invalid_scores.sql) | 100%超スコア検出（`generate_invalid_check_sql.py` の出力） |
-| [add_random_pair_votes.sql](sql/add_random_pair_votes.sql) | 「どっちが押しやすい？」の回答テーブル `random_pair_votes` を作るマイグレーション |
+| [add_random_pair_votes.sql](sql/add_random_pair_votes.sql) | 「どっちが押しやすい？」の回答テーブル `random_pair_votes` の定義（起動時に DataInitializer が自動で作るので、手で流す必要は無い） |
 
 その他の SQL（マイグレーション・データ修復・調査用）も `sql/` にまとめています。
 
