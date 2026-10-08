@@ -6,7 +6,8 @@
  * 2P のデータは作らない（2P の評価は 1P の左右反転なので、2P で並び p の順位 = 1P で p を逆順にした並びの順位。ページが読み替える）。
  * 次の 2 種類を frontend/public/data/random-ranking/ に書く。
  *
- * - summary.json: 譜面ごとの正規・MIRROR・R-RANDOM 最良の順位（一覧・並べ替えに使う）
+ * - summary.json: 譜面ごとの正規・MIRROR・R-RANDOM 最良の順位（一覧・並べ替えに使う）と、
+ *   上位 10%（504 位）・90%（4,536 位）の並びの減点（安定ランキング＝配置の影響が小さい譜面の一覧に使う）
  * - ranks-12.bin / ranks-11.bin / ranks-low.bin: 自由入力用。譜面ごとに 5,040 バイト（並びの辞書順）で、
  *   1 バイト = floor((順位 - 1) × 256 / 5040)。順位は ±10 位ほどの精度（上位何 % かの表示には十分）。
  *   ページは自由入力を使ったときだけ、そのレベルのファイルを読む
@@ -44,11 +45,16 @@ const partsDir = path.join(outDir, 'parts');
 fs.mkdirSync(outDir, { recursive: true });
 
 const TOTAL = 5040;
+/** 安定ランキングで比べる順位（上位 10% と 90%。candidates の添字なので 1 引く） */
+const P10_INDEX = TOTAL / 10 - 1;
+const P90_INDEX = (TOTAL * 9) / 10 - 1;
 const groupOf = (level: number) => (level >= 12 ? '12' : level === 11 ? '11' : 'low');
 
 type Row = {
   t: string; d: string; l: number; n: number; x: string;
   off: number; mir: number; rr: number; rrp: string; best: string;
+  /** 上位 10%（504 位）・90%（4,536 位）の並びの減点（evaluateRandom の score） */
+  s10: number; s90: number;
   g: string; i: number;
 };
 /** 1 譜面分の結果（分割の途中ファイルにも書く）。seq = 入力の行番号、ranks = 5,040 バイトの base64 */
@@ -126,7 +132,8 @@ for await (const line of rl) {
   items.push({
     seq,
     row: { t: d.title, d: d.difficulty, l: d.level, n: d.notes, x: d.textage,
-      off: rankOf('1234567'), mir: rankOf('7654321'), rr: rr.r, rrp: rr.p, best: ev.candidates[0].pattern, g: groupOf(d.level) },
+      off: rankOf('1234567'), mir: rankOf('7654321'), rr: rr.r, rrp: rr.p, best: ev.candidates[0].pattern,
+      s10: ev.candidates[P10_INDEX].score, s90: ev.candidates[P90_INDEX].score, g: groupOf(d.level) },
     ranks: buf.toString('base64'),
   });
   if (items.length % 100 === 0) console.log(`${items.length} charts, ${((Date.now() - t0) / 1000).toFixed(0)}s`);

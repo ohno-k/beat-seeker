@@ -28,6 +28,7 @@ import { useI18n } from '../composables/useI18n';
 import { useGameData, type SongDataEntry } from '../composables/useGameData';
 import ChartPlayer from '../components/ChartPlayer.vue';
 import RandomRanking from '../components/RandomRanking.vue';
+import RandomStableRanking from '../components/RandomStableRanking.vue';
 
 // props: 他人のIDを指定された場合の閲覧モード（admin=管理者、friend=フレンド閲覧）
 const props = defineProps<{
@@ -77,7 +78,7 @@ const searchQuery = ref('');                          // 検索文字列（曲�
 const levelFilter = ref<'all' | 12 | 11 | 'low'>('all'); // レベル絞り込み（low = ☆10 以下）
 const selectedEntry = ref<SongDataEntry | null>(null); // 現在選択中の曲
 const pickerOpen = ref(false);                        // モバイルで曲を選んだ後に一覧を開き直しているか
-const pageTab = ref<'analysis' | 'ranking'>('analysis'); // ページ内のタブ（譜面分析 / 当たり配置ランキング）
+const pageTab = ref<'analysis' | 'ranking' | 'stable'>('analysis'); // ページ内のタブ（譜面分析 / 当たり配置ランキング / 配置の影響が少ない譜面）
 const LIST_PAGE = 150;
 const listLimit = ref(LIST_PAGE);                     // 一覧に描画する件数（「さらに表示」で増やす）
 
@@ -668,6 +669,8 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
         @click="pageTab = 'analysis'">譜面分析</button>
       <button type="button" role="tab" :aria-selected="pageTab === 'ranking'" :class="{ on: pageTab === 'ranking' }"
         @click="pageTab = 'ranking'">当たり配置ランキング</button>
+      <button type="button" role="tab" :aria-selected="pageTab === 'stable'" :class="{ on: pageTab === 'stable' }"
+        @click="pageTab = 'stable'">配置の影響が少ない譜面</button>
     </nav>
 
     <template v-if="pageTab === 'analysis'">
@@ -1029,7 +1032,9 @@ const targetTextages = computed(() => new Set(targetEntries.value.map(s => s.tex
     </template>
 
     <!-- 当たり配置ランキング: 正規・MIRROR・R-RANDOM・自由入力の並びが各譜面で何位か（プロフィールのプレイサイド・事前計算） -->
-    <RandomRanking v-else @open="openChartFromRanking" />
+    <RandomRanking v-else-if="pageTab === 'ranking'" @open="openChartFromRanking" />
+    <!-- 配置の影響が少ない譜面: 上位 10% と 90% の並びの減点の差が小さい順（事前計算） -->
+    <RandomStableRanking v-else @open="openChartFromRanking" />
 
     <!-- 類似度デバッグモーダル（管理者機能）: 計算過程を4グループに分けて表示 -->
     <Teleport to="body">
