@@ -28,6 +28,7 @@ import AdminComparisonModal, { type AdminUserSummary } from '../components/Admin
 import RankIcon from '../components/RankIcon.vue';
 import { getRankInfo } from '../utils/beatTier';
 import { jstParts } from '../utils/jstTime';
+import { truncateDisplayName } from '../utils/displayName';
 
 const { isAdmin } = useAdmin();
 const { fetchAllUsers, fetchUserComparison, recalculateUserComparison } = useScores();
@@ -118,7 +119,7 @@ const rows = computed<ComparisonRow[]>(() => {
     const decided = sum.win + sum.loss + sum.draw;
     return {
       userId: o.userId,
-      displayName: o.displayName,
+      displayName: truncateDisplayName(o.displayName ?? ''),
       iidxId: o.iidxId,
       totalBeatPt: o.totalBeatPt ?? 0,
       ...sum,
@@ -231,7 +232,8 @@ onMounted(async () => {
     users.value = list
       .map(u => ({
         id: u.id,
-        displayName: u.displayName ?? '(no name)',
+        // 管理 API は元の名前を返すので、他の画面と同じ規則でここで省略する
+        displayName: truncateDisplayName(u.displayName ?? '(no name)'),
         iidxId: u.iidxId ?? '',
       }))
       .sort((a, b) => a.displayName.localeCompare(b.displayName, 'ja'));
