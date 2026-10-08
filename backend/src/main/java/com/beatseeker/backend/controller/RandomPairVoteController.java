@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * 【クラスの役割】 RANDOM の 2 つの並びの「どっちが押しやすい？」の回答を保存・書き出す API。
  *
- * 非公式難易度クイズのモーダルの「配置アンケート」タブ（RandomPairSurvey.vue）が 1 問ごとに POST し、学習スクリプト
+ * サイドバーの「配置アンケート」（RandomPairSurvey.vue）が 1 問ごとに POST し、学習スクリプト
  * （scripts/fit-random-weights.mts）が export で全回答とオプション投票の集計（弱い正解）をまとめて取り出す。
  * 回答はログイン中のユーザーなら誰でも、書き出しは管理者だけ（AdminAuthService）。ログイン必須は SecurityConfig で掛ける。
  *

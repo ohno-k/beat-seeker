@@ -1,25 +1,25 @@
 <script setup lang="ts">
 /**
- * 【コンポーネントの役割】 RANDOM の 2 つの並びを画像で見比べて「どっちが押しやすいか」を答えるアンケート
- * （非公式難易度クイズのモーダルの「配置アンケート」タブ。ログイン中のユーザーなら誰でも答えられる）。
+ * 【コンポーネントの役割】 RANDOM の 2 つの並びを流れる譜面で見比べて「どっちが押しやすいか」を答えるアンケート
+ * （サイドバーの「配置アンケート」から開くモーダル RandomSurveyModal の中身。ログイン中のユーザーなら誰でも答えられる）。
  *
  * 答えは当たり配置ランキングの減点の形ごとの係数を学習する正解データになる（scripts/fit-random-weights.mts）。
  * - 譜面は当たり配置ランキングの summary.json から、選んだレベル帯の中で無作為に選ぶ
  * - 2 つの並びと見せる区間は utils/randomPairQuestion.ts（Web Worker で計算）。次の問題を裏で先に作っておく
- * - 画像は utils/chartSnapshot.ts。下が区間の始まりで、時間に比例した一定速度
+ * - 区間を utils/chartSnapshot.ts で緑数字 {@link GREEN} 相当（一定速度）で降らせ、左右同時に繰り返し再生する
  * - 答えは 1 問ごとに POST /api/random-pairs。直前の 1 問は取り消せる
  * - 管理者だけ: 並びの番号と今の評価の表示、今の評価との一致、学習用データの書き出し
  *   （一般のユーザーには答えに影響しないよう出さない）
  *
- * 操作: 画像をクリック（または ← / →）で押しやすい方、↓ で同じくらい、S で判断できない（スキップ）、Z で直前の取り消し。
- * キー操作はこのコンポーネントが表示されている間だけ効く（親はタブを切り替えたら v-if で外す）。
+ * 操作: 譜面をクリック（または ← / →）で押しやすい方、↓ で同じくらい、S で判断できない（スキップ）、Z で直前の取り消し。
+ * キー操作はこのコンポーネントが表示されている間だけ効く（親はモーダルを閉じたら v-if で外す）。
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { API_BASE, useAuth } from '../composables/useAuth';
 import { useAdmin } from '../composables/useAdmin';
 import { usePlaySide } from '../composables/usePlaySide';
 import { buildChartTimeline, type ChartPlaybackData, type ChartTimeline } from '../utils/chartPlayback';
-import { drawChartSnapshot } from '../utils/chartSnapshot';
+import { makeFallingChart, greenToVisibleSec, type FallingChart } from '../utils/chartSnapshot';
 import type { PairQuestion } from '../utils/randomPairQuestion';
 
 type Choice = 'LEFT' | 'RIGHT' | 'SAME' | 'SKIP';
@@ -132,19 +132,53 @@ function restart() {
 }
 watch([levels, measures, side], restart, { deep: true });
 
-// ── 描画 ────────────────────────────────────────────────
+// ── 描画（区間を緑数字 GREEN で降らせ、左右同時に繰り返す） ──
+/** 緑数字（表示時間 = 緑数字 / 600 秒） */
+const GREEN = 270;
+const VISIBLE_SEC = greenToVisibleSec(GREEN);
+/** 1 周の終わりに空ける秒数（次の周の頭と見分けやすく） */
+const LOOP_GAP = 0.6;
 const leftCanvas = ref<HTMLCanvasElement | null>(null);
 const rightCanvas = ref<HTMLCanvasElement | null>(null);
 const boardRef = ref<HTMLElement | null>(null);
-function draw() {
+let charts2: [FallingChart, FallingChart] | null = null;
+let raf = 0;
+let loopStart = 0;
+function layout() {
   const p = current.value;
-  if (!p || !leftCanvas.value || !rightCanvas.value || !boardRef.value) return;
+  if (!p || !charts2 || !leftCanvas.value || !rightCanvas.value || !boardRef.value) return;
   const w = Math.min(230, Math.floor((boardRef.value.clientWidth - 24) / 2) - 8);
-  const h = Math.max(300, Math.min(640, Math.round(window.innerHeight * 0.55)));
-  drawChartSnapshot(leftCanvas.value, p.tl, p.q.patternLeft, side.value, p.q.startTime, p.q.endTime, w, h);
-  drawChartSnapshot(rightCanvas.value, p.tl, p.q.patternRight, side.value, p.q.startTime, p.q.endTime, w, h);
+  const h = Math.max(280, Math.min(480, Math.round(window.innerHeight * 0.5)));
+  charts2[0].resize(leftCanvas.value, w, h);
+  charts2[1].resize(rightCanvas.value, w, h);
 }
-watch(current, () => nextTick(draw));
+function frame(ts: number) {
+  const p = current.value;
+  if (!p || !charts2 || !leftCanvas.value || !rightCanvas.value) { raf = 0; return; }
+  // 区間の最初のノーツが上端から入ってくるところから、最後のノーツが判定ラインを過ぎて LOOP_GAP 秒まで
+  const from = p.q.startTime - VISIBLE_SEC;
+  const length = p.q.endTime - from + LOOP_GAP;
+  const now = from + (((ts - loopStart) / 1000) % length);
+  charts2[0].draw(leftCanvas.value, now, VISIBLE_SEC);
+  charts2[1].draw(rightCanvas.value, now, VISIBLE_SEC);
+  raf = requestAnimationFrame(frame);
+}
+function stopLoop() {
+  if (raf) cancelAnimationFrame(raf);
+  raf = 0;
+}
+watch(current, async p => {
+  stopLoop();
+  charts2 = p ? [
+    makeFallingChart(p.tl, p.q.patternLeft, side.value, p.q.startTime, p.q.endTime),
+    makeFallingChart(p.tl, p.q.patternRight, side.value, p.q.startTime, p.q.endTime),
+  ] : null;
+  if (!p) return;
+  await nextTick();
+  layout();
+  loopStart = performance.now();
+  raf = requestAnimationFrame(frame);
+});
 
 // ── 答える ──────────────────────────────────────────────
 async function answer(choice: Choice) {
@@ -243,12 +277,13 @@ async function start() {
 watch(isLoggedIn, start);
 onMounted(() => {
   window.addEventListener('keydown', onKey);
-  window.addEventListener('resize', draw);
+  window.addEventListener('resize', layout);
   void start();
 });
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey);
-  window.removeEventListener('resize', draw);
+  window.removeEventListener('resize', layout);
+  stopLoop();
   generation++;
   worker?.terminate();
 });
@@ -257,7 +292,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="space-y-3">
     <p class="text-xs text-slate-500 dark:text-slate-400">
-      同じ区間を 2 通りの RANDOM の並びで並べています。押しやすい方を選んでください。答えは当たり配置ランキングの精度を上げるのに使います。
+      同じ区間を 2 通りの RANDOM の並びで流しています（緑数字 {{ GREEN }} 相当で繰り返し再生）。押しやすい方を選んでください。
     </p>
 
     <div v-if="!isLoggedIn" class="text-center py-10 text-sm text-slate-500 dark:text-slate-400">
@@ -285,7 +320,7 @@ onBeforeUnmount(() => {
           </label>
           <template v-if="isAdmin">
             <label class="flex items-center gap-1"><input v-model="showPatterns" type="checkbox" />並びと今の評価</label>
-            <button class="ml-auto underline" @click="exportData">学習用データを書き出す</button>
+            <button class="ml-auto underline" @click="exportData">回答データを書き出す</button>
           </template>
         </div>
       </div>
@@ -300,7 +335,7 @@ onBeforeUnmount(() => {
           <div class="text-center text-sm font-semibold text-slate-700 dark:text-slate-200">
             {{ current.row.t }}
             <span class="block text-xs text-slate-400">☆{{ current.row.l }} {{ current.row.d === '10' ? 'LEGGENDARIA' : 'ANOTHER' }}
-              ・ {{ current.q.startMeasure }}〜{{ current.q.endMeasure }} 小節（下から上へ）</span>
+              ・ {{ current.q.startMeasure }}〜{{ current.q.endMeasure }} 小節</span>
           </div>
           <div class="flex justify-center gap-3">
             <button

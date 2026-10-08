@@ -1503,10 +1503,9 @@ export const ko = {
   'dan.shodan': '초단', 'dan.2dan': '2단', 'dan.3dan': '3단', 'dan.4단': '4단', 'dan.5dan': '5단', 'dan.6dan': '6단', 'dan.7dan': '7단', 'dan.8dan': '8단', 'dan.9dan': '9단', 'dan.10dan': '10단', 'dan.chuden': '중전', 'dan.kaiden': '개전',
 
   // 비공식 난이도 퀴즈 (사이드바 위젯)
-  'rankQuiz.title': '★ 퀴즈',
-  'rankQuiz.tooltip': '곡명↔비공식 난이도 암기 미니게임',
-  'rankQuiz.reviewBadge': '복습 {n}건',
-  'rankQuiz.startHint': '5문 / Lv UP',
+  'randomSurvey.title': '배치 설문',
+  'randomSurvey.tooltip': 'RANDOM 배치 두 가지 중 어느 쪽이 치기 쉬운지 답하는 설문',
+  'randomSurvey.hint': '어느 쪽이 치기 쉬울까?',
 
   // ===== Competition 기능 (Player URL / TL URL 화면) =====
   'competition.common.tlBadge': 'TL',
