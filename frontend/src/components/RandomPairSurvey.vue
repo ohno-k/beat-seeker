@@ -6,7 +6,8 @@
  * 答えは当たり配置ランキングの減点の形ごとの係数を学習する正解データになる（scripts/fit-random-weights.mts）。
  * - 譜面は当たり配置ランキングの summary.json から、選んだレベル帯の中で無作為に選ぶ
  * - 2 つの並びと見せる区間は utils/randomPairQuestion.ts（Web Worker で計算）。次の問題を裏で先に作っておく
- * - 区間を utils/chartSnapshot.ts で緑数字 {@link GREEN} 相当（一定速度）で降らせ、左右同時に繰り返し再生する
+ * - 区間を utils/chartSnapshot.ts で緑数字 {@link green} 相当（一定速度。スライダーで変えられ、ブラウザに覚える。既定 {@link GREEN_DEFAULT}）で
+ *   降らせ、左右同時に繰り返し再生する
  * - 答えは 1 問ごとに POST /api/random-pairs。直前の 1 問は取り消せる
  * - 管理者だけ: 並びの番号と今の評価の表示、今の評価との一致、学習用データの書き出し
  *   （一般のユーザーには答えに影響しないよう出さない）
@@ -154,10 +155,26 @@ function restart() {
 }
 watch([levels, measures, side], restart, { deep: true });
 
-// ── 描画（区間を緑数字 GREEN で降らせ、左右同時に繰り返す） ──
+// ── 描画（区間を緑数字 green で降らせ、左右同時に繰り返す） ──
 /** 緑数字（表示時間 = 緑数字 / 600 秒） */
-const GREEN = 270;
-const VISIBLE_SEC = greenToVisibleSec(GREEN);
+const GREEN_DEFAULT = 270;
+const GREEN_MIN = 150;
+const GREEN_MAX = 600;
+const GREEN_STORAGE_KEY = 'beat-seeker-random-survey-green';
+/** 緑数字（表示時間 = 緑数字 / 600 秒）。スライダーで変え、このブラウザに覚える（読めなければ既定値） */
+const green = ref(GREEN_DEFAULT);
+try {
+  const saved = Number(localStorage.getItem(GREEN_STORAGE_KEY));
+  if (saved >= GREEN_MIN && saved <= GREEN_MAX) green.value = saved;
+} catch {
+  // 保存領域が使えない環境では既定値のまま
+}
+watch(green, g => {
+  try { localStorage.setItem(GREEN_STORAGE_KEY, String(g)); } catch { /* 覚えられなくても再生はできる */ }
+  // 速さが変わると 1 周の長さも変わるので、区間の頭から流し直す
+  loopStart = performance.now();
+});
+const visibleSec = computed(() => greenToVisibleSec(green.value));
 /** 1 周の終わりに空ける秒数（次の周の頭と見分けやすく） */
 const LOOP_GAP = 0.6;
 const leftCanvas = ref<HTMLCanvasElement | null>(null);
@@ -178,11 +195,12 @@ function frame(ts: number) {
   const p = current.value;
   if (!p || !charts2 || !leftCanvas.value || !rightCanvas.value) { raf = 0; return; }
   // 区間の最初のノーツが上端から入ってくるところから、最後のノーツが判定ラインを過ぎて LOOP_GAP 秒まで
-  const from = p.q.startTime - VISIBLE_SEC;
+  const vis = visibleSec.value;
+  const from = p.q.startTime - vis;
   const length = p.q.endTime - from + LOOP_GAP;
-  const now = from + (((ts - loopStart) / 1000) % length);
-  charts2[0].draw(leftCanvas.value, now, VISIBLE_SEC);
-  charts2[1].draw(rightCanvas.value, now, VISIBLE_SEC);
+  const now = from + ((Math.max(0, ts - loopStart) / 1000) % length);
+  charts2[0].draw(leftCanvas.value, now, vis);
+  charts2[1].draw(rightCanvas.value, now, vis);
   raf = requestAnimationFrame(frame);
 }
 function stopLoop() {
@@ -322,7 +340,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="space-y-3">
     <p class="text-xs text-slate-500 dark:text-slate-400">
-      同じ区間を 2 通りの RANDOM の並びで流しています（緑数字 {{ GREEN }} 相当で繰り返し再生）。押しやすい方を選んでください。
+      同じ区間を 2 通りの RANDOM の並びで繰り返し流しています。押しやすい方を選んでください。
     </p>
 
     <div v-if="!isLoggedIn" class="text-center py-10 text-sm text-slate-500 dark:text-slate-400">
@@ -347,6 +365,11 @@ onBeforeUnmount(() => {
               <option :value="4">4 小節</option>
               <option :value="8">8 小節</option>
             </select>
+          </label>
+          <label class="flex items-center gap-1 basis-full sm:basis-auto">
+            緑数字
+            <input v-model.number="green" type="range" :min="GREEN_MIN" :max="GREEN_MAX" step="10" class="w-32 accent-indigo-600" />
+            <span class="tabular-nums w-8">{{ green }}</span>
           </label>
           <template v-if="isAdmin">
             <label class="flex items-center gap-1"><input v-model="showPatterns" type="checkbox" />並びと今の評価</label>
