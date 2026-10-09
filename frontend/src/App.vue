@@ -30,7 +30,6 @@ import { BOOKMARKLET_CODE } from './utils/bookmarklet';
 import ScoreSummary from './components/ScoreSummary.vue';
 import ScoreDashboard from './components/ScoreDashboard.vue';
 import WrappedBanner from './components/WrappedBanner.vue';
-import LeagueDivisionPanel from './components/LeagueDivisionPanel.vue';
 import ProfileDashboard from './components/ProfileDashboard.vue';
 import LoginModal from './components/LoginModal.vue';
 import ProfileEditModal from './components/ProfileEditModal.vue';
@@ -2633,14 +2632,10 @@ const handleUnifiedClose = async () => {
 
             <!-- ダッシュボードタブ: グラフ中心の概観表示 -->
             <div v-show="activeTab === 'dashboard'" class="w-full max-w-6xl flex flex-col items-center gap-4">
-              <!-- 現在の DIVISION: 自分のダッシュボード・ログイン時のみ最上部に表示（開催中は強調） -->
-              <LeagueDivisionPanel
-                v-if="!viewingUserId && !viewingMode && isLoggedIn"
-                @open-league="activeTab = 'league'"
-              />
-
               <!-- 月末振り返りバナー: 自分のダッシュボード閲覧時かつ表示ウィンドウ内のみ -->
               <WrappedBanner v-if="!viewingUserId && isLoggedIn" />
+              <!-- 現在の DIVISION（LeagueDivisionPanel）は ScoreDashboard の 'league' ウィジェットとして描く
+                   （ユーザーが並び順・表示を設定できるようにするため） -->
               <ScoreDashboard
                 :scores="scoreData"
                 :totalPoints="totalBeatTierPoints"
@@ -2652,6 +2647,8 @@ const handleUnifiedClose = async () => {
                 class="w-full"
                 @open-profile-edit="isProfileModalOpen = true"
                 @open-roadmap="activeTab = 'score-roadmap'"
+                @open-league="activeTab = 'league'"
+                @open-history="activeTab = 'history'"
               />
             </div>
 

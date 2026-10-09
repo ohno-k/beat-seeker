@@ -18,9 +18,9 @@
       </button>
     </div>
 
-    <!-- 歴代ベスト反映トグル。過去作を取り込み済みの本人にだけ出す -->
-    <div v-if="canUseAllTime && hasPastImports" class="flex flex-wrap items-center gap-3">
-      <label class="flex items-center gap-2 cursor-pointer group whitespace-nowrap" :title="t('past.toggleHint')">
+    <!-- ツールバー: 歴代ベスト反映トグル（過去作を取り込み済みの本人のみ）／簡易表示・カスタマイズ（自分のダッシュボードのみ） -->
+    <div v-if="(canUseAllTime && hasPastImports) || canCustomize" class="flex flex-wrap items-center gap-3">
+      <label v-if="canUseAllTime && hasPastImports" class="flex items-center gap-2 cursor-pointer group whitespace-nowrap" :title="t('past.toggleHint')">
         <div class="relative inline-flex items-center">
           <input type="checkbox" :checked="showAllTime" @change="toggleAllTime" class="sr-only peer">
           <div class="w-9 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
@@ -31,11 +31,75 @@
         >{{ t('past.toggle') }}</span>
         <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
       </label>
-      <span v-if="showAllTime" class="text-xs text-amber-600 dark:text-amber-400">{{ t('past.tierNote') }}</span>
+      <span v-if="canUseAllTime && hasPastImports && showAllTime" class="text-xs text-amber-600 dark:text-amber-400">{{ t('past.tierNote') }}</span>
+
+      <!-- 表示モード（通常／簡易／カスタマイズ。言語設定と同じく選んだ瞬間に保存）と、カスタマイズ項目の編集 -->
+      <div v-if="canCustomize" class="ml-auto flex items-center gap-2">
+        <DashboardModeSelect />
+        <button
+          type="button"
+          @click="showCustomizeModal = true"
+          :title="t('dashboard.layout.edit')"
+          :aria-label="t('dashboard.layout.edit')"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="max-sm:hidden">{{ t('dashboard.layout.edit') }}</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Tier Cards Row -->
-    <div class="grid grid-cols-1 gap-6" :class="{ 'sm:grid-cols-2': showRateTier }">
+    <!-- ウィジェットを設定の並び順で描画する（自分のダッシュボード以外は初期配置。閲覧モードごとの出せる/出せないは visibleWidgets 側で絞る） -->
+    <template v-for="w in visibleWidgets" :key="w">
+      <!-- ティアカード（簡易表示: 2 つのティアを 1 枚のカードに横並び・小アイコンで） -->
+      <div
+        v-if="w === 'tier' && isSimpleView"
+        class="bg-white dark:bg-slate-800 p-4 rounded-md border border-slate-200 dark:border-slate-700 grid grid-cols-1 gap-4 transition-colors duration-200"
+        :class="{ 'sm:grid-cols-2': showRateTier }"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <RankIcon :rank-name="rankInfo.name" :tier="rankInfo.tier" size="md" :is-supporter="iconGloss" v-bind="beatFrame" />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Beat-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
+              <button type="button" @click="showInfoModal = true" :title="t('dashboard.whatIsBeatTier')" :aria-label="t('dashboard.whatIsBeatTier')" class="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </button>
+            </div>
+            <p class="text-lg font-bold leading-tight truncate" :class="rankInfo.color">{{ rankInfo.name }} {{ rankInfo.tier || '' }}</p>
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 tabular-nums truncate">
+              {{ displayBeatPt.toFixed(1) }} pt<template v-if="nextRankInfo.nextRank"> · Next: {{ nextRankInfo.nextRank.name }} {{ nextRankInfo.nextRank.tier || '' }} ({{ t('dashboard.remaining') }} {{ remainingPt(nextRankInfo.nextRank.minPoints, displayBeatPt) }} pt)</template>
+            </p>
+            <div class="w-full mt-2 bg-slate-100 dark:bg-slate-700 h-1 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500 dark:bg-blue-400 rounded-full transition-all duration-1000" :style="{ width: `${nextRankInfo.progress}%` }"></div>
+            </div>
+          </div>
+        </div>
+        <div v-if="showRateTier" class="flex items-center gap-3 min-w-0">
+          <RankIcon :rank-name="rateTierRankInfo.name" :tier="rateTierRankInfo.tier" size="md" :is-supporter="iconGloss" v-bind="rateFrame" />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500">Rate-Tier<span v-if="showAllTime" class="ml-1.5 px-1.5 py-0.5 text-[9px] rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300">{{ t('past.tierBadge') }}</span></p>
+              <button type="button" @click="showRateInfoModal = true" :title="t('dashboard.whatIsRateTier')" :aria-label="t('dashboard.whatIsRateTier')" class="text-emerald-500 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </button>
+            </div>
+            <p class="text-lg font-bold leading-tight truncate" :class="rateTierRankInfo.color">{{ rateTierRankInfo.name }} {{ rateTierRankInfo.tier || '' }}</p>
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 tabular-nums truncate">
+              {{ displayRatePt.toFixed(1) }} pt<template v-if="rateTierNextRankInfo.nextRank"> · Next: {{ rateTierNextRankInfo.nextRank.name }} {{ rateTierNextRankInfo.nextRank.tier || '' }} ({{ t('dashboard.remaining') }} {{ remainingPt(rateTierNextRankInfo.nextRank.minPoints, displayRatePt) }} pt)</template>
+            </p>
+            <div class="w-full mt-2 bg-slate-100 dark:bg-slate-700 h-1 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-500 dark:bg-emerald-400 rounded-full transition-all duration-1000" :style="{ width: `${rateTierNextRankInfo.progress}%` }"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ティアカード（通常表示） -->
+      <div v-else-if="w === 'tier'" class="grid grid-cols-1 gap-6" :class="{ 'sm:grid-cols-2': showRateTier }">
       <!-- Beat-Tier (Lv11/12) -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden transition-colors duration-200">
         <div class="absolute top-4 right-4 z-20">
@@ -66,7 +130,7 @@
         </div>
         <p v-if="nextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 text-center">
           Next: {{ nextRankInfo.nextRank.name }} {{ nextRankInfo.nextRank.tier || '' }}<br/>
-          {{ t('dashboard.remaining') }} ({{ nextRankInfo.nextRank.minPoints - displayBeatPt > 0 ? (nextRankInfo.nextRank.minPoints - displayBeatPt).toFixed(1) : 0 }} pt)
+          {{ t('dashboard.remaining') }} ({{ remainingPt(nextRankInfo.nextRank.minPoints, displayBeatPt) }} pt)
         </p>
       </div>
 
@@ -100,7 +164,7 @@
         </div>
         <p v-if="rateTierNextRankInfo.nextRank" class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-2 z-10 text-center">
           Next: {{ rateTierNextRankInfo.nextRank.name }} {{ rateTierNextRankInfo.nextRank.tier || '' }}<br/>
-          {{ t('dashboard.remaining') }} ({{ rateTierNextRankInfo.nextRank.minPoints - displayRatePt > 0 ? (rateTierNextRankInfo.nextRank.minPoints - displayRatePt).toFixed(1) : 0 }} pt)
+          {{ t('dashboard.remaining') }} ({{ remainingPt(rateTierNextRankInfo.nextRank.minPoints, displayRatePt) }} pt)
         </p>
         <!-- DJ Name pie (topRanker only) -->
         <div v-if="isTopRankerView && rateTierDjPie.length > 0" class="w-full mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 z-10 flex flex-col sm:flex-row items-center gap-4">
@@ -116,14 +180,14 @@
           </ul>
         </div>
       </div>
-    </div>
+      </div>
 
-    <!-- 現在の DIVISION は App.vue のダッシュボード最上部（LeagueDivisionPanel）で表示する -->
+      <!-- 現在の DIVISION（リーグ参加中・自分のダッシュボードのみ。未参加なら何も描かない） -->
+      <LeagueDivisionPanel v-else-if="w === 'league'" @open-league="emit('open-league')" />
 
-    <!-- Ranking + Lv12 Stats Row -->
-    <div v-if="!isTopRankerView && !isPrivateView" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 flex flex-col justify-between transition-colors duration-200">
-        <!-- Ranking Position -->
-        <div v-if="!isTopRankerView && !isPrivateView" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-700">
+      <!-- ランキング順位・ロードマップ レベル・前後のプレイヤー -->
+      <div v-else-if="w === 'ranking'" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <!-- 順位とロードマップレベルを横並び（狭い画面では折り返す。flex-col/sm: は output.css に負けるので使わない） -->
           <div class="flex flex-wrap items-end gap-x-10 gap-y-4">
           <div>
@@ -173,9 +237,11 @@
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Lv12 Quick Stats (fixed, no settings needed) -->
-        <div v-if="!isTopRankerView && !isPrivateView" class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-auto">
+      <!-- ☆12 クイック統計 -->
+      <div v-else-if="w === 'lv12'" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <div class="flex flex-col items-center justify-center p-3 rounded-md bg-slate-50/50 dark:bg-slate-700/30 border border-slate-100 dark:border-slate-700">
             <p class="text-[9px] font-bold text-slate-400 mb-1">{{ t('dashboard.lv12Total') }}</p>
             <h3 class="text-2xl sm:text-3xl font-bold tabular-nums text-slate-700 dark:text-slate-200">{{ lv12Total }}</h3>
@@ -199,7 +265,41 @@
             </h3>
           </div>
         </div>
-    </div>
+      </div>
+
+      <!-- 非公式難易度表（歴代トグル ON なら歴代ベストで集計。成長記録だけは現行作基準） -->
+      <UnofficialDifficultyTable
+        v-else-if="w === 'diffTable'"
+        :scores="displayScores"
+        :history-scores="allFlattenedScores"
+        :current-all-time-best="currentAllTimeBest"
+        @folder-open="tableFolderOpened = true"
+      />
+
+      <!-- ランクアップアドバイス: 自分のダッシュボードと、管理者が他ユーザーを閲覧しているときだけ出す（widgetAvailable）。
+           管理者閲覧では相手のユーザー ID を渡し、相手の推薦を管理者用 API から引く。
+           フレンド閲覧などは相手の推薦を引く API が無く、自分の推薦を相手の残り pt と並べても意味が無いので出さない。 -->
+      <RankUpAdvice
+        v-else-if="w === 'advice'"
+        :total-points="props.totalPoints"
+        :viewing-user-id="viewingMode === 'admin' ? (viewingUserId ?? null) : null"
+        :viewing-display-name="viewingMode === 'admin' ? viewingDisplayName : undefined"
+      />
+
+      <!-- 全体ニュース -->
+      <ActivityFeed v-else-if="w === 'activity'" />
+
+      <!-- 最近の更新（最後に CSV を取り込んだ日に更新された譜面。同日分はまとめる） -->
+      <RecentPlayUpdates
+        v-else-if="w === 'recentPlays'"
+        :viewing-user-id="viewingMode === 'admin' ? (viewingUserId ?? null) : null"
+        :scores="allFlattenedScores"
+        @open-history="emit('open-history')"
+      />
+
+      <!-- プロフィールの小見出し（成長サマリー／時系列推移／クリア状況など）。初期設定では非表示で、カスタマイズで足す -->
+      <ProfileDashboard v-else-if="isProfileWidget(w)" :sections="PROFILE_WIDGET_SECTIONS[w]" :reload-key="scoresVersion" />
+    </template>
 
     <!-- Private user notice: hide per-song breakdowns since scores are unavailable -->
     <div v-if="isPrivateView" class="bg-amber-50 dark:bg-amber-900/20 p-5 rounded-md border border-amber-200 dark:border-amber-800 text-center">
@@ -209,32 +309,10 @@
       </div>
     </div>
 
-    <!-- Unofficial Difficulty Table（歴代トグル ON なら歴代ベストで集計。成長記録だけは現行作基準） -->
-    <UnofficialDifficultyTable
-      v-if="!isPrivateView"
-      :scores="displayScores"
-      :history-scores="allFlattenedScores"
-      :current-all-time-best="currentAllTimeBest"
-      @folder-open="tableFolderOpened = true"
-    />
-
-    <!-- Rank Up Advice -->
-    <!-- ランクアップアドバイス: 自分のダッシュボードと、管理者が他ユーザーを閲覧しているときだけ出す。
-         管理者閲覧では相手のユーザー ID を渡し、相手の推薦を管理者用 API から引く。
-         フレンド閲覧などは相手の推薦を引く API が無く、自分の推薦を相手の残り pt と並べても意味が無いので出さない。 -->
-    <RankUpAdvice
-      v-if="!isPrivateView && (!viewingMode || viewingMode === 'admin')"
-      :total-points="props.totalPoints"
-      :viewing-user-id="viewingMode === 'admin' ? (viewingUserId ?? null) : null"
-      :viewing-display-name="viewingMode === 'admin' ? viewingDisplayName : undefined"
-    />
-
-    <!-- Activity Feed (全体ニュース) -->
-    <ActivityFeed v-if="!isPrivateView" />
-
     <!-- Info Modal -->
     <BeatTierInfoModal v-if="showInfoModal" @close="showInfoModal = false" />
     <RateTierInfoModal v-if="showRateInfoModal" @close="showRateInfoModal = false" />
+    <DashboardCustomizeModal v-if="showCustomizeModal" @close="showCustomizeModal = false" />
   </div>
 </template>
 
@@ -246,6 +324,9 @@
  * - 非公式難易度表のランク別集計（UnofficialDifficultyTable）も埋込み
  * - 閲覧モード (admin/friend/public/topRanker/private) によって利用可能な情報範囲を切替
  * - TOP ランカー閲覧時はバーチャルプロフィール用に DJ 名ごとの TOP100 譜面を円グラフ化する特殊表示
+ * - 各セクションは「ウィジェット」（useDashboardLayout の DashboardWidgetId）として、設定の並び順で描画する。
+ *   自分のダッシュボードではツールバーから簡易表示モードの切替とカスタマイズ（表示/非表示・並び順）ができ、
+ *   他人の閲覧・共有ページでは常に初期配置。閲覧モードごとの「出せるか」は widgetAvailable で別に絞る。
  *
  * @prop scores 階層化されたスコアデータ。
  * @prop totalPoints 現在の Beat-PT 合計。
@@ -253,6 +334,8 @@
  * @prop viewingMode 閲覧モード。UI の「編集ボタン」表示・API 呼出先・機能制限の分岐に使用。
  * @prop rateTierPointsOverride TOP ランカー等、サーバ算出済み Rate-PT が優先される場合に使用する値。
  * @emits open-profile-edit メール未登録等の促しバナーからプロフィール編集を要求。
+ * @emits open-roadmap ロードマップ レベルの押下でスコアロードマップ画面へ。
+ * @emits open-league 現在の DIVISION パネルの押下でリーグ画面へ。
  */
 import { computed, ref, watch, onMounted } from 'vue';
 import { useI18n } from '../composables/useI18n';
@@ -271,17 +354,40 @@ import RankIcon from './RankIcon.vue';
 import UnofficialDifficultyTable from './UnofficialDifficultyTable.vue';
 import RankUpAdvice from './RankUpAdvice.vue';
 import ActivityFeed from './ActivityFeed.vue';
+import LeagueDivisionPanel from './LeagueDivisionPanel.vue';
+import DashboardCustomizeModal from './DashboardCustomizeModal.vue';
+import DashboardModeSelect from './DashboardModeSelect.vue';
+import RecentPlayUpdates from './RecentPlayUpdates.vue';
+import ProfileDashboard from './ProfileDashboard.vue';
 import { useAuth } from '../composables/useAuth';
 import { flattenScores } from '../utils/scoreData';
 import { formatRoadmapLevel } from '../utils/roadmapLevels';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import { useDashboardLayout, NORMAL_WIDGETS, SIMPLE_WIDGETS, type DashboardWidgetId } from '../composables/useDashboardLayout';
 
 const { showRateTier } = useRateTierVisibility();
 const { t } = useI18n();
 const { user, authHeaders } = useAuth();
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
-const emit = defineEmits<{ (e: 'open-profile-edit'): void; (e: 'open-roadmap'): void }>();
+const emit = defineEmits<{
+  (e: 'open-profile-edit'): void;
+  (e: 'open-roadmap'): void;
+  (e: 'open-league'): void;
+  (e: 'open-history'): void;
+}>();
+
+/** プロフィール由来のウィジェット ID → ProfileDashboard に渡す小見出し（sections prop）。 */
+const PROFILE_WIDGET_SECTIONS = {
+  profileSummary: ['growthSummary'],
+  profileTrends: ['growthTrends'],
+  profileClearStatus: ['clearStatus'],
+  profileInformalClear: ['informalClear'],
+  profileTop100Dist: ['top100Dist'],
+  profileTop10: ['top10'],
+} as const;
+type ProfileWidgetId = keyof typeof PROFILE_WIDGET_SECTIONS;
+const isProfileWidget = (w: DashboardWidgetId): w is ProfileWidgetId => w in PROFILE_WIDGET_SECTIONS;
 
 const props = defineProps<{
   scores: ScoreData[];
@@ -302,6 +408,14 @@ const props = defineProps<{
 /** 【computed の役割】 他ユーザーを閲覧中かどうか（viewingIidxId が存在する）。 */
 const isViewingOther = computed(() => !!props.viewingIidxId);
 
+/**
+ * スコアが入れ替わった回数。プロフィール系ウィジェットは履歴・スコアを自分で API から引くので、
+ * アップロード後などに props.scores が変わったらこれを合図に取り直させる（reloadKey）。
+ * （props の定義より後に置くこと。watch の getter は登録時に即実行される）
+ */
+const scoresVersion = ref(0);
+watch(() => props.scores, () => { scoresVersion.value++; });
+
 /** 【computed の役割】 BEAT-TIER アイコンの外枠（前作ティア）。自分なら /me の値、他人閲覧なら props。 */
 const beatFrame = computed(() =>
   previousTierFrame(isViewingOther.value ? props.previousBeatPt : user.value?.previousBeatPt, 'beat'));
@@ -314,6 +428,60 @@ const iconGloss = computed(() => (isViewingOther.value ? !!props.viewingIsSuppor
 const isTopRankerView = computed(() => props.viewingMode === 'topRanker');
 /** 【computed の役割】 プライベート設定ユーザーの閲覧中かどうか（詳細非表示モード）。 */
 const isPrivateView = computed(() => props.viewingMode === 'private');
+
+// ---- ダッシュボードの表示設定（簡易表示モード／ウィジェットの表示と並び順）----
+const { mode: layoutMode, isSimple, customOrder } = useDashboardLayout();
+const showCustomizeModal = ref(false);
+
+/**
+ * 【computed の役割】 自分のダッシュボードか（ログイン中・他人の閲覧でない・閲覧モード無し）。
+ * 表示設定（簡易表示・カスタマイズ）と歴代ベストのトグルはここでだけ有効。
+ */
+const isOwnDashboard = computed(() => !!user.value && !isViewingOther.value && !props.viewingMode);
+const canCustomize = isOwnDashboard;
+/** 【computed の役割】 簡易表示で描くか。他人の閲覧では自分の設定を持ち込まない。 */
+const isSimpleView = computed(() => isOwnDashboard.value && isSimple.value);
+
+/**
+ * ウィジェットごとの「この閲覧状況で出せるか」。ユーザーの表示設定とは独立した制約で、
+ * 従来の各セクションの v-if をそのまま移したもの。
+ */
+const widgetAvailable: Record<DashboardWidgetId, () => boolean> = {
+  tier: () => true,
+  league: () => isOwnDashboard.value,
+  ranking: () => !isTopRankerView.value && !isPrivateView.value,
+  lv12: () => !isTopRankerView.value && !isPrivateView.value,
+  // 取り込み履歴は本人か管理者しか引けない（ランクアップアドバイスと同じ条件）
+  recentPlays: () => isOwnDashboard.value || (props.viewingMode === 'admin' && !!props.viewingUserId),
+  diffTable: () => !isPrivateView.value,
+  advice: () => !isPrivateView.value && (!props.viewingMode || props.viewingMode === 'admin'),
+  activity: () => !isPrivateView.value,
+  // プロフィールの内容は本人の履歴・スコアを API から引くので自分のダッシュボードだけ
+  profileSummary: () => isOwnDashboard.value,
+  profileTrends: () => isOwnDashboard.value,
+  profileClearStatus: () => isOwnDashboard.value,
+  profileInformalClear: () => isOwnDashboard.value,
+  profileTop100Dist: () => isOwnDashboard.value,
+  profileTop10: () => isOwnDashboard.value,
+};
+
+/**
+ * 【computed の役割】 実際に描画するウィジェットの並び。
+ * 自分のダッシュボード: 表示モードに従う（通常=初期配置 / 簡易=固定の最小セット / カスタマイズ=設定の並び）。
+ * それ以外（他人の閲覧・共有ページ）: 初期配置。いずれも閲覧状況で出せないものは落とす。
+ */
+const visibleWidgets = computed<DashboardWidgetId[]>(() => {
+  const order: readonly DashboardWidgetId[] = !isOwnDashboard.value
+    ? NORMAL_WIDGETS
+    : layoutMode.value === 'simple' ? SIMPLE_WIDGETS
+    : layoutMode.value === 'custom' ? customOrder.value
+    : NORMAL_WIDGETS;
+  return order.filter(w => widgetAvailable[w]());
+});
+
+/** 【関数の役割】 次ティアまでの残り pt を表示用に整形する（到達済みなら "0"）。 */
+const remainingPt = (minPoints: number, current: number) =>
+  minPoints - current > 0 ? (minPoints - current).toFixed(1) : '0';
 
 // DJ palette for pie slices
 const DJ_PALETTE = [
@@ -403,8 +571,8 @@ const {
  */
 const showAllTime = ref(false);
 
-/** 歴代ベストを扱えるか。過去作は本人のデータなので、他ユーザー閲覧中は出さない。 */
-const canUseAllTime = computed(() => !!user.value && !isViewingOther.value && !props.viewingMode);
+/** 歴代ベストを扱えるか。過去作は本人のデータなので、他ユーザー閲覧中は出さない（= 自分のダッシュボードのみ）。 */
+const canUseAllTime = isOwnDashboard;
 
 /**
  * 【関数の役割】 トグルの切り替え。ON にする瞬間だけ過去作スコアを取得する

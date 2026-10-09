@@ -31,5 +31,7 @@ public record ProfileUpdateRequest(
                 /** UI 表示言語コード（例: "ja", "en"）。 */
                 String language,
                 /** レートティアをプロフィール上で表示するか。 */
-                Boolean showRateTier) {
+                Boolean showRateTier,
+                /** ダッシュボードの表示設定 JSON（形式はフロント側）。空文字は「初期配置に戻す」。 */
+                String dashboardLayout) {
 }

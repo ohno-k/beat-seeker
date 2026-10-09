@@ -16,6 +16,7 @@
 import { ref, watch } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useRateTierVisibility } from '../composables/useRateTierVisibility';
+import DashboardModeSelect from './DashboardModeSelect.vue';
 import { useI18n } from '../composables/useI18n';
 import { useToast } from '../composables/useToast';
 import { useModalEscape } from '../composables/useModalEscape';
@@ -285,6 +286,15 @@ const handleUpdate = async () => {
                 <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white dark:peer-checked:after:border-slate-800 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:after:bg-slate-800 after:border-slate-300 dark:after:border-slate-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
               </div>
             </label>
+
+            <!-- ダッシュボードの表示モード（通常／簡易／カスタマイズ）。言語設定と同じく選んだ瞬間に保存される -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('profile.dashboardMode') }}</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{{ t('profile.dashboardModeHint') }}</p>
+              </div>
+              <DashboardModeSelect />
+            </div>
           </div>
 
           <div class="pt-4 flex gap-3">

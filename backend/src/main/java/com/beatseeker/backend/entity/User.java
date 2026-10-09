@@ -128,6 +128,16 @@ public class User {
         return !Boolean.FALSE.equals(leagueNotificationsEnabled);
     }
 
+    /**
+     * ダッシュボードの表示設定（簡易表示モード・表示する項目と並び順）の JSON 文字列。
+     *
+     * 形式はフロント（useDashboardLayout.ts）が決め、サーバーは保存と返却だけを行う
+     * （language / showRateTier と同じく、別端末でログインしたときに同じ表示を復元するための保存）。
+     * null は「未設定＝初期配置」。既存行のあるテーブルへの後付け列なので NOT NULL は付けない。
+     */
+    @Column(name = "dashboard_layout", columnDefinition = "TEXT")
+    private String dashboardLayout;
+
     /** メールアドレス。パスワードリセット通知等に使う。ユニーク制約あり。 */
     @Column(unique = true)
     private String email;

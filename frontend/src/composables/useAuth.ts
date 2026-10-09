@@ -1,6 +1,7 @@
 import { ref, computed, readonly } from 'vue';
 import { currentLang } from './useI18n';
 import { showRateTierRef } from './useRateTierVisibility';
+import { applyServerLayout } from './useDashboardLayout';
 import { TOKEN_KEY, API_BASE } from './constants';
 
 // 他の composable でも `API_BASE` を使うため再エクスポート（利便性のため）。
@@ -119,6 +120,10 @@ async function fetchCurrentUser(): Promise<void> {
             if (data.showRateTier !== undefined) {
                 showRateTierRef.value = data.showRateTier;
                 localStorage.setItem('showRateTier', String(data.showRateTier));
+            }
+            // ダッシュボードの表示設定も同期（null = 未設定なので初期配置に戻す）
+            if ('dashboardLayout' in data) {
+                applyServerLayout(data.dashboardLayout);
             }
         } else {
             user.value = null;

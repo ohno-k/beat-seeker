@@ -187,6 +187,8 @@ public class AuthController {
             responseBody.put("privacyLevel", user.getPrivacyLevel());
             responseBody.put("language", user.getLanguage() != null ? user.getLanguage() : "ja");
             responseBody.put("showRateTier", user.getShowRateTier() != null ? user.getShowRateTier() : true);
+            // ダッシュボードの表示設定（未設定なら null。フロントは null を初期配置として扱う）
+            responseBody.put("dashboardLayout", user.getDashboardLayout());
             responseBody.put("isSupporter", user.getIsSupporter() != null ? user.getIsSupporter() : false);
             // 前作の最終 BEAT-PT / RATE-PT（ティアアイコンの外枠の色と光量に使う。前作の記録が無ければ null）
             previousVersionPtService.putPrevious(responseBody, user.getId());
@@ -262,6 +264,16 @@ public class AuthController {
             user.setLanguage(request.language());
         if (request.showRateTier() != null)
             user.setShowRateTier(request.showRateTier());
+        if (request.dashboardLayout() != null) {
+            // フロントが組み立てた JSON をそのまま保存する（中身の解釈はフロント側）。
+            // 空文字は「初期配置に戻す」= null。保存する内容は 7 項目の並びと ON/OFF 程度なので長さだけ抑える。
+            String layout = request.dashboardLayout().trim();
+            if (layout.length() > 2000 || (!layout.isEmpty() && !(layout.startsWith("{") && layout.endsWith("}")))) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "dashboardLayout の形式が不正です。"));
+            }
+            user.setDashboardLayout(layout.isEmpty() ? null : layout);
+        }
         if (request.email() != null && !request.email().isBlank()) {
             // メールアドレスは小文字化して保存。他ユーザーと衝突しないかを確認してから更新する
             String newEmail = request.email().trim().toLowerCase();

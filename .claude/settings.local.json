@@ -85,7 +85,8 @@
       "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad//**)",
       "Read(//c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/**)",
       "Bash(sed -n 40,100p \"/c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/shot-start.mjs\")",
-      "Bash(sed -e 's/id: 999999, iidxId: '\\\\''0000-0000'\\\\''/id: 18, iidxId: '\\\\''5787-1145'\\\\''/' /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/shot-start.mjs)"
+      "Bash(sed -e 's/id: 999999, iidxId: '\\\\''0000-0000'\\\\''/id: 18, iidxId: '\\\\''5787-1145'\\\\''/' /c/Users/oonok/AppData/Local/Temp/claude/c--Users-oonok-beat-seeker/1a19d834-7074-42e3-a1a1-36a9bc7f3b5a/scratchpad/shot-start.mjs)",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\oonok\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-oonok-beat-seeker\\\\cb49b768-ae0b-4de5-86be-fc5548715418\\\\scratchpad\\\\shots\\\\23-profile-split.txt\" | Select-String -NotMatch 'Failed to load resource' | Select-Object -Last 8; \\(Get-Content \"C:\\\\Users\\\\oonok\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-oonok-beat-seeker\\\\cb49b768-ae0b-4de5-86be-fc5548715418\\\\scratchpad\\\\shots\\\\23-profile-split.txt\" | Select-String 'Failed to load resource' | Measure-Object\\).Count)"
     ]
   }
 }

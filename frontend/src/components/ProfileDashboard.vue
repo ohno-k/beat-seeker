@@ -2,9 +2,12 @@
   <div class="w-full space-y-6 animate-fade-in">
 
     <!-- 成長軌跡 -->
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('dashboard.title') }}</h2>
-      <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">{{ t('dashboard.subtitle') }}</p>
+    <div v-if="showGrowthCard" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <!-- ダッシュボードのウィジェットとして一部だけ埋め込むときは小見出しだけで足りるので、大見出しは出さない -->
+      <div v-if="!isEmbedded">
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">{{ t('dashboard.title') }}</h2>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6">{{ t('dashboard.subtitle') }}</p>
+      </div>
 
       <div v-if="isLoading" class="flex flex-col items-center justify-center py-12">
         <div class="w-10 h-10 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin mb-4"></div>
@@ -17,7 +20,7 @@
 
       <div v-else class="space-y-10">
         <!-- 成長サマリー -->
-        <div>
+        <div v-if="showSection('growthSummary')">
           <div class="section-header">
             <div class="w-1 h-5 bg-violet-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.summary') }}</h3>
@@ -55,7 +58,7 @@
         </div>
 
         <!-- 時系列推移 -->
-        <div>
+        <div v-if="showSection('growthTrends')">
           <div class="section-header">
             <div class="w-1 h-5 bg-blue-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.trends') }}</h3>
@@ -87,8 +90,8 @@
     </div>
 
     <!-- スコア分析 -->
-    <div v-if="myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
-      <div class="flex items-center justify-between mb-4">
+    <div v-if="showAnalysisCard && myAnotherLegg.length > 0" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+      <div v-if="!isEmbedded" class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100">
             {{ t('dashboard.analysis') }}
@@ -135,6 +138,11 @@
           <span v-if="isLoadingPast" class="w-3 h-3 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></span>
         </label>
 
+        <!-- 埋め込み時は大見出しが無いので、平均 P-GREAT 率はクリア状況のフィルタ行に寄せて出す -->
+        <span v-if="isEmbedded && showSection('clearStatus') && avgPgreatRate !== null" class="ml-auto text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+          {{ t('dashboard.avgPgreatRate') }} <span class="text-base font-bold text-slate-700 dark:text-slate-200">{{ avgPgreatRate }}%</span>
+        </span>
+
         <!-- 集計値と「成長軌跡」がずれる理由を明示する -->
         <p v-if="showAllTime" class="text-[11px] text-amber-600 dark:text-amber-400 basis-full">
           {{ t('past.analysisNote') }}
@@ -143,7 +151,7 @@
 
       <div class="space-y-8">
         <!-- クリアタイプ + DJレベル + スコアレート分布 -->
-        <div>
+        <div v-if="showSection('clearStatus')">
           <div class="section-header">
             <div class="w-1 h-5 bg-emerald-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.clearStatus') }}</h3>
@@ -169,7 +177,7 @@
         </div>
 
         <!-- 非公式難易度別クリア状況 -->
-        <div>
+        <div v-if="showSection('informalClear')">
           <div class="section-header">
             <div class="w-1 h-5 bg-amber-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.informalClearStatus') }}</h3>
@@ -214,7 +222,7 @@
         </div>
 
         <!-- BEAT-PT上位100曲の難易度分布 -->
-        <div>
+        <div v-if="showSection('top100Dist')">
           <div class="section-header">
             <div class="w-1 h-5 bg-indigo-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top100Dist') }}</h3>
@@ -230,7 +238,7 @@
         </div>
 
         <!-- BEAT-PT上位10曲 -->
-        <div>
+        <div v-if="showSection('top10')">
           <div class="section-header">
             <div class="w-1 h-5 bg-violet-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 dark:text-slate-200">{{ t('dashboard.top10') }}</h3>
@@ -401,7 +409,7 @@
     </Teleport>
 
     <!-- URL 共有 -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="showSettings" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -420,10 +428,10 @@
       </button>
     </div>
 
-    <ShareTokenModal :is-open="isShareModalOpen" @close="isShareModalOpen = false" />
+    <ShareTokenModal v-if="showSettings" :is-open="isShareModalOpen" @close="isShareModalOpen = false" />
 
     <!-- 外部連携トークン -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="showSettings" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
@@ -442,10 +450,10 @@
       </button>
     </div>
 
-    <IntegrationTokenModal :is-open="isIntegrationModalOpen" @close="isIntegrationModalOpen = false" />
+    <IntegrationTokenModal v-if="showSettings" :is-open="isIntegrationModalOpen" @close="isIntegrationModalOpen = false" />
 
     <!-- 通知設定 -->
-    <div v-if="!props.viewingUserId && !props.shareToken" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
+    <div v-if="showSettings" class="bg-white dark:bg-slate-800 p-6 rounded-md border border-slate-200 dark:border-slate-700 transition-colors duration-200">
       <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -531,7 +539,7 @@
     <!-- 過去作スコアの取り込み状況（本人のみ）。取り込み自体は通常の CSV 取り込み UI が行う。
          作品ラベルのクリックは、その作品のスコア一覧ページへの遷移として App.vue へ中継する -->
     <PastScoreManager
-      v-if="!props.viewingUserId && !props.shareToken"
+      v-if="showSettings"
       @open-version="emit('open-past-version', $event)"
     />
 
@@ -548,8 +556,13 @@
  * - プッシュ通知の許可要求・テスト送信ボタンも内包（ログイン中ユーザー本人のみ）
  *
  * @prop viewingUserId null/undefined なら自分のプロフィール、数値なら管理者が他ユーザーを閲覧中（admin 用 API に切替）。
+ * @prop sections 描画するセクション（小見出し単位）。省略時は全部。ダッシュボードのウィジェットとして
+ *                「成長サマリー」「時系列推移」「クリア状況」などを単独で埋め込むときに使い、
+ *                描画しないセクションのデータ（履歴 / スコア / Push 状態）は取りに行かない。
+ *                埋め込み時は大見出し（プロフィール・成長軌跡／スコア分析）を出さず、小見出しから始める。
+ * @prop reloadKey 値が変わったら履歴とスコアを取り直す（ダッシュボードでアップロード後にスコアが入れ替わった合図）。
  */
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import {
   Chart as ChartJS, CategoryScale, LinearScale,
   PointElement, LineElement, BarElement, BarController,
@@ -571,10 +584,27 @@ import ShareTokenModal from './ShareTokenModal.vue';
 import IntegrationTokenModal from './IntegrationTokenModal.vue';
 import PastScoreManager from './PastScoreManager.vue';
 
+/**
+ * 画面の小見出し単位のまとまり。
+ *  - growthSummary / growthTrends: 「成長軌跡」カードの成長サマリー／時系列推移（履歴 API）
+ *  - clearStatus / informalClear / top100Dist / top10: 「スコア分析」カードの各小見出し（スコア API）
+ *  - settings: URL 共有・連携トークン・通知・過去作取り込み
+ */
+type ProfileSection =
+  | 'growthSummary' | 'growthTrends'
+  | 'clearStatus' | 'informalClear' | 'top100Dist' | 'top10'
+  | 'settings';
+const GROWTH_SECTIONS: readonly ProfileSection[] = ['growthSummary', 'growthTrends'];
+const ANALYSIS_SECTIONS: readonly ProfileSection[] = ['clearStatus', 'informalClear', 'top100Dist', 'top10'];
+
 const props = defineProps<{
   viewingUserId?: number | null;
   /** 共有 URL 経由の閲覧時に渡される。指定時は /api/share/{token}/... から取得する。 */
   shareToken?: string | null;
+  /** 描画するセクション。省略時は全部。 */
+  sections?: ReadonlyArray<ProfileSection>;
+  /** 値が変わったら履歴とスコアを取り直す。 */
+  reloadKey?: number;
 }>();
 
 const emit = defineEmits<{
@@ -584,6 +614,17 @@ const emit = defineEmits<{
    */
   (e: 'open-past-version', version: number): void;
 }>();
+
+/** 【関数の役割】 そのセクションを描画するか（sections 未指定なら全部）。 */
+const showSection = (s: ProfileSection) => !props.sections || props.sections.includes(s);
+/** 【computed の役割】 一部だけ埋め込まれているか（ダッシュボードのウィジェット）。大見出しの出し分けに使う。 */
+const isEmbedded = computed(() => !!props.sections);
+/** 【computed の役割】 「成長軌跡」カードを出すか（中の小見出しのどれかが要る）。履歴 API の取得要否も兼ねる。 */
+const showGrowthCard = computed(() => GROWTH_SECTIONS.some(showSection));
+/** 【computed の役割】 「スコア分析」カードを出すか。スコア API の取得要否も兼ねる。 */
+const showAnalysisCard = computed(() => ANALYSIS_SECTIONS.some(showSection));
+/** 【computed の役割】 設定系セクション（本人が自分のプロフィールを見ているときだけ）。 */
+const showSettings = computed(() => showSection('settings') && !props.viewingUserId && !props.shareToken);
 
 const { isDarkMode } = useDarkMode();
 const { authHeaders } = useAuth();
@@ -616,8 +657,8 @@ const isPushReady = computed(() =>
   && !!pushStatus.value?.subscribed
   && !!pushStatus.value?.serverEnabled);
 
-// 本人が自分のダッシュボードを見ているときだけ、Push の稼働状態を取りに行く。
-if (!props.viewingUserId && !props.shareToken) {
+// 本人が自分のダッシュボードを見ていて、通知設定を描画するときだけ Push の稼働状態を取りに行く。
+if (showSettings.value) {
   fetchPushStatus();
 }
 
@@ -710,6 +751,21 @@ interface HistoryRecord {
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080';
 
+/**
+ * 同じ URL への進行中の fetch を共有する。ダッシュボードでは小見出しごとに ProfileDashboard が
+ * 複数同時にマウントされるので、同じ履歴／スコア API を回数分叩かないようにする。
+ * 応答が返ったら忘れる（キャッシュではない）。呼び出し側は body を 1 回しか読めないので複製を返す。
+ */
+const inflightFetches = new Map<string, Promise<Response>>();
+function fetchShared(url: string, headers: HeadersInit): Promise<Response> {
+  let p = inflightFetches.get(url);
+  if (!p) {
+    p = fetch(url, { headers }).finally(() => inflightFetches.delete(url));
+    inflightFetches.set(url, p);
+  }
+  return p.then(res => res.clone());
+}
+
 const isLoading = ref(true);
 const historyData = ref<HistoryRecord[]>([]);
 const myScores = ref<any[]>([]);
@@ -739,8 +795,13 @@ if (diffTableRanksRef.value && Array.isArray(diffTableRanksRef.value)) {
  * 初回マウント時に履歴と現在スコアを並列取得する。
  * 閲覧ユーザーが自分以外（props.viewingUserId が数値）のときは /api/admin/users/{id}/... に切替える。
  * allSettled で取得するため片方が失敗しても他方の表示は続行する。
+ * 履歴は成長軌跡、スコアはスコア分析だけが使うので、描画しないセクションの分は取りに行かない。
+ * reloadKey が変わったときも同じ手順で取り直す。
  */
-onMounted(async () => {
+const loadData = async () => {
+  const needHistory = showGrowthCard.value;
+  const needScores = showAnalysisCard.value;
+  isLoading.value = true;
   try {
     const histEndpoint = props.shareToken
         ? `${API_BASE}/api/share/${encodeURIComponent(props.shareToken)}/history`
@@ -756,15 +817,15 @@ onMounted(async () => {
     // share-token モードでは認証ヘッダ不要（公開エンドポイント）。
     const headers = props.shareToken ? {} : authHeaders();
     const [histRes, scoresRes] = await Promise.allSettled([
-      fetch(histEndpoint, { headers }),
-      fetch(scoresEndpoint, { headers }),
+      needHistory ? fetchShared(histEndpoint, headers) : Promise.resolve(null),
+      needScores ? fetchShared(scoresEndpoint, headers) : Promise.resolve(null),
     ]);
 
-    if (histRes.status === 'fulfilled' && histRes.value.ok) {
+    if (histRes.status === 'fulfilled' && histRes.value?.ok) {
       historyData.value = await histRes.value.json();
       historyData.value.sort((a, b) => (toJstDate(a.date)?.getTime() ?? 0) - (toJstDate(b.date)?.getTime() ?? 0));
     }
-    if (scoresRes.status === 'fulfilled' && scoresRes.value.ok) {
+    if (scoresRes.status === 'fulfilled' && scoresRes.value?.ok) {
       myScores.value = await scoresRes.value.json();
     }
   } catch (e) {
@@ -772,7 +833,9 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-});
+};
+onMounted(loadData);
+watch(() => props.reloadKey, (now, before) => { if (now !== before) loadData(); });
 
 // ── History-based computeds ──────────────────────────────────────────────────
 
@@ -974,9 +1037,9 @@ const toggleAllTime = async () => {
   }
 };
 
-// トグルの表示可否判定にだけ使う軽量なサマリを先に取得しておく。
+// トグルの表示可否判定にだけ使う軽量なサマリを先に取得しておく（トグルはスコア分析の中にある）。
 onMounted(() => {
-  if (!canUseAllTime.value) return;
+  if (!canUseAllTime.value || !showAnalysisCard.value) return;
   fetchPastSummary().catch(() => { /* 握り潰し: トグルが出ないだけ */ });
 });
 
