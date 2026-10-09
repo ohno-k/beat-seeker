@@ -245,6 +245,43 @@ public class DataInitializer implements ApplicationRunner {
             ).executeUpdate();
         });
 
+        // 手順4.65: 配置アンケート（どっちが押しやすい？）の回答テーブル。
+        //          通常は ddl-auto=update が RandomPairVote から生成するが、ddl-auto=none の環境
+        //          （prod-db プロファイル等）でも手で SQL を流さずに済むよう CREATE TABLE IF NOT EXISTS を張る。
+        //          列定義は RandomPairVote の @Column と sql/add_random_pair_votes.sql と一致させること。
+        runStep("create random_pair_votes table", () -> {
+            entityManager.createNativeQuery(
+                    "CREATE TABLE IF NOT EXISTS random_pair_votes (" +
+                    "  id BIGSERIAL PRIMARY KEY," +
+                    "  user_id BIGINT NOT NULL REFERENCES users(id)," +
+                    "  textage VARCHAR(200) NOT NULL," +
+                    "  title VARCHAR(255) NOT NULL," +
+                    "  difficulty VARCHAR(10) NOT NULL," +
+                    "  level INTEGER," +
+                    "  side INTEGER NOT NULL," +
+                    "  pattern_left VARCHAR(7) NOT NULL," +
+                    "  pattern_right VARCHAR(7) NOT NULL," +
+                    "  start_time DOUBLE PRECISION NOT NULL," +
+                    "  end_time DOUBLE PRECISION NOT NULL," +
+                    "  start_measure INTEGER," +
+                    "  end_measure INTEGER," +
+                    "  choice VARCHAR(8) NOT NULL," +
+                    "  strategy VARCHAR(16)," +
+                    "  model_left DOUBLE PRECISION," +
+                    "  model_right DOUBLE PRECISION," +
+                    "  response_ms INTEGER," +
+                    "  repeat_of BIGINT," +
+                    "  created_at TIMESTAMP NOT NULL)"
+            ).executeUpdate();
+            // 確認問題（出し直し）の元の回答の ID。テーブルを先に作った環境向けに列だけ足す
+            entityManager.createNativeQuery(
+                    "ALTER TABLE random_pair_votes ADD COLUMN IF NOT EXISTS repeat_of BIGINT"
+            ).executeUpdate();
+            entityManager.createNativeQuery(
+                    "CREATE INDEX IF NOT EXISTS idx_random_pair_votes_user_id ON random_pair_votes (user_id)"
+            ).executeUpdate();
+        });
+
         // 手順4.8: score_history_logs.version のバックフィル。
         //          列は 2026-09-15（ZINRAI 世代切り替えの前日）に追加した。それ以前の行はすべて
         //          33 Sparkle Shower 期の記録なので、null の行を 33 で埋める（冪等。切替後に増える行は

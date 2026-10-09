@@ -40,7 +40,7 @@ import RankingList from './components/RankingList.vue';
 import AdminUserListModal from './components/AdminUserListModal.vue';
 import SongRankingList from './components/SongRankingList.vue';
 import Sidebar from './components/Sidebar.vue';
-import RankQuizModal from './components/RankQuizModal.vue';
+import RandomSurveyModal from './components/RandomSurveyModal.vue';
 import Terms from './components/Terms.vue';
 import About from './components/About.vue';
 import Manual from './components/Manual.vue';
@@ -369,7 +369,7 @@ onBeforeUnmount(() => {
 
 /** ログイン中ユーザーまたは閲覧対象ユーザーのスコアデータ（曲単位）。 */
 const scoreData = ref<ScoreData[]>([]);
-// 子孫コンポーネント（クイズモーダルなど）から inject で参照できるよう公開する。
+// 子孫コンポーネントから inject で参照できるよう公開する。
 provide('scoreData', scoreData);
 /** CSV 解析中フラグ。ローディング表示用。 */
 const isParsing = ref(false);
@@ -485,8 +485,8 @@ const isAdminModalOpen = ref(false);
 const isOnboardingOpen = ref(false);
 /** カメラ OCR 曲検索モーダルの開閉。サイドバーの「カメラで曲検索」ボタンから起動。 */
 const isOcrSearchModalOpen = ref(false);
-/** 非公式難易度クイズモーダルの開閉。サイドバーの Lv ウィジェットから起動。 */
-const isRankQuizOpen = ref(false);
+/** 配置アンケート（どっちが押しやすい？）モーダルの開閉。サイドバーから起動。 */
+const isRandomSurveyOpen = ref(false);
 
 /** 現在閲覧中のユーザー ID（自分閲覧時は null）。 */
 const viewingUserId = ref<number | null>(null);
@@ -1985,7 +1985,7 @@ const handleUnifiedClose = async () => {
       @open-admin="isAdminModalOpen = true"
       @upload="resetData"
       @open-ocr-search="isOcrSearchModalOpen = true"
-      @open-rank-quiz="isRankQuizOpen = true"
+      @open-random-survey="isRandomSurveyOpen = true"
       :can-access-competition="canAccessCompetition"
       @open-competition-admin="goCompetitionAdmin"
     />
@@ -1997,8 +1997,8 @@ const handleUnifiedClose = async () => {
       @matched="handleOcrMatched"
     />
 
-    <!-- 非公式難易度クイズモーダル: サイドバーの Lv ウィジェットから起動 -->
-    <RankQuizModal :open="isRankQuizOpen" @close="isRankQuizOpen = false" />
+    <!-- 配置アンケート（どっちが押しやすい？）: サイドバーから起動 -->
+    <RandomSurveyModal :open="isRandomSurveyOpen" @close="isRandomSurveyOpen = false" />
 
     <!-- ============================================================ -->
     <!-- グローバルモーダル群（アプリ全体から開閉される共有モーダル）        -->

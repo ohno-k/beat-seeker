@@ -1562,10 +1562,9 @@ export const en = {
   'dan.shodan': '1st Dan', 'dan.2dan': '2nd Dan', 'dan.3dan': '3rd Dan', 'dan.4dan': '4th Dan', 'dan.5dan': '5th Dan', 'dan.6dan': '6th Dan', 'dan.7dan': '7th Dan', 'dan.8dan': '8th Dan', 'dan.9dan': '9th Dan', 'dan.10dan': '10th Dan', 'dan.chuden': 'Chuden', 'dan.kaiden': 'Kaiden',
 
   // Rank Quiz (sidebar widget)
-  'rankQuiz.title': '★ Quiz',
-  'rankQuiz.tooltip': 'Mini-game: memorize song↔unofficial rank',
-  'rankQuiz.reviewBadge': '{n} to review',
-  'rankQuiz.startHint': '5 Qs / Lv UP',
+  'randomSurvey.title': 'Lane survey',
+  'randomSurvey.tooltip': 'Survey: which of two RANDOM layouts is easier to play',
+  'randomSurvey.hint': 'Which is easier?',
 
   // ===== Competition feature (Player URL / TL URL screens) =====
   'competition.common.tlBadge': 'TL',

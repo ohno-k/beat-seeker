@@ -82,6 +82,7 @@
 | [add_is_public_column.sql](sql/add_is_public_column.sql) | `scores` テーブルに `is_public` カラムを追加するマイグレーション |
 | [cleanup_duplicates.sql](sql/cleanup_duplicates.sql) | 重複ユーザ削除（実行済み想定） |
 | [find_invalid_scores.sql](sql/find_invalid_scores.sql) | 100%超スコア検出（`generate_invalid_check_sql.py` の出力） |
+| [add_random_pair_votes.sql](sql/add_random_pair_votes.sql) | 「どっちが押しやすい？」の回答テーブル `random_pair_votes` の定義（起動時に DataInitializer が自動で作るので、手で流す必要は無い） |
 
 その他の SQL（マイグレーション・データ修復・調査用）も `sql/` にまとめています。
 
@@ -99,6 +100,13 @@
 | [scripts/scrape-arena-top-rankers.js](scripts/scrape-arena-top-rankers.js) | 管理者用。eagate のアリーナクラス TOP RANKER ランキング（上位1000人）を取り込み、プレイデータ公開プレイヤーを `virtual_arena_rankers` / `virtual_arena_ranker_scores` に保存（登録済み IIDX ID はスキップ）。`EAGATE_COOKIE` と PG 接続情報が必要。BEAT/RATE-PT はバックエンド `VirtualArenaRankerService` が集計。**eagate のページ DOM は要 HTML サンプル確定**（`PARSE_*` に TODO 明記）。 |
 | [scripts/probe.js](scripts/probe.js) | データソースの存在確認（HTTPヘッダのみ取得）。 |
 | [scripts/scrape-top-rankers-test.js](scripts/scrape-top-rankers-test.js) | スクレイピングのテスト版 |
+
+当たり配置ランキング（譜面分析ページ）用:
+
+| スクリプト | 用途 |
+|------------|------|
+| [scripts/build-random-ranking.mts](scripts/build-random-ranking.mts) | 全譜面の RANDOM 5,040 通りを評価して `frontend/public/data/random-ranking/` を作る。評価のロジックや係数を変えたら作り直す。 |
+| [scripts/fit-random-weights.mts](scripts/fit-random-weights.mts) | 「どっちが押しやすい？」の回答とオプション投票から、減点の形ごとの係数を学習して `frontend/src/utils/randomWeights.ts` に書く（交差検証で良くなったときだけ）。手順は [docs/当たり配置の学習.md](docs/%E5%BD%93%E3%81%9F%E3%82%8A%E9%85%8D%E7%BD%AE%E3%81%AE%E5%AD%A6%E7%BF%92.md)。 |
 
 **典型実行フロー**:
 

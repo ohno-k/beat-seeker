@@ -7,8 +7,10 @@
  * RANDOM は鍵盤をレーンごと入れ替えるだけなので、同じ鍵盤の縦連打や総ノーツ数はどの並びでも変わらない。
  * 変わるのは「どの鍵盤がどちらの手に来るか」と「同じ手の中での位置関係」。
  *
- * 総合 = 減点の形ごとの該当ノーツ数を、難所の重み（{@link HARD_POWER}）をつけて足したもの。形ごとの係数は付けない。
+ * 総合 = 減点の形ごとの該当ノーツ数を、難所の重み（{@link HARD_POWER}）をつけて数え、形ごとの係数（{@link RANDOM_WEIGHTS}）を掛けて足したもの。
  * 2026-10-03 に重み付けをいったんやめ、2026-10-04 に難所の重み（周り ±1 秒の密度 ÷ 譜面内の最大 の 2 乗）だけ復活した（ユーザー判断）。
+ * 形ごとの係数は手で決めず、管理者の「どっちが押しやすい？」の回答とオプション投票から学習する（scripts/fit-random-weights.mts。
+ * 学習前は全部 1 = 係数無し）。
  * 速さ・トリルの長さによる補正や、譜面内の最良〜最悪への引き伸ばしはしない。
  * 1 つのノーツが複数の形に当たれば、形ごとに数える（トリルは「片手の速い移動」と「トリル」の両方に入る）。
  * 「両手にまたがる同時押し」は 2026-10-03 に廃止（「割れない」と意図が重なるため。重み無しで数えると両手で取る普通の和音まで
@@ -49,6 +51,7 @@
  */
 // 拡張子つき: scripts/build-random-ranking.mts（Node が .ts をそのまま読む）からも読み込めるように
 import { groupCharges, CN_RELEASE_PAD, type ChartTimeline } from './chartPlayback.ts';
+import { RANDOM_WEIGHTS } from './randomWeights.ts';
 
 /** 皿側の手が持つレーンの数（皿に近い側から）。1P = レーン 1〜3、2P = レーン 5〜7 */
 export const SCRATCH_HAND_LANES = 3;
@@ -145,7 +148,7 @@ export interface RandomCandidate {
   /** 左のレーンから元の鍵盤番号（例: "3726145"） */
   pattern: string;
   metrics: RandomMetrics;
-  /** 総合 = 減点の形の該当ノーツ数の合計（少ないほど押しやすい） */
+  /** 総合 = 減点の形の該当ノーツ数に形ごとの係数を掛けた合計（少ないほど押しやすい） */
   score: number;
   /** 5,040 通り中の順位（1 始まり。同点は同じ順位） */
   rank: number;
@@ -351,10 +354,8 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
   const prep = prepare(tl);
   const candidates: RandomCandidate[] = allPatterns().map(pattern => {
     const metrics = measure(prep, pattern, side);
-    let score = 0;
-    for (const k of PENALTY_KEYS) score += metrics[k];
     // 難所の重みで小数になるので、同点の判定がぶれないよう小数 3 桁にそろえる
-    return { pattern, metrics, score: Math.round(score * 1000) / 1000, rank: 0 };
+    return { pattern, metrics, score: Math.round(scoreOf(metrics) * 1000) / 1000, rank: 0 };
   });
   candidates.sort((a, b) => a.score - b.score || a.pattern.localeCompare(b.pattern));
   // 同点は同じ順位
@@ -362,6 +363,41 @@ export function evaluateRandom(tl: ChartTimeline, side: 1 | 2): RandomEvaluation
     c.rank = i > 0 && c.score === candidates[i - 1].score ? candidates[i - 1].rank : i + 1;
   });
   return { candidates, byPattern: new Map(candidates.map(c => [c.pattern, c])) };
+}
+
+/** 減点の形ごとの該当ノーツ数から総合を出す（形ごとの係数 {@link RANDOM_WEIGHTS} を掛けて足す。weights を渡せばそれを使う） */
+export function scoreOf(metrics: RandomMetrics, weights: Record<PenaltyKey, number> = RANDOM_WEIGHTS): number {
+  let score = 0;
+  for (const k of PENALTY_KEYS) score += weights[k] * metrics[k];
+  return score;
+}
+
+/** 減点の形ごとの該当ノーツ数が全部 0 のもの */
+export function emptyMetrics(): RandomMetrics {
+  return Object.fromEntries(PENALTY_KEYS.map(k => [k, 0])) as RandomMetrics;
+}
+
+/**
+ * 【関数の役割】 時間の区間ごとに、1 つの並びの減点の形ごとの該当ノーツ数を数える関数を作る（配置アンケート「どっちが押しやすい？」と学習用）。
+ * 譜面側の下ごしらえは 1 回だけして、並びを変えて何度でも呼べる。
+ * 数え方は {@link explainPattern} と同じで、減点を載せた打鍵の時刻で区間に振り分ける
+ * （CN 押しっぱなし中の皿のように、打鍵に載せない減点は入らない）。
+ *
+ * @returns (並び, 区間 [開始秒, 終了秒) の配列) → 区間ごとの該当ノーツ数
+ */
+export function makeWindowScorer(tl: ChartTimeline, side: 1 | 2): (pattern: string, windows: [number, number][]) => RandomMetrics[] {
+  const prep = prepare(tl);
+  return (pattern, windows) => {
+    const out = windows.map(() => emptyMetrics());
+    measure(prep, pattern, side, (k, key, amount) => {
+      if (!(amount > 0)) return;
+      const t = prep.events[k].time;
+      for (let i = 0; i < windows.length; i++) {
+        if (t >= windows[i][0] && t < windows[i][1]) out[i][key] += amount;
+      }
+    });
+    return out;
+  };
 }
 
 /** 1 つのノーツの減点（形ごとの量。難所の重みつき） */

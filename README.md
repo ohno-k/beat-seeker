@@ -49,6 +49,7 @@ npm run dev
 
 - [docs/完全設計書.md](docs/%E5%AE%8C%E5%85%A8%E8%A8%AD%E8%A8%88%E6%9B%B8.md) — 機能・構造・API仕様のワンドキュメント
 - [docs/textage譜面自動取り込み.md](docs/textage%E8%AD%9C%E9%9D%A2%E8%87%AA%E5%8B%95%E5%8F%96%E3%82%8A%E8%BE%BC%E3%81%BF.md) — textage からの譜面傾向プロファイルの自動取り込みと、既存プロファイルの保存方法の見直し
+- [docs/当たり配置の学習.md](docs/%E5%BD%93%E3%81%9F%E3%82%8A%E9%85%8D%E7%BD%AE%E3%81%AE%E5%AD%A6%E7%BF%92.md) — 当たり配置ランキングの係数を「どっちが押しやすい？」の回答とオプション投票から学習する手順
 - [docs/コスパ埋めレコメンド.md](docs/%E3%82%B3%E3%82%B9%E3%83%91%E5%9F%8B%E3%82%81%E3%83%AC%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%89.md) — ランクアップアドバイス（期待 BEAT-PT による埋め推薦）の算出式
 - [SCRIPTS.md](SCRIPTS.md) — プロジェクトルート直下のスクリプト説明
 - [backend/SCRIPTS.md](backend/SCRIPTS.md) — backend のビルド・テスト用バッチ説明

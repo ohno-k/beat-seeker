@@ -1595,10 +1595,9 @@ export const ja = {
   'dan.shodan': '初段', 'dan.2dan': '二段', 'dan.3dan': '三段', 'dan.4dan': '四段', 'dan.5dan': '五段', 'dan.6dan': '六段', 'dan.7dan': '七段', 'dan.8dan': '八段', 'dan.9dan': '九段', 'dan.10dan': '十段', 'dan.chuden': '中伝', 'dan.kaiden': '皆伝',
 
   // 非公式難易度クイズ（サイドバーウィジェット）
-  'rankQuiz.title': '★ クイズ',
-  'rankQuiz.tooltip': '曲名↔非公式難易度を覚えるミニゲーム',
-  'rankQuiz.reviewBadge': '復習 {n}件',
-  'rankQuiz.startHint': '5問で Lv UP',
+  'randomSurvey.title': '配置アンケート',
+  'randomSurvey.tooltip': 'RANDOM の 2 つの並びのどちらが押しやすいかを答えるアンケート',
+  'randomSurvey.hint': 'どっちが押しやすい？',
 
   // ===== Competition 機能 (Player URL / TL URL の画面) =====
   // 共通
