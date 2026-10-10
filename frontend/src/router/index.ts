@@ -35,6 +35,7 @@ const CompetitionSummaryView = () => import('../views/CompetitionSummaryView.vue
 const AdminUserComparisonView = () => import('../views/AdminUserComparisonView.vue')
 const PracticeMenuView = () => import('../views/PracticeMenuView.vue')
 const ObsIndividualStandingsView = () => import('../views/ObsIndividualStandingsView.vue')
+const ObsScoreOverlayView = () => import('../views/ObsScoreOverlayView.vue')
 const WrappedView = () => import('../views/WrappedView.vue')
 const LeagueView = () => import('../views/LeagueView.vue')
 const LoungeView = () => import('../views/LoungeView.vue')
@@ -120,6 +121,8 @@ const router = createRouter({
     { path: '/competition/summary/:competitionId', name: 'competition-summary', component: CompetitionSummaryView },
     // OBS ブラウザソース用の個人戦順位表 (公開トークン経由・認証不要・透過背景)。
     { path: '/obs/individual/:token', name: 'obs-individual-standings', component: ObsIndividualStandingsView },
+    // OBS ブラウザソース用の配信オーバーレイ (認証不要・透過背景)。キャプチャの映像は obs-websocket で取る。
+    { path: '/obs/score-overlay', name: 'obs-score-overlay', component: ObsScoreOverlayView },
     // 管理者用: 任意の 2 ユーザー間のスコア勝敗比較。
     // useAdmin.isAdmin で表示ガード + サーバ側 /api/admin/** で実権限チェック。
     { path: '/admin/user-comparison', name: 'admin-user-comparison', component: AdminUserComparisonView },

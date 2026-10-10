@@ -84,6 +84,8 @@ const StrategyCardView = defineAsyncComponent(() => import('./views/StrategyCard
 const SongRevealView = defineAsyncComponent(() => import('./views/SongRevealView.vue'));
 // 個人戦順位表 (OBS): `/obs/individual/:token` のスタンドアロン URL。透過背景で OBS のブラウザソースに重ねる。
 const ObsIndividualStandingsView = defineAsyncComponent(() => import('./views/ObsIndividualStandingsView.vue'));
+// 配信オーバーレイ (OBS): `/obs/score-overlay`。キャプチャボードの映像を読み、スコアグラフ横に単曲ティアの目盛りを出す。
+const ObsScoreOverlayView = defineAsyncComponent(() => import('./views/ObsScoreOverlayView.vue'));
 // 月末振り返り (Spotify Wrapped 風)。/wrapped/:year/:month 系のパスで全画面オーバーレイ表示する。
 const WrappedView = defineAsyncComponent(() => import('./views/WrappedView.vue'));
 // 大会管理画面: Competition セクションの 4 ID 限定。サイドバーから activeTab 経由で遷移する通常タブ。
@@ -186,6 +188,8 @@ const isSongRevealPage = ref(window.location.pathname === '/song-reveal');
  * トークンは ObsIndividualStandingsView 側で route から拾うのでここでは何も持たない。
  */
 const isObsIndividualStandingsPage = ref(window.location.pathname.startsWith('/obs/individual/'));
+/** 現在 URL が `/obs/score-overlay` かどうか。認証不要・透過背景の配信オーバーレイ。 */
+const isObsScoreOverlayPage = ref(window.location.pathname.startsWith('/obs/score-overlay'));
 
 /**
  * 現在 URL が `/competition/player/{token}` かどうかと、抽出した招待トークン。
@@ -1953,6 +1957,8 @@ const handleUnifiedClose = async () => {
   <SongRevealView v-else-if="isSongRevealPage" />
   <!-- OBS ブラウザソース用: 個人戦順位表。透過背景で重ねる前提のためサイドバー等は一切描画しない。 -->
   <ObsIndividualStandingsView v-else-if="isObsIndividualStandingsPage" />
+  <!-- OBS ブラウザソース用: 配信オーバーレイ（単曲ティアの目盛り）。透過背景。 -->
+  <ObsScoreOverlayView v-else-if="isObsScoreOverlayPage" />
   <!-- 大会参加者用招待ページ: token を抽出して View に渡す。ログイン不要のスタンドアロン。 -->
   <CompetitionPlayerView v-else-if="isCompetitionPlayerPage" :token="competitionPlayerToken" />
   <!-- 大会 TL 管理ページ: token を抽出してラインアップ管理 View を表示。ログイン不要のスタンドアロン。 -->
