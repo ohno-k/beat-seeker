@@ -40,6 +40,7 @@ import {
   type RgbaFrame,
 } from '../utils/iidxPlayScreen';
 import { matchChartByOcr } from '../utils/overlaySongMatch';
+import { startResultTimer, stepResultTimer, type ResultTimerState } from '../utils/overlayResultTimer';
 import { ObsWebSocketClient } from '../utils/obsWebSocket';
 
 const params = new URLSearchParams(window.location.search);
@@ -67,10 +68,6 @@ const TITLE_CHANGE_THRESHOLD = 12;
 const MAX_EX_STEP = 80;
 /** 画面全体の平均輝度がこれ未満なら暗転とみなす。 */
 const DARK_LUMA = 22;
-/** リザルト表示を出してから、次の暗転で消すまでの最短時間（出した直後の暗転で消さないため）。 */
-const RESULT_MIN_MS = 3000;
-/** リザルト表示を自動で消すまでの最長時間。 */
-const RESULT_MAX_MS = 90000;
 const DIFF_CODE: Record<DifficultyName, string> = {
   BEGINNER: '1', NORMAL: '2', HYPER: '3', ANOTHER: '4', LEGGENDARIA: '10',
 };
@@ -241,6 +238,12 @@ interface ResultCard {
 }
 
 const resultCard = ref<ResultCard | null>(null);
+/** 表示中のリザルトを消すタイミングの判定状態。 */
+let resultTimer: ResultTimerState | null = null;
+/** リザルト表示中に、プレー画面と判定されたフレームが続いた数。 */
+let playStreak = 0;
+/** リザルト表示中、プレー画面がこのフレーム数続いたら表示を消して次の曲に移る。 */
+const PLAY_STREAK_TO_HIDE_RESULT = 3;
 /** 自己ベストの読み込みエラー（status と違い、読み取りのたびに消さない）。 */
 const bestError = ref('');
 /** ログインユーザーの自己ベスト（曲名|難易度 → EX）。この配信中に更新したらここも上げる。 */
@@ -274,7 +277,9 @@ async function loadBestScores(): Promise<boolean> {
 function showResult(p: { chart: IdentifiedChart; ex: number }): void {
   const key = bestKey(p.chart);
   const best = testBestOverride ?? bestScores.get(key) ?? 0;
-  resultCard.value = { chart: p.chart, ex: p.ex, best, shownAt: performance.now() };
+  const now = performance.now();
+  resultCard.value = { chart: p.chart, ex: p.ex, best, shownAt: now };
+  resultTimer = startResultTimer(now);
   // 同じ配信の中で同じ曲をもう一度やったとき、今回のスコアを「前回ベスト」として比べる
   if (p.ex > (bestScores.get(key) ?? 0)) bestScores.set(key, p.ex);
 }
@@ -328,10 +333,11 @@ const resultView = computed(() => {
  *
  *  - プレー直後: 暗転（平均輝度が {@link DARK_LUMA} 未満）を見たら表示する。暗転が映らない環境もあるので、
  *    プレー画面が {@link LOST_PLAY_MS} 消えたままでも表示する（プレーのあとは必ずリザルトが来る）。
- *  - 表示中: {@link RESULT_MIN_MS} 以上たってから次の暗転（選曲画面へ戻る切り替わり）で消す。
- *    {@link RESULT_MAX_MS} を過ぎても消す。次のプレー画面が出たら即座に消す（processFrame 側）。
+ *  - 表示中: リザルト画面（明るい画面）が十分映ったあとの次の暗転（選曲画面へ戻る切り替わり）で消す。
+ *    判定は utils/overlayResultTimer.ts。次のプレー画面が出たら即座に消す（processFrame 側）。
  */
 function handleNonPlayFrame(frame: RgbaFrame, now: number): void {
+  playStreak = 0;
   const dark = frameMeanLuma(frame) < DARK_LUMA;
   if (pendingResult && (dark || now - lastPlaySeenAt > LOST_PLAY_MS)) {
     showResult(pendingResult);
@@ -342,10 +348,9 @@ function handleNonPlayFrame(frame: RgbaFrame, now: number): void {
     resetPlay();
     return;
   }
-  const r = resultCard.value;
-  if (r) {
-    const age = now - r.shownAt;
-    if ((dark && age > RESULT_MIN_MS) || age > RESULT_MAX_MS) resultCard.value = null;
+  if (resultCard.value && resultTimer && stepResultTimer(resultTimer, now, dark)) {
+    resultCard.value = null;
+    resultTimer = null;
   }
 }
 
@@ -364,9 +369,17 @@ function processFrame(frame: RgbaFrame): void {
     handleNonPlayFrame(frame, now);
     return;
   }
-  // プレー画面に戻った（誤検知の一瞬の途切れ、または次の曲）。リザルトの候補と表示は捨てる
+  // リザルト表示中は、プレー画面が数フレーム続いたときだけ「次の曲が始まった」とみなす。
+  // リザルト画面の 1 フレームの誤判定で表示が消えないようにするため。
+  if (resultCard.value) {
+    playStreak++;
+    if (playStreak < PLAY_STREAK_TO_HIDE_RESULT) return;
+    resultCard.value = null;
+    resultTimer = null;
+  }
+  playStreak = 0;
+  // プレー画面に戻った（誤検知の一瞬の途切れ、または次の曲）。リザルトの候補は捨てる
   pendingResult = null;
-  if (resultCard.value) resultCard.value = null;
   lastPlaySeenAt = now;
   if (layout.value?.id !== det.layout.id) {
     layout.value = det.layout;
