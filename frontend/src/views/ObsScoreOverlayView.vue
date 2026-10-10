@@ -32,6 +32,7 @@ import {
   detectPlayLayout,
   fingerprintDistance,
   frameMeanLuma,
+  isPlayScoreAreaVisible,
   readChartHeader,
   readCurrentExScore,
   titleFingerprint,
@@ -414,7 +415,13 @@ function handleNonPlayFrame(frame: RgbaFrame, now: number): void {
 
 function processFrame(frame: RgbaFrame): void {
   const now = performance.now();
-  const det = detectPlayLayout(frame);
+  let det = detectPlayLayout(frame);
+  // 目盛り線が一時的に見えなくても（棒グラフや背景の絵で判定が外れる）、同じ配置で
+  // YOU とペースメーカーの数字が読めている間はプレーが続いているとみなす。
+  // これが無いと、プレー中に線の判定が 1.5 秒途切れただけでリザルトが出てしまう。
+  if (!det && layout.value && isPlayScoreAreaVisible(frame, layout.value)) {
+    det = { layout: layout.value, confidence: 0 };
+  }
   if (!det) {
     // プレー画面が消えた最初のフレームで、最終スコアを確定前のリザルトとして控える
     if (layout.value && !pendingResult && chart.value && exScore.value !== null) {
@@ -1010,13 +1017,27 @@ onBeforeUnmount(() => {
   top: 55px;
   height: 28px;
 }
+.ov-row {
+  gap: 8px;
+}
 .ov-row-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #f1f1f1;
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+/* NEXT 行は「NEXT INTERMEDIATE」のように長くなるので小さめにし、数字の方を必ず残す（2026-10-11 「-140」が「-14」に切れていた） */
+.ov-row-next .ov-row-label {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.ov-digits {
+  flex: none;
 }
 .ov-digits {
   color: #f4f4f4;

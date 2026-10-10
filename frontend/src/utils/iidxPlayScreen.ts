@@ -111,47 +111,47 @@ function luma(r: number, g: number, b: number): number {
 }
 
 /**
- * 目盛り線の色。スコアが届く前は青みの明るい線、届いたあとは黄色の線になる
- * （実測: 黄色 = (226,234,61)）。
+ * 画素の「目盛り線らしさ」。目盛り線はスコアが届く前は青紫 (137,130,212)、届いたあとは黄色 (226,234,61)。青い線（届く前）は青が赤・緑より強いほど、黄色い線（届いたあと）は
+ * 赤・緑が青より強いほど大きい。灰色や白は 0 付近になる。
  */
-function isGradeLineColor(r: number, g: number, b: number): boolean {
-  const blue = b >= 150 && b > r + 10 && b >= g;
-  const yellow = r >= 170 && g >= 170 && b <= 130 && Math.abs(r - g) < 50;
-  return blue || yellow;
+function lineColorScore(r: number, g: number, b: number): number {
+  return Math.max(b - Math.max(r, g), (Math.min(r, g) - b) * 0.5);
 }
 
-/** 1 行（y）のうち、x0..x1 で線の色の画素の割合。 */
-function rowLineRatio(frame: RgbaFrame, x0: number, x1: number, y: number): number {
+/** 列が線と認められるのに必要な、線の行と上下の行の「線らしさ」の差。 */
+const LINE_COLUMN_CONTRAST = 15;
+
+/**
+ * 【関数の役割】 基準座標 y に目盛り線があるかを、x0..x1 のうち「線の行が上下の行より線らしい」列の割合で返す。
+ *
+ * 列ごとに、線の行（y±2）の線らしさの最大と、上下の行（y±5〜7）の線らしさの最大を比べ、
+ * 差が {@link LINE_COLUMN_CONTRAST} 以上の列を数える。色の絶対値ではなく上下との差で見る理由:
+ *  - 720p などに縮むと 2px の線が 2 行にまたがって半分の濃さになり、絶対値の基準を下回る（2026-10-11）。
+ *  - 一面の青い BGA は上下の行も同じだけ青いので差が出ない（線と取り違えない）。
+ *  - 背景の絵に青が混じっていても、線の行だけが周りより青ければ数えられる。
+ *  - 青い YOU の棒は上下も同じ色なので数えられない（棒が隠す分だけ割合が下がる）。
+ */
+function lineRatio(frame: RgbaFrame, x0: number, x1: number, baseY: number): number {
   const { sx, sy } = scaleOf(frame);
+  const score = (x: number, y: number) => {
+    const [r, g, b] = px(frame, x * sx, y * sy);
+    return lineColorScore(r, g, b);
+  };
   let hit = 0;
   let n = 0;
   for (let x = x0 + 6; x <= x1 - 6; x += 3) {
     n++;
-    const [r, g, b] = px(frame, x * sx, y * sy);
-    if (isGradeLineColor(r, g, b)) hit++;
+    let line = -Infinity;
+    for (let dy = -2; dy <= 2; dy++) line = Math.max(line, score(x, baseY + dy));
+    let around = -Infinity;
+    for (const dy of [-7, -6, -5, 5, 6, 7]) around = Math.max(around, score(x, baseY + dy));
+    if (line - around >= LINE_COLUMN_CONTRAST) hit++;
   }
   return n ? hit / n : 0;
 }
 
-/**
- * 【関数の役割】 基準座標 y に目盛り線があるかを、「線の行が上下の行よりどれだけ線の色が多いか」で返す。
- *
- * 線の行 = y±2 の各行の割合の最大、上下 = y±5〜7 の各行の割合の最大。返り値はその差。
- *  - 一面の青い BGA は上下の行も同じだけ青いので差は 0 に近い（線と取り違えない）。
- *  - 背景の絵に青が混じっていても、線の行だけが突出していれば差は大きい。
- *  - 青い YOU の棒は線の行と上下の行で同じだけ数えられるので、差を少し下げるだけ。
- * 線は細く、上下 5px 以上離れれば線の色ではない（実測 2px 幅 + 影 1px）。
- */
-function lineRatio(frame: RgbaFrame, x0: number, x1: number, baseY: number): number {
-  let line = 0;
-  for (let dy = -2; dy <= 2; dy++) line = Math.max(line, rowLineRatio(frame, x0, x1, baseY + dy));
-  let around = 0;
-  for (const dy of [-7, -6, -5, 5, 6, 7]) around = Math.max(around, rowLineRatio(frame, x0, x1, baseY + dy));
-  return line - around;
-}
-
-/** 3 本の線それぞれで、線の行と上下の行の差がこれ以上ならプレー画面とみなす。 */
-const MIN_LINE_RATIO = 0.2;
+/** 3 本の線それぞれで、線と認められる列の割合がこれ以上ならプレー画面とみなす。 */
+const MIN_LINE_RATIO = 0.25;
 
 /** 【診断用】 配置ごとの AAA/AA/A の検出率。テストモードの表示と調査に使う。 */
 export function gradeLineRatios(frame: RgbaFrame, layout: PlayLayout): number[] {
@@ -183,8 +183,16 @@ export function detectPlayLayout(frame: RgbaFrame): { layout: PlayLayout; confid
 const SCORE_CELL_OFFSET_X = 241;
 const SCORE_CELL_PITCH = 40;
 const SCORE_CELL_Y = 51;
-/** 先頭のゼロは灰色（輝度 100〜160）で描かれるので、それより低いしきい値にする。 */
-const DIGIT_INK_LUMA = 90;
+/**
+ * インクとみなす輝度の下限。実際のしきい値は桁ごとに {@link digitInkLuma} で決める
+ * （先頭のゼロは灰色で輝度 100〜160、ほかの数字は白で 230 前後）。
+ */
+const DIGIT_INK_LUMA_MIN = 50;
+/**
+ * 桁の最も明るい画素に対する、インクとみなす輝度の比率。0.5 だと 720p でにじんだ画の端を取りこぼし
+ * （9 の中央の横棒の塗りが 0.33 になる）、低すぎると隣の画のにじみを拾う。
+ */
+const DIGIT_INK_FACTOR = 0.35;
 
 /**
  * 7 つの画の判定矩形（桁の枠内の相対座標 [x0, y0, x1, y1]、両端含む）。
@@ -230,7 +238,9 @@ const DIGIT_PATTERNS: Record<string, number> = {
   '1111011': 9,
 };
 
-function segmentLit(frame: RgbaFrame, cellX: number, cellY: number, seg: (typeof SEGMENT_ORDER)[number]): boolean {
+function segmentLit(
+  frame: RgbaFrame, cellX: number, cellY: number, seg: (typeof SEGMENT_ORDER)[number], inkLuma: number,
+): boolean {
   const { sx, sy } = scaleOf(frame);
   const [x0, y0, x1, y1] = SEGMENT_RECTS[seg];
   let ink = 0;
@@ -239,30 +249,119 @@ function segmentLit(frame: RgbaFrame, cellX: number, cellY: number, seg: (typeof
     for (let x = x0; x <= x1; x++) {
       const [r, g, b] = px(frame, (cellX + x) * sx, (cellY + y) * sy);
       n++;
-      if (luma(r, g, b) > DIGIT_INK_LUMA) ink++;
+      if (luma(r, g, b) > inkLuma) ink++;
     }
   }
-  return ink / n >= SEGMENT_FILL_RATIO;
+  return ink / n >= (seg === 'g' ? SEGMENT_FILL_RATIO_G : SEGMENT_FILL_RATIO);
+}
+
+/**
+ * 中央の横棒（g）だけのしきい値。5・6 の横棒は 3 行しかなく、720p に粗く縮むと 6 行の判定矩形のうち
+ * 2 行分（0.33）しか残らない。g が消えている数字（0・7）はこの矩形が空なので、下げても取り違えない。
+ */
+const SEGMENT_FILL_RATIO_G = 0.3;
+
+/**
+ * 【関数の役割】 桁ごとの「インクとみなす輝度」を決める。桁の枠内の最も明るい画素の半分（下限 {@link DIGIT_INK_LUMA_MIN}）。
+ *
+ * 固定のしきい値だと、720p などに縮んでにじんだ先頭の灰色のゼロ（元の輝度 100〜160）が
+ * しきい値を下回って読めなかった（2026-10-11、録画を 720p にすると 233 フレーム中 58 フレームで EX が読めない）。
+ * 白い数字の桁は高め、灰色のゼロの桁は低めのしきい値になる。何も描かれていない枠は背景の暗さ（輝度 20〜40）の
+ * 半分にしかならないので、下限で切って「インク無し」にする。
+ */
+function digitInkLuma(frame: RgbaFrame, cellX: number, cellY: number): number {
+  const { sx, sy } = scaleOf(frame);
+  let max = 0;
+  for (let y = 0; y < 22; y += 1) {
+    for (let x = 0; x < 34; x += 1) {
+      const [r, g, b] = px(frame, (cellX + x) * sx, (cellY + y) * sy);
+      max = Math.max(max, luma(r, g, b));
+    }
+  }
+  return Math.max(DIGIT_INK_LUMA_MIN, max * DIGIT_INK_FACTOR);
+}
+
+/** 【診断用】 1 桁の判定の中身（インクのしきい値と、a〜g の各画の塗りの割合）。 */
+export function debugDigitCell(frame: RgbaFrame, cellX: number, cellY: number): { inkLuma: number; fills: Record<string, number> } {
+  const { sx, sy } = scaleOf(frame);
+  const inkLuma = digitInkLuma(frame, cellX, cellY);
+  const fills: Record<string, number> = {};
+  for (const seg of SEGMENT_ORDER) {
+    const [x0, y0, x1, y1] = SEGMENT_RECTS[seg];
+    let ink = 0;
+    let n = 0;
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        const [r, g, b] = px(frame, (cellX + x) * sx, (cellY + y) * sy);
+        n++;
+        if (luma(r, g, b) > inkLuma) ink++;
+      }
+    }
+    fills[seg] = +(ink / n).toFixed(2);
+  }
+  return { inkLuma: Math.round(inkLuma), fills };
 }
 
 /** 1 桁を読む。パターンが一致しなければ null。 */
 export function readDigitAt(frame: RgbaFrame, cellX: number, cellY: number): number | null {
-  const bits = SEGMENT_ORDER.map(s => (segmentLit(frame, cellX, cellY, s) ? '1' : '0')).join('');
+  const inkLuma = digitInkLuma(frame, cellX, cellY);
+  const bits = SEGMENT_ORDER.map(s => (segmentLit(frame, cellX, cellY, s, inkLuma) ? '1' : '0')).join('');
   const d = DIGIT_PATTERNS[bits];
   return d === undefined ? null : d;
+}
+
+/** GRAPH INFORMATION 欄の 2 行目（自己ベスト・ライバル・前作ゴースト等のペースメーカー）の数字の y。 */
+const PACEMAKER_CELL_Y = 112;
+
+function readScoreRow(frame: RgbaFrame, layout: PlayLayout, cellY: number): number | null {
+  let value = 0;
+  for (let i = 0; i < 4; i++) {
+    const d = readDigitAt(frame, layout.graphX0 + SCORE_CELL_OFFSET_X + SCORE_CELL_PITCH * i, cellY);
+    if (d === null) return null;
+    value = value * 10 + d;
+  }
+  return value;
 }
 
 /**
  * 【関数の役割】 YOU の EX スコア（4 桁）を読む。1 桁でも読めなければ null。
  */
 export function readCurrentExScore(frame: RgbaFrame, layout: PlayLayout): number | null {
-  let value = 0;
-  for (let i = 0; i < 4; i++) {
-    const d = readDigitAt(frame, layout.graphX0 + SCORE_CELL_OFFSET_X + SCORE_CELL_PITCH * i, SCORE_CELL_Y);
-    if (d === null) return null;
-    value = value * 10 + d;
+  return readScoreRow(frame, layout, SCORE_CELL_Y);
+}
+
+/**
+ * 【関数の役割】 目盛り線が見えないフレームでも、このグラフ配置のプレー画面が続いているかを数字で確かめる。
+ *
+ * YOU の行と、その下のペースメーカーの行の 2 行とも 4 桁が読めればプレー中とみなす。
+ * この 2 行はプレー画面にしか無く、リザルト画面や選曲画面で偶然 8 桁とも数字として読める見込みは低い。
+ * 棒グラフや背景の絵で目盛り線の判定が一時的に外れたときに、プレー終了と誤判定しないために使う。
+ */
+export function isPlayScoreAreaVisible(frame: RgbaFrame, layout: PlayLayout): boolean {
+  return (
+    hasGraphInfoHeader(frame, layout) &&
+    readScoreRow(frame, layout, SCORE_CELL_Y) !== null &&
+    readScoreRow(frame, layout, PACEMAKER_CELL_Y) !== null
+  );
+}
+
+/**
+ * 【関数の役割】 グラフ欄の上端のオレンジの見出し（GRAPH INFORMATION、実測 (241,129,0)）が見えるか。
+ * リザルト画面のライバル欄にも 4 桁の数字が並ぶ位置があるので（2P 近めの位置）、数字だけでは区別できない。
+ */
+function hasGraphInfoHeader(frame: RgbaFrame, layout: PlayLayout): boolean {
+  const { sx, sy } = scaleOf(frame);
+  let hit = 0;
+  let n = 0;
+  for (const y of [4, 16]) {
+    for (let x = layout.graphX0 + 6; x <= layout.graphX1 - 6; x += 4) {
+      const [r, g, b] = px(frame, x * sx, y * sy);
+      n++;
+      if (r >= 200 && g >= 90 && g <= 175 && b <= 70) hit++;
+    }
   }
-  return value;
+  // 中央の「GRAPH INFORMATION」の文字の分は欠けるので 6 割で判定
+  return n > 0 && hit / n >= 0.6;
 }
 
 // ---------------------------------------------------------------------------
