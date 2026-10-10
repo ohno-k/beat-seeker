@@ -373,6 +373,9 @@ export interface Rect { x: number; y: number; w: number; h: number }
 
 const BADGE_1P: Rect = { x: 165, y: 115, w: 175, h: 18 };
 const BADGE_2P: Rect = { x: 620, y: 115, w: 175, h: 18 };
+/** 難易度札の下の「Lv.12」。1P は札の下（パネル左寄り）、2P は右寄り。 */
+const LEVEL_1P: Rect = { x: 190, y: 136, w: 130, h: 28 };
+const LEVEL_2P: Rect = { x: 650, y: 136, w: 130, h: 28 };
 /** 曲名とアーティストの行。左右はパネル内側の斜めの枠線（x≒105〜140 と 820〜860）を避けている。 */
 const TITLE_RECT: Rect = { x: 145, y: 37, w: 673, h: 33 };
 const ARTIST_RECT: Rect = { x: 145, y: 71, w: 673, h: 24 };
@@ -423,6 +426,8 @@ export interface ChartHeader {
   badgeSide: PlaySide | null;
   titleRect: Rect;
   artistRect: Rect;
+  /** 「Lv.12」の矩形（札の点いている側）。札が読めなければ null。 */
+  levelRect: Rect | null;
 }
 
 /** 【関数の役割】 曲名パネルから難易度と、OCR に回す曲名・アーティストの矩形を取る。 */
@@ -436,6 +441,7 @@ export function readChartHeader(frame: RgbaFrame, layout: PlayLayout): ChartHead
     badgeSide,
     titleRect: toFrame(TITLE_RECT),
     artistRect: toFrame(ARTIST_RECT),
+    levelRect: badgeSide === '1P' ? toFrame(LEVEL_1P) : badgeSide === '2P' ? toFrame(LEVEL_2P) : null,
   };
 }
 
@@ -552,6 +558,18 @@ export function frameMeanLuma(frame: RgbaFrame): number {
     }
   }
   return n ? sum / n : 0;
+}
+
+/**
+ * 【関数の役割】 「Lv.12」の OCR 結果からレベルを取り出す。このフォントの 1 は「I」に見えるので 1 として扱う。
+ * 1〜12 に収まらなければ null。
+ */
+export function parseLevelText(text: string): number | null {
+  const t = text.replace(/[Iil|!]/g, '1').replace(/[Oo]/g, '0').replace(/\s/g, '');
+  const m = t.match(/[vV]\.?(\d{1,2})/) ?? t.match(/(\d{1,2})$/);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return n >= 1 && n <= 12 ? n : null;
 }
 
 // ---------------------------------------------------------------------------

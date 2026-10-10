@@ -46,6 +46,8 @@ export interface OcrMatch<T> {
 const MIN_SCORE = 0.55;
 const MIN_MARGIN = 0.08;
 const CONFIDENT_SCORE = 0.85;
+/** アーティスト名の一致度がこれ以上の譜面があれば、候補をそのアーティストに絞る。 */
+const ARTIST_GATE = 0.85;
 
 /**
  * 【関数の役割】 OCR の曲名・アーティストに最も近い譜面を返す。確信が持てなければ null。
@@ -55,13 +57,23 @@ const CONFIDENT_SCORE = 0.85;
  * {@link CONFIDENT_SCORE} にも届かない場合は、取り違えを避けて null を返す。
  */
 export function matchChartByOcr<T extends { title: string; artist: string }>(
-  charts: readonly T[],
+  charts: readonly T[] | T[],
   ocrTitle: string,
   ocrArtist: string,
 ): { best: OcrMatch<T> | null; ranked: OcrMatch<T>[] } {
   const qt = fold(ocrTitle);
   const qa = fold(ocrArtist);
   if (!qt) return { best: null, ranked: [] };
+  // アーティスト名がはっきり読めた（ある譜面とほぼ一致する）ときは、そのアーティストの譜面に絞る。
+  // 一文字の曲名（禊）を英語の読み取りが「I」と読み、別の曲「I」と完全一致してしまうのを防ぐ（2026-10-11）。
+  if (qa.length >= 3) {
+    const sims = charts.map(ch => diceSimilarity(qa, fold(ch.artist)));
+    const top = Math.max(0, ...sims);
+    if (top >= ARTIST_GATE) {
+      const gated = charts.filter((_, i) => sims[i] >= top - 0.1);
+      if (gated.length > 0) charts = gated;
+    }
+  }
   const ranked = charts
     .map(chart => {
       const ts = diceSimilarity(qt, fold(chart.title));

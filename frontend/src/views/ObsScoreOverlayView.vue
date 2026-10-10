@@ -40,6 +40,7 @@ import {
   fingerprintDistance,
   frameMeanLuma,
   isPlayScoreAreaVisible,
+  parseLevelText,
   readChartHeader,
   readCurrentExScore,
   titleFingerprint,
@@ -186,16 +187,30 @@ async function identifyChart(frame: RgbaFrame, l: PlayLayout): Promise<void> {
   const artists = [await read(ocrEng!, artistCanvas), await read(ocrJpn!, artistCanvas)];
 
   const code = DIFF_CODE[header.difficulty];
-  const pool = (songData.value as SongDataEntry[]).filter(s => s.difficulty === code && s.notes > 0);
-  // 英語・日本語の読みの組合せのうち、照合スコアが最も高いものを採る
-  let result = matchChartByOcr(pool, titles[0], artists[0]);
-  for (const t of titles) {
-    for (const a of artists) {
-      const r = matchChartByOcr(pool, t, a);
-      if ((r.ranked[0]?.score ?? 0) > (result.ranked[0]?.score ?? 0)) result = r;
-    }
+  // 「Lv.12」も読み、読めたらそのレベルの譜面に絞る（曲名の読み違いで別レベルの曲と取り違えないため）
+  let level: number | null = null;
+  if (header.levelRect) {
+    level = parseLevelText(await read(ocrEng!, frameToCanvas(binarizeForOcr(frame, header.levelRect))));
   }
-  ocrDebug.value = `OCR: ${titles.join(' / ')} | ${artists.join(' / ')} → ${result.ranked
+  const allPool = (songData.value as SongDataEntry[]).filter(s => s.difficulty === code && s.notes > 0);
+  const byLevel = level !== null ? allPool.filter(s => Number(s.level) === level) : [];
+  // 英語・日本語の読みの組合せのうち、照合スコアが最も高いものを採る
+  const bestOf = (pool: SongDataEntry[]) => {
+    let res = matchChartByOcr(pool, titles[0], artists[0]);
+    for (const t of titles) {
+      for (const a of artists) {
+        const r = matchChartByOcr(pool, t, a);
+        // 確定できた結果を優先し、その中で点数の高いもの
+        const better = (r.best && !res.best) || (!!r.best === !!res.best && (r.ranked[0]?.score ?? 0) > (res.ranked[0]?.score ?? 0));
+        if (better) res = r;
+      }
+    }
+    return res;
+  };
+  // レベルで絞った候補で決まらなければ、レベルの読み違いを疑って全レベルでやり直す
+  let result = bestOf(byLevel.length > 0 ? byLevel : allPool);
+  if (!result.best && byLevel.length > 0) result = bestOf(allPool);
+  ocrDebug.value = `OCR: Lv${level ?? '?'} ${titles.join(' / ')} | ${artists.join(' / ')} → ${result.ranked
     .slice(0, 3)
     .map(r => `${r.chart.title}(${r.score.toFixed(2)})`)
     .join(', ')}`;
@@ -390,8 +405,7 @@ const resultView = computed(() => {
   for (const t of rateTarget ? SCORE_RATE_THRESHOLDS : []) {
     const need = Math.ceil((c.maxEx * t.rate) / 100 - 1e-9);
     if (ex < need) {
-      const loss = c.maxEx - need;
-      rateNext = { label: `${t.points}PT`, right: loss === 0 ? 'MAX' : `MAX-${loss}`, gap: need - ex };
+      rateNext = { label: `${t.points}PT`, right: `EX ${need}`, gap: need - ex };
       break;
     }
   }
@@ -692,14 +706,14 @@ function buildTierDefs(c: IdentifiedChart): LadderDef[] | null {
 /**
  * 【関数の役割】 Rate-PT の目盛り（Lv10 以下など、単曲ティアの無い譜面用）。
  *
- * Rate-PT の区切り（AA=1PT, AAA=2PT, 以降 MAX までの残りが半分になるごとに倍）を上から並べ、
- * 右の数字は「MAX からの減点」で出す（例: 4PT = MAX-146）。
+ * Rate-PT の区切り 512PT（= MAX）を一番上に、256 / 128 / … / 1PT（= AA）と 2 のべき乗で等間隔に並べる。
+ * 右の数字は単曲ティアの目盛りと同じく、その区切りに必要な EX。棒は加点方式で 0 点から伸びる
+ * （「MAX からの減点」で出す案は、プレー中の失点をリアルタイムに読めないので見送った。2026-10-11）。
  */
 function buildRateDefs(c: IdentifiedChart): LadderDef[] {
   return [...SCORE_RATE_THRESHOLDS].reverse().map(t => {
     const requiredEx = Math.ceil((c.maxEx * t.rate) / 100 - 1e-9);
-    const loss = c.maxEx - requiredEx;
-    return { key: `${t.points}PT`, label: `${t.points}PT`, requiredEx, right: loss === 0 ? 'MAX' : `MAX-${loss}` };
+    return { key: `${t.points}PT`, label: `${t.points}PT`, requiredEx, right: String(requiredEx) };
   });
 }
 
@@ -1061,7 +1075,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="ov-row ov-row-next">
             <span class="ov-row-label">{{
-              !nextLine ? 'ALL CLEAR' : ladderKind === 'rate' ? `NEXT ${nextLine.right}` : `NEXT ${nextLine.label}`
+              !nextLine ? 'ALL CLEAR' : `NEXT ${nextLine.label}`
             }}</span>
             <span v-if="nextRemaining !== null" class="ov-digits ov-digits-next">-{{ nextRemaining }}</span>
           </div>
