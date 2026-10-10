@@ -38,7 +38,8 @@ import { ObsWebSocketClient } from '../utils/obsWebSocket';
 
 const params = new URLSearchParams(window.location.search);
 const testMode = params.get('test') === '1';
-const debug = testMode || params.get('debug') === '1';
+// 読み取り状況（配置・曲・EX・OCR）の左上表示は debug=1 のときだけ。テストモードでも既定では出さない。
+const debug = params.get('debug') === '1';
 const sourceName = params.get('source') ?? '';
 const password = params.get('password') ?? '';
 const obsUrl = `ws://${params.get('host') || '127.0.0.1'}:${params.get('port') || '4455'}`;
