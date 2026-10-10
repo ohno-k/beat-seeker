@@ -10,8 +10,8 @@
 
 /** リザルト画面がこれだけ映るまでは、暗転しても消さない。 */
 export const RESULT_MIN_BRIGHT_MS = 3000;
-/** どんな場合でもこれを過ぎたら消す。 */
-export const RESULT_MAX_MS = 120000;
+/** どんな場合でもこれを過ぎたら消す（2026-10-11 ユーザー指定で 20 秒）。 */
+export const RESULT_MAX_MS = 20000;
 
 export interface ResultTimerState {
   shownAt: number;

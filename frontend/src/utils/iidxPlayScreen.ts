@@ -51,22 +51,35 @@ const BASE_H = 1080;
 /** 曲名パネルの幅。2P の位置を左右反転で求めるのに使う。 */
 const TITLE_PANEL_W = 963;
 
-const LAYOUTS_1P: PlayLayout[] = [
-  {
-    id: '1P-far', side: '1P', placement: 'far',
-    graphX0: 1507, graphX1: 1914,
-    aaaY: 402.5, aaY: 462.5, aY: 521.5,
-    zeroY: 878.7, fullY: 343.2,
-    titlePanelX0: 545,
-  },
-  {
-    id: '1P-near', side: '1P', placement: 'near',
-    graphX0: 544, graphX1: 951,
-    aaaY: 256.5, aaY: 333.5, aY: 409.5,
-    zeroY: 868.7, fullY: 180.2,
-    titlePanelX0: 957,
-  },
-];
+/**
+ * グラフの横の位置（1P 基準）。遠め = 画面右端、近め = レーンのすぐ右。
+ * 曲名パネルの位置もこれで決まる。
+ */
+const GRAPH_X_1P = {
+  far: { graphX0: 1507, graphX1: 1914, titlePanelX0: 545 },
+  near: { graphX0: 544, graphX1: 951, titlePanelX0: 957 },
+} as const;
+
+/**
+ * グラフの縦の位置。横の位置とは独立で、グラフの上に何が載るかで変わる。
+ *  - tall  … ペースメーカーが自己ベスト・前作ゴースト等。グラフが「MAX SCORE」の札のすぐ下から始まる
+ *  - short … ライバルと対戦するとき。グラフの上に VS の対戦欄が入り、グラフが下に縮む
+ * （2026-10-11 に、遠めの配置でも tall になる画面を確認。当初は遠め = short と誤って結び付けていた）
+ */
+const GRAPH_Y = {
+  tall: { aaaY: 256.5, aaY: 333.5, aY: 409.5, zeroY: 868.7, fullY: 180.2 },
+  short: { aaaY: 402.5, aaY: 462.5, aY: 521.5, zeroY: 878.7, fullY: 343.2 },
+} as const;
+
+const LAYOUTS_1P: PlayLayout[] = (['far', 'near'] as const).flatMap(placement =>
+  (['tall', 'short'] as const).map(height => ({
+    id: `1P-${placement}-${height}`,
+    side: '1P' as const,
+    placement,
+    ...GRAPH_X_1P[placement],
+    ...GRAPH_Y[height],
+  })),
+);
 
 function mirrorLayout(l: PlayLayout): PlayLayout {
   return {
@@ -107,37 +120,38 @@ function isGradeLineColor(r: number, g: number, b: number): boolean {
   return blue || yellow;
 }
 
-/** 線の上下この距離の画素が線の色なら「細い線」ではない（一面の青い BGA などを除く）。 */
-const LINE_THIN_CHECK_PX = 6;
-
-/**
- * 【関数の役割】 基準座標 y 付近（±2px）に目盛り線があるか、x0..x1 のうち線が見える列の割合を返す。
- *
- * 列ごとに「±2px のどこかが線の色」かつ「上下 6px は線の色ではない」ものを数える。
- * 後者の条件で、BGA が一面の青になる場面を線と取り違えない。
- * スコアの棒は線を隠すので、割合は棒の本数と高さに応じて下がる（棒 2 本で最大 5 割ほど隠れる）。
- */
-function lineRatio(frame: RgbaFrame, x0: number, x1: number, baseY: number): number {
+/** 1 行（y）のうち、x0..x1 で線の色の画素の割合。 */
+function rowLineRatio(frame: RgbaFrame, x0: number, x1: number, y: number): number {
   const { sx, sy } = scaleOf(frame);
-  const isLineAt = (x: number, y: number) => {
-    const [r, g, b] = px(frame, x * sx, y * sy);
-    return isGradeLineColor(r, g, b);
-  };
   let hit = 0;
   let n = 0;
   for (let x = x0 + 6; x <= x1 - 6; x += 3) {
     n++;
-    let onLine = false;
-    for (let dy = -2; dy <= 2 && !onLine; dy++) onLine = isLineAt(x, baseY + dy);
-    if (!onLine) continue;
-    if (isLineAt(x, baseY - LINE_THIN_CHECK_PX) || isLineAt(x, baseY + LINE_THIN_CHECK_PX)) continue;
-    hit++;
+    const [r, g, b] = px(frame, x * sx, y * sy);
+    if (isGradeLineColor(r, g, b)) hit++;
   }
   return n ? hit / n : 0;
 }
 
-/** 3 本の線それぞれで、線が見える列の割合がこれ以上ならプレー画面とみなす。 */
-const MIN_LINE_RATIO = 0.25;
+/**
+ * 【関数の役割】 基準座標 y に目盛り線があるかを、「線の行が上下の行よりどれだけ線の色が多いか」で返す。
+ *
+ * 線の行 = y±2 の各行の割合の最大、上下 = y±5〜7 の各行の割合の最大。返り値はその差。
+ *  - 一面の青い BGA は上下の行も同じだけ青いので差は 0 に近い（線と取り違えない）。
+ *  - 背景の絵に青が混じっていても、線の行だけが突出していれば差は大きい。
+ *  - 青い YOU の棒は線の行と上下の行で同じだけ数えられるので、差を少し下げるだけ。
+ * 線は細く、上下 5px 以上離れれば線の色ではない（実測 2px 幅 + 影 1px）。
+ */
+function lineRatio(frame: RgbaFrame, x0: number, x1: number, baseY: number): number {
+  let line = 0;
+  for (let dy = -2; dy <= 2; dy++) line = Math.max(line, rowLineRatio(frame, x0, x1, baseY + dy));
+  let around = 0;
+  for (const dy of [-7, -6, -5, 5, 6, 7]) around = Math.max(around, rowLineRatio(frame, x0, x1, baseY + dy));
+  return line - around;
+}
+
+/** 3 本の線それぞれで、線の行と上下の行の差がこれ以上ならプレー画面とみなす。 */
+const MIN_LINE_RATIO = 0.2;
 
 /** 【診断用】 配置ごとの AAA/AA/A の検出率。テストモードの表示と調査に使う。 */
 export function gradeLineRatios(frame: RgbaFrame, layout: PlayLayout): number[] {
@@ -147,7 +161,8 @@ export function gradeLineRatios(frame: RgbaFrame, layout: PlayLayout): number[] 
 /**
  * 【関数の役割】 フレームがプレー画面かどうかと、そのグラフ配置を判定する。
  *
- * 4 種の配置それぞれで AAA/AA/A の 3 本が揃っているかを見て、最も揃っている配置を返す。
+ * 8 種の配置（1P/2P × 遠め/近め × 縦の位置 2 種）それぞれで AAA/AA/A の 3 本が揃っているかを見て、
+ * 最も揃っている配置を返す。
  * 3 本とも {@link MIN_LINE_RATIO} 以上でなければプレー画面ではない（選曲画面・リザルト等）とみなして null。
  */
 export function detectPlayLayout(frame: RgbaFrame): { layout: PlayLayout; confidence: number } | null {
@@ -182,11 +197,14 @@ const DIGIT_INK_LUMA = 90;
  */
 const SEGMENT_RECTS: Record<'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g', [number, number, number, number]> = {
   a: [12, 0, 22, 3],
-  b: [27, 5, 33, 8],
-  c: [27, 13, 33, 16],
+  // 右上は 4〜7 行目。8 行目は 5・6 の中央の横棒の右端がかかるので含めない
+  b: [28, 4, 32, 7],
+  c: [28, 14, 32, 16],
   d: [12, 18, 22, 21],
-  e: [1, 13, 7, 16],
-  f: [1, 5, 7, 8],
+  // 左の縦の画は幅 5px・左下は 14〜16 行目に絞る。9 の中央の横棒は左下へ垂れ下がっていて（13〜14 行目）、
+  // 桁が左に 2px ずれた映像では 13〜16 行目・幅 7px の矩形だと 4 割を超えて 8 と読んでいた（2026-10-11）。
+  e: [1, 14, 5, 16],
+  f: [1, 5, 5, 8],
   g: [12, 8, 22, 13],
 };
 const SEGMENT_ORDER = ['a', 'b', 'c', 'd', 'e', 'f', 'g'] as const;
