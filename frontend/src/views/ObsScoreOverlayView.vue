@@ -21,8 +21,15 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 import { createWorker, PSM, type Worker as TesseractWorker } from 'tesseract.js';
 import { gameDataReady, songData, diffTable, useGameData, type SongDataEntry } from '../composables/useGameData';
-import { FOLDER_RANK_DEFS, calculatePoints, getFolderRankThresholdRateAt } from '../utils/beatTier';
-import { getScoreGradeInfo, getSongTierInfoByRate, tierLabel } from '../utils/uploadReport';
+import {
+  FOLDER_RANK_DEFS,
+  SCORE_RATE_THRESHOLDS,
+  calculatePoints,
+  calculateScoreRateTierPoints,
+  getFolderRankThresholdRateAt,
+  TOP_CHART_LIMIT,
+} from '../utils/beatTier';
+import { getNumericRank, getScoreGradeInfo, getSongTierInfoByRate, tierLabel } from '../utils/uploadReport';
 import { API_BASE, TOKEN_KEY } from '../composables/constants';
 import RankIcon from '../components/RankIcon.vue';
 import LoginModal from '../components/LoginModal.vue';
@@ -53,11 +60,16 @@ const password = params.get('password') ?? '';
 const obsUrl = `ws://${params.get('host') || '127.0.0.1'}:${params.get('port') || '4455'}`;
 const intervalMs = Math.max(100, Number(params.get('interval')) || 250);
 /** テストモード専用: 難易度表に無い譜面でも目盛りを確認できるよう、☆を上書きする（例 rank=12.0）。 */
-const testRankOverride = testMode ? params.get('rank') : null;
+const testRankOverride = testMode ? params.get('rank') || null : null;
 /** テストモード専用: 読み取った EX の代わりにこの値を使う（達成時の表示確認用、例 ex=3070）。 */
 const testExOverride = testMode && params.get('ex') ? Number(params.get('ex')) : null;
 /** テストモード専用: リザルトの「前回ベスト」をこの値にする（表示確認用、例 best=2455）。 */
 const testBestOverride = testMode && params.get('best') ? Number(params.get('best')) : null;
+/** テストモード専用: 録画の指定区間を真っ黒にしてプレー中の暗転を再現する（例 blackout=60:2）。 */
+const testBlackout = (() => {
+  const m = testMode ? (params.get('blackout') ?? '').match(/^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/) : null;
+  return m ? { from: Number(m[1]), sec: Number(m[2]) } : null;
+})();
 /** テストモード専用: 歴代ベストの過去作記録を上書きする（例 alltime=2480:33）。 */
 const testAllTimeOverride = (() => {
   const m = testMode ? (params.get('alltime') ?? '').match(/^(\d+):(\d+)$/) : null;
@@ -313,6 +325,7 @@ async function loadBestScores(): Promise<boolean> {
       if ((r.score ?? 0) > (bestScores.get(key) ?? 0)) bestScores.set(key, r.score);
     }
     bestError.value = '';
+    bestVersion.value++;
   } catch (e) {
     bestError.value = `自己ベストの読み込みに失敗: ${(e as Error).message}`;
   }
@@ -336,7 +349,10 @@ function showResult(p: { chart: IdentifiedChart; ex: number }): void {
   resultCard.value = { chart: p.chart, ex: p.ex, best, allTime, shownAt: now };
   resultTimer = startResultTimer(now);
   // 同じ配信の中で同じ曲をもう一度やったとき、今回のスコアを「前回ベスト」として比べる
-  if (p.ex > (bestScores.get(key) ?? 0)) bestScores.set(key, p.ex);
+  if (p.ex > (bestScores.get(key) ?? 0)) {
+    bestScores.set(key, p.ex);
+    bestVersion.value++;
+  }
 }
 
 /** 表示中のリザルトの中身（取り込み時のレポートと同じ計算）。 */
@@ -364,10 +380,29 @@ const resultView = computed(() => {
     }
   }
   const isNewRecord = best !== null && ex > best;
+  // RATE-PT（全譜面共通の score rate → 点数。サイトの RATE-PT と同じ計算）
+  // RATE-PT はサイトと同じく ANOTHER / LEGGENDARIA だけ
+  const rateTarget = isRatePtTarget(c);
+  const ratePt = rateTarget ? calculateScoreRateTierPoints(rate) : 0;
+  const oldRatePt = rateTarget && best ? calculateScoreRateTierPoints(oldRate) : 0;
+  // 次の Rate-PT の区切り（まだ届いていない一番下の区切り）
+  let rateNext: { label: string; right: string; gap: number } | null = null;
+  for (const t of rateTarget ? SCORE_RATE_THRESHOLDS : []) {
+    const need = Math.ceil((c.maxEx * t.rate) / 100 - 1e-9);
+    if (ex < need) {
+      const loss = c.maxEx - need;
+      rateNext = { label: `${t.points}PT`, right: loss === 0 ? 'MAX' : `MAX-${loss}`, gap: need - ex };
+      break;
+    }
+  }
   return {
+    ratePt,
+    ratePtDiff: best !== null && isNewRecord ? ratePt - oldRatePt : null,
+    rateNext,
     title: c.title,
     difficulty: c.difficulty,
-    rank: c.informalRank,
+    // ☆は数値のときだけ出す（未分類の新曲は "Uncategorized" なので出さない）
+    rank: getNumericRank(c.informalRank ?? undefined),
     ex,
     maxEx: c.maxEx,
     rate,
@@ -399,6 +434,18 @@ function handleNonPlayFrame(frame: RgbaFrame, now: number): void {
   playStreak = 0;
   const dark = frameMeanLuma(frame) < DARK_LUMA;
   if (pendingResult && (dark || now - lastPlaySeenAt > LOST_PLAY_MS)) {
+    // 誤判定（グラフ欄の背景の暗転など）でプレー中にリザルトを出してしまった場合に、
+    // プレー画面へ戻ったら元に戻せるよう、プレーの状態と自己ベストを控えておく
+    const key = bestKey(pendingResult.chart);
+    suspendedPlay = {
+      chart: pendingResult.chart,
+      ex: pendingResult.ex,
+      layoutId: layout.value?.id ?? '',
+      fingerprint: currentFingerprint,
+      key,
+      prevBest: bestScores.get(key),
+      shownAt: now,
+    };
     showResult(pendingResult);
     pendingResult = null;
     // プレーは終わったので、ここでプレーの状態を片付ける。残しておくと次のフレームで
@@ -411,6 +458,47 @@ function handleNonPlayFrame(frame: RgbaFrame, now: number): void {
     resultCard.value = null;
     resultTimer = null;
   }
+}
+
+/** リザルトを出す直前のプレーの状態（誤ってリザルトを出したとき、プレーへ戻すため）。 */
+let suspendedPlay: {
+  chart: IdentifiedChart;
+  ex: number;
+  layoutId: string;
+  fingerprint: number[] | null;
+  key: string;
+  /** リザルトで上書きする前の自己ベスト（無ければ undefined）。 */
+  prevBest: number | undefined;
+  shownAt: number;
+} | null = null;
+/** リザルトを出してからこの時間内にプレー画面へ戻ったら、誤表示とみなしてプレーを続ける。 */
+const RESUME_WITHIN_MS = 8000;
+/** 曲名の見た目がこのフレーム数続けて変わったら別の曲とみなす（250ms 間隔で約 1 秒）。 */
+const TITLE_CHANGE_FRAMES = 4;
+let titleChangeStreak = 0;
+
+/**
+ * 【関数の役割】 リザルト表示中にプレー画面が続いていると分かったとき、同じプレーなら状態を元に戻す。
+ *
+ * 同じプレーとみなす条件: 表示から {@link RESUME_WITHIN_MS} 以内・グラフの配置が同じ・曲名の指紋が同じ・
+ * 今読める EX が控えた EX 以上（同じ曲をやり直した場合は EX が 0 から始まるので、ここで別のプレーと分かる）。
+ * 戻すもの: 曲・EX・曲名の指紋・自己ベスト（リザルトで上書きした分を取り消す）。
+ */
+function resumeSuspendedPlay(frame: RgbaFrame, l: PlayLayout, now: number): void {
+  const s = suspendedPlay;
+  suspendedPlay = null;
+  if (!s || now - s.shownAt > RESUME_WITHIN_MS || s.layoutId !== l.id || !s.fingerprint) return;
+  const fp = titleFingerprint(frame, readChartHeader(frame, l).titleRect);
+  if (fingerprintDistance(fp, s.fingerprint) > TITLE_CHANGE_THRESHOLD) return;
+  const exNow = readCurrentExScore(frame, l);
+  if (exNow === null || exNow < s.ex) return;
+  layout.value = l;
+  chart.value = s.chart;
+  exScore.value = exNow;
+  currentFingerprint = fp;
+  if (s.prevBest === undefined) bestScores.delete(s.key);
+  else bestScores.set(s.key, s.prevBest);
+  bestVersion.value++;
 }
 
 function processFrame(frame: RgbaFrame): void {
@@ -441,7 +529,9 @@ function processFrame(frame: RgbaFrame): void {
     if (playStreak < PLAY_STREAK_TO_HIDE_RESULT) return;
     resultCard.value = null;
     resultTimer = null;
+    resumeSuspendedPlay(frame, det.layout, now);
   }
+  suspendedPlay = null;
   playStreak = 0;
   // プレー画面に戻った（誤検知の一瞬の途切れ、または次の曲）。リザルトの候補は捨てる
   pendingResult = null;
@@ -452,10 +542,19 @@ function processFrame(frame: RgbaFrame): void {
 
   const header = readChartHeader(frame, det.layout);
   const fp = titleFingerprint(frame, header.titleRect);
+  // 曲名の見た目が数フレーム続けて変わったときだけ別の曲とみなす。リザルトへ切り替わる瞬間などに
+  // 1 フレームだけ曲名の部分が変わると、そこでプレーの記録を消してしまい、リザルトが出なくなっていた。
   if (currentFingerprint && fingerprintDistance(fp, currentFingerprint) > TITLE_CHANGE_THRESHOLD) {
-    resetPlay();
+    titleChangeStreak++;
+    if (titleChangeStreak >= TITLE_CHANGE_FRAMES) {
+      titleChangeStreak = 0;
+      resetPlay();
+      currentFingerprint = fp;
+    }
+  } else {
+    titleChangeStreak = 0;
+    currentFingerprint = fp;
   }
-  currentFingerprint = fp;
 
   if (!chart.value && !identifying.value && now >= nextIdentifyAt) {
     identifying.value = true;
@@ -521,7 +620,13 @@ const testMediaKind = ref<'video' | 'image' | null>(null);
 function testTick(): void {
   if (testMediaKind.value === 'video' && testVideo.value && testVideo.value.videoWidth) {
     const v = testVideo.value;
-    processFrame(grab(v, v.videoWidth, v.videoHeight));
+    const f = grab(v, v.videoWidth, v.videoHeight);
+    // テスト専用: blackout=開始秒:秒数 の区間は真っ黒なフレームにする（プレー中の暗転の再現）
+    if (testBlackout && v.currentTime >= testBlackout.from && v.currentTime < testBlackout.from + testBlackout.sec) {
+      f.data.fill(0);
+      for (let i = 3; i < f.data.length; i += 4) f.data[i] = 255;
+    }
+    processFrame(f);
   } else if (testMediaKind.value === 'image' && testImage.value?.naturalWidth) {
     const i = testImage.value;
     processFrame(grab(i, i.naturalWidth, i.naturalHeight));
@@ -558,12 +663,59 @@ async function loop(): Promise<void> {
 
 interface LadderLine {
   key: string;
+  /** 線の左のラベル（ティア名、または Rate-PT の点数）。 */
   label: string;
   requiredEx: number;
+  /** 線の右の数字（ティアは必要 EX、Rate-PT は MAX からの減点 "MAX-146"）。 */
+  right: string;
   y: number;
   achieved: boolean;
   isNext: boolean;
 }
+
+type LadderDef = Omit<LadderLine, 'y' | 'achieved' | 'isNext'>;
+
+/** 【関数の役割】 単曲ティアの目盛り（MAX と 11 本のブロック境界）。☆11.0〜13.1 以外は null。 */
+function buildTierDefs(c: IdentifiedChart): LadderDef[] | null {
+  if (!c.informalRank) return null;
+  const defs: LadderDef[] = [{ key: 'MAX', label: 'MAX', requiredEx: c.maxEx, right: String(c.maxEx) }];
+  for (let b = 0; b <= 10; b++) {
+    const idx = b * 5;
+    const rate = getFolderRankThresholdRateAt(idx, c.informalRank);
+    if (!rate) return null;
+    const requiredEx = Math.ceil((c.maxEx * rate) / 100 - 1e-9);
+    defs.push({ key: FOLDER_RANK_DEFS[idx].name, label: FOLDER_RANK_DEFS[idx].name, requiredEx, right: String(requiredEx) });
+  }
+  return defs;
+}
+
+/**
+ * 【関数の役割】 Rate-PT の目盛り（Lv10 以下など、単曲ティアの無い譜面用）。
+ *
+ * Rate-PT の区切り（AA=1PT, AAA=2PT, 以降 MAX までの残りが半分になるごとに倍）を上から並べ、
+ * 右の数字は「MAX からの減点」で出す（例: 4PT = MAX-146）。
+ */
+function buildRateDefs(c: IdentifiedChart): LadderDef[] {
+  return [...SCORE_RATE_THRESHOLDS].reverse().map(t => {
+    const requiredEx = Math.ceil((c.maxEx * t.rate) / 100 - 1e-9);
+    const loss = c.maxEx - requiredEx;
+    return { key: `${t.points}PT`, label: `${t.points}PT`, requiredEx, right: loss === 0 ? 'MAX' : `MAX-${loss}` };
+  });
+}
+
+/** RATE-PT の対象難易度（サイトの RATE-PT と同じく ANOTHER / LEGGENDARIA のみ）。 */
+const isRatePtTarget = (c: IdentifiedChart) => c.difficulty === 'ANOTHER' || c.difficulty === 'LEGGENDARIA';
+
+/**
+ * 目盛りの種類。☆11.0〜13.1 の譜面は単曲ティア、それ以外の ANOTHER / LEGGENDARIA（Lv10 以下・未分類の新曲）は
+ * Rate-PT。HYPER などはどちらの対象でもないので目盛りを出さない。
+ */
+const ladderKind = computed<'tier' | 'rate' | null>(() => {
+  const c = chart.value;
+  if (!c) return null;
+  if (buildTierDefs(c)) return 'tier';
+  return isRatePtTarget(c) ? 'rate' : null;
+});
 
 /** 目盛りの帯の幅と、グラフとの隙間（1920×1080 基準）。 */
 const STRIP_W = 230;
@@ -598,20 +750,8 @@ const strip = computed(() => {
 const ladder = computed<LadderLine[] | null>(() => {
   const c = chart.value;
   const s = strip.value;
-  if (!c || !c.informalRank || !s) return null;
-  const defs: { key: string; label: string; requiredEx: number }[] = [
-    { key: 'MAX', label: 'MAX', requiredEx: c.maxEx },
-  ];
-  for (let b = 0; b <= 10; b++) {
-    const idx = b * 5;
-    const rate = getFolderRankThresholdRateAt(idx, c.informalRank);
-    if (!rate) return null;
-    defs.push({
-      key: FOLDER_RANK_DEFS[idx].name,
-      label: FOLDER_RANK_DEFS[idx].name,
-      requiredEx: Math.ceil((c.maxEx * rate) / 100 - 1e-9),
-    });
-  }
+  if (!c || !s || c.maxEx <= 0 || !ladderKind.value) return null;
+  const defs = ladderKind.value === 'tier' ? buildTierDefs(c)! : buildRateDefs(c);
   const ex = exScore.value ?? 0;
   // defs.length 本の線 + 0 点 = defs.length 区間
   const step = (s.bottom - s.top) / defs.length;
@@ -632,11 +772,10 @@ const ladder = computed<LadderLine[] | null>(() => {
  * YOU の棒の上端の y。隣り合う目盛りの間は EX で線形補間する。
  * Novice 未満は「0 点 = 帯の下端」から Novice までを線形に伸ばす。
  */
-const barTopY = computed(() => {
+function exToY(ex: number): number | null {
   const lines = ladder.value;
   const s = strip.value;
   if (!lines || !s) return null;
-  const ex = exScore.value ?? 0;
   const points = [...lines, { requiredEx: 0, y: s.bottom }];
   if (ex >= points[0].requiredEx) return points[0].y;
   for (let i = 0; i < points.length - 1; i++) {
@@ -648,6 +787,129 @@ const barTopY = computed(() => {
     }
   }
   return s.bottom;
+}
+
+const barTopY = computed(() => exToY(exScore.value ?? 0));
+
+// ---------------------------------------------------------------------------
+// 自己ベスト・上位 100 譜面入りの線
+// ---------------------------------------------------------------------------
+
+/** 自己ベストが変わったら（読み込み直後・リザルトで更新したとき）上位 100 の計算をやり直すための版数。 */
+const bestVersion = ref(0);
+
+const DIFF_NAME_BY_CODE: Record<string, DifficultyName> = {
+  '1': 'BEGINNER', '2': 'NORMAL', '3': 'HYPER', '4': 'ANOTHER', '10': 'LEGGENDARIA',
+};
+
+/**
+ * 【関数の役割】 今作の自己ベストから、譜面ごとの BEAT-PT と RATE-PT を出す（サイトと同じ計算）。
+ *  - BEAT-PT: 非公式難易度（☆）のある譜面だけ。calculatePoints(score rate, ☆)
+ *  - RATE-PT: ANOTHER / LEGGENDARIA だけ。calculateScoreRateTierPoints(score rate)
+ */
+const myChartPoints = computed(() => {
+  void bestVersion.value;
+  const notesByKey = new Map<string, number>();
+  for (const s of songData.value as SongDataEntry[]) {
+    const name = DIFF_NAME_BY_CODE[s.difficulty];
+    if (name && s.notes > 0) notesByKey.set(`${s.title}|${name}`, s.notes);
+  }
+  const beat: { key: string; pt: number }[] = [];
+  const rate: { key: string; pt: number }[] = [];
+  for (const [key, score] of bestScores) {
+    const notes = notesByKey.get(key);
+    if (!notes || score <= 0) continue;
+    const r = (score / (notes * 2)) * 100;
+    const [title, diff] = key.split('|');
+    const rank = informalIndex.value.get(`${title}_${diff}`);
+    if (rank) {
+      const pt = calculatePoints(r, rank);
+      if (pt > 0) beat.push({ key, pt });
+    }
+    if (diff === 'ANOTHER' || diff === 'LEGGENDARIA') {
+      const pt = calculateScoreRateTierPoints(r);
+      if (pt > 0) rate.push({ key, pt });
+    }
+  }
+  beat.sort((a, b) => b.pt - a.pt);
+  rate.sort((a, b) => b.pt - a.pt);
+  return { beat, rate };
+});
+
+/**
+ * 【関数の役割】 この譜面を除いた他の譜面の中で 100 番目の点数（上位 100 に入るにはこれを上回る必要がある）。
+ * 他の譜面が 100 譜面に満たなければ、どんな点数でも入れるので null（線を出さない）。
+ */
+function top100Threshold(list: { key: string; pt: number }[], selfKey: string): number | null {
+  let count = 0;
+  for (const e of list) {
+    if (e.key === selfKey) continue;
+    count++;
+    if (count === TOP_CHART_LIMIT) return e.pt;
+  }
+  return null;
+}
+
+/** 【関数の役割】 点数がしきい値を上回る最小の EX（理論値でも届かなければ null）。点数は EX に対して単調。 */
+function minExAbove(maxEx: number, threshold: number, ptOf: (ratePct: number) => number): number | null {
+  if (ptOf(100) <= threshold) return null;
+  let lo = 0;
+  let hi = maxEx;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (ptOf((mid / maxEx) * 100) > threshold) hi = mid;
+    else lo = mid + 1;
+  }
+  return lo;
+}
+
+interface ExtraMarker {
+  key: 'best' | 'beat' | 'rate';
+  label: string;
+  ex: number;
+  y: number;
+  /** 札の y（近い札どうしが重ならないようにずらした位置）。 */
+  tagY: number;
+  achieved: boolean;
+}
+
+/**
+ * 目盛りの上に重ねる 3 本の線。
+ *  - 自己ベスト（今作。プレー前の記録）
+ *  - BEAT-PT の上位 100 入り（☆のある譜面で、理論値なら入れるときだけ）
+ *  - RATE-PT の上位 100 入り（ANOTHER / LEGGENDARIA）
+ */
+const extraMarkers = computed<ExtraMarker[]>(() => {
+  void bestVersion.value;
+  const c = chart.value;
+  if (!c || !ladder.value || c.maxEx <= 0) return [];
+  const key = bestKey(c);
+  const ex = exScore.value ?? 0;
+  const list: Omit<ExtraMarker, 'y' | 'tagY' | 'achieved'>[] = [];
+  const best = bestScores.get(key) ?? 0;
+  if (best > 0) list.push({ key: 'best', label: '自己ベスト', ex: best });
+  const { beat, rate } = myChartPoints.value;
+  if (c.informalRank && getNumericRank(c.informalRank)) {
+    const th = top100Threshold(beat, key);
+    const rank = c.informalRank;
+    const need = th === null ? null : minExAbove(c.maxEx, th, r => calculatePoints(r, rank));
+    if (need !== null) list.push({ key: 'beat', label: 'BEAT TOP100', ex: need });
+  }
+  if (isRatePtTarget(c)) {
+    const th = top100Threshold(rate, key);
+    const need = th === null ? null : minExAbove(c.maxEx, th, r => calculateScoreRateTierPoints(r));
+    if (need !== null) list.push({ key: 'rate', label: 'RATE TOP100', ex: need });
+  }
+  const placed = list
+    .map(m => ({ ...m, y: exToY(m.ex) ?? 0, tagY: 0, achieved: ex >= m.ex }))
+    .sort((a, b) => a.y - b.y);
+  // 札は 18px 以上離す
+  let lastTag = -Infinity;
+  for (const m of placed) {
+    m.tagY = Math.max(m.y, lastTag + 18);
+    lastTag = m.tagY;
+  }
+  return placed;
 });
 
 const nextLine = computed(() => ladder.value?.find(l => l.isNext) ?? null);
@@ -786,18 +1048,20 @@ onBeforeUnmount(() => {
             height: `${strip.bottom - strip.top + STRIP_PAD_TOP + STRIP_PAD_BOTTOM}px`,
           }"
         >
-          <div class="ov-head">BEAT TIER INFORMATION</div>
+          <div class="ov-head">{{ ladderKind === 'rate' ? 'RATE-PT INFORMATION' : 'BEAT TIER INFORMATION' }}</div>
           <div class="ov-row ov-row-you">
             <span class="ov-row-label">YOU</span>
             <span class="ov-digits"><span class="ov-digits-lead">{{ exDigits.lead }}</span>{{ exDigits.rest }}</span>
           </div>
           <div class="ov-row ov-row-next">
-            <span class="ov-row-label">{{ nextLine ? `NEXT ${nextLine.label}` : 'ALL CLEAR' }}</span>
+            <span class="ov-row-label">{{
+              !nextLine ? 'ALL CLEAR' : ladderKind === 'rate' ? `NEXT ${nextLine.right}` : `NEXT ${nextLine.label}`
+            }}</span>
             <span v-if="nextRemaining !== null" class="ov-digits ov-digits-next">-{{ nextRemaining }}</span>
           </div>
 
           <div class="ov-graph" :style="{ top: `${STRIP_PAD_TOP - GRAPH_HEAD}px` }">
-            <div class="ov-tag">☆{{ chart?.informalRank }}</div>
+            <div class="ov-tag">{{ ladderKind === 'rate' ? 'RATE-PT' : `☆${chart?.informalRank}` }}</div>
           </div>
           <div
             v-for="line in ladder"
@@ -811,17 +1075,36 @@ onBeforeUnmount(() => {
             :style="{ top: `${line.y - strip.top + STRIP_PAD_TOP}px` }"
           >
             <span class="ov-label">{{ line.label }}</span>
-            <span class="ov-ex">{{ line.requiredEx }}</span>
+            <span class="ov-ex">{{ line.right }}</span>
           </div>
           <!-- YOU の棒（実機と同じく下から伸び、目盛りの線を隠す） -->
           <div
             v-if="barTopY !== null"
             class="ov-bar"
+            :class="{ 'ov-bar-rate': ladderKind === 'rate' }"
             :style="{
               top: `${barTopY - strip.top + STRIP_PAD_TOP}px`,
               bottom: `${STRIP_PAD_BOTTOM}px`,
             }"
           />
+          <!-- 自己ベスト・上位 100 入りの線（棒の上に重ねる）。名前の札は帯の外側（グラフと反対側）に出す -->
+          <div
+            v-for="m in extraMarkers"
+            :key="m.key"
+            class="ov-mark"
+            :class="[`ov-mark-${m.key}`, { 'is-achieved': m.achieved }]"
+            :style="{ top: `${m.y - strip.top + STRIP_PAD_TOP}px` }"
+          />
+          <div
+            v-for="m in extraMarkers"
+            :key="`${m.key}-tag`"
+            class="ov-mark-tag"
+            :class="[`ov-mark-${m.key}`, strip.faceLeft ? 'tag-left' : 'tag-right', { 'is-achieved': m.achieved }]"
+            :style="{ top: `${m.tagY - strip.top + STRIP_PAD_TOP}px` }"
+          >
+            <span class="ov-mark-name">{{ m.label }}</span>
+            <span class="ov-mark-ex">{{ m.ex }}</span>
+          </div>
         </div>
       </transition>
 
@@ -874,6 +1157,19 @@ onBeforeUnmount(() => {
               <div class="ov-res-label">BEAT-PT</div>
               <div class="ov-res-value">{{ resultView.pt ? resultView.pt.toFixed(2) : '---' }}</div>
               <div v-if="resultView.ptDiff" class="ov-res-sub up">+{{ resultView.ptDiff.toFixed(2) }}</div>
+            </div>
+            <div class="ov-res-cell">
+              <div class="ov-res-label">RATE-PT</div>
+              <div class="ov-res-value">{{ resultView.ratePt ? resultView.ratePt.toFixed(2) : '---' }}</div>
+              <div v-if="resultView.ratePtDiff" class="ov-res-sub up">+{{ resultView.ratePtDiff.toFixed(2) }}</div>
+            </div>
+          </div>
+
+          <!-- 単曲ティアの無い譜面（Lv10 以下など）は、次の Rate-PT の区切りまでを出す -->
+          <div v-if="!resultView.newTier && resultView.rateNext" class="ov-res-tier">
+            <div class="ov-res-label">RATE-PT</div>
+            <div class="ov-res-next">
+              次の {{ resultView.rateNext.label }}（{{ resultView.rateNext.right }}）まで あと <b>{{ resultView.rateNext.gap }}</b>
             </div>
           </div>
 
@@ -973,7 +1269,8 @@ onBeforeUnmount(() => {
  */
 .ov-strip {
   position: absolute;
-  overflow: hidden;
+  /* 自己ベスト等の名前の札を帯の外側に出すので、はみ出しは隠さない */
+  overflow: visible;
   background: #000;
   box-shadow: 0 0 0 2px #111, 0 4px 14px rgba(0, 0, 0, 0.6);
   pointer-events: none;
@@ -1150,6 +1447,65 @@ onBeforeUnmount(() => {
   z-index: 2;
 }
 /*
+ * 自己ベスト・上位 100 入りの線。棒の上に重ねる破線。色は実機の「自己ベスト」に合わせた緑、
+ * BEAT-PT はオレンジ、RATE-PT は水色。届いたら実線になる。
+ */
+.ov-mark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  margin-top: -1px;
+  border-top: 3px dashed var(--mark-color);
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+  z-index: 3;
+}
+.ov-mark.is-achieved {
+  border-top-style: solid;
+}
+.ov-mark-best { --mark-color: #8be04e; }
+.ov-mark-beat { --mark-color: #ff9a1a; }
+.ov-mark-rate { --mark-color: #22d3ee; }
+/* 名前の札。目盛りの文字と重ならないよう帯の外側（グラフと反対側）に出す */
+.ov-mark-tag {
+  position: absolute;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: -10px;
+  padding: 1px 6px;
+  border-left: 4px solid var(--mark-color);
+  background: rgba(0, 0, 0, 0.78);
+  white-space: nowrap;
+  z-index: 3;
+}
+.ov-mark-tag.tag-left {
+  right: calc(100% + 4px);
+}
+.ov-mark-tag.tag-right {
+  left: calc(100% + 4px);
+}
+.ov-mark-name {
+  color: var(--mark-color);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+.ov-mark-ex {
+  color: #fff;
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+}
+.ov-mark-tag.is-achieved .ov-mark-ex::after {
+  content: ' ✓';
+  color: var(--mark-color);
+}
+
+/* Rate-PT の目盛りは左のラベル（512PT）が短く右の数字（MAX-115）が長いので、棒を左に寄せる */
+.ov-bar.ov-bar-rate {
+  left: 72px;
+}
+/*
  * リザルト画面の中央（イラストの位置、1920×1080 基準で x=960 を中心）に出す成果パネル。
  * 配色は目盛りの帯と同じく実機の GRAPH INFORMATION 欄に合わせる。
  */
@@ -1300,7 +1656,7 @@ onBeforeUnmount(() => {
 
 .ov-res-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin: 12px 22px 0;
 }
@@ -1310,7 +1666,9 @@ onBeforeUnmount(() => {
 }
 .ov-res-value {
   font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 26px;
+  /* 4 欄並び（SCORE RATE / DJ LEVEL / BEAT-PT / RATE-PT）で「AAA+136」が収まる大きさ */
+  font-size: 21px;
+  white-space: nowrap;
   font-weight: 900;
   line-height: 1.2;
 }
