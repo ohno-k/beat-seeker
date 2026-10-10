@@ -875,7 +875,7 @@ interface ExtraMarker {
 
 /**
  * 目盛りの上に重ねる 3 本の線。
- *  - 自己ベスト（今作。プレー前の記録）
+ *  - 歴代自己ベスト（今作と前作以前の高い方。プレー前の記録）
  *  - BEAT-PT の上位 100 入り（☆のある譜面で、理論値なら入れるときだけ）
  *  - RATE-PT の上位 100 入り（ANOTHER / LEGGENDARIA）
  */
@@ -886,8 +886,14 @@ const extraMarkers = computed<ExtraMarker[]>(() => {
   const key = bestKey(c);
   const ex = exScore.value ?? 0;
   const list: Omit<ExtraMarker, 'y' | 'tagY' | 'achieved'>[] = [];
-  const best = bestScores.get(key) ?? 0;
-  if (best > 0) list.push({ key: 'best', label: '自己ベスト', ex: best });
+  // 歴代自己ベスト（今作の記録と前作以前の記録の高い方）。前作以前の記録なら作品番号を添える
+  const currentBest = bestScores.get(key) ?? 0;
+  const pastBest = pastBestScores.get(key);
+  if (pastBest && pastBest.score > currentBest) {
+    list.push({ key: 'best', label: `歴代ベスト(${pastBest.version})`, ex: pastBest.score });
+  } else if (currentBest > 0) {
+    list.push({ key: 'best', label: '歴代ベスト', ex: currentBest });
+  }
   const { beat, rate } = myChartPoints.value;
   if (c.informalRank && getNumericRank(c.informalRank)) {
     const th = top100Threshold(beat, key);
