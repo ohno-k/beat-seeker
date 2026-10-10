@@ -21,11 +21,17 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 import { createWorker, PSM, type Worker as TesseractWorker } from 'tesseract.js';
 import { gameDataReady, songData, diffTable, useGameData, type SongDataEntry } from '../composables/useGameData';
-import { FOLDER_RANK_DEFS, getFolderRankThresholdRateAt } from '../utils/beatTier';
+import { FOLDER_RANK_DEFS, calculatePoints, getFolderRankThresholdRateAt } from '../utils/beatTier';
+import { getScoreGradeInfo, getSongTierInfoByRate, tierLabel } from '../utils/uploadReport';
+import { API_BASE, TOKEN_KEY } from '../composables/constants';
+import RankIcon from '../components/RankIcon.vue';
+import LoginModal from '../components/LoginModal.vue';
+import { useAuth } from '../composables/useAuth';
 import {
   binarizeForOcr,
   detectPlayLayout,
   fingerprintDistance,
+  frameMeanLuma,
   readChartHeader,
   readCurrentExScore,
   titleFingerprint,
@@ -48,6 +54,8 @@ const intervalMs = Math.max(100, Number(params.get('interval')) || 250);
 const testRankOverride = testMode ? params.get('rank') : null;
 /** テストモード専用: 読み取った EX の代わりにこの値を使う（達成時の表示確認用、例 ex=3070）。 */
 const testExOverride = testMode && params.get('ex') ? Number(params.get('ex')) : null;
+/** テストモード専用: リザルトの「前回ベスト」をこの値にする（表示確認用、例 best=2455）。 */
+const testBestOverride = testMode && params.get('best') ? Number(params.get('best')) : null;
 
 const BASE_W = 1920;
 const BASE_H = 1080;
@@ -57,6 +65,12 @@ const LOST_PLAY_MS = 1500;
 const TITLE_CHANGE_THRESHOLD = 12;
 /** 1 回の読み取り間で自然に増えうる EX の上限。これを超える跳びは 2 回続けて読めたときだけ採る。 */
 const MAX_EX_STEP = 80;
+/** 画面全体の平均輝度がこれ未満なら暗転とみなす。 */
+const DARK_LUMA = 22;
+/** リザルト表示を出してから、次の暗転で消すまでの最短時間（出した直後の暗転で消さないため）。 */
+const RESULT_MIN_MS = 3000;
+/** リザルト表示を自動で消すまでの最長時間。 */
+const RESULT_MAX_MS = 90000;
 const DIFF_CODE: Record<DifficultyName, string> = {
   BEGINNER: '1', NORMAL: '2', HYPER: '3', ANOTHER: '4', LEGGENDARIA: '10',
 };
@@ -73,6 +87,15 @@ interface IdentifiedChart {
   /** 非公式難易度（☆11.0〜13.1）。範囲外や未掲載は null（ティアの目盛りは出さない）。 */
   informalRank: string | null;
 }
+
+/**
+ * ログイン必須。OBS のブラウザソースは普段のブラウザとログイン状態を共有しないので、
+ * 未ログインならこのページの中でログイン画面を出す（OBS ではソースを右クリック →「対話」で入力する）。
+ * ログイン情報は localStorage に残るので、次回からは入力不要。
+ */
+const { isLoggedIn, isLoading: authLoading, authHeaders, fetchCurrentUser } = useAuth();
+/** 未ログインでログイン画面を出している間 true。 */
+const needLogin = ref(false);
 
 const status = ref('起動中…');
 const layout = shallowRef<PlayLayout | null>(null);
@@ -205,16 +228,145 @@ function resetPlay(): void {
   ocrDebug.value = '';
 }
 
+// ---------------------------------------------------------------------------
+// リザルト表示
+// ---------------------------------------------------------------------------
+
+interface ResultCard {
+  chart: IdentifiedChart;
+  ex: number;
+  /** 今回より前の自己ベスト（最後に取り込んだ CSV の記録と、この配信中のプレーの高い方）。未プレーは 0。 */
+  best: number | null;
+  shownAt: number;
+}
+
+const resultCard = ref<ResultCard | null>(null);
+/** 自己ベストの読み込みエラー（status と違い、読み取りのたびに消さない）。 */
+const bestError = ref('');
+/** ログインユーザーの自己ベスト（曲名|難易度 → EX）。この配信中に更新したらここも上げる。 */
+const bestScores = new Map<string, number>();
+const bestKey = (c: IdentifiedChart) => `${c.title}|${c.difficulty}`;
+/** プレー画面が消えた直後の「確定前のリザルト」。暗転を見たら表示に移す。 */
+let pendingResult: { chart: IdentifiedChart; ex: number } | null = null;
+
+/** 【関数の役割】 ログインユーザーの全スコアを読み、譜面ごとの自己ベストを作る。401 なら false（ログインし直し）。 */
+async function loadBestScores(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/scores/me`, { headers: authHeaders(), cache: 'no-store' });
+    if (res.status === 401 || res.status === 403) return false;
+    if (!res.ok) {
+      bestError.value = `自己ベストを読めませんでした (HTTP ${res.status})`;
+      return true;
+    }
+    const rows = (await res.json()) as { title: string; difficultyName: string; score: number }[];
+    bestScores.clear();
+    for (const r of rows) {
+      const key = `${r.title}|${r.difficultyName}`;
+      if ((r.score ?? 0) > (bestScores.get(key) ?? 0)) bestScores.set(key, r.score);
+    }
+    bestError.value = '';
+  } catch (e) {
+    bestError.value = `自己ベストの読み込みに失敗: ${(e as Error).message}`;
+  }
+  return true;
+}
+
+function showResult(p: { chart: IdentifiedChart; ex: number }): void {
+  const key = bestKey(p.chart);
+  const best = testBestOverride ?? bestScores.get(key) ?? 0;
+  resultCard.value = { chart: p.chart, ex: p.ex, best, shownAt: performance.now() };
+  // 同じ配信の中で同じ曲をもう一度やったとき、今回のスコアを「前回ベスト」として比べる
+  if (p.ex > (bestScores.get(key) ?? 0)) bestScores.set(key, p.ex);
+}
+
+/** 表示中のリザルトの中身（取り込み時のレポートと同じ計算）。 */
+const resultView = computed(() => {
+  const r = resultCard.value;
+  if (!r) return null;
+  const { chart: c, ex, best } = r;
+  const rate = c.maxEx > 0 ? (ex / c.maxEx) * 100 : 0;
+  const rank = c.informalRank ?? undefined;
+  const grade = getScoreGradeInfo(ex, c.maxEx);
+  const newTier = getSongTierInfoByRate(rate, rank);
+  const oldRate = best && c.maxEx > 0 ? (best / c.maxEx) * 100 : 0;
+  const oldTier = best ? getSongTierInfoByRate(oldRate, rank) : null;
+  const tierChanged = !!(oldTier && newTier && tierLabel(oldTier) !== tierLabel(newTier));
+  const pt = rank ? calculatePoints(rate, rank) : 0;
+  const oldPt = rank && best ? calculatePoints(oldRate, rank) : 0;
+  // 次のサブティアまでの残り
+  let next: { label: string; gap: number } | null = null;
+  if (newTier && rank) {
+    const idx = FOLDER_RANK_DEFS.findIndex(d => d.name === newTier.name && (d.tier ?? null) === (newTier.tier ?? null));
+    if (idx > 0) {
+      const need = Math.ceil((c.maxEx * getFolderRankThresholdRateAt(idx - 1, rank)) / 100 - 1e-9);
+      const d = FOLDER_RANK_DEFS[idx - 1];
+      next = { label: d.tier ? `${d.name} ${d.tier}` : d.name, gap: need - ex };
+    }
+  }
+  const isNewRecord = best !== null && ex > best;
+  return {
+    title: c.title,
+    difficulty: c.difficulty,
+    rank: c.informalRank,
+    ex,
+    maxEx: c.maxEx,
+    rate,
+    grade,
+    best,
+    diff: best !== null ? ex - best : null,
+    isNewRecord,
+    newTier,
+    oldTier: tierChanged && isNewRecord ? oldTier : null,
+    pt,
+    ptDiff: best !== null && isNewRecord ? pt - oldPt : null,
+    next,
+  };
+});
+
+/**
+ * 【関数の役割】 プレー画面が見えないフレームでの、リザルトの出し入れ。
+ *
+ *  - プレー直後: 暗転（平均輝度が {@link DARK_LUMA} 未満）を見たら表示する。暗転が映らない環境もあるので、
+ *    プレー画面が {@link LOST_PLAY_MS} 消えたままでも表示する（プレーのあとは必ずリザルトが来る）。
+ *  - 表示中: {@link RESULT_MIN_MS} 以上たってから次の暗転（選曲画面へ戻る切り替わり）で消す。
+ *    {@link RESULT_MAX_MS} を過ぎても消す。次のプレー画面が出たら即座に消す（processFrame 側）。
+ */
+function handleNonPlayFrame(frame: RgbaFrame, now: number): void {
+  const dark = frameMeanLuma(frame) < DARK_LUMA;
+  if (pendingResult && (dark || now - lastPlaySeenAt > LOST_PLAY_MS)) {
+    showResult(pendingResult);
+    pendingResult = null;
+    // プレーは終わったので、ここでプレーの状態を片付ける。残しておくと次のフレームで
+    // 同じプレーがもう一度リザルト候補になり、更新後の自己ベストと比べて「差 0」になる。
+    layout.value = null;
+    resetPlay();
+    return;
+  }
+  const r = resultCard.value;
+  if (r) {
+    const age = now - r.shownAt;
+    if ((dark && age > RESULT_MIN_MS) || age > RESULT_MAX_MS) resultCard.value = null;
+  }
+}
+
 function processFrame(frame: RgbaFrame): void {
   const now = performance.now();
   const det = detectPlayLayout(frame);
   if (!det) {
+    // プレー画面が消えた最初のフレームで、最終スコアを確定前のリザルトとして控える
+    if (layout.value && !pendingResult && chart.value && exScore.value !== null) {
+      pendingResult = { chart: { ...chart.value }, ex: exScore.value };
+    }
     if (layout.value && now - lastPlaySeenAt > LOST_PLAY_MS) {
       layout.value = null;
       resetPlay();
     }
+    handleNonPlayFrame(frame, now);
     return;
   }
+  // プレー画面に戻った（誤検知の一瞬の途切れ、または次の曲）。リザルトの候補と表示は捨てる
+  pendingResult = null;
+  if (resultCard.value) resultCard.value = null;
   lastPlaySeenAt = now;
   if (layout.value?.id !== det.layout.id) {
     layout.value = det.layout;
@@ -454,6 +606,19 @@ watch(
 
 // ---------------------------------------------------------------------------
 
+/** リアクティブな条件が真になるまで待つ。 */
+function waitFor(cond: () => boolean): Promise<void> {
+  if (cond()) return Promise.resolve();
+  return new Promise(resolve => {
+    const stop = watch(cond, v => {
+      if (v) {
+        stop();
+        resolve();
+      }
+    });
+  });
+}
+
 onMounted(async () => {
   updateScale();
   window.addEventListener('resize', updateScale);
@@ -468,8 +633,23 @@ onMounted(async () => {
     status.value = 'URL に source（キャプチャボードのソース名）を指定してください';
     return;
   }
-  // 曲データと難易度表（ログイン不要）
+  // 曲データと難易度表
   useGameData().fetchGameData();
+
+  // ログインを確認する。未ログイン（またはトークン切れ）ならログイン画面を出し、ログインされるまで待つ
+  await waitFor(() => !authLoading.value);
+  for (;;) {
+    if (isLoggedIn.value && (await loadBestScores())) break;
+    if (isLoggedIn.value) {
+      // スコア取得が 401 = トークン切れ。ログイン状態を取り直してから入力を待つ
+      localStorage.removeItem(TOKEN_KEY);
+      await fetchCurrentUser();
+    }
+    needLogin.value = true;
+    status.value = '';
+    await waitFor(() => isLoggedIn.value);
+    needLogin.value = false;
+  }
   await gameDataReady;
   // OCR のワーカーは最初の曲が来る前に温めておく
   ensureOcr().catch(e => { ocrDebug.value = `OCR の準備に失敗: ${(e as Error).message}`; });
@@ -519,7 +699,7 @@ onBeforeUnmount(() => {
       <transition name="ov-fade">
         <!-- 実機の GRAPH INFORMATION 欄に似せた構成: 見出し → YOU 行 → NEXT 行 → グラフ -->
         <div
-          v-if="strip && ladder"
+          v-if="strip && ladder && !resultCard"
           class="ov-strip"
           :style="{
             left: `${strip.x}px`,
@@ -566,10 +746,76 @@ onBeforeUnmount(() => {
           />
         </div>
       </transition>
+
+      <!-- リザルト画面の中央（イラストの位置）に出す成果。CSV 取り込み時のレポートと同じ項目 -->
+      <transition name="ov-pop">
+        <div v-if="resultView" class="ov-result">
+          <div class="ov-head">BEAT-SEEKER RESULT</div>
+          <div class="ov-res-song">
+            <span class="ov-res-diff" :class="`diff-${resultView.difficulty.toLowerCase()}`">{{ resultView.difficulty }}</span>
+            <span v-if="resultView.rank" class="ov-res-rank">☆{{ resultView.rank }}</span>
+            <span class="ov-res-title">{{ resultView.title }}</span>
+          </div>
+
+          <div class="ov-res-score">
+            <div class="ov-res-score-label">EX SCORE</div>
+            <div class="ov-res-score-main">
+              <span class="ov-res-ex">{{ resultView.ex }}</span>
+              <span v-if="resultView.diff !== null" class="ov-res-diff-num" :class="resultView.diff > 0 ? 'up' : resultView.diff < 0 ? 'down' : ''">
+                {{ resultView.diff > 0 ? `+${resultView.diff}` : resultView.diff }}
+              </span>
+            </div>
+            <div v-if="resultView.isNewRecord" class="ov-res-new">NEW RECORD</div>
+          </div>
+
+          <div class="ov-res-grid">
+            <div class="ov-res-cell">
+              <div class="ov-res-label">SCORE RATE</div>
+              <div class="ov-res-value">{{ resultView.rate.toFixed(2) }}<small>%</small></div>
+            </div>
+            <div class="ov-res-cell">
+              <div class="ov-res-label">DJ LEVEL</div>
+              <div class="ov-res-value">{{ resultView.grade.main }}</div>
+              <div class="ov-res-sub">{{ resultView.grade.sub }}</div>
+            </div>
+            <div class="ov-res-cell">
+              <div class="ov-res-label">BEAT-PT</div>
+              <div class="ov-res-value">{{ resultView.pt ? resultView.pt.toFixed(2) : '---' }}</div>
+              <div v-if="resultView.ptDiff" class="ov-res-sub up">+{{ resultView.ptDiff.toFixed(2) }}</div>
+            </div>
+          </div>
+
+          <div v-if="resultView.newTier" class="ov-res-tier">
+            <div class="ov-res-label">単曲ティア</div>
+            <div class="ov-res-tier-row">
+              <template v-if="resultView.oldTier">
+                <RankIcon :rank-name="resultView.oldTier.name" :tier="resultView.oldTier.tier" size="sm" disable-party lite class="opacity-60" />
+                <span class="ov-res-tier-name old">{{ tierLabel(resultView.oldTier) }}</span>
+                <span class="ov-res-arrow">▶</span>
+              </template>
+              <RankIcon :rank-name="resultView.newTier.name" :tier="resultView.newTier.tier" size="md" disable-party />
+              <span class="ov-res-tier-name">{{ tierLabel(resultView.newTier) }}</span>
+            </div>
+            <div v-if="resultView.next" class="ov-res-next">
+              次の {{ resultView.next.label }} まで あと <b>{{ resultView.next.gap }}</b>
+            </div>
+          </div>
+        </div>
+      </transition>
     </div>
 
-    <div v-if="debug || status" class="ov-debug">
+    <!-- 未ログイン時はログイン画面だけを出す（OBS ではソースを右クリック →「対話」で入力） -->
+    <template v-if="needLogin">
+      <div class="ov-login-note">
+        配信オーバーレイを使うには beat-seeker へのログインが必要です。<br />
+        OBS ではこのソースを右クリックして「対話」を開き、ログインしてください。
+      </div>
+      <LoginModal :is-open="true" @close="() => {}" />
+    </template>
+
+    <div v-if="debug || status || bestError" class="ov-debug">
       <div v-if="status">{{ status }}</div>
+      <div v-if="bestError">{{ bestError }}</div>
       <template v-if="debug">
         <div>配置: {{ layout ? layout.id : 'プレー画面ではない' }}</div>
         <div>
@@ -797,6 +1043,203 @@ onBeforeUnmount(() => {
   transition: top 0.2s linear;
   z-index: 2;
 }
+/*
+ * リザルト画面の中央（イラストの位置、1920×1080 基準で x=960 を中心）に出す成果パネル。
+ * 配色は目盛りの帯と同じく実機の GRAPH INFORMATION 欄に合わせる。
+ */
+.ov-result {
+  position: absolute;
+  left: 650px;
+  top: 250px;
+  width: 620px;
+  padding: 26px 0 18px;
+  background:
+    repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 2px),
+    linear-gradient(rgba(70, 70, 70, 0.94), rgba(30, 30, 30, 0.94));
+  box-shadow: 0 0 0 2px #111, 0 0 0 4px rgba(241, 129, 0, 0.8), 0 12px 40px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+.ov-result .ov-head {
+  height: 26px;
+  line-height: 26px;
+  font-size: 14px;
+}
+.ov-res-song {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 22px 0;
+  min-width: 0;
+}
+.ov-res-diff {
+  flex: none;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  background: #555;
+}
+.ov-res-diff.diff-another { background: linear-gradient(#d33, #8b1515); }
+.ov-res-diff.diff-leggendaria { background: linear-gradient(#a855f7, #6b21a8); }
+.ov-res-diff.diff-hyper { background: linear-gradient(#e0a020, #8a5a08); }
+.ov-res-diff.diff-normal { background: linear-gradient(#3b82f6, #1e3a8a); }
+.ov-res-diff.diff-beginner { background: linear-gradient(#22c55e, #166534); }
+.ov-res-rank {
+  flex: none;
+  color: #f3d44a;
+  font-size: 18px;
+  font-weight: 900;
+}
+.ov-res-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.ov-res-score {
+  margin: 14px 22px 0;
+  padding: 10px 16px 12px;
+  background: linear-gradient(#0b0b0b, #1c1c1c);
+  border-bottom: 1px solid rgb(181, 101, 29);
+}
+.ov-res-score-label,
+.ov-res-label {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.ov-res-score-main {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+.ov-res-ex {
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+.ov-res-diff-num {
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 30px;
+  font-weight: 900;
+  color: #94a3b8;
+}
+.ov-res-diff-num.up,
+.ov-res-sub.up {
+  color: rgb(226, 234, 61);
+}
+.ov-res-diff-num.down {
+  color: #f87171;
+}
+.ov-res-new {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 10px;
+  background: linear-gradient(#ffb02e, rgb(241, 129, 0));
+  color: #2a1300;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  animation: ov-blink 1.2s ease-in-out infinite;
+}
+@keyframes ov-blink {
+  50% { opacity: 0.55; }
+}
+
+.ov-res-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 12px 22px 0;
+}
+.ov-res-cell {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.45);
+}
+.ov-res-value {
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.ov-res-value small {
+  font-size: 16px;
+}
+.ov-res-sub {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.ov-res-tier {
+  margin: 12px 22px 0;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.45);
+}
+.ov-res-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.ov-res-tier-name {
+  font-size: 26px;
+  font-weight: 900;
+}
+.ov-res-tier-name.old {
+  font-size: 18px;
+  color: #94a3b8;
+}
+.ov-res-arrow {
+  color: rgb(226, 234, 61);
+  font-size: 18px;
+}
+.ov-res-next {
+  margin-top: 6px;
+  color: #e2e8f0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.ov-res-next b {
+  color: rgb(226, 234, 61);
+  font-size: 18px;
+}
+
+.ov-pop-enter-active {
+  transition: opacity 0.35s, transform 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.ov-pop-leave-active {
+  transition: opacity 0.3s;
+}
+.ov-pop-enter-from {
+  opacity: 0;
+  transform: scale(0.92);
+}
+.ov-pop-leave-to {
+  opacity: 0;
+}
+
+.ov-login-note {
+  position: absolute;
+  left: 50%;
+  top: 24px;
+  z-index: 60;
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  font-size: 15px;
+  line-height: 1.6;
+  text-align: center;
+}
+
 .ov-fade-enter-active,
 .ov-fade-leave-active {
   transition: opacity 0.3s;

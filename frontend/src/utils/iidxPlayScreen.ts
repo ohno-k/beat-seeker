@@ -418,6 +418,25 @@ export function binarizeForOcr(frame: RgbaFrame, rect: Rect, upscale = 2): RgbaF
   return { width: W, height: H, data: out };
 }
 
+/**
+ * 【関数の役割】 画面全体の平均輝度（0〜255）。32px 間隔で間引いて測る。
+ * プレー終了後の暗転（リザルトへの切り替わり）の判定に使う。
+ */
+export function frameMeanLuma(frame: RgbaFrame): number {
+  let sum = 0;
+  let n = 0;
+  const stepX = Math.max(1, Math.round(frame.width / 60));
+  const stepY = Math.max(1, Math.round(frame.height / 34));
+  for (let y = 0; y < frame.height; y += stepY) {
+    for (let x = 0; x < frame.width; x += stepX) {
+      const [r, g, b] = px(frame, x, y);
+      sum += luma(r, g, b);
+      n++;
+    }
+  }
+  return n ? sum / n : 0;
+}
+
 // ---------------------------------------------------------------------------
 // グラフ座標
 // ---------------------------------------------------------------------------
