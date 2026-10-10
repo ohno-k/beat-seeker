@@ -57,6 +57,11 @@ const testRankOverride = testMode ? params.get('rank') : null;
 const testExOverride = testMode && params.get('ex') ? Number(params.get('ex')) : null;
 /** テストモード専用: リザルトの「前回ベスト」をこの値にする（表示確認用、例 best=2455）。 */
 const testBestOverride = testMode && params.get('best') ? Number(params.get('best')) : null;
+/** テストモード専用: 歴代ベストの過去作記録を上書きする（例 alltime=2480:33）。 */
+const testAllTimeOverride = (() => {
+  const m = testMode ? (params.get('alltime') ?? '').match(/^(\d+):(\d+)$/) : null;
+  return m ? { score: Number(m[1]), version: Number(m[2]) } : null;
+})();
 
 const BASE_W = 1920;
 const BASE_H = 1080;
@@ -234,6 +239,11 @@ interface ResultCard {
   ex: number;
   /** 今回より前の自己ベスト（最後に取り込んだ CSV の記録と、この配信中のプレーの高い方）。未プレーは 0。 */
   best: number | null;
+  /**
+   * 今回より前の歴代自己ベスト（今作の記録と前作以前の記録の高い方）と、その作品の表示名。
+   * どちらの記録も無ければ null。
+   */
+  allTime: { score: number; label: string } | null;
   shownAt: number;
 }
 
@@ -251,6 +261,40 @@ const bestScores = new Map<string, number>();
 const bestKey = (c: IdentifiedChart) => `${c.title}|${c.difficulty}`;
 /** プレー画面が消えた直後の「確定前のリザルト」。暗転を見たら表示に移す。 */
 let pendingResult: { chart: IdentifiedChart; ex: number } | null = null;
+
+/** 前作以前の自己ベスト（曲名|難易度 → 最高 EX とその作品）。今作の記録は含めない。 */
+const pastBestScores = new Map<string, { score: number; version: number }>();
+/** 作品番号 → 作品名（例 33 → "Sparkle Shower"）。前作スコアの一覧 API から取る。 */
+const versionNames = new Map<number, string>();
+
+/** 【関数の役割】 前作以前のスコアを読み、譜面ごとの過去作ベストを作る。失敗しても今作の表示は続ける。 */
+async function loadPastBestScores(): Promise<void> {
+  try {
+    const [bestRes, sumRes] = await Promise.all([
+      fetch(`${API_BASE}/api/scores/past/best`, { headers: authHeaders(), cache: 'no-store' }),
+      fetch(`${API_BASE}/api/scores/past/summary`, { headers: authHeaders(), cache: 'no-store' }),
+    ]);
+    if (sumRes.ok) {
+      for (const s of (await sumRes.json()) as { version: number; versionName: string }[]) {
+        versionNames.set(s.version, s.versionName);
+      }
+    }
+    if (!bestRes.ok) return;
+    const rows = (await bestRes.json()) as { v: number; t: string; d: string; s: number | null }[];
+    pastBestScores.clear();
+    for (const r of rows) {
+      const key = `${r.t}|${r.d}`;
+      const score = r.s ?? 0;
+      const cur = pastBestScores.get(key);
+      // 同点なら新しい作品の記録を採る
+      if (score > 0 && (!cur || score > cur.score || (score === cur.score && r.v > cur.version))) {
+        pastBestScores.set(key, { score, version: r.v });
+      }
+    }
+  } catch {
+    // 過去作スコアが読めなくても、今作との比較は出す
+  }
+}
 
 /** 【関数の役割】 ログインユーザーの全スコアを読み、譜面ごとの自己ベストを作る。401 なら false（ログインし直し）。 */
 async function loadBestScores(): Promise<boolean> {
@@ -271,14 +315,24 @@ async function loadBestScores(): Promise<boolean> {
   } catch (e) {
     bestError.value = `自己ベストの読み込みに失敗: ${(e as Error).message}`;
   }
+  await loadPastBestScores();
   return true;
 }
 
 function showResult(p: { chart: IdentifiedChart; ex: number }): void {
   const key = bestKey(p.chart);
   const best = testBestOverride ?? bestScores.get(key) ?? 0;
+  // 歴代: 今作のベストと過去作のベストの高い方。同点なら今作を採る
+  const past = testAllTimeOverride
+    ? { score: testAllTimeOverride.score, version: testAllTimeOverride.version }
+    : pastBestScores.get(key);
+  let allTime: ResultCard['allTime'] = best > 0 ? { score: best, label: '今作' } : null;
+  if (past && past.score > (allTime?.score ?? 0)) {
+    const name = versionNames.get(past.version);
+    allTime = { score: past.score, label: name ? `${past.version} ${name}` : `IIDX ${past.version}` };
+  }
   const now = performance.now();
-  resultCard.value = { chart: p.chart, ex: p.ex, best, shownAt: now };
+  resultCard.value = { chart: p.chart, ex: p.ex, best, allTime, shownAt: now };
   resultTimer = startResultTimer(now);
   // 同じ配信の中で同じ曲をもう一度やったとき、今回のスコアを「前回ベスト」として比べる
   if (p.ex > (bestScores.get(key) ?? 0)) bestScores.set(key, p.ex);
@@ -288,7 +342,7 @@ function showResult(p: { chart: IdentifiedChart; ex: number }): void {
 const resultView = computed(() => {
   const r = resultCard.value;
   if (!r) return null;
-  const { chart: c, ex, best } = r;
+  const { chart: c, ex, best, allTime } = r;
   const rate = c.maxEx > 0 ? (ex / c.maxEx) * 100 : 0;
   const rank = c.informalRank ?? undefined;
   const grade = getScoreGradeInfo(ex, c.maxEx);
@@ -325,6 +379,10 @@ const resultView = computed(() => {
     pt,
     ptDiff: best !== null && isNewRecord ? pt - oldPt : null,
     next,
+    allTime,
+    allTimeDiff: allTime ? ex - allTime.score : null,
+    // 歴代ベストの更新（過去作の記録を初めて超えたときも含む）。今作ベストの更新と同時なら両方出す
+    isNewAllTime: !!allTime && ex > allTime.score,
   };
 });
 
@@ -778,7 +836,21 @@ onBeforeUnmount(() => {
                 {{ resultView.diff > 0 ? `+${resultView.diff}` : resultView.diff }}
               </span>
             </div>
-            <div v-if="resultView.isNewRecord" class="ov-res-new">NEW RECORD</div>
+            <div v-if="resultView.isNewRecord || resultView.isNewAllTime" class="ov-res-badges">
+              <span v-if="resultView.isNewRecord" class="ov-res-new">NEW RECORD</span>
+              <span v-if="resultView.isNewAllTime" class="ov-res-new ov-res-new-alltime">歴代ベスト更新</span>
+            </div>
+          </div>
+
+          <div v-if="resultView.allTime" class="ov-res-alltime">
+            <span class="ov-res-label">歴代自己ベスト</span>
+            <span class="ov-res-alltime-score">{{ resultView.allTime.score }}</span>
+            <span class="ov-res-alltime-ver">{{ resultView.allTime.label }}</span>
+            <span
+              v-if="resultView.allTimeDiff !== null"
+              class="ov-res-alltime-diff"
+              :class="resultView.allTimeDiff > 0 ? 'up' : resultView.allTimeDiff < 0 ? 'down' : ''"
+            >{{ resultView.allTimeDiff > 0 ? `+${resultView.allTimeDiff}` : resultView.allTimeDiff }}</span>
           </div>
 
           <div class="ov-res-grid">
@@ -1151,9 +1223,48 @@ onBeforeUnmount(() => {
 .ov-res-diff-num.down {
   color: #f87171;
 }
+.ov-res-badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.ov-res-new-alltime {
+  background: linear-gradient(#fff36b, rgb(226, 234, 61)) !important;
+}
+/* 歴代自己ベストの行（EX SCORE の直下） */
+.ov-res-alltime {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 8px 22px 0;
+  padding: 7px 16px;
+  background: rgba(0, 0, 0, 0.45);
+}
+.ov-res-alltime-score {
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+}
+.ov-res-alltime-ver {
+  color: #c4b5fd;
+  font-size: 14px;
+  font-weight: 800;
+}
+.ov-res-alltime-diff {
+  margin-left: auto;
+  font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #94a3b8;
+}
+.ov-res-alltime-diff.up {
+  color: rgb(226, 234, 61);
+}
+.ov-res-alltime-diff.down {
+  color: #f87171;
+}
 .ov-res-new {
   display: inline-block;
-  margin-top: 6px;
   padding: 1px 10px;
   background: linear-gradient(#ffb02e, rgb(241, 129, 0));
   color: #2a1300;
